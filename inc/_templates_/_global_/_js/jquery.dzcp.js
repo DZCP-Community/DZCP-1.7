@@ -37,12 +37,6 @@ var DZCP = {
             autoplay: true,
             interval: 6000
             });
-
-        $(".tabs").tabs("> .switchs");
-        $(".tabs2").tabs(".switchs2 > div", { effect: 'fade', rotate: true });
-        
-        //init ckeditor
-        $(".editorStyleWord").ckeditor();
     },
 
     // init lightbox
@@ -529,7 +523,3 @@ var DZCP = {
         }
     }
 }
-
-// load global events
-$(document).ready(function() { DZCP.init(); });
-$(window).load(function() { DZCP.resizeImages(); });

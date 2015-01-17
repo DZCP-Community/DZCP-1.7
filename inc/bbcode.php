@@ -502,7 +502,7 @@ function userid() {
 }
 
 //-> Templateswitch
-$files = get_files(basePath.'/inc/_templates_/',true);
+$files = get_files(basePath.'/inc/_templates_/',true,false,array(),false,array(),'_global_');
 if(isset($_GET['tmpl_set'])) {
     foreach ($files as $templ) {
         if($templ == $_GET['tmpl_set']) {
@@ -2887,25 +2887,48 @@ function page($index='',$title='',$where='',$index_templ='index') {
     // refresh interval of the shoutbox in ms
     $json_encode_js = json_encode(array('lng' => ($language=='deutsch'?'de':'en'), 'maxW' => config('maxwidth'), 'shoutInterval' => 15000)); //Settings to JS
     $java_vars = '<script language="javascript" type="text/javascript">var json = \''.$json_encode_js.'\', dzcp_config = JSON && JSON.parse(json) || $.parseJSON(json);</script>'."\n";
+    $java_vars .= '<script language="javascript" type="text/javascript" src="../inc/_templates_/_global_/_js/jquery.js"></script>'."\n";
+    $java_vars .= '<script language="javascript" type="text/javascript" src="../inc/_templates_/_global_/ckeditor/ckeditor.js"></script>'."\n";
+    $java_vars .= '<script language="javascript" type="text/javascript" src="../inc/_templates_/_global_/ckeditor/adapters/jquery.js"></script>'."\n";
     
-    //TODO: Old Code, implement function is_mobile()
-    if(!strstr($_SERVER['HTTP_USER_AGENT'],'Android') && !strstr($_SERVER['HTTP_USER_AGENT'],'webOS')) {
-        $java_vars .= '<script language="javascript" type="text/javascript" src="'.$designpath.'/_js/wysiwyg.js"></script>'."\n";
+    //Add JS Core
+    if($js_core_files = get_files(basePath.'/inc/_templates_/_global_/_js/',false,true,array('js'))) {
+        foreach($js_core_files AS $js_core_file) {
+            if($js_core_file == 'jquery.js') continue;
+            $java_vars .= '<script language="javascript" type="text/javascript" src="../inc/_templates_/_global_/_js/'.$js_core_file.'"></script>'."\n";
+        }
+        unset($js_core_files,$js_core_file);
     }
-
+    
+    //Add Template JS
+    $java_tpl_init = ""; $java_tpl_load = "";
+    if(file_exists(basePath."/inc/_templates_/".$tmpdir."/_js/template.js")) {
+        $java_vars .= '<script language="javascript" type="text/javascript" src="'.$designpath.'/_js/template.js"></script>'."\n";
+        $java_tpl_init = " TPL.init();";
+        $java_tpl_load = " TPL.load();";
+    }
+    
+    $java_vars .= '<script language="javascript" type="text/javascript">$(document).ready(function() { DZCP.init();'.$java_tpl_init.' }); $(window).load(function() { DZCP.resizeImages();'.$java_tpl_load.' });</script>'."\n";
+    
     if(settings("wmodus") && $chkMe != 4) {
         if(config('securelogin'))
             $secure = show("menu/secure", array("help" => _login_secure_help, "security" => _register_confirm));
 
         $login = show("errors/wmodus_login", array("what" => _login_login, "secure" => $secure, "signup" => _login_signup, "permanent" => _login_permanent, "lostpwd" => _login_lostpwd));
         cookie::save(); //Save Cookie
-        echo show("errors/wmodus", array("wmodus" => _wartungsmodus,
+        $index = show("errors/wmodus", array("wmodus" => _wartungsmodus,
                                          "head" => _wartungsmodus_head,
                                          "tmpdir" => $tmpdir,
                                          "java_vars" => $java_vars,
                                          "dir" => $designpath,
                                          "title" => re(strip_tags($title)),
                                          "login" => $login));
+        
+        if(!mysqli_persistconns) $mysql->close(); //MySQL
+        cookie::save(); //Save Cookie
+        if(debug_save_to_file) DebugConsole::save_log(); //Debug save to file
+        $output = view_error_reporting ? DebugConsole::show_logs().$index : $index; //Debug Console + Index Out
+        gz_output($output); // OUTPUT BUFFER END
     } else {
         updateCounter();
         update_maxonline();
@@ -2920,7 +2943,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
         }
 
         //init templateswitch
-        $tmpldir=""; $tmps = get_files(basePath.'/inc/_templates_/',true);
+        $tmpldir=""; $tmps = get_files(basePath.'/inc/_templates_/',true,false,array(),false,array(),'_global_');
         foreach ($tmps as $tmp) {
             $selt = ($tmpdir == $tmp ? 'selected="selected"' : '');
             $tmpldir .= show(_select_field, array("value" => "?tmpl_set=".$tmp,  "what" => $tmp,  "sel" => $selt));
