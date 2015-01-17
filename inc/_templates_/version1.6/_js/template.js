@@ -56,5 +56,6 @@ var TPL = {
 	//CKEditor - WYSIWYG 
 	CKEditor: function() {
 		$(".editorStyleWord").ckeditor(config_ckeditor_standard);
+		$(".editorStyle").ckeditor(config_ckeditor_mini);
 	}
 };
