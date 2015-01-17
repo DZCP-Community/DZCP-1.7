@@ -15,11 +15,11 @@ function show_dzcp_version() {
     if(dzcp_version_checker || allow_url_fopen_support()) {
         if(!$config_cache['use_cache'] || !$cache->isExisting('dzcp_version')) {
             switch (_edition) {
-                case 'dev': $url = 'bugfree'; break;
+                case 'dev': $url = 'development'; break;
                 case 'society': $url = 'society'; break;
-                default: $url = 'final'; break;
+                default: $url = 'stable'; break;
             }
-            if($dzcp_online_v = fileExists("https://raw.githubusercontent.com/DZCP-Community/dzcp/".$url."/dzcp_version.xml"))
+            if($dzcp_online_v = fileExists("https://raw.githubusercontent.com/DZCP-Community/DZCP-1.7/".$url."/dzcp_version.xml"))
                 if($config_cache['use_cache'] && $dzcp_online_v && !empty($dzcp_online_v))
                     $cache->set('dzcp_version', $dzcp_online_v, dzcp_version_checker_refresh);
         }
