@@ -536,8 +536,11 @@ function lang($lng,$pfad='') {
         $lng = str_replace('.php','',$files[0]);
     }
 
+    $ckeditor_lang = 'en';
     include(basePath."/inc/lang/global.php");
     include(basePath."/inc/lang/languages/".$lng.".php");
+    javascript::add('lng', $ckeditor_lang);
+    unset($ckeditor_lang);
 }
 
 /**
@@ -2875,6 +2878,31 @@ if($functions_files = get_files(basePath.'/inc/additional-functions/',false,true
 if(file_exists(basePath.'/inc/menu-functions/navi.php'))
     include_once(basePath.'/inc/menu-functions/navi.php');
 
+//-> Sendet Daten von PHP nach Javascript per JSON
+class javascript {
+    private static $data_array = array();
+
+    public static function add_array($array=array()) { 
+        self::$data_array = array_merge(self::$data_array, $array);
+    }
+
+    public static function add($key='',$var='') {
+        self::$data_array[$key] = utf8_encode($var);
+    }
+
+    public static function remove($key='') {
+        unset(self::$data_array[$key]); 
+    }
+
+    public static function get($key='') {
+        return utf8_decode(self::$data_array[$key]);
+    }
+
+    public static function encode() { 
+        return json_encode(self::$data_array);
+    }
+}
+
 //-> Ausgabe des Indextemplates
 function page($index='',$title='',$where='',$index_templ='index') {
     global $db,$userid,$userip,$tmpdir,$chkMe,$charset,$mysql,$dir;
@@ -2882,11 +2910,12 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
     // Timer Stop
     $time = round(generatetime() - $time_start,4);
+    javascript::add('maxW',config('maxwidth'));
+    javascript::add('shoutInterval',15000); // refresh interval of the shoutbox in ms
+    javascript::add('onlyBBCode',false); // nur BBCode Verwenden
 
     // JS-Dateine einbinden * json *
-    // refresh interval of the shoutbox in ms
-    $json_encode_js = json_encode(array('lng' => ($language=='deutsch'?'de':'en'), 'maxW' => config('maxwidth'), 'shoutInterval' => 15000)); //Settings to JS
-    $java_vars = '<script language="javascript" type="text/javascript">var json = \''.$json_encode_js.'\', dzcp_config = JSON && JSON.parse(json) || $.parseJSON(json);</script>'."\n";
+    $java_vars = '<script language="javascript" type="text/javascript">var json = \''.javascript::encode().'\', dzcp_config = JSON && JSON.parse(json) || $.parseJSON(json);</script>'."\n";
     $java_vars .= '<script language="javascript" type="text/javascript" src="../inc/_templates_/_global_/_js/jquery.js"></script>'."\n";
     $java_vars .= '<script language="javascript" type="text/javascript" src="../inc/_templates_/_global_/ckeditor/ckeditor.js"></script>'."\n";
     $java_vars .= '<script language="javascript" type="text/javascript" src="../inc/_templates_/_global_/ckeditor/adapters/jquery.js"></script>'."\n";

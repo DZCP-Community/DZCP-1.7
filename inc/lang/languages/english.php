@@ -5,6 +5,7 @@
  */
 
 $charset = 'iso-8859-1';
+$ckeditor_lang = 'en';
 header("Content-type: text/html; charset=".$charset);
 
 ## ADDED / REDEFINED FOR 1.7.0
