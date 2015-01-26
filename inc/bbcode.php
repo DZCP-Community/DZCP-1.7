@@ -330,7 +330,10 @@ if(session_id()) {
      * Pruft ob mehrere Session IDs von der gleichen DNS kommen, sollte der Useragent keinen Bot Tag enthalten, wird ein Spambot angenommen.
      */
     $sql_sb = db("SELECT `id`,`ip`,`bot`,`agent` FROM `".$db['ip2dns']."` WHERE `dns` LIKE '".up($userdns)."';");
-    if(_rows($sql_sb) >= 3) {
+    if(_rows($sql_sb) >= 3 && !validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && 
+        !validateIpV4Range($userip, '[127].[0].[0-255].[0-255]') && 
+        !validateIpV4Range($userip, '[10].[0-255].[0-255].[0-255]') && 
+        !validateIpV4Range($userip, '[172].[16-31].[0-255].[0-255]')) {
         $get_sb = _fetch($sql_sb);
         if(!$get_sb['bot'] && !isSpider(re($get_sb['agent']))) {
             if(!db("SELECT `id` FROM `".$db['ipban']."` WHERE `ip` = '".$userip."' LIMIT 1",true)) {
