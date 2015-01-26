@@ -2882,10 +2882,6 @@ if(file_exists(basePath.'/inc/menu-functions/navi.php'))
 class javascript {
     private static $data_array = array();
 
-    public static function add_array($array=array()) { 
-        self::$data_array = array_merge(self::$data_array, $array);
-    }
-
     public static function add($key='',$var='') {
         self::$data_array[$key] = utf8_encode($var);
     }
@@ -2912,7 +2908,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
     $time = round(generatetime() - $time_start,4);
     javascript::add('maxW',config('maxwidth'));
     javascript::add('shoutInterval',15000); // refresh interval of the shoutbox in ms
-    javascript::add('onlyBBCode',false); // nur BBCode Verwenden
+    javascript::add('onlyBBCode',true); // nur BBCode Verwenden
 
     // JS-Dateine einbinden * json *
     $java_vars = '<script language="javascript" type="text/javascript">var json = \''.javascript::encode().'\', dzcp_config = JSON && JSON.parse(json) || $.parseJSON(json);</script>'."\n";
