@@ -5,13 +5,12 @@
  */
 
 ob_start();
+ob_implicit_flush(false);
 define('basePath', '../../../../');
+$ajaxJob = true;
 
 ## INCLUDES ##
-$ajaxJob = true;
-include_once(basePath."/inc/debugger.php");
-include_once(basePath."/inc/config.php");
-include_once(basePath."/inc/bbcode.php");
+include(basePath."/inc/common.php");
 
 ## FUNCTIONS ##
 function rawflag_tinymce($code) {
@@ -87,5 +86,4 @@ if(empty($_GET['sort']) || $_GET['sort'] == 'clan') {
 </body>
 </html>
 <?php
-    ob_end_flush();
-?>
+ob_end_flush();

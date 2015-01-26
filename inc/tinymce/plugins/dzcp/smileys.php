@@ -5,13 +5,12 @@
  */
 
 ob_start();
+ob_implicit_flush(false);
 define('basePath', '../../../../');
+$ajaxJob = true;
 
 ## INCLUDES ##
-$ajaxJob = true;
-include_once(basePath."/inc/debugger.php");
-include_once(basePath."/inc/config.php");
-include_once(basePath."/inc/bbcode.php");
+include(basePath."/inc/common.php");
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -81,4 +80,3 @@ echo $tr1; ?><td><a href="javascript:insertEmotion('<?php echo$files[$i]; ?>')">
 </html>
 <?php
 ob_end_flush();
-?>
