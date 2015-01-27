@@ -538,7 +538,7 @@ var DZCP = {
     GoToAnchor: function() {
        if(!DZCP.empty(dzcp_config.AnchorMove)) {
             DZCP.DebugLogger('GoToAnchor -> Tag: \'' + dzcp_config.AnchorMove + '\'');
-            $('html, body').animate({ scrollTop: $("#" + dzcp_config.AnchorMove).offset().top }, 'slow');
+            $('html, body').animate({ scrollTop: $("#" + dzcp_config.AnchorMove).offset().top - 12 }, 'slow');
        }
     },
     
