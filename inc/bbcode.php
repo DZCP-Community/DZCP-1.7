@@ -88,6 +88,7 @@ $maxpicwidth = 90;
 $maxadmincw = 10;
 $maxfilesize = @ini_get('upload_max_filesize');
 $UserAgent = trim(GetServerVars('HTTP_USER_AGENT'));
+javascript::set('AnchorMove','');
 
 //-> Global
 $action = isset($_GET['action']) ? $_GET['action'] : 'default';
@@ -2878,6 +2879,27 @@ if($functions_files = get_files(basePath.'/inc/additional-functions/',false,true
 if(file_exists(basePath.'/inc/menu-functions/navi.php'))
     include_once(basePath.'/inc/menu-functions/navi.php');
 
+//-> Verbertet wichtige Informationen zwischen JS und PHP
+class javascript {
+    private static $data_array = array();
+
+    public static function set($key='',$var='') { 
+        self::$data_array[$key] = utf8_encode($var);
+    }
+
+    public static function remove($key='') { 
+        unset(self::$data_array[$key]);
+    }
+
+    public static function get($key='') { 
+        return utf8_decode(self::$data_array[$key]);
+    }
+
+    public static function encode() { 
+        return json_encode(self::$data_array);
+    }
+}
+
 //-> Ausgabe des Indextemplates
 function page($index='',$title='',$where='',$index_templ='index') {
     global $db,$userid,$userip,$tmpdir,$chkMe,$charset,$mysql,$dir;
@@ -2885,11 +2907,12 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
     // Timer Stop
     $time = round(generatetime() - $time_start,4);
-
+    javascript::set('lng',($language=='deutsch'?'de':'en'));
+    javascript::set('maxW',config('maxwidth'));
+    javascript::set('shoutInterval',15000);  // refresh interval of the shoutbox in ms
+    
     // JS-Dateine einbinden * json *
-    // refresh interval of the shoutbox in ms
-    $json_encode_js = json_encode(array('lng' => ($language=='deutsch'?'de':'en'), 'maxW' => config('maxwidth'), 'shoutInterval' => 15000)); //Settings to JS
-    $java_vars = '<script language="javascript" type="text/javascript">var json = \''.$json_encode_js.'\', dzcp_config = JSON && JSON.parse(json) || $.parseJSON(json);</script>'."\n";
+    $java_vars = '<script language="javascript" type="text/javascript">var json = \''.javascript::encode().'\', dzcp_config = JSON && JSON.parse(json) || $.parseJSON(json);</script>'."\n";
     
     //TODO: Old Code, implement function is_mobile()
     if(!strstr($_SERVER['HTTP_USER_AGENT'],'Android') && !strstr($_SERVER['HTTP_USER_AGENT'],'webOS')) {
@@ -2938,6 +2961,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
         $rss = $clanname;
         $title = re(strip_tags($title));
         $notification = notification::get();
+        $notification_tr = (!empty($notification) ? '<tr><td class="contentMainFirst" colspan="2" align="center">'.$notification.'</td></tr>' : '');
 
         if(check_internal_url())
             $index = error(_error_have_to_be_logged, 1);
@@ -2954,7 +2978,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
         //filter placeholders
         $dir = $designpath; //after template index autodetect!!!
-        $blArr = array("[clanname]","[title]","[java_vars]","[login]","[template_switch]","[headtitle]","[index]","[time]","[rss]","[dir]","[charset]","[where]","[lang]","[notification]");
+        $blArr = array("[clanname]","[title]","[java_vars]","[login]","[template_switch]","[headtitle]","[index]","[time]","[rss]","[dir]","[charset]","[where]","[lang]","[notification]","[notification_tr]");
         $pholdervars = '';
         for($i=0;$i<=count($blArr)-1;$i++) {
             if(preg_match("#".$blArr[$i]."#",$pholder))

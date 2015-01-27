@@ -523,9 +523,17 @@ var DZCP = {
         } else {
             $('#ts3settings').css('display', 'none');
         }
+    },
+
+    GoToAnchor: function() {
+        if(dzcp_config.anchor != '') {
+            $('html, body').animate({
+                scrollTop: $("#" + dzcp_config.AnchorMove).offset().top
+            }, 'slow');
+        }
     }
 }
 
 // load global events
 $(document).ready(function() { DZCP.init(); });
-$(window).load(function() { DZCP.resizeImages(); });
+$(window).load(function() { DZCP.resizeImages(); DZCP.GoToAnchor(); });
