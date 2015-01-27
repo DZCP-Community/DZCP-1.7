@@ -88,7 +88,10 @@ $maxpicwidth = 90;
 $maxadmincw = 10;
 $maxfilesize = @ini_get('upload_max_filesize');
 $UserAgent = trim(GetServerVars('HTTP_USER_AGENT'));
+
+//JavaScript
 javascript::set('AnchorMove','');
+javascript::set('debug',(view_error_reporting && view_javascript_debug));
 
 //-> Global
 $action = isset($_GET['action']) ? $_GET['action'] : 'default';

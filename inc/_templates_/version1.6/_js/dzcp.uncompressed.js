@@ -9,6 +9,7 @@ var DZCP = {
   //init
     init: function() {
         doc.body.id = 'dzcp-engine-1.7';
+        DZCP.DebugLogger('Load DZCP-Engine 1.7');
         
         isIE  = (navigator.appVersion.indexOf("MSIE") != -1) ? true : false;
         isWin = (navigator.appVersion.toLowerCase().indexOf("win") != -1) ? true : false;
@@ -53,6 +54,7 @@ var DZCP = {
 
     // init lightbox
     initLightbox: function() {
+      DZCP.DebugLogger('Initiation Lightbox');
       $('a[rel^=lightbox]').lightBox({
           fixedNavigation:      true,
           overlayBgColor:       '#000',
@@ -134,14 +136,16 @@ var DZCP = {
 
     // init Ajax DynLoader
     initDynLoader: function(tag,menu,options) {
+        DZCP.DebugLogger('DynLoader -> Tag: \'' + tag + '\' / URL: \'' + "../inc/ajax.php?i=" + menu + options + '\'');
         var request = $.ajax({ url: "../inc/ajax.php?i=" + menu + options, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
         request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); });
     },
     
     // init Ajax DynLoader Sides via Ajax
     initPageDynLoader: function(tag,url) {
-            var request = $.ajax({ url: url, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
-            request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); });
+        DZCP.DebugLogger('PageDynLoader -> Tag: \'' + tag + '\' / URL: \'' + url + '\'');
+        var request = $.ajax({ url: url, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
+        request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); });
     },
     
     // init Ajax DynCaptcha
@@ -153,12 +157,14 @@ var DZCP = {
         if(namespace.length > 1) { url_input = url_input + "&namespace="+namespace; }
         if(length >= 1) { url_input = url_input + "&length="+length; }
         if(sid > 0) { url_input = url_input + "&sid="+sid; } else { url_input = url_input + "&sid="+Math.random(); }
+        DZCP.DebugLogger('DynCaptcha -> Tag: \'' + tag + '\' / URL: \'' + url_input + '\'');
         var request = $.ajax({ url: url_input, type: "GET", data: {}, cache:false, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
         request.done(function(msg) { $('#' + tag).attr("src",msg).hide().fadeIn("normal"); });
     },
 
     // Play Sound per JS-Audio
     EvalSound: function(url) {
+        DZCP.DebugLogger('EvalSound -> URL: \'' + url + '\'');
         var audio = new Audio(url);
         audio.play();
     },
@@ -187,6 +193,7 @@ var DZCP = {
     },
     
     autocomplete: function(type,change) {
+        DZCP.DebugLogger('Autocomplete -> URL: \'' + '../inc/ajax.php?i=autocomplete&type='+type+'&game='+selected_game + '\'');
         var selected_game = $('#status :selected').val();
         $( document ).load('../inc/ajax.php?i=autocomplete&type='+type+'&game='+selected_game, function(data) {
             var json = jQuery.parseJSON(data);
@@ -262,8 +269,7 @@ var DZCP = {
     },
 
     // handle Steam layer
-    showSteamBox: function(user, img, text, text2, status)
-    {
+    showSteamBox: function(user, img, text, text2, status) {
         var class_state;
         switch(status) {
             case 1: class_state = 'online'; break; //Online
@@ -394,7 +400,8 @@ var DZCP = {
 
   // ajax calendar switch
     calSwitch: function(m, y) {
-      $('#navKalender').load('../inc/ajax.php?i=kalender&month=' + m + '&year=' + y);
+        var request = $.ajax({ url: '../inc/ajax.php?i=kalender&month=' + m + '&year=' + y, type: "GET", data: {}, cache:false, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
+        request.done(function(msg) { $('#navKalender').html( msg ).hide().fadeIn("normal"); });    
     },
 
   // ajax team switch
@@ -425,6 +432,7 @@ var DZCP = {
 
   // ajax preview
     ajaxPreview: function(form) {
+      DZCP.DebugLogger('Ajax Preview -> Tag: \'' + form + '\'');
       var tag=doc.getElementsByTagName("textarea");
       for(var i=0;i<tag.length;i++)
       {
@@ -489,6 +497,7 @@ var DZCP = {
   // Newticker
     initTicker: function(objID, to, ms) {
      // set settings
+      DZCP.DebugLogger('Initiation Newticker');
       tickerTo[tickerc] = (to == 'h' || to == 'v') ? to : 'v';
       tickerSpeed[tickerc] = (parseInt(ms) <= 10) ? 10 : parseInt(ms);
 
@@ -525,21 +534,21 @@ var DZCP = {
       if(tickerTo[subID] == 'h') thisObj.style.left = (parseInt(thisObj.style.left) <= (0-(width/2)+2)) ? 0 : parseInt(thisObj.style.left)-1 + 'px';
       else thisObj.style.top = (thisObj.style.top == '' || (parseInt(thisObj.style.top)<(0-(width/2)+6))) ? 0 : parseInt(thisObj.style.top)-1 + 'px';
     },
-    
-    //TS3 Settings
-    TS3Settings: function(id) {
-        if(id == 3) {
-            $('#ts3settings').css('display', '');
-        } else {
-            $('#ts3settings').css('display', 'none');
-        }
-    },
 
     GoToAnchor: function() {
-        if(dzcp_config.anchor != '') {
-            $('html, body').animate({
-                scrollTop: $("#" + dzcp_config.AnchorMove).offset().top
-            }, 'slow');
+       if(!DZCP.empty(dzcp_config.AnchorMove)) {
+            DZCP.DebugLogger('GoToAnchor -> Tag: \'' + dzcp_config.AnchorMove + '\'');
+            $('html, body').animate({ scrollTop: $("#" + dzcp_config.AnchorMove).offset().top }, 'slow');
+       }
+    },
+    
+    empty: function(value) {
+        return (value == null || $.noop(value) || !/\S/.test(value));
+    },
+    
+    DebugLogger: function(message) {
+        if(dzcp_config.debug) {
+            console.info("DZCP Debug: " + message);
         }
     }
 }
