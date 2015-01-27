@@ -116,7 +116,7 @@ if(defined('_Forum')) {
                        `email`  = '".up($_POST['email'])."',
                        `text`   = '".up($_POST['eintrag'])."',
                        `hp`     = '".links($_POST['hp'])."',
-                       `edited` = '".addslashes($editedby)."'
+                       `edited` = '".up($editedby)."'
                    WHERE id = '".intval($_GET['id'])."'");
 
       $checkabo = db("SELECT s1.user,s1.fid,s2.nick,s2.id,s2.email FROM ".$db['f_abo']." AS s1

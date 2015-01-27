@@ -92,7 +92,7 @@ if(defined('_UserMenu')) {
                                          SET ".$addme."
                                                  `nachricht`  = '".up($_POST['eintrag'])."',
                                                  `reg`        = '".intval($_POST['reg'])."',
-                                                 `editby`     = '".addslashes($editedby)."'
+                                                 `editby`     = '".up($editedby)."'
                                          WHERE id = '".intval($_GET['gbid'])."'");
 
                     $index = info(_gb_edited, "?action=user&show=gb&id=".$_GET['id']);

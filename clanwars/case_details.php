@@ -408,7 +408,7 @@ if(defined('_Clanwars')) {
                         `email`    = '".(isset($_POST['email']) ? up($_POST['email']) : up(data('email')))."',
                         `hp`       = '".(isset($_POST['hp']) ? links($_POST['hp']) : links(data('hp')))."',
                         `comment`  = '".up($_POST['comment'])."',
-                        `editby`   = '".addslashes($editedby)."'
+                        `editby`   = '".up($editedby)."'
                     WHERE id = '".intval($_GET['cid'])."'");
                 $index = info(_comment_edited, "?action=details&amp;id=".$_GET['id']."");
             }

@@ -278,7 +278,7 @@ case 'edit';
                           `end`= '".intval($time)."',
                         `titel`= '".up($_POST['titel'])."',
                         `reason`= '".up($_POST['reason'])."',
-                        `lastedit`= '".addslashes($editedby)."'
+                        `lastedit`= '".up($editedby)."'
                         WHERE id = '".intval($_GET['id'])."'");
 
             $index = info(_away_successful_edit, "../away/");

@@ -322,7 +322,7 @@ case 'show';
                        `email`    = '".up($_POST['email'])."',
                        `hp`       = '".links($_POST['hp'])."',
                        `comment`  = '".up($_POST['comment'])."',
-                       `editby`   = '".addslashes($editedby)."'
+                       `editby`   = '".up($editedby)."'
                    WHERE id = '".intval($_GET['cid'])."'");
 
         $index = info(_comment_edited, "?action=show&amp;id=".$_GET['id']."");

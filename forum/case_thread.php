@@ -410,7 +410,7 @@ if(defined('_Forum')) {
                        `sticky`   = '".intval($_POST['sticky'])."',
                        `global`   = '".intval($_POST['global'])."',
                                             `vote`     = '".$vid."',
-                       `edited`   = '".addslashes($editedby)."'
+                       `edited`   = '".up($editedby)."'
                    WHERE id = '".intval($_GET['id'])."'");
 
       $checkabo = db("SELECT s1.user,s1.fid,s2.nick,s2.id,s2.email FROM ".$db['f_abo']." AS s1
