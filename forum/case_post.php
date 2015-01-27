@@ -235,7 +235,7 @@ if(defined('_Forum')) {
 
             $text = bbcode($getl['text']);
 
-            if($chkMe == "4") $posted_ip = $getl['ip'];
+            if($chkMe == 4 || permission('ipban')) $posted_ip = $getl['ip'];
             else              $posted_ip = _logged;
 
             $titel = show(_eintrag_titel_forum, array("postid" => (cnt($db['f_posts'], " WHERE sid =".intval($_GET['id']))+1),
@@ -309,7 +309,7 @@ if(defined('_Forum')) {
             if(isset($_GET['hl'])) $text = bbcode($ftxt['text']);
             else $text = bbcode($gett['t_text']);
 
-            if($chkMe == "4") $posted_ip = $gett['ip'];
+            if($chkMe == 4 || permission('ipban')) $posted_ip = $gett['ip'];
             else                 $posted_ip = _logged;
 
             $titel = show(_eintrag_titel_forum, array("postid" => "1",
@@ -478,7 +478,7 @@ if(defined('_Forum')) {
                         if($_GET['hl']) $text = bbcode($ftxt['text']);
                         else $text = bbcode($getl['text']);
 
-                        if($chkMe == "4") $posted_ip = $getl['ip'];
+                        if($chkMe == 4 || permission('ipban')) $posted_ip = $getl['ip'];
                         else $posted_ip = _logged;
 
                         $titel = show(_eintrag_titel_forum, array("postid" => (cnt($db['f_posts'], " WHERE sid = ".intval($_GET['id']))+1),
@@ -558,7 +558,7 @@ if(defined('_Forum')) {
                         if($_GET['hl']) $text = bbcode($ftxt['text']);
                         else $text = bbcode($gett['t_text']);
 
-                        if($chkMe == "4") $posted_ip = $gett['ip'];
+                        if($chkMe == 4 || permission('ipban')) $posted_ip = $gett['ip'];
                         else $posted_ip = _logged;
 
                         if($gett['t_reg'] != 0)

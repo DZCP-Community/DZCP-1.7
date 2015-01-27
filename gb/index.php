@@ -91,7 +91,7 @@ default:
                                                                                  "hp" => $gbhp));
           }
 
-      if($chkMe == "4") $posted_ip = $get['ip'];
+      if($chkMe == 4 || permission('ipban')) $posted_ip = $get['ip'];
       else $posted_ip = _logged;
 
           $show .= show($dir."/gb_show", array("gbtitel" => $gbtitel,

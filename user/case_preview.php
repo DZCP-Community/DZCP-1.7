@@ -54,7 +54,7 @@ if(defined('_UserMenu')) {
                                       "edit" => $edit,
                                       "delete" => $delete));
 
-  if($chkMe == 4) $posted_ip = $ip;
+  if($chkMe == 4 || permission('ipban')) $posted_ip = $ip;
   else            $posted_ip = _logged;
 
     $index .= show("page/comments_show", array("titel" => $titel,

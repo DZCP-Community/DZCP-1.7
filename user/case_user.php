@@ -167,7 +167,7 @@ if(defined('_UserMenu')) {
                                                         "edit" => $edit,
                                                         "delete" => $delete));
 
-                    $posted_ip = ($chkMe == 4 ? $getgb['ip'] : _logged);
+                    $posted_ip = ($chkMe == 4 || permission('ipban') ? $getgb['ip'] : _logged);
                     $membergb .= show("page/comments_show", array("titel" => $titel,
                                                                   "comment" => bbcode($getgb['nachricht']),
                                                                   "nick" => $nick,

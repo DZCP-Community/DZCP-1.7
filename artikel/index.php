@@ -133,7 +133,7 @@ case 'show';
                                                     "edit" => $edit,
                                                     "delete" => $delete));
 
-                $posted_ip = ($chkMe == "4" ? $getc['ip'] : _logged);
+                $posted_ip = ($chkMe == 4 || permission('ipban') ? $getc['ip'] : _logged);
                 $comments .= show("page/comments_show", array("titel" => $titel,
                                                               "comment" => bbcode($getc['comment']),
                                                               "editby" => bbcode($getc['editby']),

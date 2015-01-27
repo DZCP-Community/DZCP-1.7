@@ -77,7 +77,7 @@ if(defined('_Forum')) {
         if(isset($_GET['hl'])) $text = bbcode($ftxt['text']);
         else $text = bbcode($getp['text']);
 
-        if($chkMe == 4) $posted_ip = $getp['ip'];
+        if($chkMe == 4 || permission('ipban')) $posted_ip = $getp['ip'];
         else $posted_ip = _logged;
 
         $titel = show(_eintrag_titel_forum, array("postid" => $i+($page-1)*config('m_fposts'),
@@ -243,7 +243,7 @@ if(defined('_Forum')) {
       if(isset($_GET['hl'])) $text = bbcode($ftxt['text']);
       else $text = bbcode($get['t_text']);
 
-      if($chkMe == "4") $posted_ip = $get['ip'];
+      if($chkMe == 4 || permission('ipban')) $posted_ip = $get['ip'];
       else $posted_ip = _logged;
 
       $titel = show(_eintrag_titel_forum, array("postid" => "1",
