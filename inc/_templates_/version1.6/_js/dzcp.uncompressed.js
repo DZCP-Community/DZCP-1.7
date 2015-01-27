@@ -20,7 +20,7 @@ var DZCP = {
         doc.body.onmousemove = DZCP.trackMouse;
 
         // refresh shoutbox
-        if(dzcp_config.shoutInterval > 1) {
+        if(dzcp_config.shoutInterval > 1) { //set shoutInterval to 0 for disable
             if($('#navShout')[0]) 
                 window.setInterval("$('#navShout').load('../inc/ajax.php?i=shoutbox');", dzcp_config.shoutInterval);
         }
@@ -29,13 +29,23 @@ var DZCP = {
         DZCP.initLightbox();
 
         //init slidetabs
+        if(dzcp_config.slideshowInterval > 1) { //set slideshowInterval to 0 for disable
         $(".slidetabs").tabs(".images > div", {
             effect: 'fade',
             rotate: true
         }).slideshow({
             autoplay: true,
-            interval: 6000
+            interval: dzcp_config.slideshowInterval
             });
+        } else {
+            $(".slidetabs").tabs(".images > div", {
+                effect: 'fade',
+                rotate: true
+            }).slideshow({
+                autoplay: false,
+                interval: 6000
+            });
+        }
 
         $(".tabs").tabs("> .switchs");
         $(".tabs2").tabs(".switchs2 > div", { effect: 'fade', rotate: true });
