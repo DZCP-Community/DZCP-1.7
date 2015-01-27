@@ -1858,30 +1858,26 @@ function nav($entrys, $perpage, $urlpart='', $recall = 0) {
 //-> Generiert die Infobox bei Fehlern oder Erfolg etc. / neuer Ersatz fur function info() & error()
 class notification {
     static private $notification_index = array();
+    static private $notification_global = true;
     
     public static function add_error($msg = '', $link = false, $time = 3) {
-        self::$notification_index[] = ($data = array('status' => 'error', 'msg' => $msg, 'link' => $link, 'time' => $time));
-        return $data;
+        return self::import('error', $msg, $link, $time);
     }
     
     public static function add_success($msg = '', $link = false, $time = 3) {
-        self::$notification_index[] = ($data = array('status' => 'success', 'msg' => $msg, 'link' => $link, 'time' => $time));
-        return $data;
+        return self::import('success', $msg, $link, $time);
     }
     
     public static function add_notice($msg = '', $link = false, $time = 3) {
-        self::$notification_index[] = ($data = array('status' => 'notice', 'msg' => $msg, 'link' => $link, 'time' => $time));
-        return $data;
+        return self::import('notice', $msg, $link, $time);
     }
     
     public static function add_warning($msg = '', $link = false, $time = 3) {
-        self::$notification_index[] = ($data = array('status' => 'warning', 'msg' => $msg, 'link' => $link, 'time' => $time));
-        return $data;
+        return self::import('warning', $msg, $link, $time);
     }
     
     public static function add_custom($status = 'custom', $msg = '', $link = false, $time = 3) {
-        self::$notification_index[] = ($data = array('status' => strtolower($status), 'msg' => $msg, 'link' => $link, 'time' => $time));
-        return $data;
+        return self::import($status, $msg, $link, $time);
     }
 
     public static function get($input=false) {
@@ -1908,6 +1904,25 @@ class notification {
         }
         
         return $notification;
+    }
+    
+    public static function get_tr($input=false) {
+        $notification = self::get($input);
+        return (!empty($notification) ? '<tr><td class="contentMainFirst" colspan="2" align="center">'.$notification.'</td></tr>' : '');
+    }
+    
+    public static function set_global($global = true) {
+        self::$notification_global = $global;
+    }
+    
+    //Private
+    private static function import($status, $msg, $link, $time) {
+        $data = array('status' => strtolower($status), 'msg' => $msg, 'link' => $link, 'time' => $time);
+        if(self::$notification_global) {
+            self::$notification_index[] = $data;
+        }
+        
+        return $data;
     }
 }
 
@@ -2980,7 +2995,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
         $rss = $clanname;
         $title = re(strip_tags($title));
         $notification = notification::get();
-        $notification_tr = (!empty($notification) ? '<tr><td class="contentMainFirst" colspan="2" align="center">'.$notification.'</td></tr>' : '');
+        $notification_tr = notification::get_tr();
 
         if(check_internal_url())
             $index = error(_error_have_to_be_logged, 1);
