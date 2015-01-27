@@ -1857,27 +1857,42 @@ class notification {
     static private $notification_index = array();
     
     public static function add_error($msg = '', $link = false, $time = 3) {
-        self::$notification_index[] = array('status' => 'error', 'msg' => $msg, 'link' => $link, 'time' => $time);
+        self::$notification_index[] = ($data = array('status' => 'error', 'msg' => $msg, 'link' => $link, 'time' => $time));
+        return $data;
     }
     
     public static function add_success($msg = '', $link = false, $time = 3) {
-        self::$notification_index[] = array('status' => 'success', 'msg' => $msg, 'link' => $link, 'time' => $time);
+        self::$notification_index[] = ($data = array('status' => 'success', 'msg' => $msg, 'link' => $link, 'time' => $time));
+        return $data;
     }
     
     public static function add_notice($msg = '', $link = false, $time = 3) {
-        self::$notification_index[] = array('status' => 'notice', 'msg' => $msg, 'link' => $link, 'time' => $time);
+        self::$notification_index[] = ($data = array('status' => 'notice', 'msg' => $msg, 'link' => $link, 'time' => $time));
+        return $data;
     }
     
     public static function add_warning($msg = '', $link = false, $time = 3) {
-        self::$notification_index[] = array('status' => 'warning', 'msg' => $msg, 'link' => $link, 'time' => $time);
+        self::$notification_index[] = ($data = array('status' => 'warning', 'msg' => $msg, 'link' => $link, 'time' => $time));
+        return $data;
     }
     
     public static function add_custom($status = 'custom', $msg = '', $link = false, $time = 3) {
-        self::$notification_index[] = array('status' => strtolower($status), 'msg' => $msg, 'link' => $link, 'time' => $time);
+        self::$notification_index[] = ($data = array('status' => strtolower($status), 'msg' => $msg, 'link' => $link, 'time' => $time));
+        return $data;
     }
 
-    public static function get() {
+    public static function get($input=false) {
         $notification = '';
+        if($input) {
+            if($input['link']) {
+                $input['link'] = '<script language="javascript" type="text/javascript">window.setTimeout("DZCP.goTo(\''.$input['link'].'\');", '.($input['time']*1000).');</script>'
+                . '<noscript><meta http-equiv="refresh" content="'.$input['time'].';url='.$input['link'].'"></noscript>';
+            } else { $input['link'] = ''; } unset($input['time']);
+            
+            $input['status_msg'] = (defined('_notification_'.$input['status']) ? constant('_notification_'.$input['status']) : $input['status']);
+            return show("page/notification_box",$input);
+        }
+        
         if(count(self::$notification_index) >= 1) {
             foreach (self::$notification_index as $data) {
                 if($data['link']) {
@@ -2910,9 +2925,10 @@ function page($index='',$title='',$where='',$index_templ='index') {
     javascript::set('lng',($language=='deutsch'?'de':'en'));
     javascript::set('maxW',config('maxwidth'));
     javascript::set('shoutInterval',15000);  // refresh interval of the shoutbox in ms
+    javascript::set('slideshowInterval',6000);  // refresh interval of the shoutbox in ms
     
     // JS-Dateine einbinden * json *
-    $java_vars = '<script language="javascript" type="text/javascript">var json = \''.javascript::encode().'\', dzcp_config = JSON && JSON.parse(json) || $.parseJSON(json);</script>'."\n";
+    $java_vars = '<script language="javascript" type="text/javascript">var json=\''.javascript::encode().'\',dzcp_config=JSON&&JSON.parse(json)||$.parseJSON(json);</script>'."\n";
     
     //TODO: Old Code, implement function is_mobile()
     if(!strstr($_SERVER['HTTP_USER_AGENT'],'Android') && !strstr($_SERVER['HTTP_USER_AGENT'],'webOS')) {
