@@ -32,8 +32,7 @@
  *
  *
  */
-class GameQ_Protocols_Teamspeak3 extends GameQ_Protocols
-{
+class GameQ_Protocols_Teamspeak3 extends GameQ_Protocols {
     /**
      * Normalization for this protocol class
      *

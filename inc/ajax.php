@@ -79,7 +79,7 @@ ob_implicit_flush(false);
                 } else {
                     $protocols_array = GameQ::getGames();
                     foreach ($protocols_array AS $gameq => $info) {
-                        if($gameq == $_GET['game']) {
+                        if($gameq == $_GET['game'] && $info['autocomplete']) {
                             exit(json_encode(array('qport' => $info['port']))); 
                             break; 
                         }
@@ -117,17 +117,19 @@ ob_implicit_flush(false);
                     $securimage->audio_path = basePath.'/inc/securimage/audio/en/';
 
                 $securimage->namespace = isset($_GET['namespace']) ? $_GET['namespace'] : 'default';
-                die($securimage->outputAudioFile());
+                exit($securimage->outputAudioFile());
             }
             break;
     endswitch;
 
-    if(!mysqli_persistconns)
+    if(!mysqli_persistconns) {
         $mysql->close(); //MySQL
+    }
 
     $output = ob_get_contents();
-    if(debug_save_to_file)
+    if(debug_save_to_file) {
         DebugConsole::save_log(); //Debug save to file
+    }
 
 ob_end_clean();
 ob_start('ob_gzhandler');

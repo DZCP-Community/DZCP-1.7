@@ -65,6 +65,13 @@ class GameQ_Protocols_Bf2142 extends GameQ_Protocols_Gamespy3
      * @var array
     */
     protected $stats_options = array();
+    
+    /**
+     * Set autocomplete ports on server list
+     *
+     * @var array
+     */
+    protected $autocomplete = true;
 
     /*
     * ######################################################################################

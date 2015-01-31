@@ -21,8 +21,7 @@
  *
  * @author Austin Bischoff <austin@codebeard.com>
  */
-class GameQ_Protocols_Ut extends GameQ_Protocols_Gamespy
-{
+class GameQ_Protocols_Ut extends GameQ_Protocols_Gamespy {
     protected $name = "ut";
     protected $name_long = "Unreal Tournament";
     protected $name_short = 'UT';
@@ -72,8 +71,7 @@ class GameQ_Protocols_Ut extends GameQ_Protocols_Gamespy
     * #################################### DZCP RUNTIME ####################################
     * ######################################################################################
     */
-    protected function process_dzcp_runtime()
-    {
+    protected function process_dzcp_runtime() {
         $result = new GameQ_Result();
         if(!$this->server_data_stream['gq_online'])
         {
@@ -127,8 +125,7 @@ class GameQ_Protocols_Ut extends GameQ_Protocols_Gamespy
          * Custom settings
         */
         $custom_settings = array();
-        foreach($this->server_data_stream as $key => $data)
-        {
+        foreach($this->server_data_stream as $key => $data) {
             if(in_array($key, $this->settings_filter)) // Mutators, etc.
                 $custom_settings[$key] = $data;
         }
@@ -140,18 +137,15 @@ class GameQ_Protocols_Ut extends GameQ_Protocols_Gamespy
         */
         $this->server_data_stream['teams'] = array(array(),array());
         $teams = array();
-        foreach($this->server_data_stream['teams'] as $key => $data)
-        {
+        foreach($this->server_data_stream['teams'] as $key => $data) {
             $teams[$key] = array('team_name' => (!$key ? 'Rot' : 'Blau'), 'team_score' => '');
         }
         $result->add('game_teams',$teams);
         unset($teams);
 
         $player_list = array();
-        if(array_key_exists('players', $this->server_data_stream) && count($this->server_data_stream['players']) >= 1)
-        {
-            foreach($this->server_data_stream['players'] as $player)
-            {
+        if(array_key_exists('players', $this->server_data_stream) && count($this->server_data_stream['players']) >= 1) {
+            foreach($this->server_data_stream['players'] as $player) {
 
                 if(empty($player['player']) && !server_show_empty_players) continue;
                 $new_player = array();
@@ -187,8 +181,7 @@ class GameQ_Protocols_Ut extends GameQ_Protocols_Gamespy
         $this->stats_options['stats_stats']  = array_key_exists(($key_opt='stats_stats'), $this->stats_options)  ? $this->stats_options[$key_opt] : false;
         $result->add('game_stats_options',$this->stats_options);
 
-        switch(isset($_GET['spsort']) ? $_GET['spsort'] : 'kills') //Sort
-        {
+        switch(isset($_GET['spsort']) ? $_GET['spsort'] : 'kills') {
             case 'score': if($this->stats_options['stats_score']) $player_list = GameQ::record_sort($player_list, 'player_score', true); break;
             case 'time': if($this->stats_options['stats_time']) $player_list = GameQ::record_sort($player_list, 'player_time', true); break;
             case 'team': if($this->stats_options['stats_team']) $player_list = GameQ::record_sort($player_list, 'player_team', true); break;

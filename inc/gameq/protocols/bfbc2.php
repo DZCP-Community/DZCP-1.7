@@ -114,6 +114,13 @@ class GameQ_Protocols_Bfbc2 extends GameQ_Protocols
      * @var array
     */
     protected $stats_options = array();
+    
+    /**
+     * Set autocomplete ports on server list
+     *
+     * @var array
+     */
+    protected $autocomplete = true;
 
     /*
     * Internal methods

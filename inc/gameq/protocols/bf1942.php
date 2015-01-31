@@ -46,7 +46,7 @@ class GameQ_Protocols_Bf1942 extends GameQ_Protocols_Gamespy
      * @var array
      */
     protected $modlist = array('dc_final' => array('name_long' => 'Desert Combat Final','name_short' => 'DCF','game_dir' => 'desertcombat'));
-
+    
     /**
      * Set settings filter
      *
@@ -80,6 +80,13 @@ class GameQ_Protocols_Bf1942 extends GameQ_Protocols_Gamespy
      * @var array
     */
     protected $stats_options = array();
+    
+    /**
+     * Set autocomplete ports on server list
+     *
+     * @var array
+     */
+    protected $autocomplete = true;
 
     /*
     * ######################################################################################

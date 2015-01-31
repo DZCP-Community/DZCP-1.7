@@ -146,6 +146,13 @@ class GameQ_Protocols_Bf3 extends GameQ_Protocols
     protected $basic_game_long = '';
     protected $basic_game_short = '';
     protected $basic_game_dir = 'bf3';
+    
+    /**
+     * Set autocomplete ports on server list
+     *
+     * @var array
+     */
+    protected $autocomplete = true;
 
     /*
     * Internal methods

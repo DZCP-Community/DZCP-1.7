@@ -21,8 +21,7 @@
  *
  * @author Austin Bischoff <austin@codebeard.com>
  */
-class GameQ_Protocols_Tfc extends GameQ_Protocols_Source
-{
+class GameQ_Protocols_Tfc extends GameQ_Protocols_Source {
     //Game or Mod
     protected $name = "tfc";
     protected $name_long = "Team Fortress Classic";

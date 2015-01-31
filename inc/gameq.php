@@ -164,7 +164,7 @@ final class GameQ {
             }
 
             $class = new $class_name;
-            $protocols_array[$class->name()] = array('name' => $class->name_long(),'port' => $class->port(),'state' => $class->state());
+            $protocols_array[$class->name()] = array('name' => $class->name_long(),'port' => $class->port(),'state' => $class->state(),'autocomplete' => $class->autocomplete());
             unset($class);
         }
 

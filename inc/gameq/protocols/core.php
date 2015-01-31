@@ -223,6 +223,13 @@ abstract class GameQ_Protocols_Core
     protected $join_link = NULL;
     
     /**
+     * Set autocomplete ports on server list
+     *
+     * @var string
+     */
+    protected $autocomplete = FALSE;
+    
+    /**
      * Create the instance.
      *
      * @param string $ip
@@ -348,6 +355,15 @@ abstract class GameQ_Protocols_Core
     }
 
     /**
+     * Get autocomplete is allowed
+     *
+     * @param boolean $port
+     */
+    public function autocomplete() {
+        return $this->autocomplete;
+    }
+    
+    /**
      * Get/set the port of the server
      *
      * @param int $port
@@ -360,6 +376,7 @@ abstract class GameQ_Protocols_Core
 
         return array_key_exists('query_port', $this->options) && $this->options['query_port'] != false ? $this->options['query_port'] : $this->port;
     }
+    
     
     /**
      * Get/set the client port of the server

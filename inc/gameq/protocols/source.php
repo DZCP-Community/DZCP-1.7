@@ -138,6 +138,13 @@ class GameQ_Protocols_Source extends GameQ_Protocols
      * @var array
      */
     protected $stats_options = array();
+    
+    /**
+     * Set autocomplete ports on server list
+     *
+     * @var array
+     */
+    protected $autocomplete = false;
 
     /**
      * Parse the challenge response and apply it to all the packet types
@@ -145,8 +152,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
      *
      * @see GameQ_Protocols_Core::parseChallengeAndApply()
      */
-     protected function parseChallengeAndApply()
-    {
+     protected function parseChallengeAndApply() {
         // Skip the header
         $this->challenge_buffer->skip(5);
 
@@ -163,8 +169,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
      *
      * @param array $packets
      */
-    protected function preProcess_details($packets)
-    {
+    protected function preProcess_details($packets) {
         return $this->process_packets($packets); // Process the packets
     }
 
@@ -173,8 +178,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
      *
      * @throws GameQ_ProtocolsException
      */
-    protected function process_details()
-    {
+    protected function process_details() {
         // Make sure we have a valid response
         if(!$this->hasValidResponse(self::PACKET_DETAILS))
             return array();
@@ -196,16 +200,14 @@ class GameQ_Protocols_Source extends GameQ_Protocols
 
         // Make sure the data is formatted properly
         // Source is 0x49, Goldsource is 0x6d
-        if(!in_array($type, array("0x49","0x6d")))
-        {
+        if(!in_array($type, array("0x49","0x6d"))) {
             throw new GameQ_ProtocolsException("Data for ".__METHOD__." does not have the proper header type (should be 0x49|0x6d). Header type: ".$type);
             return array();
         }
 
         // Update the engine type for other calls and other methods, if necessary
         $this->source_engine = ($type == '0x6d' ? self::GOLDSOURCE_ENGINE : self::SOURCE_ENGINE);
-        if($this->source_engine == self::GOLDSOURCE_ENGINE)
-        {
+        if($this->source_engine == self::GOLDSOURCE_ENGINE) {
             //GOLDSOURCE
             $result->add('address', $buf->readString());
             $result->add('hostname', $buf->getString());
@@ -233,9 +235,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
 
             $result->add('secure', $buf->readInt8());
             $result->add('num_bots', $buf->readInt8());
-        }
-        else
-        {
+        } else {
             //SOURCE
             $result->add('protocol', $buf->readInt8());
             $result->add('hostname', $buf->getString());
@@ -262,8 +262,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
      *
      * @param array $packets
      */
-    protected function preProcess_players($packets)
-    {
+    protected function preProcess_players($packets) {
         // Process the packets
         return $this->process_packets($packets);
     }
@@ -273,8 +272,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
      *
      * @throws GameQ_ProtocolsException
      */
-    protected function process_players()
-    {
+    protected function process_players() {
         // Make sure we have a valid response
         if(!$this->hasValidResponse(self::PACKET_PLAYERS))
             return array();
@@ -292,8 +290,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
         $buf->skip(4);
 
         // Make sure the data is formatted properly
-        if(($header = $buf->read()) != "\x44")
-        {
+        if(($header = $buf->read()) != "\x44") {
             throw new GameQ_ProtocolsException("Data for ".__METHOD__." does not have the proper header (should be 0xFF0xFF0xFF0xFF0x44). Header: ".bin2hex($header));
             return array();
         }
@@ -309,8 +306,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
             return $result->fetch();
 
         // Players list
-        while ($buf->getLength())
-        {
+        while ($buf->getLength()) {
             $result->addPlayer('id', $buf->readInt8()); //byte
             $result->addPlayer('name', $buf->readString());
             $result->addPlayer('score', $buf->readInt32Signed()); //long
@@ -328,8 +324,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
      *
      * @param array $packets
      */
-    protected function preProcess_rules($packets)
-    {
+    protected function preProcess_rules($packets) {
         // Process the packets
         return $this->process_packets($packets);
     }
@@ -339,8 +334,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
      *
      * @throws GameQ_ProtocolsException
      */
-    protected function process_rules()
-    {
+    protected function process_rules() {
         // Make sure we have a valid response
         if(!$this->hasValidResponse(self::PACKET_RULES))
             return array();
@@ -357,8 +351,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
         $buf->skip(4);
 
         // Make sure the data is formatted properly
-        if(($header = $buf->read()) != "\x45")
-        {
+        if(($header = $buf->read()) != "\x45") {
             throw new GameQ_ProtocolsException("Data for ".__METHOD__." does not have the proper header (should be 0xFF0xFF0xFF0xFF0x45). Header: ".bin2hex($header));
             return array();
         }
@@ -385,8 +378,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
      * @throws GameQ_ProtocolsException
      * @return string
      */
-    protected function process_packets($packets)
-    {
+    protected function process_packets($packets) {
         // Make a buffer to see if we should have multiple packets
         $buffer = new GameQ_Buffer($packets[0]);
 
@@ -396,8 +388,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
         $packet_type = $buffer->readInt32Signed();
 
         // This is one packet so just return the rest of the buffer
-        if($packet_type == -1)
-        {
+        if($packet_type == -1) {
             // Free some memory
             unset($buffer);
 
@@ -412,8 +403,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
         $packs = array();
 
         // We have multiple packets so we need to get them and order them
-        foreach($packets AS $packet)
-        {
+        foreach($packets AS $packet) {
             // Make a buffer so we can read this info
             $buffer = new GameQ_Buffer($packet);
 
@@ -422,8 +412,7 @@ class GameQ_Protocols_Source extends GameQ_Protocols
             $request_id = $buffer->readInt32Signed();
 
             // Check to see if this is compressed
-            if($request_id & 0x80000000)
-            {
+            if($request_id & 0x80000000) {
                 // Check to see if we have Bzip2 installed
                 if(!function_exists('bzdecompress'))
                 {
@@ -477,11 +466,11 @@ class GameQ_Protocols_Source extends GameQ_Protocols
         return implode("", $packs);
     }
 
-/*
- * ######################################################################################
- * #################################### DZCP RUNTIME ####################################
- * ######################################################################################
- */
+    /*
+     * ######################################################################################
+     * #################################### DZCP RUNTIME ####################################
+     * ######################################################################################
+     */
     protected function process_dzcp_runtime()
     {
         //Homefront Hack
