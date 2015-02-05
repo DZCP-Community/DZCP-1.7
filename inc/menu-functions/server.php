@@ -89,7 +89,7 @@ function server($serverID = 0) {
                 }
 
                 $game_icon_inp = GameQ::search_game_icon($game_icon);
-                if($game_icon_inp['found'] && empty($get['icon'])) {
+                if($game_icon_inp['found'] && stristr($icon_basic_inp['image'], 'unknown') === FALSE && empty($get['icon'])) {
                     db("UPDATE `".$db['server']."` SET `icon` = '".up($game_icon)."' WHERE `id` = ".$get['id'].";");
                 }
                 

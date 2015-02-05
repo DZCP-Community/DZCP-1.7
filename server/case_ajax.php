@@ -120,7 +120,7 @@ function server_show($sID = 0, $showID = 0) {
 
         //Admin MSG
         $icon_basic_inp = GameQ::search_game_icon($icon_basic);
-        if(stristr($icon_basic_inp, 'unknown') === FALSE && empty($get['icon'])) {
+        if($icon_basic_inp['found'] && stristr($icon_basic_inp['image'], 'unknown') === FALSE && empty($get['icon'])) {
             db("UPDATE `".$db['server']."` SET `icon` = '".up($icon_basic)."' WHERE `id` = ".$get['id'].";");
         }
         
