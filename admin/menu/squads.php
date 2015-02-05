@@ -394,7 +394,6 @@ switch ($do) {
                                                 "navi" => _admin_squads_nav,
                                                 "upload" => show(_member_admin_icon_upload_edit,array('id' => intval($_GET['id']))),
                                                 "sshown" => $sshown,
-                                                "nothing" => _nothing,
                                                 "selr" => $roster,
                                                 "selt" => $team_show,
                                                 "navigation" => $navigation,

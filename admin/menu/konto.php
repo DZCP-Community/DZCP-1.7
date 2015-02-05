@@ -56,7 +56,7 @@ if(_adminMenu != 'true') exit;
 
       $show = show($dir."/clankasse", array("head" => _config_clankasse_head,
                                             "edit" => _editicon_blank,
-                                            "bez" => _admin_download_kat,
+                                            "bez" => _description,
                                             "top" => _config_c_clankasse,
                                             "add" => _clankasse_new_head,
                                             "delete" => _deleteicon_blank,
@@ -80,7 +80,7 @@ if(_adminMenu != 'true') exit;
                                                    "do" => "add",
                                                    "kat" => "",
                                                    "what" => _button_value_add,
-                                                   "dlkat" => _admin_download_kat));
+                                                   "dlkat" => _description));
       } elseif($do == "add") {
         if(empty($_POST['kat']))
         {
@@ -101,7 +101,7 @@ if(_adminMenu != 'true') exit;
                                                    "kat" => re($get['kat']),
                                                    "top" => _config_c_clankasse,
                                                    "what" => _button_value_edit,
-                                                   "dlkat" => _admin_download_kat));
+                                                   "dlkat" => _description));
       } elseif($do == "editkat") {
         if(empty($_POST['kat']))
         {

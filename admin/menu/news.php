@@ -100,7 +100,6 @@ if(_adminMenu != 'true') exit;
                                                 "kat" => re($get['kategorie']),
                                                 "value" => _button_value_edit,
                                                 "id" => $_GET['id'],
-                                                "nothing" => _nothing,
                                                 "do" => $do,
                                                 "nimg" => _config_newskats_katbild,
                                                 "upload" => $upload,

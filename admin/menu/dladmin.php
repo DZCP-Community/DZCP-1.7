@@ -88,7 +88,6 @@ if(_adminMenu != 'true') exit;
                                             "file" => $dl,
                                             "lokal" => _downloads_lokal,
                                             "exist" => _downloads_exist,
-                                            "nothing" => _nothing,
                                             "nofile" => _downloads_nofile,
                                             "oder" => _or,
                                             "dbeschreibung" => re_bbcode($get['beschreibung']),

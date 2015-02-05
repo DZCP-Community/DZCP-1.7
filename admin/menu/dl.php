@@ -31,7 +31,7 @@ if(_adminMenu != 'true') exit;
                                          "show" => $show_,
                                          "add" => _dl_new_head,
                                          "whatkat" => 'dl',
-                                         "download" => _admin_download_kat,
+                                         "download" => _description,
                                          "edit" => _editicon_blank,
                                          "delete" => _deleteicon_blank));
 
