@@ -42,6 +42,8 @@ define("_notification_success", 'Success');
 define("_notification_notice", 'Notice');
 define("_notification_warning", 'Warning');
 define("_notification_custom", 'Custom');
+define("_color", 'Color');
+define("_description", 'Description');
 
 //Forum
 define('_forum_last_post', 'View the latest post');
@@ -1866,7 +1868,6 @@ define('_server_admin_added' , 'The server was successfully registered!');
 define('_empty_game' , 'You have to choose an icon!');
 define('_empty_servername' , 'You have to choose a server`s name!');
 define('_admin_dlkat' , 'Download categories');
-define('_admin_download_kat' , 'Description');
 define('_dl_add_new' , '<a href="?admin=dl&amp;do=new">Insert new category</a>');
 define('_dl_new_head' , 'Insert new download categorie');
 define('_dl_dlkat' , 'Category');

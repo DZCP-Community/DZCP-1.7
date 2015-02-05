@@ -42,6 +42,8 @@ define("_notification_success", 'Erfolg');
 define("_notification_notice", 'Hinweis');
 define("_notification_warning", 'Achtung');
 define("_notification_custom", 'Benutzerdefiniert');
+define("_color", 'Farbe');
+define("_description", 'Bezeichnung');
 
 //Forum
 define("_forum_last_post", 'Neuesten Beitrag anzeigen');
@@ -1878,7 +1880,6 @@ define('_config_server_mapname', 'Mapname');
 define('_config_server_maps_head', 'Servermaps');
 define('_config_server_map_deleted', 'Der Mapscreen wurde erfolgreich gel&ouml;scht!');
 define('_admin_dlkat', 'Downloadkategorien');
-define('_admin_download_kat', 'Bezeichnung');
 define('_dl_add_new', '<a href="?admin=dl&amp;do=new">Neue Kategorie hinzuf&uuml;gen</a>');
 define('_dl_new_head', 'Neue Downloadkategorie hinzuf&uuml;gen');
 define('_dl_dlkat', 'Kategorie');
