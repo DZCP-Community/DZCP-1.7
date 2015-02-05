@@ -38,7 +38,7 @@ if(defined('_UserMenu')) {
         $index = show($dir."/admin_self", array("squadhead" => _admin_user_squadhead,
                                                 "showpos" => getrank($_GET['edit']),
                                                 "esquad" => $esquads,
-                                                "nothing" => _nothing,
+                                                
                                                 "value" => _button_value_edit,
                                                 "eposi" => $posi,
                                                 "squad" => _member_admin_squad,
@@ -67,42 +67,65 @@ if(defined('_UserMenu')) {
             }
         } else if($do == "update") {
             if($_POST && isset($_GET['user'])) {
-                // permissions
-                db("DELETE FROM ".$db['permissions']." WHERE `user` = '".intval($_GET['user'])."'");
-                if(!empty($_POST['perm'])) {
-                    $p = '';
-                    foreach($_POST['perm'] AS $v => $k) {
-                        $p .= "`".substr($v, 2)."` = '".intval($k)."',";
-                    }
-
-                    if(!empty($p))
-                        $p = ', '.substr($p, 0, strlen($p) - 1);
-
-                    db("INSERT INTO ".$db['permissions']." SET `user` = '".intval($_GET['user'])."'".$p);
+                $edituser = intval($_GET['user']);
+                
+                // Permissions Update
+                if(empty($_POST['perm'])) {
+                    $_POST['perm'] = array();
                 }
 
-                // internal boardpermissions
-                db("DELETE FROM ".$db['f_access']." WHERE `user` = '".intval($_GET['user'])."'");
-                if(!empty($_POST['board'])) {
-                    foreach($_POST['board'] AS $v) {
-                        db("INSERT INTO ".$db['f_access']." SET `user` = '".intval($_GET['user'])."', `forum` = '".$v."'");
+                $qry_fields = db("SHOW FIELDS FROM `".$db['permissions']."`;"); $sql_update = '';
+                while($get = _fetch($qry_fields)) {
+                    if($get['Field'] != 'id' && $get['Field'] != 'user' && $get['Field'] != 'pos' && $get['Field'] != 'intforum') {
+                        $sql = array_key_exists('p_'.$get['Field'], $_POST['perm']) ? '`'.$get['Field'].'` = 1' : '`'.$get['Field'].'` = 0';
+                        $sql_update .= $sql.', ';
                     }
                 }
 
-                db("DELETE FROM ".$db['squaduser']." WHERE user = '".intval($_GET['user'])."'");
-                db("DELETE FROM ".$db['userpos']." WHERE user = '".intval($_GET['user'])."'");
+                // Check User Permissions is exists
+                if(!db('SELECT `id` FROM `'.$db['permissions'].'` WHERE `user` = '.$edituser.' LIMIT 1',true)) {
+                    db("INSERT INTO `".$db['permissions']."` SET `user` = ".$edituser.";");
+                }
+
+                // Update Permissions
+                db('UPDATE `'.$db['permissions'].'` SET '.substr($sql_update, 0, -2).' WHERE `user` = '.$edituser.';');
+
+                // Internal Boardpermissions Update
+                if(empty($_POST['board'])) {
+                    $_POST['board'] = array();
+                }
+
+                // Boardpermissions Cleanup
+                $sql = db('SELECT `id`,`forum` FROM `'.$db['f_access'].'` WHERE `user` = '.$edituser.';');
+                while($get = _fetch($sql)) { 
+                    if(!array_var_exists($get['forum'],$_POST['board'])) { 
+                        db('DELETE FROM `'.$db['f_access'].'` WHERE `id` = '.$get['id']); 
+                    }
+                }
+
+                //Add new Boardpermissions
+                if(count($_POST['board']) >= 1) {
+                    foreach($_POST['board'] AS $boardpem) { 
+                        if(!db("SELECT `id` FROM `".$db['f_access']."` WHERE `user` = ".$edituser." AND `forum` = '".$boardpem."';",true)) {
+                            db("INSERT INTO `".$db['f_access']."` SET `user` = ".$edituser.", `forum` = '".$boardpem."';"); 
+                        }
+                    }
+                }
+
+                db("DELETE FROM ".$db['squaduser']." WHERE user = '".$edituser."'");
+                db("DELETE FROM ".$db['userpos']." WHERE user = '".$edituser."'");
 
                 $sq = db("SELECT id FROM ".$db['squads']."");
                 while($getsq = _fetch($sq)) {
                     if(isset($_POST['squad'.$getsq['id']])) {
                         db("INSERT INTO ".$db['squaduser']."
-                            SET `user`   = '".intval($_GET['user'])."',
+                            SET `user`   = '".$edituser."',
                                 `squad`  = '".intval($_POST['squad'.$getsq['id']])."'");
                     }
 
                     if(isset($_POST['squad'.$getsq['id']])) {
                         db("INSERT INTO ".$db['userpos']."
-                            SET `user`   = '".intval($_GET['user'])."',
+                            SET `user`   = '".$edituser."',
                                 `posi`   = '".intval($_POST['sqpos'.$getsq['id']])."',
                                 `squad`  = '".intval($getsq['id'])."'");
                     }
@@ -119,9 +142,9 @@ if(defined('_UserMenu')) {
                         `listck` = '".(isset($_POST['listck']) ? intval($_POST['listck']) : 0)."',
                         `level`  = '".intval($update_level)."',
                         `banned`  = '".intval($update_banned)."'
-                    WHERE id = '".intval($_GET['user'])."'");
+                    WHERE id = '".$edituser."'");
 
-                setIpcheck("upduser(".$userid."_".intval($_GET['user']).")");
+                setIpcheck("upduser(".$userid."_".$edituser.")");
             }
 
             $index = info(_admin_user_edited, "?action=userlist");
@@ -146,9 +169,7 @@ if(defined('_UserMenu')) {
             }
 
             $index = info(_admin_user_edited, "?action=user&amp;id=".$userid."");
-        }
-        elseif($do == "delete")
-        {
+        } elseif($do == "delete") {
             $index = show(_user_delete_verify, array("user" => autor(intval($_GET['id'])), "id" => $_GET['id']));
             if($_GET['verify'] == "yes")
             {
@@ -174,9 +195,7 @@ if(defined('_UserMenu')) {
                     $index = info(_user_deleted, "?action=userlist");;
                 }
             }
-        }
-        else
-        {
+        } else {
             $qry = db("SELECT id,user,nick,pwd,email,level,position,listck FROM ".$db['users']." WHERE id = '".intval($_GET['edit'])."'");
             if(_rows($qry))
             {
@@ -250,7 +269,7 @@ if(defined('_UserMenu')) {
                                                    "getboardpermissions" => getBoardPermissions(intval($_GET['edit'])),
                                                    "forenrechte" => _config_positions_boardrights,
                                                    "showpos" => getrank($_GET['edit']),
-                                                   "nothing" => _nothing,
+                                                   
                                                    "listck" => (empty($get['listck']) ? '' : ' checked="checked"'),
                                                    "clankasse" => _user_list_ck,
                                                    "auth_info" => _admin_user_clanhead_info,
