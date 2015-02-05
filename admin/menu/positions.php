@@ -4,167 +4,174 @@
  * http://www.dzcp.de
  */
 
-if(_adminMenu != 'true') exit;
+if(_adminMenu != 'true') exit();
+$where = $where.': '._admin_pos;
 
-    $where = $where.': '._admin_pos;
-      $qry = db("SELECT * FROM ".$db['pos']."
-                 ORDER BY pid");
-      while($get = _fetch($qry))
-      {
-        $edit = show("page/button_edit_single", array("id" => $get['id'],
-                                                      "action" => "admin=positions&amp;do=edit",
-                                                      "title" => _button_title_edit));
-        $delete = show("page/button_delete_single", array("id" => $get['id'],
-                                                          "action" => "admin=positions&amp;do=delete",
-                                                          "title" => _button_title_del,
-                                                          "del" => convSpace(_confirm_del_entry)));
-        $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-
-        $show_ .= show($dir."/dlkats_show", array("gameicon" => $gameicon,
-                                                  "edit" => $edit,
-                                                  "name" => re($get['position']),
-                                                  "class" => $class,
-                                                  "delete" => $delete));
-      }
-
-      $show = show($dir."/dlkats", array("head" => _admin_pos,
-                                         "show" => $show_,
-                                         "add" => _pos_new_head,
-                                         "whatkat" => 'positions',
-                                         "download" => _admin_download_kat,
-                                         "edit" => _editicon_blank,
-                                         "delete" => _deleteicon_blank));
-
-      if($do == "edit")
-      {
-        $qry1 = db("SELECT * FROM ".$db['pos']."
-                    ORDER BY pid");
-        while($get1 = _fetch($qry1))
-        {
-          $positions .= show(_select_field, array("value" => $get1['pid']+1,
-                                                  "what" => _nach.' '.re($get1['position']),
-                                                  "sel" => ""));
+switch ($do) {
+    case 'edit':
+        $qry = db("SELECT `pid`,`position` FROM `".$db['pos']."` ORDER BY pid DESC;"); $positions = '';
+        while($get = _fetch($qry)) {
+            $positions .= show(_select_field, array("value" => ($get['pid']+1),
+                                                    "what" => _nach.' '.re($get['position']),
+                                                    "sel" => ""));
         }
 
-        $qry = db("SELECT * FROM ".$db['pos']."
-                   WHERE id = '".intval($_GET['id'])."'");
-        $get = _fetch($qry);
-
+        $id = intval($_GET['id']);
+        $get = db("SELECT `position`,`color` FROM `".$db['pos']."` WHERE `id` = ".$id.";",false,true);
         $show = show($dir."/form_pos", array("newhead" => _pos_edit_head,
-                                             "do" => "editpos&amp;id=".intval($_GET['id'])."",
-                                             "kat" => $get['position'],
-                                             "pos" => _position,
-                                             "rechte" => _config_positions_rights,
-                                             "getpermissions" => getPermissions(intval($_GET['id']), 1),
-                                             "getboardpermissions" => getBoardPermissions(intval($_GET['id']), 1),
-                                             "forenrechte" => _config_positions_boardrights,
+                                             "do" => "editpos&amp;id=".$id."",
+                                             "kat" => re($get['position']),
+                                             "color" => re($get['color']),
+                                             "getpermissions" => getPermissions($id, 1),
+                                             "getboardpermissions" => getBoardPermissions($id, 1),
                                              "positions" => $positions,
-                                             "nothing" => _nothing,
-                                             "what" => _button_value_edit,
-                                             "dlkat" => _admin_download_kat));
-      } elseif($do == "editpos") {
-        if(empty($_POST['kat']))
-        {
-          $show = error(_pos_empty_kat,1);
+                                             "what" => _button_value_edit));
+        unset($positions,$qry,$get);
+    break;
+    case 'editpos':
+        if(empty($_POST['kat'])) {
+            $show = error(_pos_empty_kat,1);
         } else {
-          if($_POST['pos'] == "lazy")
-              {
-                    $pid = "";
-              } else {
-                    $pid = ",`pid` = '".intval($_POST['pos'])."'";
+            $posid = intval($_POST['pos']); $id = intval($_GET['id']);
+            $pid = ($_POST['pos'] == "lazy" ? "" : ",`pid` = ".$posid);
+            $sign = ($_POST['pos'] == "1" || $_POST['pos'] == "2" ? ">= " : "> ");
+            db("UPDATE `".$db['pos']."` SET `pid` = (pid+1) WHERE `pid` ".$sign." ".$posid.";");
+            db("UPDATE `".$db['pos']."` SET `position` = '".up($_POST['kat'])."' ".$pid.", `color` = '".up($_POST['color'])."' WHERE `id` = ".$id.";");
 
-            if($_POST['pos'] == "1" || "2") $sign = ">= ";
-            else $sign = "> ";
+            // Permissions Update
+            if(empty($_POST['perm'])) {
+                $_POST['perm'] = array();
+            }
 
-            $posi = db("UPDATE ".$db['pos']."
-                        SET `pid` = pid+1
-                        WHERE pid ".$sign." '".intval($_POST['pos'])."'");
-              }
+            $qry_fields = db("SHOW FIELDS FROM `".$db['permissions']."`;"); $sql_update = '';
+            while($get = _fetch($qry_fields)) {
+                if($get['Field'] != 'id' && $get['Field'] != 'user' && $get['Field'] != 'pos' && $get['Field'] != 'intforum') {
+                    $sql = array_key_exists('p_'.$get['Field'], $_POST['perm']) ? '`'.$get['Field'].'` = 1' : '`'.$get['Field'].'` = 0';
+                    $sql_update .= $sql.', ';
+                }
+            }
 
-          $qry = db("UPDATE ".$db['pos']."
-                     SET `position` = '".up($_POST['kat'])."'
-                         ".$pid."
-                     WHERE id = '".intval($_GET['id'])."'");
-    // permissions
-          db("DELETE FROM ".$db['permissions']." WHERE `pos` = '".intval($_GET['id'])."'");
-          if(!empty($_POST['perm']))
-          {
-            foreach($_POST['perm'] AS $v => $k) $p .= "`".substr($v, 2)."` = '".intval($k)."',";
-                                  if(!empty($p))$p = ', '.substr($p, 0, strlen($p) - 1);
+            // Check group Permissions is exists
+            if(!db('SELECT `id` FROM `'.$db['permissions'].'` WHERE `pos` = '.$id.' LIMIT 1;',true)) {
+                db("INSERT INTO `".$db['permissions']."` SET `pos` = ".$id.";");
+            }
 
-            db("INSERT INTO ".$db['permissions']." SET `pos` = '".intval($_GET['id'])."'".$p);
-          }
-    ////////////////////
+            // Update Permissions
+            db('UPDATE `'.$db['permissions'].'` SET '.substr($sql_update, 0, -2).' WHERE `pos` = '.$id.' LIMIT 1;');
 
-    // internal boardpermissions
-          db("DELETE FROM ".$db['f_access']." WHERE `pos` = '".intval($_GET['id'])."'");
-          if(!empty($_POST['board']))
-          {
-            foreach($_POST['board'] AS $v)
-              db("INSERT INTO ".$db['f_access']." SET `pos` = '".intval($_GET['id'])."', `forum` = '".$v."'");
-          }
-    ////////////////////
+            // Internal Boardpermissions Update
+            if(empty($_POST['board'])) {
+                $_POST['board'] = array();
+            }
 
-          $show = info(_pos_admin_edited, "?admin=positions");
+            // Cleanup Boardpermissions
+            $sql = db('SELECT `id`,`forum` FROM `'.$db['f_access'].'` WHERE `pos` = '.$id.';');
+            while($get = _fetch($sql)) { 
+                if(!array_var_exists($get['forum'],$_POST['board'])) {
+                    db('DELETE FROM `'.$db['f_access'].'` WHERE `id` = '.$get['id'].';'); 
+                }
+            }
+
+            //Add new Boardpermissions
+            if(count($_POST['board']) >= 1) {
+                foreach($_POST['board'] AS $boardpem) { 
+                    if(!db("SELECT `id` FROM `".$db['f_access']."` WHERE `pos` = ".$id." AND `forum` = '".$boardpem."';",true)) {
+                        db("INSERT INTO `".$db['f_access']."` SET `pos` = ".$id.", `forum` = '".$boardpem."';"); 
+                    }
+                }
+            }
+
+            $show = info(_pos_admin_edited, "?admin=positions");
         }
-      } elseif($do == "delete") {
-        db("DELETE FROM ".$db['pos']." WHERE id = '".intval($_GET['id'])."'");
-        db("DELETE FROM ".$db['permissions']." WHERE pos = '".intval($_GET['id'])."'");
-
+    break;
+    case 'delete':
+        db("DELETE FROM `".$db['pos']."` WHERE `id` = ".intval($_GET['id']).";");
+        db("DELETE FROM `".$db['permissions']."` WHERE `pos` = ".intval($_GET['id']).";");
         $show = info(_pos_admin_deleted, "?admin=positions");
-
-      } elseif($do == "new") {
-        $qry = db("SELECT * FROM ".$db['pos']."
-                   ORDER BY pid");
-        while($get = _fetch($qry))
-        {
-          $positions .= show(_select_field, array("value" => $get['pid']+1,
-                                                            "what" => _nach.' '.re($get['position']),
-                                                            "sel" => ""));
+    break;
+    case 'new':
+        $qry = db("SELECT `pid`,`position` FROM `".$db['pos']."` ORDER BY pid DESC;"); $positions = '';
+        while($get = _fetch($qry)) {
+            $positions .= show(_select_field, array("value" => ($get['pid']+1),
+                                                    "what" => _nach.' '.re($get['position']),
+                                                    "sel" => ""));
         }
+
         $show = show($dir."/form_pos", array("newhead" => _pos_new_head,
                                              "do" => "add",
-                                             "pos" => _position,
-                                             "rechte" => _config_positions_rights,
                                              "getpermissions" => getPermissions(),
                                              "getboardpermissions" => getBoardPermissions(),
                                              "nothing" => "",
-                                             "forenrechte" => _config_positions_boardrights,
                                              "positions" => $positions,
                                              "kat" => "",
-                                             "what" => _button_value_add,
-                                             "dlkat" => _admin_download_kat));
-      } elseif($do == "add") {
-        if(empty($_POST['kat']))
-        {
-          $show = error(_pos_empty_kat,1);
+                                             "color" => "#000000",
+                                             "what" => _button_value_add));
+
+        unset($positions,$qry,$get);
+    break;
+    case 'add':
+        if(empty($_POST['kat'])) {
+            $show = error(_pos_empty_kat,1);
         } else {
-          if($_POST['pos'] == "1" || "2") $sign = ">= ";
-          else $sign = "> ";
+            $sign = ($_POST['pos'] == "1" || $_POST['pos'] == "2" ? ">= " : "> ");
+            db("UPDATE ".$db['pos']." SET `pid` = (pid+1) WHERE pid ".$sign." '".intval($_POST['pos'])."';");
+            db("INSERT INTO ".$db['pos']." SET `pid` = '".intval($_POST['pos'])."', `position` = '".up($_POST['kat'])."', `color` = '".up($_POST['color'])."';");
+            
+            $posID = _insert_id();
+            $qry_fields = db("SHOW FIELDS FROM `".$db['permissions']."`;"); $sql_update = '';
+            while($get = _fetch($qry_fields)) {
+                if($get['Field'] != 'id' && $get['Field'] != 'user' && $get['Field'] != 'pos' && $get['Field'] != 'intforum') {
+                    $sql = array_key_exists('p_'.$get['Field'], $_POST['perm']) ? '`'.$get['Field'].'` = 1' : '`'.$get['Field'].'` = 0';
+                    $sql_update .= $sql.', ';
+                }
+            }
+            
+            // Add Permissions
+            db('INSERT INTO `'.$db['permissions'].'` SET '.$sql_update.'`pos` = '.$posID.';');
 
-          $posi = db("UPDATE ".$db['pos']."
-                      SET `pid` = pid+1
-                      WHERE pid ".$sign." '".intval($_POST['pos'])."'");
+            // Internal Boardpermissions Update
+            if(empty($_POST['board'])) {
+                $_POST['board'] = array();
+            }
 
-          $qry = db("INSERT INTO ".$db['pos']."
-                     SET `pid`        = '".intval($_POST['pos'])."',
-                         `position`  = '".up($_POST['kat'])."'");
-          $posID = _insert_id();
-    // permissions
-          foreach($_POST['perm'] AS $v => $k) $p .= "`".substr($v, 2)."` = '".intval($k)."',";
-                                if(!empty($p))$p = ', '.substr($p, 0, strlen($p) - 1);
-
-          db("INSERT INTO ".$db['permissions']." SET `pos` = '".$posID."'".$p);
-    ////////////////////
-
-    // internal boardpermissions
-          if(!empty($_POST['board']))
-          {
-            foreach($_POST['board'] AS $v)
-              db("INSERT INTO ".$db['f_access']." SET `pos` = '".$posID."', `forum` = '".$v."'");
-          }
-    ////////////////////
+            //Add new Boardpermissions
+            if(count($_POST['board']) >= 1) {
+                foreach($_POST['board'] AS $boardpem) { 
+                    if(!db("SELECT `id` FROM `".$db['f_access']."` WHERE `pos` = ".$posID." AND `forum` = '".$boardpem."';",true)) {
+                        db("INSERT INTO `".$db['f_access']."` SET `pos` = ".$posID.", `forum` = '".$boardpem."';"); 
+                    }
+                }
+            }
 
           $show = info(_pos_admin_added, "?admin=positions");
         }
-      }
+    break;
+    default:
+        $qry = db("SELECT `id`,`position` FROM `".$db['pos']."` ORDER BY pid DESC;"); $show_pos = '';
+        while($get = _fetch($qry)) {
+            $edit = show("page/button_edit_single", array("id" => $get['id'],
+                                                          "action" => "admin=positions&amp;do=edit",
+                                                          "title" => _button_title_edit));
+
+            $delete = show("page/button_delete_single", array("id" => $get['id'],
+                                                              "action" => "admin=positions&amp;do=delete",
+                                                              "title" => _button_title_del,
+                                                              "del" => convSpace(_confirm_del_entry)));
+
+            $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
+            $show_pos .= show($dir."/positions_show", array("edit" => $edit,
+                                                      "name" => re($get['position']),
+                                                      "class" => $class,
+                                                      "delete" => $delete));
+        }
+
+        if(empty($show_pos)) {
+            $show_pos = show(_no_entrys_yet, array("colspan" => "3"));
+        }
+
+        $show = show($dir."/positions", array("show" => $show_pos,
+                                              "edit" => _editicon_blank,
+                                              "delete" => _deleteicon_blank));
+        unset($show_pos,$qry,$get);
+    break;
+}

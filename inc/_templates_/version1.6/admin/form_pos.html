@@ -6,7 +6,7 @@
   <td class="contentHead" align="center" colspan="2"><span class="fontBold">[newhead]</span></td>
 </tr>
 <tr>
-  <td class="contentMainTop" width="135"><span class="fontBold">[dlkat]:</span></td>
+  <td class="contentMainTop" width="135"><span class="fontBold">[lang_description]:</span></td>
   <td class="contentMainFirst" align="center">
     <input type="text" name="kat" value="[kat]" class="inputField_dis"
     onfocus="this.className='inputField_en';"
@@ -14,7 +14,7 @@
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[rechte]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_config_positions_rights]:</span></td>
   <td class="contentMainFirst" align="center">
     <div class="permissions">
       [getpermissions]
@@ -22,7 +22,7 @@
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[forenrechte]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_config_positions_boardrights]:</span></td>
   <td class="contentMainFirst" align="center">
     <div class="permissions">
       [getboardpermissions]
@@ -30,13 +30,21 @@
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[pos]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_position]:</span></td>
   <td class="contentMainFirst" align="center">
     <select name="pos" class="dropdown">
-      [nothing]
+      [lang_nothing]
       <option value="1">als erstes</option>
       [positions]
     </select>
+  </td>
+</tr>
+<tr>
+  <td class="contentMainTop"><span class="fontBold">[lang_color]:</span></td>
+  <td class="contentMainFirst" align="center">
+    <input type="text" name="color" id="colorpicker" value="[color]" class="inputField_dis_mid"
+    onfocus="this.className='inputField_en_mid';"
+    onblur="this.className='inputField_dis_mid';" />
   </td>
 </tr>
 <tr>

@@ -1979,6 +1979,7 @@ function update_mysql_1_7() {
     db("ALTER TABLE `".$db['server']."` ADD `icon` VARCHAR(150) NOT NULL DEFAULT '' AFTER `custom_icon`;",false,false,true);
     db("ALTER TABLE `".$db['pos']."` ADD `color` VARCHAR(7) NOT NULL DEFAULT '#000000' AFTER `nletter`;",false,false,true);
     db("ALTER TABLE `".$db['f_access']."` CHANGE `pos` `pos` INT(5) NOT NULL DEFAULT '0';",false,false,true);
+    db("ALTER TABLE `".$db['pos']."` CHANGE `nletter` `nletter` INT(1) NOT NULL DEFAULT '0';",false,false,true);
     
     // Check group Permissions is exists
     $sql = db('SELECT `id` FROM `'.$db['pos'].'`;');
