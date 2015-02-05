@@ -28,6 +28,9 @@ var DZCP = {
 
         // init lightbox
         DZCP.initLightbox();
+        
+        // init colorpicker
+        $("#colorpicker").colorpicker();
 
         //init slidetabs
         if(dzcp_config.slideshowInterval > 1) { //set slideshowInterval to 0 for disable
@@ -48,6 +51,7 @@ var DZCP = {
             });
         }
 
+        // init template
         $(".tabs").tabs("> .switchs");
         $(".tabs2").tabs(".switchs2 > div", { effect: 'fade', rotate: true });
     },
