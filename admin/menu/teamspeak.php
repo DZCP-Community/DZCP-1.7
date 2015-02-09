@@ -53,8 +53,7 @@ switch ($do) {
     break;
     case 'edit':
         $error = ''; $show = '';
-        if(isset($_POST['ip']))
-        {
+        if(isset($_POST['ip'])) {
             if(empty($_POST['ip']))
                 $error = _ts_empty_ip_dns;
             else if(empty($_POST['port']))
@@ -62,13 +61,10 @@ switch ($do) {
             else if(empty($_POST['sport']))
                 $error = _ts_empty_qport;
 
-            if(empty($error))
-            {
-                if(isset($_POST['defaults']))
-                {
+            if(empty($error)) {
+                if(isset($_POST['defaults'])) {
                     $qry = db("SELECT id FROM ".$db['ts']." WHERE `default_server` = 1");
-                    if(_rows($qry))
-                    {
+                    if(_rows($qry)) {
                         while($get = _fetch($qry))
                         { db("UPDATE ".$db['ts']." SET `default_server` = '0' WHERE `id` = ".$get['id'].";"); }
                     }
@@ -77,8 +73,8 @@ switch ($do) {
                 db("UPDATE ".$db['ts']." SET `host_ip_dns` = '".up($_POST['ip'])."',
                                                   `server_port` = '".intval($_POST['port'])."',
                                                   `query_port` = '".intval($_POST['sport'])."',
-                                                    `customicon` = '".intval($_POST['customicon'])."',
-                                                    `showchannel` = '".intval($_POST['showchannel'])."',
+                                                  `customicon` = '".intval($_POST['customicon'])."',
+                                                  `showchannel` = '".intval($_POST['showchannel'])."',
                                                   `default_server` = ".(isset($_POST['defaults']) ? '1' : '0')."
                                                   WHERE `id` = ".intval($_GET['id']).";");
 
@@ -90,8 +86,7 @@ switch ($do) {
             }
         }
 
-        if(empty($show))
-        {
+        if(empty($show)) {
             $get = db("SELECT * FROM ".$db['ts']." WHERE `id` = ".intval($_GET['id']).";",false,true);
             $show = show($dir."/teamspeak_edit", array('id' => intval($_GET['id']),
                                                        'error' => (!empty($error) ? show("errors/errortable", array("error" => $error)) : ""),
@@ -106,8 +101,7 @@ switch ($do) {
     break;
     case 'new':
         $error = '';
-        if(isset($_POST['ip']))
-        {
+        if(isset($_POST['ip'])) {
             if(empty($_POST['ip']))
                 $error = _ts_empty_ip_dns;
             else if(empty($_POST['port']))
@@ -115,18 +109,17 @@ switch ($do) {
             else if(empty($_POST['sport']))
                 $error = _ts_empty_qport;
 
-            if(empty($error))
-            {
-                if(isset($_POST['defaults']))
-                {
+            if(empty($error)) {
+                if(isset($_POST['defaults'])) {
                     $qry = db("SELECT id FROM ".$db['ts']." WHERE `default_server` = 1");
-                    if(_rows($qry))
-                    {
+                    if(_rows($qry)) {
                         while($get = _fetch($qry))
                         { db("UPDATE ".$db['ts']." SET `default_server` = '0' WHERE `id` = ".$get['id'].";"); }
                     }
                 }
 
+                $_POST['sport'] = (empty($_POST['sport']) ? 10011 : $_POST['sport']);
+                $_POST['port'] = (empty($_POST['port']) ? 9987 : $_POST['port']);
                 db("INSERT INTO ".$db['ts']." SET `host_ip_dns` = '".up($_POST['ip'])."',
                                                        `server_port` = '".intval($_POST['port'])."',
                                                        `query_port` = '".intval($_POST['sport'])."',
@@ -150,8 +143,7 @@ switch ($do) {
     break;
     default:
         $qry = db("SELECT * FROM ".$db['ts']." ORDER BY id"); $color = 1;
-        while($get = _fetch($qry))
-        {
+        while($get = _fetch($qry)) {
             $edit = show("page/button_edit_single", array("id" => $get['id'],"action" => "admin=teamspeak&amp;do=edit","title" => _button_title_edit));
             $delete = show("page/button_delete_single", array("id" => $get['id'],"action" => "admin=teamspeak&amp;do=delete","title" => _button_title_del,"del" => _confirm_del_server));
 
