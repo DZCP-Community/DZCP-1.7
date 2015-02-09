@@ -83,6 +83,7 @@ define('_config_ts_updated', 'Der Teamspeak Server wurde erfogreich editiert!');
 define('_config_ts_added', 'Der Teamspeak Server wurde erfogreich eingetragen!');
 define('_no_ts_page', 'Es ist kein Teamspeak 3 Server eingetragen');
 define('_no_connect_to_ts', 'Teamspeak 3 Server is offline!');
+define('_server_nousers', '<tr><td class="contentMainFirst" align="center" colspan="99"><span class="fontBold">No Users on the server</span></td></tr>');
 
 //Startpage
 define('_profil_startpage', 'Startseite');
