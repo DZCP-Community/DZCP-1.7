@@ -95,25 +95,68 @@ else {
         $addons1 = '/*'; $addons2 = '*/';
     }
 
-    $dzcp_news = '';
-    if(allow_url_fopen_support()) {
-        if(admin_view_dzcp_news) {
-            if(!$config_cache['use_cache'] || !$cache->isExisting("admin_news")) {
-                $dzcp_news = fileExists("http://www.dzcp.de/dzcp_news.php");
-                if($dzcp_news && !empty($dzcp_news))
-                    if($config_cache['use_cache'])
-                        $cache->set("admin_news", base64_encode($dzcp_news), 1200);
-                else
-                    $dzcp_news = false;
-            }
-            else
-                $dzcp_news = base64_decode($cache->get("admin_news"));
-            
-            $dzcp_news = '<td><div style="padding:3px">'.(empty($dzcp_news) ? '' : '<b>DZCP News:</b><br />').'<div id="dzcpticker">'.$dzcp_news.'</div></div>
-            <script language="javascript" type="text/javascript">DZCP.addEvent(window, \'load\', function() { DZCP.initTicker(\'dzcpticker\', \'h\', 30); });</script></td>';
-        }
-    }
+    //Dashboard
+    if(empty($show)) {
+        $show_news = '';
+        if(allow_url_fopen_support()) {
+            if(admin_view_dzcp_news) {
+                if(!$config_cache['use_cache'] || !$cache->isExisting("admin_news")) {
+                    $dzcp_news_stream = fileExists("http://www.dzcp.de/dzcp_news_1.7_test.php");
+                    if($dzcp_news_stream != false && !empty($dzcp_news_stream)) {
+                        if($config_cache['use_cache'])
+                            $cache->set("admin_news", base64_encode($dzcp_news_stream), 1200);
+                        
+                        $dzcp_news_stream = json_decode($dzcp_news_stream, true);
+                    }
+                } else
+                    $dzcp_news_stream = json_decode(base64_decode($cache->get("admin_news")),true);
 
+                $dzcp_news_db = array();
+                if(file_exists(basePath.'/inc/_cache_/admin_dzcp_news.dat')) {
+                    $dzcp_news_db = json_decode(file_get_contents(basePath.'/inc/_cache_/admin_dzcp_news.dat'),true);
+                    if(isset($_POST['what']) && $_POST['what'] == 'news') {
+                        switch ($_POST['do']) {
+                            case 'remove':
+                                $dzcp_news_db[intval($_POST['newsID'])] = true;
+                            break;
+                            case 'update':
+                                $dzcp_news_stream = fileExists("http://www.dzcp.de/dzcp_news_1.7_test.php");
+                                if($dzcp_news_stream != false && !empty($dzcp_news_stream)) {
+                                    if($config_cache['use_cache'])
+                                        $cache->set("admin_news", base64_encode($dzcp_news_stream), 1200);
+
+                                    $dzcp_news_stream = json_decode($dzcp_news_stream, true);
+                                }
+                            break;
+                        }
+                        
+                        file_put_contents(basePath.'/inc/_cache_/admin_dzcp_news.dat', json_encode($dzcp_news_db));
+                    }
+                } else {
+                    file_put_contents(basePath.'/inc/_cache_/admin_dzcp_news.dat', json_encode(array()));
+                }
+                
+                foreach ($dzcp_news_stream as $news) {
+                    if(!array_key_exists($news['newsid'], $dzcp_news_db)) {
+                        $show_news .= show($dir."/dzcp_news_show", array("titel" => $news['titel'],
+                                                                         "image" => $news['image'],
+                                                                         "id" => $news['newsid'],
+                                                                         "text" => cut($news['news'],230,true),
+                                                                         "url" => $news['url'],
+                                                                         "datum" => date("d.m.y H:i", $news['date'])._uhr));
+                    }
+                }
+
+                if(empty($show_news))
+                    $show_news = show(_no_news_yet, array("colspan" => "2"));
+
+                unset($news,$dzcp_news_stream);
+            }
+        }
+        
+        $show = show($dir."/dashboard", array('news' => show($dir."/dzcp_news", array('news' => $show_news))));
+    }
+    
     if(@file_exists(basePath."/_installer") && $chkMe == 4 && !view_error_reporting && _edition != 'dev')
         $index = _installdir;
     else {
@@ -125,7 +168,6 @@ else {
                                            "einst" => _config_einst,
                                            "content" => _content,
                                            "addons" => _addons,
-                                           "newsticker" => $dzcp_news,
                                            "rootadmin" => _rootadmin,
                                            "rootmenu" => $rootmenu,
                                            "settingsmenu" => $settingsmenu,

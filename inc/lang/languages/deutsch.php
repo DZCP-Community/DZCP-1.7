@@ -44,6 +44,10 @@ define("_notification_warning", 'Achtung');
 define("_notification_custom", 'Benutzerdefiniert');
 define("_color", 'Farbe');
 define("_description", 'Bezeichnung');
+define('_no_news_yet', '<tr>
+  <td class="contentMainFirst" colspan="[colspan]" align="center">Keine neuen News vorhanden</td>
+</tr>');
+
 
 //Forum
 define("_forum_last_post", 'Neuesten Beitrag anzeigen');
