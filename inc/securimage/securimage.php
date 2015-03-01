@@ -1198,7 +1198,7 @@ class Securimage {
         global $db;
         $code = '';
         if (Securimage::$_captchaId !== null)
-            $result = db("SELECT `code`,`created`,`code_display` FROM `".$db['captcha']."` WHERE `id` = '".md5(Securimage::$_captchaId)."';");
+            $result = db("SELECT `code`,`created`,`code_display` FROM `".$db['captcha']."` WHERE `id` = '".md5(Securimage::$_captchaId)."' AND `namespace` = '".$this->namespace."';");
         else
             $result = db("SELECT `code`,`created`,`code_display` FROM `".$db['captcha']."` WHERE `id` = '".md5(visitorIp())."' AND `namespace` = '".$this->namespace."';");
 

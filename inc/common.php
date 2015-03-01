@@ -37,17 +37,18 @@ if(!$thumbgen) {
 
 ## REQUIRES ##
 //DZCP-Install default variable
-if(!isset($installer)) $installer = false;
+if(!isset($installer)) { $installer = false; }
 if(!isset($sql_host) || !isset($sql_user) || !isset($sql_pass) || !isset($sql_db)) {
     $sql_prefix = ''; $sql_host = ''; $sql_user =  ''; $sql_pass = ''; $sql_db = '';
 }
 
-if(file_exists(basePath."/inc/mysql.php"))
+if(file_exists(basePath."/inc/mysql.php")) {
     require_once(basePath."/inc/mysql.php");
+}
 
-if(!isset($installation)) $installation = false;
-if(!isset($updater)) $updater = false;
-if(!isset($global_index)) $global_index = false;
+if(!isset($installation)) { $installation = false; }
+if(!isset($updater)) { $updater = false; }
+if(!isset($global_index)) { $global_index = false; }
 
 //-> MySQL-Datenbankangaben
 $prefix = $sql_prefix;
@@ -188,7 +189,9 @@ function show($tpl="", $array=array(), $array_lang_constant=array(), $array_bloc
     return $tpl;
 }
 
+//Database
 require_once(basePath."/inc/database.php");
 
-if(!$installation)
+if(!$installation) {
     require_once(basePath."/inc/bbcode.php");
+}

@@ -8,6 +8,7 @@
 require_once(basePath.'/inc/crypt.php');
 require_once(basePath.'/inc/sessions.php');
 require_once(basePath.'/inc/secure.php');
+require_once(basePath."/inc/database_old_code_adapter.php");
 require_once(basePath.'/inc/_version.php');
 require_once(basePath.'/inc/pop3.php');
 require_once(basePath.'/inc/smtp.php');
@@ -39,7 +40,7 @@ $securimage = new Securimage();
 dbc_index::init();
 
 //-> Automatische Datenbank Optimierung
-if(auto_db_optimize && settings('db_optimize',false) < time() && !$installer && !$updater) {
+if(!$ajaxJob && auto_db_optimize && settings('db_optimize',false) < time() && !$installer && !$updater) {
     @ignore_user_abort(true);
     db("UPDATE `".$db['settings']."` SET `db_optimize` = ".(time()+auto_db_optimize_interval)." WHERE `id` = 1;");
     db_optimize();
@@ -289,8 +290,8 @@ $chkMe = checkme();
 if(!$chkMe) {
     $_SESSION['id']        = '';
     $_SESSION['pwd']       = '';
-    $_SESSION['ip']        = '';
-    $_SESSION['lastvisit'] = '';
+    $_SESSION['ip']        = $userip;
+    $_SESSION['lastvisit'] = time();
 }
 
 //-> Prueft ob der User gebannt ist, oder die IP des Clients warend einer offenen session verändert wurde.
@@ -3055,7 +3056,6 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
         //index output
         $index = (file_exists(basePath."/inc/_templates_/".$tmpdir."/".$index_templ.".html") ? show($index_templ, $arr) : show("index", $arr));
-        if(!mysqli_persistconns) $mysql->close(); //MySQL
         cookie::save(); //Save Cookie
         if(debug_save_to_file) DebugConsole::save_log(); //Debug save to file
         $output = view_error_reporting ? DebugConsole::show_logs().$index : $index; //Debug Console + Index Out

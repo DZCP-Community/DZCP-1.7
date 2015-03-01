@@ -17,8 +17,9 @@ $time_start=getmicrotime();
 
 function gz_output($output='') {
     $gzip_compress_level = (!defined('buffer_gzip_compress_level') ? 4 : buffer_gzip_compress_level);
-    if(function_exists('ini_set'))
+    if(function_exists('ini_set')) {
         ini_set('zlib.output_compression_level', $gzip_compress_level);
+    }
 
     if(buffer_show_licence_bar) {
         switch (_edition) {
@@ -34,8 +35,7 @@ function gz_output($output='') {
 
     ob_end_clean();
     ob_start('ob_gzhandler');
-             $output .= "\r\n<!--This CMS is powered by deV!L`z Clanportal V"._version." - www.dzcp.de-->";
-        echo $output."\r\n"."<!-- [GZIP => Level ".$gzip_compress_level."] ".sprintf("%01.2f",((strlen(gzcompress($output,$gzip_compress_level)))/1024))." kBytes | uncompressed: ".sprintf("%01.2f",((strlen($output))/1024 ))." kBytes -->";
+        $output .= "\r\n<!--This CMS is powered by deV!L`z Clanportal V"._version." - www.dzcp.de-->";
+        exit($output."\r\n"."<!-- [GZIP => Level ".$gzip_compress_level."] ".sprintf("%01.2f",((strlen(gzcompress($output,$gzip_compress_level)))/1024))." kBytes | uncompressed: ".sprintf("%01.2f",((strlen($output))/1024 ))." kBytes -->");
     ob_end_flush();
-    exit();
 }

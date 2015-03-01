@@ -15,6 +15,7 @@ final class session {
     function __construct() {
         $this->_prefix = '_';
         $this->_skcrypt = '';
+        $this->_use_sqlS_local = false;
 
         switch(sessions_backend) {
             case 'memcache':
@@ -261,11 +262,13 @@ final class session {
     }
 
     public final function apc_gc($lifetime) {
-        if(show_sessions_debug)
+        if (show_sessions_debug) {
             DebugConsole::insert_info("session::apc_gc()", "Call Garbage-Collection");
+        }
 
-        if ($this->_ttl)
+        if ($this->_ttl) {
             $lifetime = min($lifetime, $this->_ttl);
+        }
 
         $ts = apc_fetch($this->_prefix.'/TS');
         foreach ($ts as $id=>$time) {
@@ -281,37 +284,40 @@ final class session {
     ###################################################
     ################## MySQL Backend ##################
     ###################################################
+    public final function get_sql_resource() {
+        if ($this->db->mysqli_resource instanceOf mysqli) {
+            return $this->db->mysqli_resource;
+        }
+        
+        return null;
+    }
+
     public final function sql_open() {
         global $db;
-        if(show_sessions_debug)
-            DebugConsole::insert_info("session::sql_open()", "Connect to MySQL Server");
-
-        $db_host = (mysqli_persistconns ? 'p:' : '').$db['host'];
-        if($this->db instanceOf mysqli) return false;
-        if(sessions_mysql_sethost)
-            $this->db = new mysqli(sessions_mysql_host, sessions_mysql_user, sessions_mysql_pass, sessions_mysql_db);
-        else
-            $this->db = new mysqli($db_host, $db['user'], $db['pass'], $db['db']);
-
+        if (sessions_mysql_sethost) {
+            $this->_use_sqlS_local = false;
+            $this->db = new database(sessions_mysql_host,sessions_mysql_db,sessions_mysql_user,sessions_mysql_pass);
+        } else {
+            $this->_use_sqlS_local = true;
+            $this->db = new database();
+        }
+        
         if(show_sessions_debug) {
-            if(!$this->db) {
+            if ($this->db->mysqli_resource instanceOf mysqli === false) {
                 DebugConsole::insert_error("session::sql_open()", "Connect to MySQL Server failed!");
-                DebugConsole::insert_error("session::sql_open()", "Host: ".sessions_mysql_host);
-                DebugConsole::insert_error("session::sql_open()", "User: ".sessions_mysql_user);
-                DebugConsole::insert_error("session::sql_open()", "DB: ".sessions_mysql_db);
+                DebugConsole::insert_error("session::sql_open()", "Host: " . (sessions_mysql_sethost ? sessions_mysql_host : $db['host']));
+                DebugConsole::insert_error("session::sql_open()", "User: " . (sessions_mysql_sethost ? sessions_mysql_user : $db['user']));
+                DebugConsole::insert_error("session::sql_open()", "DB: " . (sessions_mysql_sethost ? sessions_mysql_db : $db['db']));
+                echo DebugConsole::show_logs();
+                exit('DZCP-Sessions: Connect to MySQL Server failed!');
             }
-            else
-                DebugConsole::insert_successful("session::sql_open()", "Connected to MySQL Server");
         }
 
-        return !$this->db ? false : true;
+        return ($this->db->mysqli_resource instanceOf mysqli === false);
     }
 
     public final function sql_close() {
-        if(show_sessions_debug)
-            DebugConsole::insert_info("session::sql_close()", "Disconnect MySQL Server");
-
-        return $this->db->close();
+        //Dummy
     }
 
     public final function sql_read($id) {
@@ -321,23 +327,20 @@ final class session {
             DebugConsole::insert_info("session::sql_read()", "Select ID: '".$id."'");
         }
 
-        $data = null;
-        if(!isset($this->read_stmt))
-            $this->read_stmt = $this->db->prepare("SELECT `data` FROM `".$db['sessions']."` WHERE `ssid` = ? LIMIT 1;");
+        $data = '';
+        if ($this->db->mysqli_resource instanceOf mysqli) {
+            if(!$this->db->db_stmt("SELECT `data` FROM `" . $db['sessions'] . "` WHERE `ssid` = ? LIMIT 1;",array('s', $id),true)) { return ''; }
+            $data = $this->read_stmt = $this->db->db_stmt("SELECT `data` FROM `" . $db['sessions'] . "` WHERE `ssid` = ? LIMIT 1;",array('s', $id),false,true);
+            if (empty($data['data'])) { return ''; }
 
-        if(!$this->read_stmt) return false;
-        $this->read_stmt->bind_param('s', $id);
-        $this->read_stmt->execute();
-        $this->read_stmt->store_result();
-        $this->read_stmt->bind_result($data);
-        $this->read_stmt->fetch();
-        if(empty($data)) return '';
+            if(sessions_encode) {
+                $data = self::decode($data['data'], $this->_skcrypt, true);
+            }
 
-        if(sessions_encode)
-            $data = self::decode($data,$this->_skcrypt,true);
-
-        if(show_sessions_debug)
-            DebugConsole::insert_successful("session::sql_read()", $data);
+            if (show_sessions_debug) {
+                DebugConsole::insert_successful("session::sql_read()", $data);
+            }
+        }
 
         return $data;
     }
@@ -349,24 +352,20 @@ final class session {
             DebugConsole::insert_info("session::sql_write()", "Select ID: '".$id."'");
         }
 
-        if(show_sessions_debug)
+        if (show_sessions_debug) {
             DebugConsole::insert_successful("session::sql_write()", $data);
+        }
 
-        if(sessions_encode)
-            $data = self::encode($data,$this->_skcrypt,true);
+        if (sessions_encode) {
+            $data = self::encode($data, $this->_skcrypt, true);
+        }
 
-        $time = time();
-
-        $result = $this->db->query("SELECT `id` FROM `".$db['sessions']."` WHERE `ssid` = '".$id."' LIMIT 1;");
-        if(!isset($this->w_stmt) && !$result->num_rows) {
-            $this->w_stmt = $this->db->prepare("INSERT INTO `".$db['sessions']."` (id, ssid, time, data) VALUES (NULL, ?, ?, ?);");
-            $this->w_stmt->bind_param('sis', $id, $time, $data);
-            return $this->w_stmt->execute();
-        } else {
-            if(!isset($this->w_stmt) && $result->num_rows) {
-                $this->w_stmt = $this->db->prepare("UPDATE `".$db['sessions']."` SET `time` = ?, `data` = ? WHERE `ssid` = ?;");
-                $this->w_stmt->bind_param('iss', $time, $data, $id);
-                return $this->w_stmt->execute();
+        if ($this->db->mysqli_resource instanceOf mysqli) {
+            $time = time();
+            if(!$this->db->db_stmt("SELECT `id` FROM `".$db['sessions']."` WHERE `ssid` = ? LIMIT 1;",array('s', $id),true)) {
+                return $this->db->db_stmt("INSERT INTO `".$db['sessions']."` (id, ssid, time, data) VALUES (NULL, ?, ?, ?);",array('sis', $id, $time, $data),true);
+            } else {
+                return $this->db->db_stmt("UPDATE `".$db['sessions']."` SET `time` = ?, `data` = ? WHERE `ssid` = ?;",array('iss', $time, $data, $id),true);
             }
         }
 
@@ -375,37 +374,29 @@ final class session {
 
     public final function sql_destroy($id) {
         global $db;
-        if(show_sessions_debug)
+        if (show_sessions_debug) {
             DebugConsole::insert_info("session::sql_destroy()", "Call Session destroy");
+        }
 
-        if(!isset($this->delete_stmt))
-            $this->delete_stmt = $this->db->prepare("DELETE FROM `".$db['sessions']."` WHERE `ssid` = ?;");
-
-        $this->delete_stmt->bind_param('s', $id);
-        return $this->delete_stmt->execute();
+        return $this->db->db_stmt("DELETE FROM `" . $db['sessions'] . "` WHERE `ssid` = ?;",array('s', $id));
     }
 
     public final function sql_gc($max) {
         global $db;
-        if(show_sessions_debug)
+        if (show_sessions_debug) {
             DebugConsole::insert_info("session::sql_gc()", "Call Garbage-Collection");
+        }
 
-        if(!isset($this->gc_stmt))
-            $this->gc_stmt = $this->db->prepare("DELETE FROM `".$db['sessions']."` WHERE `time` < ?;");
-
-        $old = time() - $max;
-        $this->gc_stmt->bind_param('i', $old);
-        return $this->gc_stmt->execute();
+        $new_time = time() - $max;
+        return $this->db->db_stmt("DELETE FROM `".$db['sessions']."` WHERE `time` < ?;",array('s', $new_time));
     }
 
     public static function encode($data,$mcryptkey='',$binary=false,$hex=false) {
         $crypt = new Crypt(CRYPT_MODE_BASE64,CRYPT_HASH_SHA1);
-        
-        if(empty($mcryptkey)) 
-            $crypt->__set('Key',self::$securityKey_mcrypt);
-        else
-            $crypt->__set('Key',$mcryptkey);
-        
+       
+        if (empty($mcryptkey)) { $crypt->__set('Key', self::$securityKey_mcrypt); } 
+        else { $crypt->__set('Key', $mcryptkey); }
+
         if($binary && !$hex) { $crypt->__set('Hash',CRYPT_MODE_BINARY); }
         if(!$binary && $hex) { $crypt->__set('Hash',CRYPT_MODE_HEXADECIMAL); }
         $is_array = is_array($data);
@@ -416,16 +407,15 @@ final class session {
     public static function decode($data,$mcryptkey='',$binary=false,$hex=false) {
         $crypt = new Crypt(CRYPT_MODE_BASE64,CRYPT_HASH_SHA1);
         
-        if(empty($mcryptkey)) 
-            $crypt->__set('Key',self::$securityKey_mcrypt);
-        else
-            $crypt->__set('Key',$mcryptkey);
+        if (empty($mcryptkey)) { $crypt->__set('Key', self::$securityKey_mcrypt); } 
+        else { $crypt->__set('Key', $mcryptkey); }
 
         if($binary && !$hex) { $crypt->__set('Hash',CRYPT_MODE_BINARY); }
         if(!$binary && $hex) { $crypt->__set('Hash',CRYPT_MODE_HEXADECIMAL); }
-        $data = $crypt->Decrypt($data);
-        $data = unserialize($data);
-        if(!is_array($data)) return null;
+        $data = unserialize($crypt->Decrypt($data));
+        if (!is_array($data)) {
+            return null;
+        }
         return $data['data'];
     }
     
@@ -435,10 +425,11 @@ final class session {
 
     protected final function is_session_started() {
         if ( php_sapi_name() !== 'cli' ) {
-            if ( version_compare(phpversion(), '5.4.0', '>=') )
+            if (version_compare(phpversion(), '5.4.0', '>=')) {
                 return session_status() === PHP_SESSION_ACTIVE ? true : false;
-            else
+            } else {
                 return session_id() === '' ? false : true;
+            }
         }
 
         return false;
