@@ -24,6 +24,7 @@ ob_implicit_flush(false);
     ## SETTINGS ##
     $dir = "sites";
     addNoCacheHeaders(); //No Browser-Cache
+    $is_debug = isset($_GET['debug']);
     
     ## SECTIONS ##
     //-> Steam Status
@@ -75,17 +76,17 @@ ob_implicit_flush(false);
         case 'autocomplete':
             if($_GET['type'] == 'srv') {
                 if($_GET['game'] == 'nope') {
-                    exit(json_encode(array('qport' => '')));
+                    echo json_encode(array('qport' => ''));
                 } else {
                     $protocols_array = GameQ::getGames();
                     foreach ($protocols_array AS $gameq => $info) {
                         if($gameq == $_GET['game'] && $info['autocomplete']) {
-                            exit(json_encode(array('qport' => $info['port']))); 
+                            echo json_encode(array('qport' => $info['port'])); 
                             break; 
                         }
                     }
 
-                    exit(json_encode(array('qport' => '')));
+                    echo json_encode(array('qport' => ''));
                 }
             }
             break;
@@ -103,12 +104,14 @@ ob_implicit_flush(false);
                 
                 $imgData = $securimage->show();
                 if(!$imgData['error']) {
-                    echo 'data:image/gif;base64,'.$imgData['data'];
+                    if($is_debug) {
+                        echo '<img src="data:image/gif;base64,'.$imgData['data'].'" />';
+                    } else {
+                        echo 'data:image/gif;base64,'.$imgData['data'];
+                    }
                 } else {
                     echo $imgData; 
                 }
-                
-                exit();
             }
             break;
         case 'securimage_audio':
@@ -117,14 +120,10 @@ ob_implicit_flush(false);
                     $securimage->audio_path = basePath.'/inc/securimage/audio/en/';
 
                 $securimage->namespace = isset($_GET['namespace']) ? $_GET['namespace'] : 'default';
-                exit($securimage->outputAudioFile());
+                echo $securimage->outputAudioFile();
             }
             break;
     endswitch;
-
-    if(!mysqli_persistconns) {
-        $mysql->close(); //MySQL
-    }
 
     $output = ob_get_contents();
     if(debug_save_to_file) {
@@ -133,5 +132,5 @@ ob_implicit_flush(false);
 
 ob_end_clean();
 ob_start('ob_gzhandler');
-    exit(isset($_GET['dev']) ? DebugConsole::show_logs().$output : $output);
+    echo ($is_debug ? DebugConsole::show_logs().$output : $output);
 ob_end_flush();
