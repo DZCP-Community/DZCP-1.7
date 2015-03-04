@@ -43,7 +43,7 @@ function install_mysql($login, $nick, $pwd, $email) {
              `member` varchar(50) NOT NULL default '0',
              `transaktion` varchar(249) NOT NULL default '',
              `pm` int(1) NOT NULL default '0',
-             `betrag` decimal(5,2) NOT NULL default '0',
+             `betrag` decimal(8,2) NOT NULL default '0',
              PRIMARY KEY  (`id`)
              ) ");
   $qry = db("DROP TABLE IF EXISTS ".$db['c_payed']."");
