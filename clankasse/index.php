@@ -27,7 +27,7 @@ switch ($action):
                        LIMIT ".($page - 1)*config('m_clankasse').",".config('m_clankasse')."");
             while ($get = _fetch($qry)) {
                 $betrag = $get['betrag'];
-                $betrag = str_replace(".",",",$betrag);
+                $betrag = str_replace(',', '.', $betrag);
                 $pm = show(($get['pm'] == "0" ? _clankasse_plus : _clankasse_minus),
                             array("betrag" => $betrag,"w" => $get_settings['k_waehrung']));
 
