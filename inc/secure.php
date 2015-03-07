@@ -11,17 +11,11 @@ if(!headers_sent()) {
         $session = new session();
         if(!$session->init())
             die('PHP-Sessions not started!');
-        
-        $mysql = $session->get_sql_resource();
     } else {
         if(!session_start())
             die('PHP-Sessions not started!');
     }
 
-    if(!isset($mysql) || !$mysql){ //SQL Failback
-        $mysql = new database();
-    }
-    
     if(!isset($_SESSION['PHPSESSID']))
         $_SESSION['PHPSESSID'] = true;
 }

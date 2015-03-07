@@ -50,14 +50,14 @@ if(!$ajaxJob && auto_db_optimize && settings('db_optimize',false) < time() && !$
 
 //-> Settingstabelle auslesen * Use function settings('xxxxxx');
 if(!dbc_index::issetIndex('settings')) {
-    $get_settings = db("SELECT * FROM `".$db['settings']."`;",false,true);
+    $get_settings = $sql->selectSingle("SELECT * FROM `{prefix_settings}` WHERE `id` = 1 LIMIT 1;");
     dbc_index::setIndex('settings', $get_settings);
     unset($get_settings);
 }
 
 //-> Configtabelle auslesen * Use function config('xxxxxx');
 if(!dbc_index::issetIndex('config')) {
-    $get_config = db("SELECT * FROM `".$db['config']."`;",false,true);
+    $get_config = $sql->selectSingle("SELECT * FROM `{prefix_config}` WHERE `id` = 1 LIMIT 1;");
     dbc_index::setIndex('config', $get_config);
     unset($get_config);
 }
@@ -156,7 +156,7 @@ function validateIpV4Range ($ip, $range) {
 
 // -> Pruft ob die IP gesperrt und gultig ist
 function check_ip() {
-    global $db,$ajaxJob,$isSpider,$userip,$UserAgent;
+    global $sql,$userip,$UserAgent;
     if(!isIP($userip, true)) {
         if((!isIP($userip) && !isIP($userip,true)) || $userip == false || empty($userip)) {
             dzcp_session_destroy();
@@ -169,18 +169,15 @@ function check_ip() {
         }
         
         //Banned IP
-        $banned_ip_sql = db("SELECT `id`,`typ`,`data` FROM `".$db['ipban']."` WHERE `ip` = '".$userip."' AND `enable` = 1;");
-        if(_rows($banned_ip_sql) >= 1) {
-            while($banned_ip = _fetch($banned_ip_sql)) {
-                if($banned_ip['typ'] == 2 || $banned_ip['typ'] == 3) {
-                    dzcp_session_destroy();
-                    $banned_ip['data'] = unserialize($banned_ip['data']);
-                    die('Deine IP ist gesperrt!<p>Your IP is banned!<p>MSG: '.$banned_ip['data']['banned_msg']);
-                }
+        foreach($sql->select("SELECT `id`,`typ`,`data` FROM `{prefix_ipban}` WHERE `ip` = ? AND `enable` = 1;",array($userip)) as $banned_ip) {
+            if($banned_ip['typ'] == 2 || $banned_ip['typ'] == 3) {
+                dzcp_session_destroy();
+                $banned_ip['data'] = unserialize($banned_ip['data']);
+                die('Deine IP ist gesperrt!<p>Your IP is banned!<p>MSG: '.$banned_ip['data']['banned_msg']);
             }
         }
-
-        unset($banned_ip,$banned_ip_sql);
+        unset($banned_ip);
+        
         if(allow_url_fopen_support() && isIP($userip) && !validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[127].[0].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[10].[0-255].[0-255].[0-255]') && 
@@ -212,51 +209,48 @@ function dzcp_session_destroy() {
 //-> Auslesen der Cookies und automatisch anmelden
 if(cookie::get('id') != false && cookie::get('pkey') != false && empty($_SESSION['id']) && !checkme()) {
     //-> Permanent Key aus der Datenbank suchen
-    $sql = db_stmt("SELECT `id`,`uid`,`update`,`expires` FROM `".$db['autologin']."` WHERE `pkey` = ? AND `uid` = ?;",array('ss', cookie::get('pkey'), cookie::get('id')));
-    if(_rows($sql)) {
-        $get_almgr = _fetch($sql);
+    $get_almgr = $sql->selectSingle("SELECT `id`,`uid`,`update`,`expires` FROM `{prefix_autologin}` WHERE `pkey` = ? AND `uid` = ?;",array(cookie::get('pkey'), cookie::get('id')));
+    if($sql->rowCount()) {
         if((!$get_almgr['update'] || (time() < ($get_almgr['update'] + $get_almgr['expires'])))) {
             //-> User aus der Datenbank suchen
-            $sql = db_stmt("SELECT `id`,`user`,`nick`,`pwd`,`email`,`level`,`time` FROM `".$db['users']."` WHERE `id` = ? AND `level` != 0;",array('i', cookie::get('id')));
-            if(_rows($sql)) {
-                $get = _fetch($sql);
-              
+            $get = $sql->selectSingle("SELECT `id`,`user`,`nick`,`pwd`,`email`,`level`,`time` FROM `{prefix_users}` WHERE `id` = ? AND `level` != 0;",array(cookie::get('id')));
+            if($sql->rowCount()) {
                 //-> Generiere neuen permanent-key
                 $permanent_key = md5(mkpwd(8));
                 cookie::put('pkey', $permanent_key);
                 cookie::save();
                 
                 //Update Autologin
-                db("UPDATE `".$db['autologin']."` SET `ssid` = '".session_id()."',
-                                                      `pkey` = '".$permanent_key."',
-                                                      `ip` = '".visitorIp()."',
-                                                      `host` = '".gethostbyaddr(visitorIp())."',
-                                                      `update` = ".time().",
-                                                      `expires` = ".autologin_expire." WHERE `id` = ".$get_almgr['id'].";");
+                $sql->update("UPDATE `{prefix_autologin}` SET `ssid` = ?, `pkey` = ?, `ip` = ?, `host` = ?, `update` = ?, `expires` = ? WHERE `id` = ?;",
+                array(session_id(),$permanent_key,$userip,gethostbyaddr($userip),time(),autologin_expire,$get_almgr['id']));
 
                 //-> Schreibe Werte in die Server Sessions
                 $_SESSION['id']         = $get['id'];
                 $_SESSION['pwd']        = $get['pwd'];
                 $_SESSION['lastvisit']  = $get['time'];
-                $_SESSION['ip']         = visitorIp();
+                $_SESSION['ip']         = $userip;
 
-                if(data("ip",$get['id']) != $_SESSION['ip'])
-                    $_SESSION['lastvisit'] = data("time",$get['id']);
+                if (data("ip", $get['id']) != $_SESSION['ip']) {
+                    $_SESSION['lastvisit'] = data("time", $get['id']);
+                }
 
-                if(empty($_SESSION['lastvisit']))
-                    $_SESSION['lastvisit'] = data("time",$get['id']);
+                if (empty($_SESSION['lastvisit'])) {
+                    $_SESSION['lastvisit'] = data("time", $get['id']);
+                }
 
                 //-> Aktualisiere Datenbank
-                db("UPDATE `".$db['users']."` SET `online` = '1', `sessid` = '".session_id()."', `ip` = '".$_SESSION['ip']."' WHERE `id` = ".$get['id'].";");
+                $sql->update("UPDATE `{prefix_users}` SET `online` = 1, `sessid` = ?, `ip` = ? WHERE `id` = ?;",
+                array(session_id(),$userip,$get['id']));
 
                 //-> Aktualisiere die User-Statistik
-                db("UPDATE `".$db['userstats']."` SET `logins` = logins+1 WHERE `user` = ".$get['id'].";");
+                $sql->update("UPDATE `{prefix_userstats}` SET `logins` = logins+1 WHERE `user` = ?;",array($get['id']));
 
                 //-> Aktualisiere Ip-Count Tabelle
-                $qry = db("SELECT `id` FROM `".$db['clicks_ips']."` WHERE `ip` = '".$userip."' AND `uid` = 0;");
-                if(_rows($qry)) while($get_ci = _fetch($qry)) { db("UPDATE `".$db['clicks_ips']."` SET `uid` = ".$get['id']." WHERE `id` = ".$get_ci['id'].";"); }
+                foreach($sql->select("SELECT `id` FROM `{prefix_clicks_ips}` WHERE `ip` = ? AND `uid` = 0;",array($userip)) as $get_ci) {
+                    $sql->update("UPDATE `{prefix_clicks_ips}` SET `uid` = ? WHERE `id` = ?;",array($get['id'],$get_ci['id']));
+                }
 
-                unset($get,$permanent_key,$get_almgr);
+                unset($get,$permanent_key,$get_almgr,$get_ci); //Clear Mem
             } else {
                 dzcp_session_destroy();
                 $_SESSION['id']        = '';
@@ -265,10 +259,8 @@ if(cookie::get('id') != false && cookie::get('pkey') != false && empty($_SESSION
                 $_SESSION['lastvisit'] = '';
                 $_SESSION['pkey']      = '';
             }
-
-            unset($sql);
         } else {
-            db("DELETE FROM `".$db['autologin']."` WHERE `id` = ".$get_almgr['id'].";");
+            $sql->delete("DELETE FROM `{prefix_autologin}` WHERE `id` = ?;",array($get_almgr['id']));
             dzcp_session_destroy();
         }
     }
@@ -287,14 +279,14 @@ if(isset($_GET['set_language']) && !empty($_GET['set_language'])) {
 lang($language); //Lade Sprache
 $userid = userid();
 $chkMe = checkme();
-if(!$chkMe) {
+if(!$chkMe && (!empty($_SESSION['id']) || !empty($_SESSION['pwd']))) {
     $_SESSION['id']        = '';
     $_SESSION['pwd']       = '';
     $_SESSION['ip']        = $userip;
     $_SESSION['lastvisit'] = time();
 }
 
-//-> Prueft ob der User gebannt ist, oder die IP des Clients warend einer offenen session verändert wurde.
+//-> Prueft ob der User gebannt ist, oder die IP des Clients warend einer offenen session veraendert wurde.
 if($chkMe && $userid && !empty($_SESSION['ip'])) {
     if($_SESSION['ip'] != visitorIp() || isBanned($userid,false) ) {
         dzcp_session_destroy();
@@ -308,51 +300,49 @@ if($chkMe && $userid && !empty($_SESSION['ip'])) {
  */
 if(session_id()) {
     $userdns = DNSToIp($userip);
-    if(db("SELECT `id` FROM `".$db['ip2dns']."` WHERE `update` <= ".time()." AND `sessid` = '".session_id()."';",true)) {
+    if($sql->rows("SELECT `id` FROM `{prefix_iptodns}` WHERE `update` <= ? AND `sessid` = ?;",array(time(),session_id()))) {
         $bot = SearchBotDetect();
-        db("UPDATE `".$db['ip2dns']."` SET `time` = ".(time()+10*60).", `update` = ".(time()+60).", `ip` = '".$userip."', "
-        . "`agent` = '".up($UserAgent)."', `dns` = '".up($userdns)."', `bot` = ".($bot['bot'] ? 1 : 0).", "
-        . "`bot_name` = '".up($bot['name'])."', `bot_fullname` = '".up($bot['fullname'])."' WHERE `sessid` = '".session_id()."';"); unset($bot);
-    } else {
-        if(!db("SELECT `id` FROM `".$db['ip2dns']."` WHERE `sessid` = '".session_id()."';",true) ) {
-            $bot = SearchBotDetect();
-            db("INSERT INTO `".$db['ip2dns']."` SET `sessid` = '".session_id()."', `time` = ".(time()+10*60).", `ip` = '".$userip."', "
-            . "`agent` = '".up($UserAgent)."', `dns` = '".up($userdns)."', `bot` = ".($bot['bot'] ? 1 : 0).", "
-            . "`bot_name` = '".up($bot['name'])."', `bot_fullname` = '".up($bot['fullname'])."';"); unset($bot);
-        }
+        $sql->update("UPDATE `{prefix_iptodns}` SET `time` = ?, `update` = ?, `ip` = ?, `agent` = ?, `dns` = ?, `bot` = ?, `bot_name` = ?, `bot_fullname` = ? WHERE `sessid` = ?;",
+        array((time()+10*60),(time()+60),$userip,up($UserAgent),up($userdns),($bot['bot'] ? 1 : 0),up($bot['name']),up($bot['fullname']),session_id()));
+        unset($bot);
+    } else if(!$sql->rows("SELECT `id` FROM `{prefix_iptodns}` WHERE `sessid` = ?;",array(session_id()))) {
+        $bot = SearchBotDetect();
+        $sql->insert("INSERT INTO `{prefix_iptodns}` SET `sessid` = ?, `time` = ?, `ip` = ?, `agent` = ?, `dns` = ?, `bot` = ?, `bot_name` = ?, `bot_fullname` = ?;",
+        array(session_id(),(time()+10*60),$userip,up($UserAgent),up($userdns),($bot['bot'] ? 1 : 0),up($bot['name']),up($bot['fullname'])));
+        unset($bot);
     }
     
     //-> Cleanup DNS DB
-    $qryDNS = db("SELECT `id`,`ip` FROM `".$db['ip2dns']."` WHERE `time` <= ".time().";");
-    if(_rows($qryDNS) >= 1) {
-        while($getDNS = _fetch($qryDNS)) {
-            db("DELETE FROM `".$db['ip2dns']."` WHERE `id` = ".$getDNS['id'].";");
-            db("DELETE FROM `".$db['c_who']."` WHERE `ip` = '".$getDNS['ip']."';");
+    $qryDNS = $sql->select("SELECT `id`,`ip` FROM `{prefix_iptodns}` WHERE `time` <= ?;",array(time()));
+    if($sql->rowCount()) {
+        foreach($qryDNS as $getDNS) {
+            $sql->delete("DELETE FROM `{prefix_iptodns}` WHERE `id` = ?;",array($getDNS['id']));
+            $sql->delete("DELETE FROM `{prefix_counter_whoison}` WHERE `ip` = ?;",array($getDNS['ip']));
         } unset($getDNS);
     } unset($qryDNS);
 
     /*
      * Pruft ob mehrere Session IDs von der gleichen DNS kommen, sollte der Useragent keinen Bot Tag enthalten, wird ein Spambot angenommen.
      */
-    $sql_sb = db("SELECT `id`,`ip`,`bot`,`agent` FROM `".$db['ip2dns']."` WHERE `dns` LIKE '".up($userdns)."';");
-    if(_rows($sql_sb) >= 3 && !validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && 
+    $get_sb = $sql->select("SELECT `id`,`ip`,`bot`,`agent` FROM `{prefix_iptodns}` WHERE `dns` LIKE ?;",array(up($userdns)));
+    if($sql->rowCount() >= 3 && !validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[127].[0].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[10].[0-255].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[172].[16-31].[0-255].[0-255]')) {
-        $get_sb = _fetch($sql_sb);
         if(!$get_sb['bot'] && !isSpider(re($get_sb['agent']))) {
-            if(!db("SELECT `id` FROM `".$db['ipban']."` WHERE `ip` = '".$userip."' LIMIT 1",true)) {
+            if(!$sql->rows("SELECT `id` FROM `{prefix_ipban}` WHERE `ip` = ? LIMIT 1;",array($userip))) {
                 $data_array = array();
                 $data_array['confidence'] = ''; $data_array['frequency'] = ''; $data_array['lastseen'] = '';
                 $data_array['banned_msg'] = up('SpamBot detected by System * No BotAgent *');
                 $data_array['agent'] = $get_sb['agent'];
-                db("INSERT INTO `".$db['ipban']."` SET `time` = ".time().", `ip` = '".$get_sb['ip']."', `data` = '".serialize($data_array)."', `typ` = 3;");
+                $sql->insert("INSERT INTO `{prefix_ipban}` SET `time` = ?, `ip` = ?, `data` = ?, `typ` = 3;",array(time(),$get_sb['ip'],serialize($data_array)));
                 check_ip(); // IP Prufung * No IPV6 Support *
+                unset($data_array);
             }
         }
     }
 
-    unset($get_sb,$get,$data_array,$bot);
+    unset($get_sb);
 }
 
 /**
@@ -360,10 +350,10 @@ if(session_id()) {
 * Erkennt bekannte Bots am User Agenten
 */
 function SearchBotDetect() { 
-    global $UserAgent,$db;
-    $sql = db("SELECT * FROM `".$db['botlist']."` WHERE `enabled` = 1;");
-    if(_rows($sql) >= 1) {
-        while ($botdata = _fetch($sql)) {
+    global $UserAgent,$sql;
+    $qry = $sql->select("SELECT * FROM `{prefix_botlist}` WHERE `enabled` = 1;");
+    if($sql->rowCount()) {
+        foreach($qry as $botdata) {
             switch ($botdata['type']) {
                 case 1:
                     if(preg_match(re($botdata['regexpattern']), $UserAgent, $matches)) {
@@ -418,15 +408,17 @@ function visitorIp() {
     'HTTP_FORWARDED_FOR','HTTP_FORWARDED','HTTP_VIA','HTTP_X_COMING_FROM','HTTP_COMING_FROM');
     foreach ($ServerVars as $ServerVar) {
         if($IP=detectIP($ServerVar)) {
-            if(isIP($IP) && !validateIpV4Range($IP, '[192].[168].[0-255].[0-255]') && 
-		!validateIpV4Range($IP, '[127].[0].[0-255].[0-255]') && 
-		!validateIpV4Range($IP, '[10].[0-255].[0-255].[0-255]') && 
-		!validateIpV4Range($IP, '[172].[16-31].[0-255].[0-255]')) {
-                    return $IP;
-            } else $SetIP = $IP;
-            
-            if(isIP($IP,true)) //IPV6
+            if (isIP($IP) && !validateIpV4Range($IP, '[192].[168].[0-255].[0-255]') &&
+                    !validateIpV4Range($IP, '[127].[0].[0-255].[0-255]') &&
+                    !validateIpV4Range($IP, '[10].[0-255].[0-255].[0-255]') &&
+                    !validateIpV4Range($IP, '[172].[16-31].[0-255].[0-255]')) {
                 return $IP;
+            } else {
+                $SetIP = $IP;
+            }
+
+            //IPV6
+            if(isIP($IP, true)) { return $IP; }
         }
     }
     
@@ -436,8 +428,9 @@ function visitorIp() {
 function detectIP($var) {
     if(!empty($var) && ($REMOTE_ADDR = GetServerVars($var)) && !empty($REMOTE_ADDR)) {
         $REMOTE_ADDR = trim($REMOTE_ADDR);
-        if(isIP($REMOTE_ADDR) || isIP($REMOTE_ADDR,true))
-             return $REMOTE_ADDR;
+        if (isIP($REMOTE_ADDR) || isIP($REMOTE_ADDR, true)) {
+            return $REMOTE_ADDR;
+        }
     }
     
     return false;
@@ -450,7 +443,7 @@ function detectIP($var) {
  * @return   boolean
  */
 function isIP($ip,$v6=false) {
-    if(!$v6 && $ip == "0.0.0.0") return false;
+    if (!$v6 && $ip == "0.0.0.0") { return false; }
     if(!$v6 && substr_count($ip,":") < 1) {
         return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? true : false;
     }
@@ -463,32 +456,25 @@ function isIP($ip,$v6=false) {
  * @return boolean
  **/
 function fsockopen_support() {
-    if(fsockopen_support_bypass) return true;
-
-    if(disable_functions('fsockopen') || disable_functions('fopen'))
-        return false;
-
-    return true;
+    return ((!fsockopen_support_bypass && (disable_functions('fsockopen') || disable_functions('fopen'))) ? false : true);
 }
 
 function disable_functions($function='') {
-    if(!function_exists($function)) return true;
+    if (!function_exists($function)) { return true; }
     $disable_functions = ini_get('disable_functions');
-    if(empty($disable_functions)) return false;
+    if (empty($disable_functions)) { return false; }
     $disabled_array = explode(',', $disable_functions);
     foreach ($disabled_array as $disabled) {
-       if(strtolower(trim($function)) == strtolower(trim($disabled)))
+        if (strtolower(trim($function)) == strtolower(trim($disabled))) {
             return true;
+        }
     }
 
     return false;
 }
 
 function allow_url_fopen_support() {
-    if(ini_get('allow_url_fopen') == 1)
-        return true;
-
-    return false;
+    return (ini_get('allow_url_fopen') == 1);
 }
 
 /**
@@ -496,17 +482,16 @@ function allow_url_fopen_support() {
  * @return integer
  **/
 function userid() {
-    global $db;
-    if(empty($_SESSION['id']) || empty($_SESSION['pwd'])) return 0;
-    if(!dbc_index::issetIndex('user_'.$_SESSION['id'])) {
-        $sql = db("SELECT * FROM `".$db['users']."` WHERE `id` = ".intval($_SESSION['id'])." AND `pwd` = '".$_SESSION['pwd']."';");
-        if(!_rows($sql)) return 0;
-        $get = _fetch($sql);
+    global $sql;
+    if (empty($_SESSION['id']) || empty($_SESSION['pwd'])) { return 0; }
+    if(!dbc_index::issetIndex('user_'.intval($_SESSION['id']))) {
+        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ? AND `pwd` = ?;",array(intval($_SESSION['id']),$_SESSION['pwd']));
+        if (!$sql->rowCount()) { return 0; }
         dbc_index::setIndex('user_'.$get['id'], $get);
         return $get['id'];
     }
 
-    return dbc_index::getIndexKey('user_'.$_SESSION['id'], 'id');
+    return dbc_index::getIndexKey('user_'.intval($_SESSION['id']), 'id');
 }
 
 //-> Templateswitch
@@ -522,22 +507,24 @@ if(isset($_GET['tmpl_set'])) {
 }
 
 if(cookie::get('tmpdir') != false && cookie::get('tmpdir') != NULL) {
-    if(file_exists(basePath."/inc/_templates_/".cookie::get('tmpdir')))
+    if (file_exists(basePath . "/inc/_templates_/" . cookie::get('tmpdir'))) {
         $tmpdir = cookie::get('tmpdir');
-    else
+    } else {
         $tmpdir = $files[0];
+    }
 } else {
-    if(file_exists(basePath."/inc/_templates_/".$sdir))
+    if (file_exists(basePath . "/inc/_templates_/" . $sdir)) {
         $tmpdir = $sdir;
-    else
+    } else {
         $tmpdir = $files[0];
+    }
 }
 unset($files);
 
 $designpath = '../inc/_templates_/'.$tmpdir;
 
 //-> Languagefiles einlesen
-function lang($lng,$pfad='') {
+function lang($lng) {
     global $charset;
     if(!file_exists(basePath."/inc/lang/languages/".$lng.".php")) {
         $files = get_files(basePath.'/inc/lang/languages/',false,true,array('php'));
@@ -565,63 +552,66 @@ function languages() {
     return $lang;
 }
 
-//-> Userspezifiesche Dinge
-if($userid >= 1 && $ajaxJob != true && isset($_SESSION['lastvisit']))
-    db("UPDATE `".$db['userstats']."` SET `hits` = hits+1, `lastvisit` = ".intval($_SESSION['lastvisit'])." WHERE `user` = ".$userid.";");
+//-> User Hits und Lastvisit aktualisieren
+if($userid >= 1 && $ajaxJob != true && isset($_SESSION['lastvisit'])) {
+    $sql->update("UPDATE `{prefix_userstats}` SET `hits` = (hits+1), `lastvisit` = ? WHERE `user` = ?;",array(intval($_SESSION['lastvisit']),$userid));
+}
 
 //-> Settings auslesen
 function settings($what,$use_dbc=true) {
-    global $db;
-
+    global $sql;
     if(is_array($what)) {
-        if($use_dbc)
+        if ($use_dbc) {
             $dbd = dbc_index::getIndex('settings');
-        else
-            $dbd = db("SELECT * FROM `".$db['settings']."`;",false,true);
+        } else {
+            $dbd = $sql->selectSingle("SELECT * FROM `{prefix_settings}` WHERE `id` = 1 LIMIT 1");
+        }
 
         $return = array();
         foreach ($dbd as $key => $var) {
-            if(!in_array($key,$what))
+            if (!in_array($key, $what)) {
                 continue;
+            }
 
             $return[$key] = $var;
         }
 
         return $return;
     } else {
-        if($use_dbc)
+        if ($use_dbc) {
             return dbc_index::getIndexKey('settings', $what);
+        }
 
-        $get = db("SELECT `".$what."` FROM `".$db['settings']."`;",false,true);
-        return $get[$what];
+        return $sql->selectSingle("SELECT `".$what."` FROM `{prefix_settings}` WHERE `id` = 1 LIMIT 1;",array(),$what);
     }
 }
 
 //-> Config auslesen
 function config($what,$use_dbc=true) {
-    global $db;
-
+    global $sql;
     if(is_array($what)) {
-        if($use_dbc)
+        if ($use_dbc) {
             $dbd = dbc_index::getIndex('config');
-        else
-            $dbd = db("SELECT * FROM `".$db['config']."`;",false,true);
+        } else {
+            $dbd = $sql->selectSingle("SELECT * FROM `{prefix_config}` WHERE `id` = 1 LIMIT 1");
+        }
 
         $return = array();
         foreach ($dbd as $key => $var) {
-            if(!in_array($key,$what))
+            if (!in_array($key, $what)) {
                 continue;
+            }
 
             $return[$key] =  $var;
         }
 
         return $return;
     } else {
-        if($use_dbc)
+        if ($use_dbc) {
             return dbc_index::getIndexKey('config', $what);
+        }
 
-        $get = db("SELECT `".$what."` FROM `".$db['config']."`;",false,true);
-        return $get[$what];
+        return $sql->selectSingle("SELECT `".$what."` FROM `{prefix_config}` WHERE `id` = 1 LIMIT 1;",array(),$what);
     }
 }
 
@@ -629,7 +619,7 @@ function config($what,$use_dbc=true) {
 function rootAdmin($userid=0) {
     global $rootAdmins;
     $userid = (!$userid ? userid() : $userid);
-    if(!count($rootAdmins)) return false;
+    if (!count($rootAdmins)) { return false; }
     return in_array($userid, $rootAdmins);
 }
 
@@ -658,8 +648,9 @@ function highlight_text($txt) {
         $src = '<?php'.$src.' ?>';
         $colors = array('#111111' => 'string', '#222222' => 'comment', '#333333' => 'keyword', '#444444' => 'bg',     '#555555' => 'default', '#666666' => 'html');
 
-        foreach ($colors as $color => $key)
-            ini_set('highlight.'.$key, $color);
+        foreach ($colors as $color => $key) {
+            ini_set('highlight.' . $key, $color);
+        }
 
         // Farben ersetzen & highlighten
         $src = preg_replace('!style="color: (#\d{6})"!e','"class=\"".$prefix.$colors["\1"]."\""',highlight_string($src, TRUE));
@@ -678,8 +669,9 @@ function highlight_text($txt) {
 
         // Zeilen zaehlen
         $lines = "";
-        for($i=1;$i<=count($l)+1;$i++)
-            $lines .= $i.".<br />";
+        for ($i = 1; $i <= count($l) + 1; $i++) {
+            $lines .= $i . ".<br />";
+        }
 
         // Ausgabe
         $code = '<div class="codeHead">&nbsp;&nbsp;&nbsp;Code:</div><div class="code"><table style="width:100%;padding:0px" cellspacing="0"><tr><td class="codeLines">'.$lines.'</td><td class="codeContent">'.$src.'</td></table></div>';
@@ -708,12 +700,10 @@ function regexChars($txt) {
 //-> Glossarfunktion
 $use_glossar = true; //Global
 function glossar_load_index() {
-    global $db,$use_glossar;
-    if(!$use_glossar) return false;
-
+    global $sql,$use_glossar;
+    if (!$use_glossar) { return false; }
     $gl_words = array(); $gl_desc = array();
-    $qryglossar = db("SELECT `word`,`glossar` FROM `".$db['glossar']."`;");
-    while($getglossar = _fetch($qryglossar)) {
+    foreach($sql->select("SELECT `word`,`glossar` FROM `{prefix_glossar}`;") as $getglossar) {
         $gl_words[] = re($getglossar['word']);
         $gl_desc[]  = $getglossar['glossar'];
     }
@@ -722,13 +712,14 @@ function glossar_load_index() {
 }
 
 function glossar($txt) {
-    global $db,$gl_words,$gl_desc,$use_glossar,$ajaxJob;
-
-    if(!$use_glossar || $ajaxJob)
+    global $gl_words,$gl_desc,$use_glossar,$ajaxJob;
+    if (!$use_glossar || $ajaxJob) {
         return $txt;
+    }
 
-    if(!dbc_index::issetIndex('glossar'))
+    if (!dbc_index::issetIndex('glossar')) {
         glossar_load_index();
+    }
 
     $gl_words = dbc_index::getIndexKey('glossar', 'gl_words');
     $gl_desc = dbc_index::getIndexKey('glossar', 'gl_desc');
@@ -765,9 +756,9 @@ function bbcodetolow($founds) {
 //-> Replaces
 function replace($txt,$type=false,$no_vid_tag=false) {
     $txt = str_replace("&#34;","\"",$txt);
-
-    if($type)
-        $txt = preg_replace("#<img src=\"(.*?)\" mce_src=\"(.*?)\"(.*?)\>#i","<img src=\"$2\" alt=\"\">",$txt);
+    if ($type) {
+        $txt = preg_replace("#<img src=\"(.*?)\" mce_src=\"(.*?)\"(.*?)\>#i", "<img src=\"$2\" alt=\"\">", $txt);
+    }
 
     $txt = preg_replace_callback("/\[(.*?)\](.*?)\[\/(.*?)\]/","bbcodetolow",$txt);
     $var = array("/\[url\](.*?)\[\/url\]/",
@@ -825,7 +816,7 @@ function parse_ts3($string='') {
 
 //-> Badword Filter
 function BadwordFilter($txt) {
-    $words = explode(",",trim(settings('badwords')));
+    $words = explode(",",trim(re(settings('badwords'))));
     foreach($words as $word)
     { $txt = preg_replace("#".$word."#i", str_repeat("*", strlen($word)), $txt); }
     return $txt;
@@ -871,9 +862,9 @@ function re_bbcode($txt) {
 function _make_url_clickable_cb($matches) {
     $ret = '';
     $url = $matches[2];
-
-    if ( empty($url) )
+    if (empty($url)) {
         return $matches[0];
+    }
     // removed trailing [.,;:] from URL
     if ( in_array(substr($url, -1), array('.', ',', ';', ':')) === true ) {
         $ret = substr($url, -1);
@@ -887,9 +878,9 @@ function _make_web_ftp_clickable_cb($matches) {
     $ret = '';
     $dest = $matches[2];
     $dest = 'http://' . $dest;
-
-    if ( empty($dest) )
+    if (empty($dest)) {
         return $matches[0];
+    }
 
     // removed trailing [,;:] from URL
     if ( in_array(substr($dest, -1), array('.', ',', ';', ':')) === true ) {
@@ -1244,9 +1235,10 @@ function fileExists($url,$timeout=1) {
    
     if(class_exists('Snoopy')) { //Use Snoopy HTTP Client
         $snoopy = new Snoopy;
-        if(!$snoopy->fetch($url))
+        if (!$snoopy->fetch($url)) {
             return false;
-        
+        }
+
         return ((string)(trim($snoopy->results)));
     }
 
@@ -1265,8 +1257,9 @@ function fileExists($url,$timeout=1) {
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
         }
         
-        if(!$content = curl_exec($curl))
+        if (!$content = curl_exec($curl)) {
             return false;
+        }
 
         @curl_close($curl);
         unset($curl);
@@ -1314,35 +1307,37 @@ function up($txt = '') {
  * @return string
  */
 function GetServerVars($var) {
-    if(array_key_exists($var, $_SERVER) && !empty($_SERVER[$var]))
+    if (array_key_exists($var, $_SERVER) && !empty($_SERVER[$var])) {
         return up($_SERVER[$var]);
-    else if(array_key_exists($var, $_ENV) && !empty($_ENV[$var]))
+    } else if (array_key_exists($var, $_ENV) && !empty($_ENV[$var])) {
         return up($_ENV[$var]);
-    
+    }
+
     return false;
 }
 
 //-> Funktion um diverse Dinge aus Tabellen auszaehlen zu lassen
 //-> Single & Multi Version
 function cnt($db, $where = "", $what = "id") {
-    $cnt_sql = db("SELECT COUNT(".$what.") AS `cnt` FROM `".$db."` ".$where.";");
-    if(_rows($cnt_sql)) {
-        $cnt = _fetch($cnt_sql);
-        return $cnt['cnt'];
+    global $sql;
+    $cnt = $sql->selectSingle("SELECT COUNT(".$what.") AS `cnt` FROM `".$db."` ".$where.";",array(),'cnt');
+    if($sql->rowCount()) {
+        return $cnt;
     }
 
     return 0;
 }
 
 function cnt_multi($db, $where = "", $whats = array('id')) {
-    $cnt_sql = "";
+    global $sql; $cnt_sql = "";
     foreach ($whats as $what) {
         $cnt_sql .= "COUNT(".$what.") AS `cnt_".$what."`,";
     }
     $cnt_sql = substr($cnt_sql, 0, -1);
-    $cnt_sql = db("SELECT ".$cnt_sql." FROM `".$db."` ".$where.";");
-    if(_rows($cnt_sql))
-        return _fetch($cnt_sql);
+    $cnt = $sql->selectSingle("SELECT ".$cnt_sql." FROM `".$db."` ".$where.";");
+    if ($sql->rowCount()) {
+        return $cnt;
+    }
 
     return array();
 }
@@ -1350,9 +1345,9 @@ function cnt_multi($db, $where = "", $whats = array('id')) {
 //-> Funktion um diverse Dinge aus Tabellen zusammenzaehlen zu lassen
 //-> Single & Multi Version
 function sum($db, $where = "", $what = "id") {
-    $sum_sql = db("SELECT SUM(".$what.") AS `sum` FROM `".$db."` ".$where.";");
-    if(_rows($sum_sql)) {
-        $sum = _fetch($sum_sql);
+    global $sql;
+    $sum = $sql->selectSingle("SELECT SUM(".$what.") AS `sum` FROM `".$db."` ".$where.";");
+    if($sql->rowCount()) {
         return $sum['sum'];
     }
 
@@ -1360,14 +1355,15 @@ function sum($db, $where = "", $what = "id") {
 }
 
 function sum_multi($db, $where = "", $whats = array('id')) {
-    $sum_sql = "";
+    global $sql; $sum_sql = "";
     foreach ($whats as $what) {
         $sum_sql .= "SUM(".$what.") AS `sum_".$what."`,";
     }
     $sum_sql = substr($sum_sql, 0, -1);
-    $sum_sql = db("SELECT ".$sum_sql." FROM `".$db."` ".$where.";");
-    if(_rows($sum_sql))
-        return _fetch($sum_sql);
+    $sum = $sql->selectSingle("SELECT ".$sum_sql." FROM `".$db."` ".$where.";");
+    if ($sql->rowCount()) {
+        return $sum;
+    }
 
     return array();
 }
@@ -1384,8 +1380,9 @@ function orderby($sort) {
     }
 
     if(isset($_GET['orderby']) && $_GET['order']) {
-        if($_GET['orderby'] == $sort && $_GET['order'] == "ASC")
-            return $url."orderby=".$sort."&order=DESC";
+        if ($_GET['orderby'] == $sort && $_GET['order'] == "ASC") {
+            return $url . "orderby=" . $sort . "&order=DESC";
+        }
     }
 
     return $url."orderby=".$sort."&order=ASC";
@@ -1409,42 +1406,45 @@ function orderby_nav() {
 
 //-> Funktion um ein Datenbankinhalt zu highlighten
 function highlight($word) {
-    if(substr(phpversion(),0,1) == 5)
-        return str_ireplace($word,'<span class="fontRed">'.$word.'</span>',$word);
-    else
-        return str_replace($word,'<span class="fontRed">'.$word.'</span>',$word);
+    if (substr(phpversion(), 0, 1) == 5) {
+        return str_ireplace($word, '<span class="fontRed">' . $word . '</span>', $word);
+    } else {
+        return str_replace($word, '<span class="fontRed">' . $word . '</span>', $word);
+    }
 }
 
 //-> Counter updaten
 function updateCounter() {
-    global $db,$reload,$userip;
+    global $sql,$reload,$userip;
     $datum = time();
-    $sql_agent = db("SELECT `id`,`agent`,`bot` FROM `".$db['ip2dns']."` WHERE `ip` = '".up($userip)."';");
-    if(_rows($sql_agent)) {
-        $get_agent = _fetch($sql_agent);
+    $get_agent = $sql->selectSingle("SELECT `id`,`agent`,`bot` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array(up($userip)));
+    if($sql->rowCount()) {
         if(!$get_agent['bot'] && !isSpider(re($get_agent['agent']))) {
-            $ipcheck = db("SELECT `id`,`ip`,`datum` FROM `".$db['c_ips']."` WHERE `ip` = '".up($userip)."' AND FROM_UNIXTIME(datum,'%d.%m.%Y') = '".date("d.m.Y")."';");
-            db("DELETE FROM `".$db['c_ips']."` WHERE datum+".$reload." <= ".time()." OR FROM_UNIXTIME(datum,'%d.%m.%Y') != '".date("d.m.Y")."';");
-            $count = db("SELECT `id`,`visitors`,`today` FROM `".$db['counter']."` WHERE `today` = '".date("j.n.Y")."';");
-            if(_rows($ipcheck)>=1) {
-                $get = _fetch($ipcheck);
+            if($sql->rows("SELECT id FROM `{prefix_counter_ips}` WHERE datum+? <= ? OR FROM_UNIXTIME(datum,'%d.%m.%Y') != ?;",array($reload,time(),date("d.m.Y")))) {
+                $sql->delete("DELETE FROM `{prefix_counter_ips}` WHERE datum+? <= ? OR FROM_UNIXTIME(datum,'%d.%m.%Y') != ?;",array($reload,time(),date("d.m.Y")));
+            }
+
+            $get = $sql->selectSingle("SELECT `datum` FROM `{prefix_counter_ips}` WHERE `ip` = ? AND FROM_UNIXTIME(datum,'%d.%m.%Y') = ?;",array(up($userip),date("d.m.Y")));
+            if($sql->rowCount()) {
                 $sperrzeit = $get['datum']+$reload;
                 if($sperrzeit <= time()) {
-                    db("DELETE FROM `".$db['c_ips']."` WHERE `ip` = '".up($userip)."';");
+                    $sql->delete("DELETE FROM `{prefix_counter_ips}` WHERE `ip` = ?;",array(up($userip)));
+                    if ($sql->rows("SELECT `id` FROM `{prefix_counter}` WHERE `today` = '" . date("j.n.Y") . "';",array(date("j.n.Y")))) {
+                        $sql->update("UPDATE `{prefix_counter}` SET `visitors` = (visitors+1) WHERE `today` = ?;",array(date("j.n.Y")));
+                    } else {
+                        $sql->insert("INSERT INTO `{prefix_counter}` SET `visitors` = 1 WHERE `today` = ?;",array(date("j.n.Y")));
+                    }
 
-                    if(_rows($count))
-                        db("UPDATE `".$db['counter']."` SET `visitors` = visitors+1 WHERE `today` = '".date("j.n.Y")."';");
-                    else
-                        db("INSERT INTO `".$db['counter']."` SET `visitors` = '1', `today` = '".date("j.n.Y")."';");
-
-                    db("INSERT INTO `".$db['c_ips']."` SET `ip` = '".up($userip)."', `datum` = '".intval($datum)."';");
+                    $sql->insert("INSERT INTO `{prefix_counter_ips}` SET `ip` = ?, `datum` = ?;",array(up($userip),intval($datum)));
                 }
             } else {
-                if(_rows($count))
-                    db("UPDATE `".$db['counter']."` SET `visitors` = visitors+1 WHERE `today` = '".date("j.n.Y")."';");
-                else
-                    db("INSERT INTO `".$db['counter']."` SET `visitors` = '1', `today` = '".date("j.n.Y")."';");
-                db("INSERT INTO `".$db['c_ips']."` SET `ip` = '".up($userip)."', `datum` = '".intval($datum)."';");
+                if($sql->rows("SELECT `id` FROM `{prefix_counter}` WHERE `today` = ?;",array(date("j.n.Y")))) {
+                    $sql->update("UPDATE `{prefix_counter}` SET `visitors` = (visitors+1) WHERE `today` = ?;",array(date("j.n.Y")));
+                } else {
+                    $sql->insert("INSERT INTO `{prefix_counter}` SET `visitors` = 1, `today` = ?;",array(date("j.n.Y")));
+                }
+
+                $sql->insert("INSERT INTO `{prefix_counter_ips}` SET `ip` = ?, `datum` = ?;",array(up($userip),intval($datum)));
             }
         }
     }
@@ -1452,11 +1452,11 @@ function updateCounter() {
 
 //-> Updatet die Maximalen User die gleichzeitig online sind
 function update_maxonline() {
-    global $db;
-    $count = cnt($db['c_who']);
-    $get = db("SELECT `maxonline` FROM `".$db['counter']."` WHERE `today` = '".date("j.n.Y")."';",false,true);
-    if($get['maxonline'] < $count)
-        db("UPDATE `".$db['counter']."` SET `maxonline` = ".$count." WHERE `today` = '".date("j.n.Y")."';");
+    global $sql;
+    $maxonline = $sql->selectSingle("SELECT `maxonline` FROM `{prefix_counter}` WHERE `today` = ?;",array(date("j.n.Y")),'maxonline');
+    if ($maxonline < ($count = cnt('{prefix_counter_whoison}'))) {
+        $sql->update("UPDATE `{prefix_counter}` SET `maxonline` = ? WHERE `today` = ?;",array($count,date("j.n.Y")));
+    }
 }
 
 //-> Aktualisiert die Position der Gaste & User

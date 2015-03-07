@@ -5,7 +5,7 @@
  */
 
 final class session {
-    protected $db;
+    protected $db = null;
     protected $memcached;
     protected $_prefix;
     protected $_ttl = 3600;
@@ -284,69 +284,62 @@ final class session {
     ###################################################
     ################## MySQL Backend ##################
     ###################################################
-    public final function get_sql_resource() {
-        if ($this->db->mysqli_resource instanceOf mysqli) {
-            return $this->db->mysqli_resource;
-        }
-        
-        return null;
-    }
-
     public final function sql_open() {
-        global $db;
-        if (sessions_mysql_sethost) {
+        global $db,$database;
+        if (sessions_sql_sethost) {
             $this->_use_sqlS_local = false;
-            $this->db = new database(sessions_mysql_host,sessions_mysql_db,sessions_mysql_user,sessions_mysql_pass);
+            $database->setConfig('sessions',array("driver" => sessions_sql_driver, "db" => sessions_sql_db, 
+            "db_host" => sessions_sql_host, "db_user" => sessions_sql_user, "db_pw" => sessions_sql_pass));
+            $this->db = $database->getInstance('sessions');
         } else {
+            $database->cloneConfig('default','sessions');
             $this->_use_sqlS_local = true;
-            $this->db = new database();
+            $this->db = $database->getInstance('sessions');
         }
         
         if(show_sessions_debug) {
-            if ($this->db->mysqli_resource instanceOf mysqli === false) {
+            if ($this->db instanceOf database === false) {
                 DebugConsole::insert_error("session::sql_open()", "Connect to MySQL Server failed!");
-                DebugConsole::insert_error("session::sql_open()", "Host: " . (sessions_mysql_sethost ? sessions_mysql_host : $db['host']));
-                DebugConsole::insert_error("session::sql_open()", "User: " . (sessions_mysql_sethost ? sessions_mysql_user : $db['user']));
-                DebugConsole::insert_error("session::sql_open()", "DB: " . (sessions_mysql_sethost ? sessions_mysql_db : $db['db']));
+                DebugConsole::insert_error("session::sql_open()", "Host: " . (sessions_sql_sethost ? sessions_sql_host : $db['host']));
+                DebugConsole::insert_error("session::sql_open()", "User: " . (sessions_sql_sethost ? sessions_sql_user : $db['user']));
+                DebugConsole::insert_error("session::sql_open()", "DB: " . (sessions_sql_sethost ? sessions_sql_db : $db['db']));
                 echo DebugConsole::show_logs();
-                exit('DZCP-Sessions: Connect to MySQL Server failed!');
+                exit('DZCP-Sessions: Connect to SQL Server failed!');
             }
         }
 
-        return ($this->db->mysqli_resource instanceOf mysqli === false);
+        return ($this->db instanceOf database === false);
     }
 
     public final function sql_close() {
-        //Dummy
+        //Not Used
     }
 
     public final function sql_read($id) {
-        global $db;
         if(show_sessions_debug) {
             DebugConsole::insert_info("session::sql_read()", "Read Session-Data from Database");
             DebugConsole::insert_info("session::sql_read()", "Select ID: '".$id."'");
         }
 
-        $data = '';
-        if ($this->db->mysqli_resource instanceOf mysqli) {
-            if(!$this->db->db_stmt("SELECT `data` FROM `" . $db['sessions'] . "` WHERE `ssid` = ? LIMIT 1;",array('s', $id),true)) { return ''; }
-            $data = $this->read_stmt = $this->db->db_stmt("SELECT `data` FROM `" . $db['sessions'] . "` WHERE `ssid` = ? LIMIT 1;",array('s', $id),false,true);
-            if (empty($data['data'])) { return ''; }
-
+        if ($this->db instanceOf database) {
+            $data = $this->db->selectSingle("SELECT `data` FROM `{prefix_sessions}` WHERE `ssid` = ? LIMIT 1;",array($id),'data');
+            if(!$this->db->rowCount()) { return ''; }
+            if (empty($data)) { return ''; }
             if(sessions_encode) {
-                $data = self::decode($data['data'], $this->_skcrypt, true);
+                $data = self::decode($data, $this->_skcrypt, true);
             }
 
             if (show_sessions_debug) {
                 DebugConsole::insert_successful("session::sql_read()", $data);
             }
+            
+            return $data;
         }
 
-        return $data;
+        return '';
     }
 
     public final function sql_write($id, $data) {
-        global $db;
         if(show_sessions_debug) {
             DebugConsole::insert_info("session::sql_write()", "Write Session-Data to Database");
             DebugConsole::insert_info("session::sql_write()", "Select ID: '".$id."'");
@@ -360,12 +353,13 @@ final class session {
             $data = self::encode($data, $this->_skcrypt, true);
         }
 
-        if ($this->db->mysqli_resource instanceOf mysqli) {
+        if ($this->db instanceOf database) {
             $time = time();
-            if(!$this->db->db_stmt("SELECT `id` FROM `".$db['sessions']."` WHERE `ssid` = ? LIMIT 1;",array('s', $id),true)) {
-                return $this->db->db_stmt("INSERT INTO `".$db['sessions']."` (id, ssid, time, data) VALUES (NULL, ?, ?, ?);",array('sis', $id, $time, $data),true);
+            $this->db->select("SELECT `id` FROM `{prefix_sessions}` WHERE `ssid` = ? LIMIT 1;",array($id));
+            if(!$this->db->rowCount()) {
+                return $this->db->insert("INSERT INTO `{prefix_sessions}` (id, ssid, time, data) VALUES (NULL, ?, ?, ?);",array($id, $time, $data));
             } else {
-                return $this->db->db_stmt("UPDATE `".$db['sessions']."` SET `time` = ?, `data` = ? WHERE `ssid` = ?;",array('iss', $time, $data, $id),true);
+                return $this->db->update("UPDATE `{prefix_sessions}` SET `time` = ?, `data` = ? WHERE `ssid` = ?;",array($time, $data, $id));
             }
         }
 
@@ -373,22 +367,26 @@ final class session {
     }
 
     public final function sql_destroy($id) {
-        global $db;
         if (show_sessions_debug) {
             DebugConsole::insert_info("session::sql_destroy()", "Call Session destroy");
         }
 
-        return $this->db->db_stmt("DELETE FROM `" . $db['sessions'] . "` WHERE `ssid` = ?;",array('s', $id));
+        $this->db->select("SELECT `id` FROM `{prefix_sessions}` WHERE `ssid` = ? LIMIT 1;",array($id));
+        if($this->db->rowCount()) {
+            return $this->db->delete("DELETE FROM `{prefix_sessions}` WHERE `ssid` = ?;",array($id));
+        }
     }
 
     public final function sql_gc($max) {
-        global $db;
         if (show_sessions_debug) {
             DebugConsole::insert_info("session::sql_gc()", "Call Garbage-Collection");
         }
 
         $new_time = time() - $max;
-        return $this->db->db_stmt("DELETE FROM `".$db['sessions']."` WHERE `time` < ?;",array('s', $new_time));
+        $this->db->select("SELECT `id` FROM `{prefix_sessions}` WHERE `time` < ".$new_time.";");
+        if($this->db->rowCount()) {
+            return $this->db->delete("DELETE FROM `{prefix_sessions}` WHERE `time` < ".$new_time.";");
+        }
     }
 
     public static function encode($data,$mcryptkey='',$binary=false,$hex=false) {

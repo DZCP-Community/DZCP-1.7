@@ -2,190 +2,293 @@
 /**
  * DZCP - deV!L`z ClanPortal 1.7.0
  * http://www.dzcp.de
- * Database Connect & Functions
+ * Database Connect & Functions Class (PDO)
  */
 
+    /*
+     * 
+     * LOOPS
+     * 
+    foreach($sql->select("SELECT * FROM `".$db['settings']."`;") as $row) {
+        echo '<pre>';
+        print_r($row);
+        echo '<p>';
+    }
+     * */
+
+    /*
+    $rows = $database->select();
+    while($row = array_shift($rows)){
+
+    }
+     * 
+     * Functions Calls
+     * 
+     	$sql->update();
+	$sql->insert();
+	$sql->select();
+	$sql->rows();
+	$sql->selectSingle();
+	$sql->delete();
+	$sql->rowCount();
+	$sql->lastInsertId();
+	$sql->query();
+*/
+
 class database {
-    public $mysqli_resource = null;
-    
-    /* Constructor */
-    public function __construct() {
-        global $db;
-        $this->connect($db['host'],$db['user'],$db['pass'],$db['db']);
-    }
-    
-    public function __construct1($host,$db) {
-        global $db;
-        $this->connect($host,$db['user'],$db['pass'],$db);
-    }
-    
-    public function __construct2($host,$db,$user,$pass) {
-        $this->connect($host,$user,$pass,$db);
-    }
-    
-    /* Destructor */
-    public function __destruct() {
-        $this->close();
-    }
-    
-    /* Close */
-    public function close() {
-        if (!mysqli_persistconns && $this->mysqli_resource instanceof mysqli) {
-            $this->mysqli_resource->close();
-        }
-    }
-    
-    /* MySQL Functions */
-    public function rows($rows) {
-        if ($this->mysqli_resource instanceOf mysqli && (array_key_exists('_stmt_rows_',$rows) || is_object($rows))) {
-            return array_key_exists('_stmt_rows_', $rows) ? $rows['_stmt_rows_'] : $rows->num_rows;
-        }
+    protected $dbConf = array();
+    protected $instances = array();
 
-        return false;
-    }
+    protected $active = false;
+    protected $dbHandle = null;
+    protected $lastInsertId = false;
+    protected $rowCount = false;
+    protected $queryCounter = 0;
+    protected $active_driver = '';
+    protected $connection_pooling = true;
+    protected $connection_encrypting = true;
+    protected $mysql_buffered_query = true;
 
-    public function fetch($fetch) {
-        if ($this->mysqli_resource instanceOf mysqli && (is_array($fetch) || is_object($fetch))) {
-            return array_key_exists('_stmt_rows_', $fetch) ? $fetch[0] : $fetch->fetch_assoc();
-        }
-
-        return false;
-    }
-
-    public function real_escape_string($string='') {
-        if ($this->mysqli_resource instanceOf mysqli) {
-            return (!empty($string) ? $this->mysqli_resource->real_escape_string($string) : $string);
-        }
-
-        return false;
-    }
-
-    public function insert_id() {
-        if ($this->mysqli_resource instanceOf mysqli) {
-            return $this->mysqli_resource->insert_id;
-        }
-
-        return false;
-    }
-    
-    public function db($query='',$rows=false,$fetch=false) {
-        global $clanname,$updater;
-        if ($this->mysqli_resource instanceOf mysqli) {
-            if(empty($query)) { DebugConsole::insert_warning('database::db(()', 'MySQL-Query is empty!'); return false; }
-            if(debug_all_sql_querys) { DebugConsole::wire_log('debug', 9, 'SQL_Query', $query); }
-            if($updater) { $qry = $this->mysqli_resource->query($query); } else {
-                if(!$qry = $this->mysqli_resource->query($query)) {
-                    $message = DebugConsole::sql_error_handler($query);
-                    include_once(basePath."/inc/lang/languages/english.php");
-                    $message = 'SQL-Debug:<p>'.$message;
-                    exit(show('<b>Upps...</b><br /><br />Entschuldige bitte! Das h&auml;tte nicht passieren d&uuml;rfen. Wir k&uuml;mmern uns so schnell wie m&ouml;glich darum.<br><br>'.$clanname.
-                    '<br><br>'.(view_error_reporting ? nl2br($message).'<br><br>' : '').'[lang_back]'));
-                }
-            }
-
-            if ($rows && !$fetch) {
-                $rqry = $this->rows($qry);
-            } else if($fetch && $rows) {
-                $rqry = $qry->fetch_array(MYSQLI_NUM);
-            } else if($fetch && !$rows) {
-                $rqry = $this->fetch($qry);
-            } else {
-                $rqry = $qry;
-            }
-            
-            if ($rows || $fetch) {
-                $qry->free_result();
-                $qry->close();
-            }
-
-            return $rqry;
-        }
-
-        return false;
-    }
-
-    /**
-     *  i     corresponding variable has type integer
-     *  d     corresponding variable has type double
-     *  s     corresponding variable has type string
-     *  b     corresponding variable is a blob and will be sent in packets
-     */
-    public function db_stmt($query,$params=array('si', 'hallo', '4'),$rows=false,$fetch=false) {
-        global $prefix;
-        if ($this->mysqli_resource instanceOf mysqli) {
-            if(!$statement = $this->mysqli_resource->prepare($query)) exit('<b>MySQL-Query failed:</b><br /><br /><ul>'.
-                    '<li><b>ErrorNo</b> = '.!empty($prefix) ? str_replace($prefix,'',$this->mysqli_resource->connect_errno) : $this->mysqli_resource->connect_errno.
-                    '<li><b>Error</b>   = '.!empty($prefix) ? str_replace($prefix,'',$this->mysqli_resource->connect_error) : $this->mysqli_resource->connect_error.
-                    '<li><b>Query</b>   = '.!empty($prefix) ? str_replace($prefix,'',$query).'</ul>' : $query);
-
-            call_user_func_array(array($statement, 'bind_param'), $this->refValues($params));
-            if(!$statement->execute()) exit('<b>MySQL-Query failed:</b><br /><br /><ul>'.
-                    '<li><b>ErrorNo</b> = '.!empty($prefix) ? str_replace($prefix,'',$this->mysqli_resource->connect_errno) : $this->mysqli_resource->connect_errno.
-                    '<li><b>Error</b>   = '.!empty($prefix) ? str_replace($prefix,'',$this->mysqli_resource->connect_error) : $this->mysqli_resource->connect_error.
-                    '<li><b>Query</b>   = '.!empty($prefix) ? str_replace($prefix,'',$query).'</ul>' : $query);
-
-            $meta = $statement->result_metadata();
-            if(!$meta || empty($meta)) { $statement->close(); return; }
-            $row = array(); $parameters = array(); $results = array();
-            while ( $field = $meta->fetch_field()) {
-                $parameters[] = &$row[$field->name];
-            }
-
-            $statement->store_result();
-            $results['_stmt_rows_'] = $statement->num_rows();
-            call_user_func_array(array($statement, 'bind_result'), $this->refValues($parameters));
-
-            while (mysqli_stmt_fetch($statement)) {
-                $x = array();
-                foreach( $row as $key => $val ) {
-                    $x[$key] = $val;
-                }
-
-                $results[] = $x;
-            }
-
-            if ($rows && !$fetch) {
-                $results = $this->rows($results);
-            } else if($fetch && !$rows) {
-                $results = $this->fetch($results);
-            }
-            
-            $statement->free_result();
-            $statement->close();
-            return $results;
-        }
-    }
-    
-    private function refValues($arr) {
-        if (strnatcmp(phpversion(),'5.3') >= 0) {
-            $refs = array();
-            foreach($arr as $key => $value)
-                $refs[$key] = &$arr[$key];
-
-            return $refs;
-        }
-
-        return $arr;
-    }
-    
-    /* Privat Connect */
-    private function connect($host,$user,$pass,$db) {
-        global $thumbgen;
-        if ($this->mysqli_resource instanceOf mysqli === false) {
-            if(!$thumbgen && !empty($host) && !empty($user) && !empty($pass) && !empty($db)) {
-                $db_host = (mysqli_persistconns ? 'p:' : '').$host;
-                $this->mysqli_resource = new mysqli($db_host,$user,$pass,$db);
-                if($this->mysqli_resource->connect_errno != 0) {
-                    die('Unable to connect to database! [' . $this->mysqli_resource->connect_error . '] '
-                    . '-> ['.$this->mysqli_resource->connect_errno.']');
-                }
-                
-                if($this->mysqli_resource instanceof mysqli === true) {
-                    return true;
-                }
-            }
+    public function cloneConfig($active = "default",$from = "new") { 
+        if (!isset($this->dbConf[$active])) {
+            throw new Exception("Unexisting db-config $active");
         }
         
+        $this->dbConf[$from] = $this->dbConf[$active];
+    }
+
+    public function setConfig($active = "default", array $data) {
+        if(isset($data['db']) && isset($data['db_host']) && isset($data['db_host']) && isset($data['db_user']) && isset($data['db_pw'])) {
+            $this->dbConf[$active] = $data;
+        }
+    }
+
+    public final function getInstance($active = "default") {
+        if (!isset($this->dbConf[$active])) {
+            throw new Exception("Unexisting db-config $active");
+        }
+
+        if (!isset($this->instances[$active]) || $this->instances[$active] instanceOf database === false) {
+            $this->instances[$active] = new database();
+            $this->instances[$active]->setConfig($active,$this->dbConf[$active]);
+            $this->instances[$active]->connect($active);
+        }
+
+        return $this->instances[$active];
+    }
+
+    public final function disconnect($active = "") {
+        if(empty($active)) {
+            unset($this->instances[$this->active]);
+        } else {
+            unset($this->instances[$active]);
+        }
+
+        $this->dbHandle = null;
+    }
+
+    public function getHandle() {
+        return $this->dbHandle;
+    }
+
+    public function lastInsertId() {
+        return $this->lastInsertId;
+    }
+
+    public function rowCount() {
+        return $this->rowCount;
+    }
+    
+    public function rows($qry, array $params = array()) {
+        if (($type = $this->getQueryType($qry)) !== "select") {
+            throw new Exception("Incorrect Delete Query");
+        }
+
+        $this->run_query($qry, $params, $type);
+        return $this->rowCount;
+    }
+    
+    public function delete($qry, array $params = array()) {
+        if (($type = $this->getQueryType($qry)) !== "delete") {
+            throw new Exception("Incorrect Delete Query");
+        }
+
+        return $this->run_query($qry, $params, $type);
+    }
+
+    public function update($qry, array $params = array()) {
+        if (($type = $this->getQueryType($qry)) !== "update") {
+            throw new Exception("Incorrect Update Query");
+        }
+
+        return $this->run_query($qry, $params, $type);
+    }
+
+    public function insert($qry, array $params = array()) {
+        if (($type = $this->getQueryType($qry)) !== "insert") {
+            throw new Exception("Incorrect Insert Query");
+        }
+
+        return $this->run_query($qry, $params, $type);
+    }
+
+    public function select($qry, array $params = array()) {
+        if (($type = $this->getQueryType($qry)) !== "select") {
+            throw new Exception("Incorrect Select Query");
+        }
+
+        if ($stmnt = $this->run_query($qry, $params, $type)) {
+            return $stmnt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            return array();
+        }
+    }
+
+    public function selectSingle($qry, array $params = array(), $field = false) {
+        if (($type = $this->getQueryType($qry)) !== "select") {
+            throw new Exception("Incorrect Select Query");
+        }
+
+        if ($stmnt = $this->run_query($qry, $params, $type)) {
+            $res = $stmnt->fetch(PDO::FETCH_ASSOC);
+            return ($field === false) ? $res : $res[$field];
+        } else {
+            return false;
+        }
+    }
+
+    public final function query($qry) {
+        $this->lastInsertId = false;
+        $this->rowCount = false;
+        $this->rowCount = $this->dbHandle->exec($qry);
+        $this->queryCounter++;
+    }
+
+    public function getQueryCounter() {
+        return $this->queryCounter;
+    }
+
+    public function quote($str) {
+        return $this->dbHandle->quote($str);
+    }
+
+    /************************
+     * Protected
+     ************************/
+    
+    /**
+     * Erstellt das PDO Objekt mit vorhandener Konfiguration
+     * @namespace system\database
+     * @category PDO Database
+     * @param string $active = "default"
+     * @throws PDOException
+     */
+    protected final function connect($active = "default") {
+        if (!isset($this->dbConf[$active])) {
+            throw new PDOException("No supported connection scheme");
+        }
+
+        $dbConf = $this->dbConf[$active];
+        try {
+            if (!$dsn = $this->dsn($active)) {
+                throw new Exception("PDO driver is missing");
+            }
+
+            $db = new PDO($dsn, $dbConf['db_user'], $dbConf['db_pw']);
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $db->query("set character set utf8");
+            $db->query("set names utf8");
+
+            $this->dbHandle = $db;
+            $this->active = $active; //mark as active
+        } catch (PDOException $ex) {
+            throw new PDOException("Connection Exception: " . $ex->getMessage());
+        }
+    }
+    
+    protected final function run_query($qry, array $params, $type) {
+        if (in_array($type, array("insert", "select", "update", "delete")) === false) {
+            throw new Exception("Unsupported Query Type");
+        }
+
+        // replace sql prefix
+        if(strpos($qry,"{prefix_")!==false) {
+            $qry = preg_replace_callback("#\{prefix_(.*?)\}#",function($tb) { 
+                global $db; 
+                return str_ireplace($tb[0],$db['prefix'].$tb[1],$tb[0]); 
+            },$qry);
+        }
+
+        //Debug
+        if(show_pdo_delete_debug || show_pdo_delete_debug || show_pdo_delete_debug || show_pdo_delete_debug) {
+            DebugConsole::insert_sql_info('database::run_query('.$type.')',$qry,$params);
+        }
+
+        $this->lastInsertId = false;
+        $this->rowCount = false;
+        $stmnt = $this->active_driver == 'mysql' ? $this->dbHandle->prepare($qry, array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => $this->mysql_buffered_query)) : $this->dbHandle->prepare($qry);
+
+        try
+        {
+            $success = (count($params) !== 0) ? $stmnt->execute($params) : $stmnt->execute();
+            $this->queryCounter++;
+
+            if (!$success) {
+                return false;
+            }
+
+            if ($type === "insert") {
+                $this->lastInsertId = $this->dbHandle->lastInsertId();
+            }
+
+            $this->rowCount = $stmnt->rowCount();
+
+            return ($type === "select") ? $stmnt : true;
+        } catch (PDOException $ex) {
+            throw new PDOException("PDO-Exception: " . $ex->getMessage());
+        }
+    }
+
+    protected final function check_driver($use_driver) {
+        foreach(PDO::getAvailableDrivers() as $driver) {
+            if ($use_driver == $driver) {
+                return true;
+            }
+        }
+
         return false;
+    }
+
+    protected final function dsn($active) {
+        $dbConf = $this->dbConf[$active];
+        if (!$this->check_driver($dbConf['driver'])) {
+            return false;
+        }
+
+        $this->active_driver = $dbConf['driver'];
+        $dsn= sprintf('%s:', $dbConf['driver']);
+        switch($dbConf['driver']) {
+            case 'mysql':
+            case 'pgsql':
+                $dsn .= sprintf('host=%s;dbname=%s', $dbConf['db_host'], $dbConf['db']);
+                break;
+            case 'sqlsrv':
+                $dsn .= sprintf('Server=%s;1433;Database=%s', $dbConf['db_host'], $dbConf['db']);
+                if ($this->connection_pooling) {
+                    $dsn .= ';ConnectionPooling=1';
+                }
+                
+                if($this->connection_encrypting) {
+                    $dsn .= ';Encrypt=1';
+                }
+                break;
+        }
+
+        return $dsn;
+    }
+
+    protected function getQueryType($qry) {
+        list($type, ) = explode(" ", strtolower($qry), 2);
+        return $type;
     }
 }

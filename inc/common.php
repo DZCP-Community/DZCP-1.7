@@ -6,6 +6,7 @@
 
 require_once(basePath."/inc/debugger.php");
 require_once(basePath."/inc/config.php");
+require_once(basePath."/inc/database.php");
 
 if(function_exists("date_default_timezone_set") && function_exists("date_default_timezone_get") && use_default_timezone)
     @date_default_timezone_set(@date_default_timezone_get());
@@ -37,15 +38,18 @@ if(!$thumbgen) {
 
 ## REQUIRES ##
 //DZCP-Install default variable
+$database = new database(); //Load DB Class
 if(!isset($installer)) { $installer = false; }
 if(!isset($sql_host) || !isset($sql_user) || !isset($sql_pass) || !isset($sql_db)) {
     $sql_prefix = ''; $sql_host = ''; $sql_user =  ''; $sql_pass = ''; $sql_db = '';
 }
 
+//Load SQL Config
 if(file_exists(basePath."/inc/mysql.php")) {
     require_once(basePath."/inc/mysql.php");
 }
 
+$sql = $database->getInstance(); //Connect to DB * default *
 if(!isset($installation)) { $installation = false; }
 if(!isset($updater)) { $updater = false; }
 if(!isset($global_index)) { $global_index = false; }
@@ -162,17 +166,21 @@ function show($tpl="", $array=array(), $array_lang_constant=array(), $array_bloc
         $array['idir'] = '../inc/images';
         $pholder = explode("^",pholderreplace($tpl));
         for($i=0;$i<=count($pholder)-1;$i++) {
-            if(in_array($pholder[$i],$array_block))
+            if (in_array($pholder[$i], $array_block)) {
                 continue;
+            }
 
-            if(array_key_exists($pholder[$i],$array))
+            if (array_key_exists($pholder[$i], $array)) {
                 continue;
+            }
 
-            if(!strstr($pholder[$i], 'lang_'))
+            if (!strstr($pholder[$i], 'lang_')) {
                 continue;
+            }
 
-            if(defined(substr($pholder[$i], 4)))
-                $array[$pholder[$i]] = (count($array_lang_constant) >= 1 ? show(constant(substr($pholder[$i], 4)),$array_lang_constant) : constant(substr($pholder[$i], 4)));
+            if (defined(substr($pholder[$i], 4))) {
+                $array[$pholder[$i]] = (count($array_lang_constant) >= 1 ? show(constant(substr($pholder[$i], 4)), $array_lang_constant) : constant(substr($pholder[$i], 4)));
+            }
         }
 
         unset($pholder);
@@ -188,9 +196,6 @@ function show($tpl="", $array=array(), $array_lang_constant=array(), $array_bloc
 
     return $tpl;
 }
-
-//Database
-require_once(basePath."/inc/database.php");
 
 if(!$installation) {
     require_once(basePath."/inc/bbcode.php");

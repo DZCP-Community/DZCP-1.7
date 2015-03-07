@@ -5,8 +5,10 @@
  */
 
 ## Check PHP Version ##
-if(version_compare(PHP_VERSION, '5.2.0', '>=') === false)
+/* Minimum PHP Version */
+if (version_compare(PHP_VERSION, '5.3.0', 'lt')) {
     die('DZCP required PHP 5.2.0 or newer!<p> Found PHP ' . PHP_VERSION);
+}
 
 ## Check MySQLi ##
 if(!function_exists('mysqli_connect'))
@@ -24,6 +26,10 @@ define('show_deprecation_debug', false);
 define('show_teamspeak_debug', false);
 define('show_gameserver_debug', false);
 define('show_sessions_debug', false);
+define('show_pdo_delete_debug', true);
+define('show_pdo_update_debug', true);
+define('show_pdo_insert_debug', true);
+define('show_pdo_select_debug', true);
 
 #############################################
 ############### Debug Console ###############
@@ -52,6 +58,9 @@ class DebugConsole {
     public static final function insert_info($file,$info)
     { if(show_info) self::$log_array[$file][] = '<font color="#9900CC">'.$info.'</font>'; }
 
+    public static final function insert_sql_info($file,$info,$params)
+    { self::$log_array[$file][] = '<font color="#2A3AEC">'.$info.' <p> Data for SQL-Query => '.json_encode($params).'</font>'; }
+    
     public static final function insert_warning($file,$func)
     { if(show_warning) self::$log_array[$file][] = '<font color="#FFFF00">'.$func.'</font>'; }
 

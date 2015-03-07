@@ -9,45 +9,52 @@
 //OLD Code Adapter
 //#######################################
 
+$mysqli = null;
+if($db['host'] != '' && $db['user'] != '' && $db['pass'] != '' && $db['db'] != '' && !$thumbgen) {
+    $db_host = (mysqli_persistconns ? 'p:' : '').$db['host'];
+    $mysqli = new mysqli($db_host,$db['user'],$db['pass'],$db['db']);
+    if ($mysqli->connect_error) { die("<b>Fehler beim Zugriff auf die Datenbank!"); }
+}
+
 //MySQLi-Funktionen
 function _rows($rows) {
-    global $mysql;
-    if ($mysql instanceof mysqli)
+    global $mysqli;
+    if ($mysqli instanceof mysqli)
         return array_key_exists('_stmt_rows_', $rows) ? $rows['_stmt_rows_'] : $rows->num_rows;
 
     return false;
 }
 
 function _fetch($fetch) {
-    global $mysql;
-    if ($mysql instanceof mysqli)
+    global $mysqli;
+    if ($mysqli instanceof mysqli)
         return array_key_exists('_stmt_rows_', $fetch) ? $fetch[0] : $fetch->fetch_assoc();
 
     return false;
 }
 
 function _real_escape_string($string='') {
-    global $mysql;
-    if ($mysql instanceof mysqli)
-        return !empty($string) ? $mysql->real_escape_string($string) : $string;
+    global $mysqli;
+    if ($mysqli instanceof mysqli)
+        return !empty($string) ? $mysqli->real_escape_string($string) : $string;
 
     return false;
 }
 
 function _insert_id() {
-    global $mysql;
-    if ($mysql instanceof mysqli)
-        return $mysql->insert_id;
+    global $mysqli;
+    if ($mysqli instanceof mysqli)
+        return $mysqli->insert_id;
 
     return false;
 }
 
 function db($query='',$rows=false,$fetch=false) {
-    global $mysql,$clanname,$updater;
-    if ($mysql instanceof mysqli) {
+    global $mysqli,$clanname,$updater;
+    if ($mysqli instanceof mysqli) {
         if(debug_all_sql_querys) DebugConsole::wire_log('debug', 9, 'SQL_Query', $query);
-        if($updater) { $qry = $mysql->query($query); } else {
-            if(!$qry = $mysql->query($query)) {
+        if($updater) { $qry = $mysqli->query($query); } else {
+            if(!$qry = $mysqli->query($query)) {
                 $message = DebugConsole::sql_error_handler($query);
                 include_once(basePath."/inc/lang/languages/english.php");
                 $message = 'SQL-Debug:<p>'.$message;
@@ -75,17 +82,17 @@ function db($query='',$rows=false,$fetch=false) {
  *  b     corresponding variable is a blob and will be sent in packets
  */
 function db_stmt($query,$params=array('si', 'hallo', '4'),$rows=false,$fetch=false) {
-    global $prefix,$mysql;
-    if ($mysql instanceof mysqli) {
-        if(!$statement = $mysql->prepare($query)) die('<b>MySQL-Query failed:</b><br /><br /><ul>'.
-                '<li><b>ErrorNo</b> = '.!empty($prefix) ? str_replace($prefix,'',$mysql->connect_errno) : $mysql->connect_errno.
-                '<li><b>Error</b>   = '.!empty($prefix) ? str_replace($prefix,'',$mysql->connect_error) : $mysql->connect_error.
+    global $prefix,$mysqli;
+    if ($mysqli instanceof mysqli) {
+        if(!$statement = $mysqli->prepare($query)) die('<b>MySQL-Query failed:</b><br /><br /><ul>'.
+                '<li><b>ErrorNo</b> = '.!empty($prefix) ? str_replace($prefix,'',$mysqli->connect_errno) : $mysqli->connect_errno.
+                '<li><b>Error</b>   = '.!empty($prefix) ? str_replace($prefix,'',$mysqli->connect_error) : $mysqli->connect_error.
                 '<li><b>Query</b>   = '.!empty($prefix) ? str_replace($prefix,'',$query).'</ul>' : $query);
 
         call_user_func_array(array($statement, 'bind_param'), refValues($params));
         if(!$statement->execute()) die('<b>MySQL-Query failed:</b><br /><br /><ul>'.
-                '<li><b>ErrorNo</b> = '.!empty($prefix) ? str_replace($prefix,'',$mysql->connect_errno) : $mysql->connect_errno.
-                '<li><b>Error</b>   = '.!empty($prefix) ? str_replace($prefix,'',$mysql->connect_error) : $mysql->connect_error.
+                '<li><b>ErrorNo</b> = '.!empty($prefix) ? str_replace($prefix,'',$mysqli->connect_errno) : $mysqli->connect_errno.
+                '<li><b>Error</b>   = '.!empty($prefix) ? str_replace($prefix,'',$mysqli->connect_error) : $mysqli->connect_error.
                 '<li><b>Query</b>   = '.!empty($prefix) ? str_replace($prefix,'',$query).'</ul>' : $query);
 
         $meta = mysqli_stmt_result_metadata($statement);
@@ -118,8 +125,8 @@ function db_stmt($query,$params=array('si', 'hallo', '4'),$rows=false,$fetch=fal
 }
 
 function db_optimize() {
-    global $db,$mysql,$securimage;
-    if ($mysql instanceof mysqli) {
+    global $db,$mysqli,$securimage;
+    if ($mysqli instanceof mysqli) {
         $sql = db("SELECT `id`,`update`,`expires` FROM `".$db['autologin']."`");
         if(_rows($sql)) {
             while ($get = _fetch($sql)) {
@@ -172,8 +179,8 @@ file_exists(basePath."/inc/mysql.php") && !$installation && !$thumbgen) {
 }
 
 function sql_backup() {
-    global $mysql,$db;
-    if ($mysql instanceof mysqli) {
+    global $mysqli,$db;
+    if ($mysqli instanceof mysqli) {
         $backup_table_data = array();
 
         //Table Drop

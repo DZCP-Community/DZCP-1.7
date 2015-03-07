@@ -91,11 +91,12 @@ define('sessions_ttl_maxtime', (2*60*60)); //Live-Time der Sessions * 2h
 define('sessions_memcache_host', 'localhost'); //Server Adresse fur das Sessions Backend: memcache
 define('sessions_memcache_port', 11211); //Server Port fur das Sessions Backend: memcache
 
-define('sessions_mysql_sethost', false); //Verwende eine externe Datenbank fur die Sessions
-define('sessions_mysql_host', 'localhost'); //MySQL Host
-define('sessions_mysql_user', 'user'); //MySQL Username
-define('sessions_mysql_pass', 'xxxx'); //MySQL Passwort
-define('sessions_mysql_db', 'test'); //MySQL Database
+define('sessions_sql_sethost', false); //Verwende eine externe Datenbank fur die Sessions
+define('sessions_sql_driver', 'mysql'); //Welche Datenbank Driver wird verwendet
+define('sessions_sql_host', 'localhost'); //SQL Host
+define('sessions_sql_user', 'user'); //SQL Username
+define('sessions_sql_pass', 'xxxx'); //SQL Passwort
+define('sessions_sql_db', 'test'); //SQL Database
 
 /* SQL Tabelle fur externe Datenbank */ /*
  CREATE TABLE IF NOT EXISTS `[prefix]_sessions` (
@@ -115,7 +116,7 @@ define('sessions_mysql_db', 'test'); //MySQL Database
 
 $config_cache = array();
 $config_cache['use_cache'] = true; // verwende einen Cache, um abfragen zwischenzuspeichern
-$config_cache['storage'] = "files"; // welcher Cache: auto,memcache,files,sqlite,wincache,xcache oder apc
+$config_cache['storage'] = "apc"; // welcher Cache: auto,memcache,files,sqlite,wincache,xcache oder apc
 $config_cache['server'] = array(array("127.0.0.1",11211,1)); //adressen fur die memcache server
 $config_cache['dbc'] = true; //verwende database query caching * nur mit memory cache
 $config_cache['dbc_auto_memcache'] = false; //automatische memcache verfugbarkeisprufung
