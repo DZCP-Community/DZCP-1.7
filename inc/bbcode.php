@@ -1568,7 +1568,7 @@ function permission($check,$uid=0) {
 function check_msg() {
     global $sql;
     if($sql->rows("SELECT `id` FROM `{prefix_messages}` WHERE `an` = ? AND `page` = 0;",array(intval($_SESSION['id'])))) {
-        $sql->update("UPDATE `{prefix_messages}` SET `page` = 1 WHERE `an` = ".intval($_SESSION['id']).";",array(intval($_SESSION['id'])));
+        $sql->update("UPDATE `{prefix_messages}` SET `page` = 1 WHERE `an` = ?;",array(intval($_SESSION['id'])));
         return show("user/new_msg", array("new" => _site_msg_new));
     }
 
