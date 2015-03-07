@@ -1461,25 +1461,24 @@ function update_maxonline() {
 
 //-> Aktualisiert die Position der Gaste & User
 function update_online($where='') {
-    global $db,$useronline,$userip,$chkMe,$isSpider,$userid;
-    if(!$isSpider && !empty($where) && !db("SELECT `id` FROM `".$db['ip2dns']."` WHERE `sessid` = '".session_id()."' AND `bot` = 1;",true)) {
-        db("DELETE FROM `".$db['c_who']."` WHERE `online` < ".time().";");
-        $sql = db("SELECT `id` FROM `".$db['c_who']."` WHERE `ip` = '".$userip."';");
-        if(_rows($sql)) {
-            $get = _fetch($sql);
-            db("UPDATE `".$db['c_who']."` SET `whereami` = '".up($where)."', 
-                                              `online` = ".(time()+$useronline).", 
-                                              `login`    = ".(!$chkMe ? 0 : 1)." 
-                                          WHERE `id` = '".$get['id']."';");
+    global $sql,$useronline,$userip,$chkMe,$isSpider,$userid;
+    if(!$isSpider && !empty($where) && !$sql->rows("SELECT `id` FROM `{prefix_iptodns}` WHERE `sessid` = ? AND `bot` = 1;",array(session_id()))) {
+        if($sql->rows("SELECT `id` FROM `{prefix_counter_whoison}` WHERE `online` < ?;",array(time()))) {
+            $sql->delete("DELETE FROM `{prefix_counter_whoison}` WHERE `online` < ?;",array(time()));
+        }
+
+        $get = $sql->selectSingle("SELECT `id` FROM `{prefix_counter_whoison}` WHERE `ip` = ?;",array($userip));
+        if($sql->rowCount()) {
+            $sql->update("UPDATE `{prefix_counter_whoison}` SET `whereami` = ?, `online` = ?, `login` = ?  WHERE `id` = ?;",
+            array(up($where),(time()+$useronline),(!$chkMe ? 0 : 1),$get['id']));
         } else {
-            db("INSERT INTO `".$db['c_who']."` SET `ip`  = '".$userip."',
-                                                   `online`   = ".(time()+$useronline).",
-                                                   `whereami` = '".up($where)."',
-                                                   `login`    = ".(!$chkMe ? 0 : 1).";");
+            $sql->insert("INSERT INTO `{prefix_counter_whoison}` SET `ip` = ?, `online` = ?, `whereami` = ?, `login` = ?;",
+            array($userip,(time()+$useronline),up($where),(!$chkMe ? 0 : 1)));
         }
         
-        if($chkMe)
-            db("UPDATE `".$db['users']."` SET `time` = ".time().", `whereami` = '".up($where)."' WHERE `id` = ".intval($userid).";");
+        if($chkMe) {
+            $sql->update("UPDATE `{prefix_users}` SET `time` = ?, `whereami` = ? WHERE `id` = ?;",array(time(),up($where),intval($userid)));
+        }
     }
 }
 
