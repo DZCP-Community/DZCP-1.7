@@ -1484,10 +1484,10 @@ function update_online($where='') {
 
 //-> Prueft, wieviele Besucher gerade online sind
 function online_guests($where='') {
-    global $db,$useronline,$isSpider;
+    global $sql,$useronline,$isSpider;
     if(!$isSpider) {
-        $whereami = (empty($where) ? '' : " AND `whereami` = '".$where."'");
-        return cnt($db['c_who']," WHERE (online+".$useronline.")>".time()."".$whereami." AND `login` = 0");
+        $whereami = (empty($where) ? '' : " AND `whereami` = ".$sql->quote($where));
+        return cnt('{prefix_counter_whoison}'," WHERE (online+".$useronline.")>".time()."".$whereami." AND `login` = 0");
     }
     
     return 0;
