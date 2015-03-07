@@ -1521,10 +1521,10 @@ function checkme($userid_set=0) {
 
 //-> Prueft, ob der User gesperrt ist und meldet ihn ab
 function isBanned($userid_set=0,$logout=true) {
-    global $db,$userid;
+    global $sql,$userid;
     $userid_set = $userid_set ? $userid_set : $userid;
     if(checkme($userid_set) >= 1 || $userid_set) {
-        $get = db("SELECT `banned` FROM `".$db['users']."` WHERE `id` = ".intval($userid_set)." LIMIT 1;",false,true);
+        $get = $sql->selectSingle("SELECT `banned` FROM `{prefix_users}` WHERE `id` = ? LIMIT 1;",array(intval($userid_set)));
         if($get['banned']) {
             if($logout) {
                 dzcp_session_destroy();
