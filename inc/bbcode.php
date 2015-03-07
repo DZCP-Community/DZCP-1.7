@@ -1566,9 +1566,9 @@ function permission($check,$uid=0) {
 
 //-> Checkt, ob neue Nachrichten vorhanden sind
 function check_msg() {
-    global $db;
-    if(db("SELECT `page` FROM `".$db['msg']."` WHERE `an` = ".intval($_SESSION['id'])." AND `page` = 0;",true)) {
-        db("UPDATE `".$db['msg']."` SET `page` = 1 WHERE `an` = ".intval($_SESSION['id']).";");
+    global $sql;
+    if($sql->rows("SELECT `id` FROM `{prefix_messages}` WHERE `an` = ? AND `page` = 0;",array(intval($_SESSION['id'])))) {
+        $sql->update("UPDATE `{prefix_messages}` SET `page` = 1 WHERE `an` = ".intval($_SESSION['id']).";",array(intval($_SESSION['id'])));
         return show("user/new_msg", array("new" => _site_msg_new));
     }
 
