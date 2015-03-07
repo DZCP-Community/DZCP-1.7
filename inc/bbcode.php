@@ -1589,18 +1589,19 @@ function check_buddy($buddy) {
 
 //-> Funktion um bei Clanwars Endergebnisse auszuwerten
 function cw_result($punkte, $gpunkte) {
-    if($punkte > $gpunkte)
-        return '<span class="CwWon">'.$punkte.':'.$gpunkte.'</span> <img src="../inc/images/won.gif" alt="" class="icon" />';
-    else if($punkte < $gpunkte)
-        return '<span class="CwLost">'.$punkte.':'.$gpunkte.'</span> <img src="../inc/images/lost.gif" alt="" class="icon" />';
-    else
-        return '<span class="CwDraw">'.$punkte.':'.$gpunkte.'</span> <img src="../inc/images/draw.gif" alt="" class="icon" />';
+    if ($punkte > $gpunkte) {
+        return '<span class="CwWon">' . $punkte . ':' . $gpunkte . '</span> <img src="../inc/images/won.gif" alt="" class="icon" />';
+    } else if ($punkte < $gpunkte) {
+        return '<span class="CwLost">' . $punkte . ':' . $gpunkte . '</span> <img src="../inc/images/lost.gif" alt="" class="icon" />';
+    } else {
+        return '<span class="CwDraw">' . $punkte . ':' . $gpunkte . '</span> <img src="../inc/images/draw.gif" alt="" class="icon" />';
+    }
 }
 
 function cw_result_pic($punkte, $gpunkte) {
-    if($punkte > $gpunkte)
+    if ($punkte > $gpunkte) {
         return '<img src="../inc/images/won.gif" alt="" class="icon" />';
-    else if($punkte < $gpunkte)
+    } else if ($punkte < $gpunkte)
         return '<img src="../inc/images/lost.gif" alt="" class="icon" />';
     else
         return '<img src="../inc/images/draw.gif" alt="" class="icon" />';
@@ -1608,71 +1609,83 @@ function cw_result_pic($punkte, $gpunkte) {
 
 //-> Funktion um bei Clanwars Endergebnisse auszuwerten ohne bild
 function cw_result_nopic($punkte, $gpunkte) {
-    if($punkte > $gpunkte)
-        return '<span class="CwWon">'.$punkte.':'.$gpunkte.'</span>';
-    else if($punkte < $gpunkte)
-        return '<span class="CwLost">'.$punkte.':'.$gpunkte.'</span>';
-    else
-        return '<span class="CwDraw">'.$punkte.':'.$gpunkte.'</span>';
+    if ($punkte > $gpunkte) {
+        return '<span class="CwWon">' . $punkte . ':' . $gpunkte . '</span>';
+    } else if ($punkte < $gpunkte) {
+        return '<span class="CwLost">' . $punkte . ':' . $gpunkte . '</span>';
+    } else {
+        return '<span class="CwDraw">' . $punkte . ':' . $gpunkte . '</span>';
+    }
 }
 
 //-> Funktion um bei Clanwars Endergebnisse auszuwerten ohne bild und ohne farbe
 function cw_result_nopic_nocolor($punkte, $gpunkte) {
-    if($punkte > $gpunkte)
-        return $punkte.':'.$gpunkte;
-    else if($punkte < $gpunkte)
-        return $punkte.':'.$gpunkte;
-    else
-        return $punkte.':'.$gpunkte;
+    if ($punkte > $gpunkte) {
+        return $punkte . ':' . $gpunkte;
+    } else if ($punkte < $gpunkte) {
+        return $punkte . ':' . $gpunkte;
+    } else {
+        return $punkte . ':' . $gpunkte;
+    }
 }
 
 //-> Funktion um bei Clanwars Details Endergebnisse auszuwerten ohne bild
 function cw_result_details($punkte, $gpunkte) {
-    if($punkte > $gpunkte)
-        return '<td class="contentMainFirst" align="center"><span class="CwWon">'.$punkte.'</span></td><td class="contentMainFirst" align="center"><span class="CwLost">'.$gpunkte.'</span></td>';
-    else if($punkte < $gpunkte)
-        return '<td class="contentMainFirst" align="center"><span class="CwLost">'.$punkte.'</span></td><td class="contentMainFirst" align="center"><span class="CwWon">'.$gpunkte.'</span></td>';
-    else
-        return '<td class="contentMainFirst" align="center"><span class="CwDraw">'.$punkte.'</span></td><td class="contentMainFirst" align="center"><span class="CwDraw">'.$gpunkte.'</span></td>';
+    if ($punkte > $gpunkte) {
+        return '<td class="contentMainFirst" align="center"><span class="CwWon">' . $punkte . '</span></td><td class="contentMainFirst" align="center"><span class="CwLost">' . $gpunkte . '</span></td>';
+    } else if ($punkte < $gpunkte) {
+        return '<td class="contentMainFirst" align="center"><span class="CwLost">' . $punkte . '</span></td><td class="contentMainFirst" align="center"><span class="CwWon">' . $gpunkte . '</span></td>';
+    } else {
+        return '<td class="contentMainFirst" align="center"><span class="CwDraw">' . $punkte . '</span></td><td class="contentMainFirst" align="center"><span class="CwDraw">' . $gpunkte . '</span></td>';
+    }
 }
 
 //-> Flaggen ausgeben
 function flag($code) {
     global $picformat;
-    if(empty($code))
+    if (empty($code)) {
         return '<img src="../inc/images/flaggen/nocountry.gif" alt="" class="icon" />';
-
-    foreach($picformat as $end) {
-        if(file_exists(basePath."/inc/images/flaggen/".$code.".".$end)) break;
     }
 
-    if(file_exists(basePath."/inc/images/flaggen/".$code.".".$end))
-        return'<img src="../inc/images/flaggen/'.$code.'.'.$end.'" alt="" class="icon" />';
+    foreach($picformat as $end) {
+        if (file_exists(basePath . "/inc/images/flaggen/" . $code . "." . $end)) {
+            break;
+        }
+    }
+
+    if (file_exists(basePath . "/inc/images/flaggen/" . $code . "." . $end)) {
+        return'<img src="../inc/images/flaggen/' . $code . '.' . $end . '" alt="" class="icon" />';
+    }
 
     return '<img src="../inc/images/flaggen/nocountry.gif" alt="" class="icon" />';
 }
 
 function rawflag($code) {
     global $picformat;
-    if(empty($code))
+    if (empty($code)) {
         return '<img src=../inc/images/flaggen/nocountry.gif alt= class=icon />';
-
-    foreach($picformat as $end) {
-        if(file_exists(basePath."/inc/images/flaggen/".$code.".".$end)) break;
     }
 
-    if(file_exists(basePath."/inc/images/flaggen/".$code.".".$end))
-        return '<img src=../inc/images/flaggen/'.$code.'.'.$end.' alt= class=icon />';
+    foreach($picformat as $end) {
+        if (file_exists(basePath . "/inc/images/flaggen/" . $code . "." . $end)) {
+            break;
+        }
+    }
+
+    if (file_exists(basePath . "/inc/images/flaggen/" . $code . "." . $end)) {
+        return '<img src=../inc/images/flaggen/' . $code . '.' . $end . ' alt= class=icon />';
+    }
 
     return '<img src=../inc/images/flaggen/nocountry.gif alt= class=icon />';
 }
 
 //-> Liste der Laender ausgeben
 function show_countrys($i="") {
-    if($i != "")
-        $options = preg_replace('#<option value="'.$i.'">(.*?)</option>#', '<option value="'.$i.'" selected="selected"> \\1</option>', _country_list);
-    else
+    if ($i != "") {
+        $options = preg_replace('#<option value="' . $i . '">(.*?)</option>#', '<option value="' . $i . '" selected="selected"> \\1</option>', _country_list);
+    } else {
         $options = preg_replace('#<option value="de"> Deutschland</option>#', '<option value="de" selected="selected"> Deutschland</option>', _country_list);
+    }
 
     return '<select id="land" name="land" class="dropdown">'.$options.'</select>';
 }
@@ -1680,16 +1693,20 @@ function show_countrys($i="") {
 //-> Gameicon ausgeben
 function squad($code) {
     global $picformat;
-    if(empty($code))
+    if (empty($code)) {
         return '<img src="../inc/images/gameicons/custom/unknown.gif" alt="" class="icon" />';
+    }
 
     $code = str_replace(array('.png','.gif','.jpg'),'',$code);
     foreach($picformat as $end) {
-        if(file_exists(basePath."/inc/images/gameicons/custom/".$code.".".$end)) break;
+        if (file_exists(basePath . "/inc/images/gameicons/custom/" . $code . "." . $end)) {
+            break;
+        }
     }
 
-    if(file_exists(basePath."/inc/images/gameicons/custom/".$code.".".$end))
-        return'<img src="../inc/images/gameicons/custom/'.$code.'.'.$end.'" alt="" class="icon" />';
+    if (file_exists(basePath . "/inc/images/gameicons/custom/" . $code . "." . $end)) {
+        return'<img src="../inc/images/gameicons/custom/' . $code . '.' . $end . '" alt="" class="icon" />';
+    }
 
     return '<img src="../inc/images/gameicons/custom/unknown.gif" alt="" class="icon" />';
 }
@@ -1723,12 +1740,8 @@ function mkpwd($passwordLength=8,$specialcars=true) {
 
 //-> Passwortabfrage
 function checkpwd($user, $pwd) {
-    global $db;
-    return db("SELECT `id`,`user`,`nick`,`pwd`
-               FROM `".$db['users']."`
-               WHERE `user` = '".up($user)."'
-               AND `pwd` = '".up($pwd)."'
-               AND `level` != 0;",true) ? true : false;
+    global $sql;
+    return ($sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user` = ? AND `pwd` = ? AND `level` != 0;",array(up($user),up($pwd))));
 }
 
 //-> Infomeldung ausgeben
