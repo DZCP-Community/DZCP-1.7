@@ -1746,19 +1746,23 @@ function checkpwd($user, $pwd) {
 
 //-> Infomeldung ausgeben
 function info($msg, $url, $timeout = 5) {
-    if(config('direct_refresh'))
-        return header('Location: '.str_replace('&amp;', '&', $url));
+    if (config('direct_refresh')) {
+        return header('Location: ' . str_replace('&amp;', '&', $url));
+    }
 
     $u = parse_url($url); $parts = '';
     $u['query'] = array_key_exists('query', $u) ? $u['query'] : '';
     $u['query'] = str_replace('&amp;', '&', $u['query']);
     foreach(explode('&', $u['query']) as $p) {
         $p = explode('=', $p);
-        if(count($p) == 2)
-            $parts .= '<input type="hidden" name="'.$p[0].'" value="'.$p[1].'" />'."\r\n";
+        if (count($p) == 2) {
+            $parts .= '<input type="hidden" name="' . $p[0] . '" value="' . $p[1] . '" />' . "\r\n";
+        }
     }
 
-    if(!array_key_exists('path',$u)) $u['path'] = '';
+    if (!array_key_exists('path', $u)) {
+        $u['path'] = '';
+    }
     return show("errors/info", array("msg" => $msg,
                                      "url" => $u['path'],
                                      "rawurl" => html_entity_decode($url),
@@ -1938,17 +1942,15 @@ class notification {
 
 //-> Startseite fur einen User abrufen
 function startpage() {
-    global $db,$userid,$chkMe;
+    global $sql,$userid,$chkMe;
     $startpageID = ($userid >= 1 ? data('startpage') : 0);
     if(!$startpageID) { return 'user/?action=userlobby'; }
-
-    $sql = db("SELECT `url`,`level` FROM `".$db['startpage']."` WHERE `id` = ".$startpageID." LIMIT 1");
-    if(!_rows($sql)) {
-        db("UPDATE `".$db['users']."` SET `startpage` = 0 WHERE `id` = ".$userid.";");
+    $get = $sql->selectSingle("SELECT `url`,`level` FROM `{prefix_startpage}` WHERE `id` = ? LIMIT 1",array($startpageID));
+    if(!$sql->rowCount()) {
+        $sql->update("UPDATE `{prefix_users}` SET `startpage` = 0 WHERE `id` = ?;",array($userid));
         return 'user/?action=userlobby';
     }
 
-    $get = _fetch($sql);
     $page = $get['level'] <= $chkMe ? re($get['url']) : 'user/?action=userlobby';
     return (!empty($page) ? $page : 'news/');
 }
