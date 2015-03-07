@@ -1528,7 +1528,6 @@ function isBanned($userid_set=0,$logout=true) {
         if($get['banned']) {
             if($logout) {
                 dzcp_session_destroy();
-                $userid = 0; $chkMe = 0;
             }
 
             return true;
@@ -1540,29 +1539,28 @@ function isBanned($userid_set=0,$logout=true) {
 
 //-> Prueft, ob ein User diverse Rechte besitzt
 function permission($check,$uid=0) {
-    global $db,$userid,$chkMe;
-    if(!$uid) $uid = $userid;
-
-    if($chkMe == 4)
+    global $sql,$userid,$chkMe;
+    if (!$uid) { $uid = $userid; }
+    if($chkMe == 4) {
         return true;
-    else {
-        if($uid) {
+    } else {
+        if ($uid) {
             // check rank permission
-            if(db("SELECT s1.`".$check."` FROM `".$db['permissions']."` AS `s1`
-                   LEFT JOIN `".$db['userpos']."` AS `s2` ON s1.`pos` = s2.`posi`
-                   WHERE s2.`user` = ".intval($uid)." AND s1.`".$check."` = 1 AND s2.`posi` != 0;",true))
+            if ($sql->rows("SELECT s1.`" . $check . "` FROM `{prefix_permissions}` AS `s1` LEFT JOIN `{prefix_userposis}` AS `s2` ON s1.`pos` = s2.`posi`"
+                            . "WHERE s2.`user` = ? AND s1.`" . $check . "` = 1 AND s2.`posi` != 0;", array(intval($uid)))) {
                 return true;
-
-            // check user permission
-            if(!dbc_index::issetIndex('user_permission_'.$uid)) {
-                $permissions = db("SELECT * FROM `".$db['permissions']."` WHERE `user` = ".intval($uid).";",false,true);
-                dbc_index::setIndex('user_permission_'.$uid, $permissions);
             }
 
-            return dbc_index::getIndexKey('user_permission_'.$uid, $check) ? true : false;
-        }
-        else
+            // check user permission
+            if (!dbc_index::issetIndex('user_permission_' . intval($uid))) {
+                $permissions = $sql->selectSingle("SELECT * FROM `{prefix_permissions}` WHERE `user` = ?;", array(intval($uid)));
+                dbc_index::setIndex('user_permission_' . intval($uid), $permissions);
+            }
+
+            return dbc_index::getIndexKey('user_permission_' . intval($uid), $check) ? true : false;
+        } else {
             return false;
+        }
     }
 }
 
