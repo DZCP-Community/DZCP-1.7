@@ -1957,11 +1957,10 @@ function startpage() {
 
 //-> Nickausgabe mit Profillink oder Emaillink (reg/nicht reg)
 function autor($uid, $class="", $nick="", $email="", $cut="", $add="") {
-    global $db;
+    global $sql;
     if(!dbc_index::issetIndex('user_'.intval($uid))) {
-        $qry = db("SELECT * FROM `".$db['users']."` WHERE `id` = ".intval($uid).";");
-        if(_rows($qry)) {
-            $get = _fetch($qry);
+        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
+        if($sql->rowCount()) {
             dbc_index::setIndex('user_'.$get['id'], $get);
         } else {
             $nickname = (!empty($cut)) ? cut(re($nick), $cut) : re($nick);
@@ -1979,22 +1978,20 @@ function autor($uid, $class="", $nick="", $email="", $cut="", $add="") {
 
 //-> Nickausgabe mit Profillink (reg + position farbe)
 function autorcolerd($uid, $class="", $cut="") {
-    global $db;
+    global $sql;
     if(!dbc_index::issetIndex('user_'.intval($uid))) {
-        $qry = db("SELECT * FROM `".$db['users']."` WHERE `id` = ".intval($uid).";");
-        if(_rows($qry)) {
-            $get = _fetch($qry);
+        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
+        if($sql->rowCount()) {
             dbc_index::setIndex('user_'.$get['id'], $get);
         }
     }
 
     $position = dbc_index::getIndexKey('user_'.intval($uid), 'position');
-    $sql = db("SELECT `id`,`color` FROM `".$db['pos']."` WHERE `id` = ".$position);
-    if(!$position || !_rows($sql)) {
+    $get = $sql->selectSingle("SELECT `id`,`color` FROM `{prefix_positions}` WHERE `id` = ?;",array($position));
+    if(!$position || !$sql->rowCount()) {
         return autor($uid,$class,'','',$cut);
     }
     
-    $get = _fetch($sql);
     $nickname = (!empty($cut)) ? cut(re(dbc_index::getIndexKey('user_'.intval($uid), 'nick')), $cut) : re(dbc_index::getIndexKey('user_'.intval($uid), 'nick'));
     return show(_user_link_colerd, array("id" => $uid,
                                          "country" => flag(dbc_index::getIndexKey('user_'.intval($uid), 'country')),
