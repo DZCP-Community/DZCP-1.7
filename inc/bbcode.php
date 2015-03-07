@@ -1506,18 +1506,17 @@ function online_reg($where='') {
 
 //-> Prueft, ob der User eingeloggt ist und wenn ja welches Level besitzt er
 function checkme($userid_set=0) {
-    global $db;
-    if(!$userid = ($userid_set != 0 ? intval($userid_set) : userid())) return 0;
-    if(empty($_SESSION['id']) || empty($_SESSION['pwd'])) return 0;
-    if(!dbc_index::issetIndex('user_'.$userid)) {
-        $qry = db("SELECT * FROM `".$db['users']."` WHERE `id` = ".$userid." AND `pwd` = '".$_SESSION['pwd']."' AND `ip` = '".$_SESSION['ip']."';");
-        if(!_rows($qry)) return 0;
-        $get = _fetch($qry);
+    global $sql;
+    if (!$userid = ($userid_set != 0 ? intval($userid_set) : userid())) { return 0; }
+    if (empty($_SESSION['id']) || empty($_SESSION['pwd'])) { return 0; }
+    if(!dbc_index::issetIndex('user_'.intval($userid))) {
+        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ? AND `pwd` = ? AND `ip` = ?;",array(intval($userid),$_SESSION['pwd'],$_SESSION['ip']));
+        if (!$sql->rowCount()) { return 0; }
         dbc_index::setIndex('user_'.$get['id'], $get);
         return $get['level'];
     }
 
-    return dbc_index::getIndexKey('user_'.$userid, 'level');
+    return dbc_index::getIndexKey('user_'.intval($userid), 'level');
 }
 
 //-> Prueft, ob der User gesperrt ist und meldet ihn ab
