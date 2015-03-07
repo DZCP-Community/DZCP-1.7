@@ -7,6 +7,8 @@
 //MySQL-Daten einlesen
 $installation = true;
 include(basePath.'/inc/common.php');
+include(basePath.'/inc/secure.php');
+include(basePath."/inc/database_old_code_adapter.php");
 include(basePath.'/_installer/conf/dbu.php');
 $prev = intval(makePrev());
 
