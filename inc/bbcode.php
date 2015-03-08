@@ -77,8 +77,8 @@ $language = (cookie::get('language') != false ? (file_exists(basePath.'/inc/lang
 
 //-> einzelne Definitionen
 $isSpider = isSpider();
-$subfolder = basename(dirname(dirname($_SERVER['PHP_SELF']).'../'));
-$httphost = $_SERVER['HTTP_HOST'].(empty($subfolder) ? '' : '/'.$subfolder);
+$subfolder = basename(dirname(dirname(GetServerVars('PHP_SELF')).'../'));
+$httphost = GetServerVars('HTTP_HOST').(empty($subfolder) ? '' : '/'.$subfolder);
 $domain = str_replace('www.','',$httphost);
 $pagetitle = re(settings('pagetitel'));
 $sdir = re(settings('tmpdir'));
@@ -277,7 +277,7 @@ if(isset($_GET['set_language']) && !empty($_GET['set_language'])) {
         cookie::save();
     }
 
-    header("Location: ".$_SERVER['HTTP_REFERER']);
+    header("Location: ".GetServerVars('HTTP_REFERER'));
 }
 
 lang($language); //Lade Sprache
@@ -505,7 +505,7 @@ if(isset($_GET['tmpl_set'])) {
         if($templ == $_GET['tmpl_set']) {
             cookie::put('tmpdir', $templ);
             cookie::save();
-            header("Location: ".$_SERVER['HTTP_REFERER']);
+            header("Location: ".GetServerVars('HTTP_REFERER'));
         }
     }
 }
@@ -1373,7 +1373,7 @@ function sum_multi($db, $where = "", $whats = array('id')) {
 }
 
 function orderby($sort) {
-    $split = explode("&",$_SERVER['QUERY_STRING']);
+    $split = explode("&",GetServerVars('QUERY_STRING'));
     $url = "?";
 
     foreach($split as $part) {
@@ -2599,8 +2599,8 @@ function check_internal_url() {
     if ($chkMe >= 1) {
         return false;
     }
-    $install_pfad = explode("/",dirname(dirname($_SERVER['SCRIPT_NAME'])."../"));
-    $now_pfad = explode("/",$_SERVER['REQUEST_URI']); $pfad = '';
+    $install_pfad = explode("/",dirname(dirname(GetServerVars('SCRIPT_NAME'))."../"));
+    $now_pfad = explode("/",GetServerVars('REQUEST_URI')); $pfad = '';
     foreach($now_pfad as $key => $value) {
         if(!empty($value)) {
             if(!isset($install_pfad[$key]) || $value != $install_pfad[$key]) {
@@ -3040,7 +3040,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
     $java_vars = '<script language="javascript" type="text/javascript">var json=\''.javascript::encode().'\',dzcp_config=JSON&&JSON.parse(json)||$.parseJSON(json);</script>'."\n";
     
     //TODO: Old Code, implement function is_mobile()
-    if(!strstr($_SERVER['HTTP_USER_AGENT'],'Android') && !strstr($_SERVER['HTTP_USER_AGENT'],'webOS')) {
+    if(!strstr(GetServerVars('HTTP_USER_AGENT'),'Android') && !strstr(GetServerVars('HTTP_USER_AGENT'),'webOS')) {
         $java_vars .= '<script language="javascript" type="text/javascript" src="'.$designpath.'/_js/wysiwyg.js"></script>'."\n";
     }
 
