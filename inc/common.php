@@ -8,31 +8,41 @@ require_once(basePath."/inc/debugger.php");
 require_once(basePath."/inc/config.php");
 require_once(basePath."/inc/database.php");
 
-if(function_exists("date_default_timezone_set") && function_exists("date_default_timezone_get") && use_default_timezone)
-    @date_default_timezone_set(@date_default_timezone_get());
-else if(!use_default_timezone) date_default_timezone_set(default_timezone);
-else date_default_timezone_set("Europe/Berlin");
-if(!isset($thumbgen)) $thumbgen = false;
+if (function_exists("date_default_timezone_set") && function_exists("date_default_timezone_get") && use_default_timezone) {
+    date_default_timezone_set(@date_default_timezone_get());
+} else if (!use_default_timezone) {
+    date_default_timezone_set(default_timezone);
+} else {
+    date_default_timezone_set("Europe/Berlin");
+}
+
+if (!isset($thumbgen)) {
+    $thumbgen = false;
+}
 
 if(!$thumbgen) {
     if(view_error_reporting) {
         error_reporting(E_ALL);
 
-        if(function_exists('ini_set'))
+        if (function_exists('ini_set')) {
             ini_set('display_errors', 1);
+        }
 
         DebugConsole::initCon();
 
-        if(debug_dzcp_handler)
+        if (debug_dzcp_handler) {
             set_error_handler('dzcp_error_handler');
+        }
     } else {
-        if(function_exists('ini_set'))
+        if (function_exists('ini_set')) {
             ini_set('display_errors', 0);
+        }
 
         error_reporting(E_ALL ^ E_NOTICE ^ E_DEPRECATED);
 
-        if(debug_dzcp_handler)
+        if (debug_dzcp_handler) {
             set_error_handler('dzcp_error_handler');
+        }
     }
 }
 
@@ -140,25 +150,26 @@ function show($tpl="", $array=array(), $array_lang_constant=array(), $array_bloc
             $cacheHash = md5($template);
             if(template_cache && $config_cache['use_cache'] && dbc_index::useMem() && $cache->isExisting('tpl_'.$cacheHash)) {
                 $tpl = re($cache->get('tpl_'.$cacheHash));
-                if(show_dbc_debug)
-                    DebugConsole::insert_info('template::show()', 'Get Template-Cache: "'.'tpl_'.$cacheHash.'"');
+                if(show_dbc_debug) {
+                    DebugConsole::insert_info('template::show()', 'Get Template-Cache: "' . 'tpl_' . $cacheHash . '"');
+                }
             }
             else {
                 if(file_exists($template.".html")) {
                     $tpl = file_get_contents($template.".html");
-
                     if(template_cache && $config_cache['use_cache'] && dbc_index::useMem()) {
                         $cache->set('tpl_'.$cacheHash,up($tpl),template_cache_time);
-
-                        if(show_dbc_debug)
-                            DebugConsole::insert_loaded('template::show()', 'Set Template-Cache: "'.'tpl_'.$cacheHash.'"');
+                        if (show_dbc_debug) {
+                            DebugConsole::insert_loaded('template::show()', 'Set Template-Cache: "' . 'tpl_' . $cacheHash . '"');
+                        }
                     }
                 }
             }
         }
         else {
-            if(file_exists($template.".html"))
-                $tpl = file_get_contents($template.".html");
+            if (file_exists($template . ".html")) {
+                $tpl = file_get_contents($template . ".html");
+            }
         }
 
         //put placeholders in array

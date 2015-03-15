@@ -96,9 +96,9 @@ javascript::set('AnchorMove','');
 javascript::set('debug',(view_error_reporting && view_javascript_debug));
 
 //-> Global
-$action = isset($_GET['action']) ? $_GET['action'] : 'default';
-$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-$do = isset($_GET['do']) ? $_GET['do'] : '';
+$action = isset($_GET['action']) ? $_GET['action'] : (isset($_POST['action']) ? $_POST['action'] : 'default');
+$page = isset($_GET['page']) ? intval($_GET['page']) : (isset($_POST['page']) ? $_POST['page'] : 1);
+$do = isset($_GET['do']) ? $_GET['do'] : (isset($_POST['do']) ? $_POST['do'] : '');
 $index = ''; $show = ''; $color = 0;
 
 //-> Neue Kernel Funktionen einbinden, sofern vorhanden

@@ -63,11 +63,12 @@ if(defined('_News')) {
             }
 
             $links = "";
-            if(!empty($links1) || !empty($links2) || !empty($links3))
+            if (!empty($links1) || !empty($links2) || !empty($links3)) {
                 $links = show(_news_links, array("link1" => $links1,
-                                                 "link2" => $links2,
-                                                 "link3" => $links3,
-                                                 "rel" => $rel));
+                    "link2" => $links2,
+                    "link3" => $links3,
+                    "rel" => $rel));
+            }
 
             $intern = $get['intern'] ? _votes_intern : "";
             $newsimage = '../inc/images/newskat/'.re($sql->selectSingle("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']),'katimg'));

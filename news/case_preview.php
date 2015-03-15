@@ -43,8 +43,13 @@ if(defined('_News')) {
     }
 
     $intern = ''; $sticky = '';
-    if(isset($_POST['intern']) && $_POST['intern'] == 1) $intern = _votes_intern;
-    if(isset($_POST['sticky']) && $_POST['sticky'] == 1) $sticky = _news_sticky;
+    if(isset($_POST['intern']) && $_POST['intern'] == 1) {
+        $intern = _votes_intern;
+    }
+    
+    if (isset($_POST['sticky']) && $_POST['sticky'] == 1) {
+        $sticky = _news_sticky;
+    }
 
     $newsimage = '../inc/images/newskat/'.re($sql->selectSingle("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array(intval($_POST['kat'])),'katimg'));
     $viewed = show(_news_viewed, array("viewed" => '0'));
@@ -68,6 +73,5 @@ if(defined('_News')) {
                                            "links" => $links,
                                            "autor" => autor($_SESSION['id'])));
 
-    echo utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>');
-    exit();
+    exit(utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>'));
 }

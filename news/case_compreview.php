@@ -6,7 +6,7 @@
 
 if(defined('_News')) {
     if($do == 'edit') {
-        $get = db("SELECT * FROM ".$db['newscomments']." WHERE `id` = '".intval($_GET['cid'])."'",false,true);
+        $get = $sql->selectSingle("SELECT `reg`,`datum` FROM `{prefix_newscomments}` WHERE `id` = ?;",array(intval($_GET['cid'])));
         $get_id = '?';
         $get_userid = $get['reg'];
         $get_date = $get['datum'];
@@ -14,7 +14,7 @@ if(defined('_News')) {
         $editedby = show(_edited_by, array("autor" => cleanautor($userid),
                                            "time" => date("d.m.Y H:i", time())._uhr));
     } else {
-        $get_id = cnt($db['newscomments'], " WHERE news = ".intval($_GET['id']))+1;
+        $get_id = cnt('{prefix_newscomments}', " WHERE `news` = ".intval($_GET['id']))+1;
         $get_userid = $userid;
         $get_date = time();
         $regCheck = $chkMe >= 1 ? true : false;
@@ -27,14 +27,15 @@ if(defined('_News')) {
         $get_email = isset($_POST['email']) ? $_POST['email'] : '';
         $get_nick = isset($_POST['nick']) ? $_POST['nick'] : '';
 
-        if(!empty($get_hp))
+        if (!empty($get_hp)) {
             $hp = show(_hpicon_forum, array("hp" => links($get_hp)));
+        }
 
-        if(!empty($get_email))
-            $email = '<br />'.CryptMailto($get_email,_emailicon_forum);
+        if (!empty($get_email)) {
+            $email = '<br />' . CryptMailto($get_email, _emailicon_forum);
+        }
 
-        $onoff = "";
-        $avatar = "";
+        $onoff = ""; $avatar = "";
         $nick = show(_link_mailto, array("nick" => re($get_nick),
                                          "email" => $get_email));
     } else {
@@ -60,10 +61,5 @@ if(defined('_News')) {
                                               "ip" => $userip._only_for_admins));
 
     header('Content-Type: text/html; charset=utf-8');
-    echo utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>');
-
-    if(!mysqli_persistconns)
-        $mysql->close(); //MySQL
-
-    exit();
+    exit(utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>'));
 }

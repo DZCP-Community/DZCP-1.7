@@ -15,10 +15,10 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
         } else {
             switch ($do) {
                 case 'add':
-                    if (db("SELECT `id` FROM `" . $db['news'] . "` WHERE `id` = " . $news_id . ";", true, false) != 0) {
-                        if (settings("reg_newscomments") && !$chkMe)
+                    if ($sql->rows("SELECT `id` FROM `{prefix_news}` WHERE `id` = ?;",array($news_id)) != 0) {
+                        if (settings("reg_newscomments") && !$chkMe) {
                             $index = error(_error_have_to_be_logged, 1);
-                        else {
+                        } else {
                             if (!ipcheck("ncid(" . $_GET['id'] . ")", config('f_newscom'))) {
                                 if ($userid >= 1) {
                                     $toCheck = empty($_POST['comment']);
@@ -48,19 +48,13 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                                         }
 
                                         $form = show("page/editor_notregged", array("posthp" => (isset($_POST['hp']) ? $_POST['hp'] : ''),
-                                            "postemail" => (isset($_POST['email']) ? $_POST['email'] : ''),
-                                            "postnick" => (isset($_POST['nick']) ? $_POST['nick'] : '')));
+                                                                                    "postemail" => (isset($_POST['email']) ? $_POST['email'] : ''),
+                                                                                    "postnick" => (isset($_POST['nick']) ? $_POST['nick'] : '')));
                                     }
                                 } else {
-                                    db("INSERT INTO `" . $db['newscomments'] . "` SET `news`     = " . $news_id . ",
-                                                                                  `datum`    = " . time() . ",
-                                                                                  `nick`     = '" . (isset($_POST['nick']) && !$userid ? up($_POST['nick']) : data('nick')) . "',
-                                                                                  `email`    = '" . (isset($_POST['email']) && !$userid ? up($_POST['email']) : data('email')) . "',
-                                                                                  `hp`       = '" . (isset($_POST['hp']) && !$userid ? links($_POST['hp']) : links(data('hp'))) . "',
-                                                                                  `reg`      = " . intval($userid) . ",
-                                                                                  `comment`  = '" . up($_POST['comment']) . "',
-                                                                                  `ip`       = '" . $userip . "'");
-
+                                    $sql->insert("INSERT INTO `{prefix_newscomments}` SET `news` = ?,`datum` = ?,`nick` = ?,`email` = ?,`hp` = ?,`reg` = ?,`comment` = ?, `ip` = ?;",
+                                    array($news_id,time(),(isset($_POST['nick']) && !$userid ? up($_POST['nick']) : data('nick')),(isset($_POST['email']) && !$userid ? up($_POST['email']) : data('email')),
+                                    (isset($_POST['hp']) && !$userid ? links($_POST['hp']) : links(data('hp'))),intval($userid),up($_POST['comment']),$userip));
                                     setIpcheck("ncid(" . $news_id . ")");
                                     notification::set_global(false);
                                     javascript::set('AnchorMove', 'notification-box');
@@ -79,9 +73,9 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                 case 'delete':
                     javascript::set('AnchorMove', 'notification-box');
                     notification::set_global(false);
-                    $get = db("SELECT `reg` FROM " . $db['newscomments'] . " WHERE `id` = '" . ($cid = intval($_GET['cid'])) . "'", false, true);
-                    if ($get['reg'] == $userid || permission('news')) {
-                        db("DELETE FROM " . $db['newscomments'] . " WHERE `id` = '" . $cid . "'");
+                    $reg = $sql->selectSingle("SELECT `reg` FROM `{prefix_newscomments}` WHERE `id` = ?;",array(($cid = intval($_GET['cid']))),'reg');
+                    if ($reg == $userid || permission('news')) {
+                        $sql->delete("DELETE FROM `{prefix_newscomments}` WHERE `id` = ?;",array($cid));
                         $notification_p = notification::add_success(_comment_deleted);
                     } else {
                         $notification_p = notification::add_error(_error_wrong_permissions);
@@ -92,18 +86,16 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                 case 'editcom':
                     notification::set_global(false);
                     javascript::set('AnchorMove', 'notification-box');
-                    $sql = db("SELECT `reg` FROM `" . $db['newscomments'] . "` WHERE `id` = " . ($cid = intval($_GET['cid'])) . ";");
-                    if (_rows($sql) && !empty($_POST['comment'])) {
-                        $get = _fetch($sql);
-                        if ($get['reg'] == $userid || permission('news')) {
+                    $reg = $sql->selectSingle("SELECT `reg` FROM `{prefix_newscomments}` WHERE `id` = ?;",array(($cid = intval($_GET['cid']))),'reg');
+                    if ($sql->rowCount() && !empty($_POST['comment'])) {
+                        if ($reg == $userid || permission('news')) {
                             $editedby = show(_edited_by, array("autor" => autor($userid), "time" => date("d.m.Y H:i", time()) . _uhr));
-                            db("UPDATE " . $db['newscomments'] . "
-                                       SET `nick`     = '" . (isset($_POST['nick']) ? up($_POST['nick']) : '') . "',
-                                           `email`    = '" . (isset($_POST['email']) ? up($_POST['email']) : '') . "',
-                                           `hp`       = '" . (isset($_POST['hp']) ? links($_POST['hp']) : '') . "',
-                                           `comment`  = '" . (isset($_POST['comment']) ? up($_POST['comment']) : '') . "',
-                                           `editby`   = '" . up($editedby) . "'
-                                       WHERE `id` = " . $cid);
+                            $sql->update("UPDATE `{prefix_newscomments}` SET `nick` = ?, `email` = ?, `hp` = ?, `comment` = ?, `editby` = ?
+                                          WHERE `id` = ?;",array((isset($_POST['nick']) ? up($_POST['nick']) : ''),
+                                          (isset($_POST['email']) ? up($_POST['email']) : ''),
+                                          (isset($_POST['hp']) ? links($_POST['hp']) : ''),
+                                          (isset($_POST['comment']) ? up($_POST['comment']) : ''),
+                                          up($editedby),$cid));
 
                             $_POST = array(); //Clear Post
                             $notification_p = notification::add_success(_comment_edited);
@@ -117,7 +109,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                     notification::set_global(true);
                     break;
                 case 'edit':
-                    $get = db("SELECT `reg`,`comment`,`hp`,`email`,`nick` FROM " . $db['newscomments'] . " WHERE `id` = '" . intval($_GET['cid']) . "'", false, true);
+                    $get = $sql->selectSingle("SELECT `reg`,`comment`,`hp`,`email`,`nick` FROM `{prefix_newscomments}` WHERE `id` = ?;",array(intval($_GET['cid'])));
                     if ($get['reg'] == $userid || permission('news')) {
                         javascript::set('AnchorMove', 'comForm');
                         if ($get['reg'] != 0) {
