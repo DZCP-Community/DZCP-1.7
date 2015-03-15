@@ -1322,9 +1322,9 @@ function GetServerVars($var) {
 
 //-> Funktion um diverse Dinge aus Tabellen auszaehlen zu lassen
 //-> Single & Multi Version
-function cnt($db, $where = "", $what = "id") {
+function cnt($db, $where = "", $what = "id", $sql_std=array()) {
     global $sql;
-    $cnt = $sql->selectSingle("SELECT COUNT(".$what.") AS `cnt` FROM `".$db."` ".$where.";",array(),'cnt');
+    $cnt = $sql->selectSingle("SELECT COUNT(".$what.") AS `cnt` FROM `".$db."` ".$where.";",$sql_std,'cnt');
     if($sql->rowCount()) {
         return $cnt;
     }
@@ -1348,11 +1348,11 @@ function cnt_multi($db, $where = "", $whats = array('id')) {
 
 //-> Funktion um diverse Dinge aus Tabellen zusammenzaehlen zu lassen
 //-> Single & Multi Version
-function sum($db, $where = "", $what = "id") {
+function sum($db, $where = "", $what = "id", $sql_std=array()) {
     global $sql;
-    $sum = $sql->selectSingle("SELECT SUM(".$what.") AS `sum` FROM `".$db."` ".$where.";");
+    $sum = $sql->selectSingle("SELECT SUM(".$what.") AS `sum` FROM `".$db."` ".$where.";",$sql_std,'sum');
     if($sql->rowCount()) {
-        return $sum['sum'];
+        return $sum;
     }
 
     return 0;
@@ -2703,8 +2703,8 @@ function getBoardPermissions($checkID = 0, $pos = 0) {
 
 //-> schreibe in dei IPCheck Tabelle
 function setIpcheck($what = '') {
-    global $sql, $userip;
-    $sql->insert("INSERT INTO `{prefix_ipcheck}` SET `ip` = ?, `user_id` = ?, `what` = ?, `time` = ?;",array($userip,intval(userid()),$what,time()));
+    global $sql;
+    $sql->insert("INSERT INTO `{prefix_ipcheck}` SET `ip` = ?, `user_id` = ?, `what` = ?, `time` = ?;",array(visitorIp(),intval(userid()),$what,time()));
 }
 
 //-> Preuft ob alle clicks nur einmal gezahlt werden *gast/user
@@ -2741,8 +2741,7 @@ function count_clicks($side_tag='',$clickedID=0,$update=true) {
                 return true;
             }
         } else {
-            $sql->rows();
-            if(!db("SELECT id FROM `{prefix_clicks_ips}` WHERE `ip` = '".$userip."' AND `ids` = ".$clickedID." AND `side` = '".$side_tag."';",true)) {
+            if(!$sql->rows("SELECT id FROM `{prefix_clicks_ips}` WHERE `ip` = ? AND `ids` = ? AND `side` = ?;",array($userip,intval($clickedID),$side_tag))) {
                 if($update) {
                     $sql->insert("INSERT INTO `{prefix_clicks_ips}` SET `ip` = ?, `uid` = 0, `ids` = ?, `side` = ?, `time` = ?;",
                     array($userip,intval($clickedID),$side_tag,(time()+count_clicks_expires)));

@@ -25,9 +25,6 @@ if (TinyMCE_Compressor::getParam("js")) {
     $tinyMCECompressor->handleRequest();
 }
 
-if(!mysqli_persistconns)
-    $mysql->close(); //MySQL
-
 /**
  * This class combines and compresses the TinyMCE core, plugins, themes and
  * language packs into one disk cached gzipped request. It improves the loading speed of TinyMCE dramatically but

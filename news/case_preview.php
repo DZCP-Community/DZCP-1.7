@@ -6,8 +6,6 @@
 
 if(defined('_News')) {
     header("Content-type: text/html; charset=utf-8");
-    $getkat = db("SELECT katimg FROM ".$db['newskat']." WHERE id = '".intval($_POST['kat'])."'",false,true);
-
     $klapp = "";
     if($_POST['klapptitel']) {
         $klapp = show(_news_klapplink, array("klapplink" => re($_POST['klapptitel']),
@@ -48,7 +46,7 @@ if(defined('_News')) {
     if(isset($_POST['intern']) && $_POST['intern'] == 1) $intern = _votes_intern;
     if(isset($_POST['sticky']) && $_POST['sticky'] == 1) $sticky = _news_sticky;
 
-    $newsimage = '../inc/images/newskat/'.re($getkat['katimg']);
+    $newsimage = '../inc/images/newskat/'.re($sql->selectSingle("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array(intval($_POST['kat'])),'katimg'));
     $viewed = show(_news_viewed, array("viewed" => '0'));
     $index = show($dir."/news_show_full", array("titel" => $_POST['titel'],
                                            "kat" => $newsimage,
@@ -71,9 +69,5 @@ if(defined('_News')) {
                                            "autor" => autor($_SESSION['id'])));
 
     echo utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>');
-
-    if(!mysqli_persistconns)
-        $mysql->close(); //MySQL
-
     exit();
 }

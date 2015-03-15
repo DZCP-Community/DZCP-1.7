@@ -26,10 +26,10 @@ define('show_deprecation_debug', false);
 define('show_teamspeak_debug', false);
 define('show_gameserver_debug', false);
 define('show_sessions_debug', false);
-define('show_pdo_delete_debug', true);
-define('show_pdo_update_debug', true);
-define('show_pdo_insert_debug', true);
-define('show_pdo_select_debug', true);
+define('show_pdo_delete_debug', false);
+define('show_pdo_update_debug', false);
+define('show_pdo_insert_debug', false);
+define('show_pdo_select_debug', false);
 
 #############################################
 ############### Debug Console ###############

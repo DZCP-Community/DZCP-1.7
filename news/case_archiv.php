@@ -27,42 +27,35 @@ if(defined('_News')) {
     $n_kat = !$kat ? "" : "AND kat = '".$kat."'";
 
     if(($search = isset($_GET['search']) && !empty($_GET['search']) ? $_GET['search'] : false)) {
-        $qry = db("SELECT `id`,`titel`,`autor`,`datum`,`kat`,`text`
-                  FROM ".$db['news']."
-                  WHERE `text` LIKE '%".$search."%'
-                  ".$intern."
-                  AND `datum` <= ".time()."
-                  OR `klapptext` LIKE '%".$search."%'
-                  ".$intern."
-                  AND `datum` <= ".time()."
-                  ORDER BY `datum` DESC
-                  LIMIT ".($page - 1)*config('m_archivnews').",".config('m_archivnews')."");
-
-        $entrys = cnt($db['news'], " WHERE text LIKE '%".$search."%' OR klapptext LIKE '%".$search."%' ".$intern."");
+        $qry = $sql->select("SELECT `id`,`titel`,`autor`,`datum`,`kat`,`text` FROM `{prefix_news}` WHERE `text` LIKE '%?%' ".$intern." AND `datum` <= ? "
+                            . "OR `klapptext` LIKE '%?%' ".$intern." AND `datum` <= ? "
+                            . "ORDER BY `datum` DESC LIMIT ".($page - 1)*config('m_archivnews').",".config('m_archivnews').";",
+                            array($search,($time=time()),$search,$time));
+        $entrys = cnt('{prefix_news}', " WHERE `text` LIKE '%?%' OR `klapptext` LIKE '%?%' ".$intern,'id',array($search,$search));
 
     } else if($pyear) {
         $from = mktime(0,0,0,$pmonth,1,$pyear);
         $til = mktime(0,0,0,$pmonth+1,1,$pyear);
 
-        $qry = db("SELECT id,titel,autor,datum,kat,text FROM ".$db['news']."
-                   WHERE datum BETWEEN ".$from ." AND ".$til."
+        $qry = $sql->select("SELECT `id`,`titel`,`autor`,`datum`,`kat`,`text` FROM `{prefix_news}`
+                   WHERE `datum` BETWEEN ".$from ." AND ".$til."
                    ".$intern."
-                   ORDER BY datum DESC
-                   LIMIT ".($page - 1)*config('m_archivnews').",".config('m_archivnews')."");
-        $entrys = cnt($db['news'], " WHERE datum BETWEEN ".$from." AND ".$til." ".$intern."");
+                   ORDER BY `datum` DESC
+                   LIMIT ".($page - 1)*config('m_archivnews').",".config('m_archivnews').";");
+        $entrys = cnt('{prefix_news}', " WHERE `datum` BETWEEN ".$from." AND ".$til." ".$intern."");
     } else {
-        $qry = db("SELECT id,titel,autor,datum,kat,text
-                   FROM ".$db['news']."
+        $qry = $sql->select("SELECT `id`,`titel`,`autor`,`datum`,`kat`,`text`
+                   FROM `{prefix_news}`
                    ".$intern2."
                    ".$n_kat."
                    ".orderby_sql(array("datum","autor","titel","kat"), 'ORDER BY datum DESC')."
-                   LIMIT ".($page - 1)*config('m_archivnews').",".config('m_archivnews')."");
-        $entrys = cnt($db['news'], " ".$intern2." ".$n_kat);
+                   LIMIT ".($page - 1)*config('m_archivnews').",".config('m_archivnews').";");
+        $entrys = cnt('{prefix_news}', " ".$intern2." ".$n_kat);
     }
 
-    while($get = _fetch($qry)) {
-        $getk = db("SELECT kategorie FROM ".$db['newskat']." WHERE id = '".$get['kat']."'",false,true);
-        $comments = cnt($db['newscomments'], " WHERE news = ".$get['id']."");
+    foreach($qry as $get) {
+        $getk = $sql->selectSingle("SELECT `kategorie` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']));
+        $comments = cnt('{prefix_newscomments}'," WHERE `news` = ".$get['id']);
         $titel = show(_news_show_link, array("titel" => cut(re($get['titel']),config('l_newsarchiv')), "id" => $get['id']));
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
         $show .= show($dir."/archiv_show", array("autor" => autor($get['autor']),
@@ -73,39 +66,39 @@ if(defined('_News')) {
                                                  "comments" => $comments));
     }
 
-    $y = db("SELECT datum FROM ".$db['news']." ".$intern2." ORDER BY datum LIMIT 1");
-    $sy = _fetch($y);
-    $min = date("Y",$sy['datum']);
-    $ty = date("Y", time());
+    $min = date("Y",$sql->selectSingle("SELECT `datum` FROM `{prefix_news}` ".$intern2." ORDER BY `datum` LIMIT 1;",array(),'datum'));
+    $ty = date("Y", ($time=time()));
 
     $years = '';
     for($x=$min;$x<=$ty-1;$x++) {
-        $sel = ($x == date("Y", time()) ? 'selected="selected"' : "");
-        $years .= show(_select_field, array("value" => $x,
-                                            "sel" => $sel,
-                                            "what" => $x));
+        $sel = ($x == date("Y", $time) ? 'selected="selected"' : "");
+        $years .= show(_select_field, array("value" => $x, "sel" => $sel, "what" => $x));
     }
 
     $endc = $language == "deutsch" ? 'n' : '';
-    $ccount = cnt($db['newscomments']);
+    $ccount = cnt('{prefix_newscomments}');
     $com = ($ccount == "1" ? _news_kommentar : _news_kommentare.$endc);
-
-    $stats = show(_news_stats, array("news" => $entrys,
-                                     "comments" => cnt($db['newscomments']),
-                                     "com" => $com));
-
-    $qrykat = db("SELECT `id`,`kategorie` FROM ".$db['newskat'].""); $kategorien = '';
-    while($getkat = _fetch($qrykat)) {
-        $kategorien .= '<option value="'.$getkat['id'].'">-> '.$getkat['kategorie'].'</option>';
+    $stats = show(_news_stats, array("news" => $entrys, "comments" => cnt($db['newscomments']), "com" => $com));
+    
+    //News Kategorie
+    $qry = $sql->select("SELECT `id`,`kategorie` FROM {prefix_newskat};"); $kategorien = '';
+    foreach($qry as $get) {
+        $kategorien .= '<option value="'.$get['id'].'">-> '.$get['kategorie'].'</option>';
     }
 
     for($i=1;$i<=12;$i++) {
         if(!$pyear) {
-              if($i == date("n", time())) $sel[$i] = 'selected="selected"';
-              else $sel[$i] = "";
+            if ($i == date("n", time())) {
+                $sel[$i] = 'selected="selected"';
+            } else {
+                $sel[$i] = "";
+            }
         } else {
-              if($i == nonum($pmonth)) $sel[$i] = 'selected="selected"';
-              else $sel[$i] = "";
+            if ($i == nonum($pmonth)) {
+                $sel[$i] = 'selected="selected"';
+            } else {
+                $sel[$i] = "";
+            }
         }
     }
 
