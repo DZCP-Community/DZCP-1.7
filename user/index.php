@@ -58,8 +58,9 @@ function getcustom($kid=1,$user=0) {
     return $custom;
 }
 
-if(file_exists(basePath."/user/case_".$action.".php"))
-    require_once(basePath."/user/case_".$action.".php");
+if (file_exists(basePath . "/user/case_" . $action . ".php")) {
+    require_once(basePath . "/user/case_" . $action . ".php");
+}
 
 ## INDEX OUTPUT ##
 $whereami = preg_replace_callback("#autor_(.*?)$#",create_function('$id', 'return re(data("nick","$id[1]"));'),$where);
