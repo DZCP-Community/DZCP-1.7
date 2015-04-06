@@ -77,8 +77,8 @@ if(defined('_UserMenu')) {
                 $qry_fields = db("SHOW FIELDS FROM `".$db['permissions']."`;"); $sql_update = '';
                 while($get = _fetch($qry_fields)) {
                     if($get['Field'] != 'id' && $get['Field'] != 'user' && $get['Field'] != 'pos' && $get['Field'] != 'intforum') {
-                        $sql = array_key_exists('p_'.$get['Field'], $_POST['perm']) ? '`'.$get['Field'].'` = 1' : '`'.$get['Field'].'` = 0';
-                        $sql_update .= $sql.', ';
+                        $sql_qry = array_key_exists('p_'.$get['Field'], $_POST['perm']) ? '`'.$get['Field'].'` = 1' : '`'.$get['Field'].'` = 0';
+                        $sql_update .= $sql_qry.', ';
                     }
                 }
 
@@ -94,10 +94,10 @@ if(defined('_UserMenu')) {
                 if(empty($_POST['board'])) {
                     $_POST['board'] = array();
                 }
-
+                
                 // Boardpermissions Cleanup
-                $sql = db('SELECT `id`,`forum` FROM `'.$db['f_access'].'` WHERE `user` = '.$edituser.';');
-                while($get = _fetch($sql)) { 
+                $qry = db('SELECT `id`,`forum` FROM `'.$db['f_access'].'` WHERE `user` = '.$edituser.';');
+                while($get = _fetch($qry)) { 
                     if(!array_var_exists($get['forum'],$_POST['board'])) { 
                         db('DELETE FROM `'.$db['f_access'].'` WHERE `id` = '.$get['id']); 
                     }

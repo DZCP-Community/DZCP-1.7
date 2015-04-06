@@ -17,8 +17,9 @@ define('_Forum', true);
 
 ## SECTIONS
 $action = empty($action) ? 'default' : $action;
-if(file_exists(basePath."/forum/case_".$action.".php"))
-    require_once(basePath."/forum/case_".$action.".php");
+if (file_exists(basePath . "/forum/case_" . $action . ".php")) {
+    require_once(basePath . "/forum/case_" . $action . ".php");
+}
 
 ## INDEX OUTPUT ##
 $title = $pagetitle." - ".$where;

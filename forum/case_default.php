@@ -121,8 +121,8 @@ if(defined('_Forum')) {
     $stats = show($dir."/forum_stats", array());
 
     /* Wer ist online */
-    $sql = db('SELECT `position`,`color` FROM '.$db['pos']); $team_groups = '';
-    while ($get = _fetch($sql)) {
+    $qry = db('SELECT `position`,`color` FROM '.$db['pos']); $team_groups = '';
+    while ($get = _fetch($qry)) {
         $team_groups .= show(_forum_team_groups, array('color' => re($get['color']), 'group' => re($get['position'])));
     }
 

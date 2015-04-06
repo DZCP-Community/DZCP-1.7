@@ -77,8 +77,8 @@ switch ($do) {
         }
     break;
     default:
-        $sql = db("SELECT * FROM `".$db['startpage']."`;"); $color = 0; $show = '';
-        while($get = _fetch($sql))
+        $qry = db("SELECT * FROM `".$db['startpage']."`;"); $color = 0; $show = '';
+        while($get = _fetch($qry))
         {
             $edit = show("page/button_edit_single", array("id" => $get['id'], "action" => "admin=startpage&amp;do=edit", "title" => _button_title_edit));
             $delete = show("page/button_delete_single", array("id" => $get['id'], "action" => "admin=startpage&amp;do=delete", "title" => _button_title_del, "del" => _confirm_del_entry));

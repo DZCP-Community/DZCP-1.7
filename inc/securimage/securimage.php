@@ -1223,8 +1223,8 @@ class Securimage {
         global $db;
         $id = empty(Securimage::$_captchaId) ? visitorIp() : Securimage::$_captchaId;
         db("DELETE FROM `".$db['captcha']."` WHERE id = '".md5($id)."' AND namespace = '".$this->namespace."';");
-        $sql = db("SELECT `id` FROM `".$db['captcha']."` WHERE `created` < ".(time()-(30*30)).";");
-        while ($get = _fetch($sql)) {
+        $qry = db("SELECT `id` FROM `".$db['captcha']."` WHERE `created` < ".(time()-(30*30)).";");
+        while ($get = _fetch($qry)) {
             db("DELETE FROM `".$db['captcha']."` WHERE `id` = '".$get['id']."'");
         }
     }

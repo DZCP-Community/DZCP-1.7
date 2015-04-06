@@ -13,29 +13,24 @@ if(defined('_UserMenu')) {
         $lastvisit = $_SESSION['lastvisit'];
 
         /** Neue Foreneintraege anzeigen */
-        $qrykat = $sql->select("SELECT s1.id,s2.kattopic,s1.intern,s2.id FROM `{prefix_forumkats}` AS s1 LEFT JOIN `{prefix_forumsubkats}` AS s2 ON s1.id = s2.sid ORDER BY s1.kid,s2.kattopic");
+        $qrykat = $sql->select("SELECT s1.id,s2.kattopic,s1.intern,s2.id FROM `{prefix_forumkats}` AS s1 "
+                             . "LEFT JOIN `{prefix_forumsubkats}` AS s2 "
+                             . "ON s1.id = s2.sid "
+                             . "ORDER BY s1.kid,s2.kattopic");
 
         $forumposts = '';
         if ($sql->rowCount()) {
             foreach($qrykat as $getkat) {
-                unset($nthread);
-                unset($post);
-                unset($forumposts_show);
-
+                unset($nthread,$post,$forumposts_show);
                 if (fintern($getkat['id'])) {
-                    $qrytopic = db("SELECT lp,id,topic,first,sticky FROM " . $db['f_threads'] . "
-                                    WHERE kid = '" . $getkat['id'] . "'
-                                    AND lp > " . $lastvisit . "
-                                    ORDER BY lp DESC
-                                    LIMIT 150");
-                    if (_rows($qrytopic) >= 1) {
+                    $qrytopic = $sql->select("SELECT `lp`,`id`,`topic`,`first`,`sticky` FROM `{prefix_forumthreads}` "
+                                           . "WHERE `kid` = ? AND `lp` > ? ORDER BY `lp` DESC LIMIT 150;",array($getkat['id'],$lastvisit));
+                    if ($sql->rowCount() >= 1) {
                         $forumposts_show = '';
-                        while ($gettopic = _fetch($qrytopic)) {
-                            $lp = "";
-                            $cnt = "";
-                            $count = cnt($db['f_posts'], " WHERE date > " . $lastvisit . " AND sid = '" . $gettopic['id'] . "'");
-                            $lp = cnt($db['f_posts'], " WHERE sid = '" . $gettopic['id'] . "'");
-
+                        foreach($qrytopic as $gettopic) {
+                            $count = cnt('{prefix_forumposts}', " WHERE `date` > ? AND `sid` = ?",'id',array($lastvisit,$gettopic['id']));
+                            $lp = cnt('{prefix_forumposts}', " WHERE `sid` = ?",'id',array($gettopic['id']));
+                            
                             if ($count == 0) {
                                 $cnt = 1;
                                 $pagenr = 1;
@@ -51,23 +46,20 @@ if(defined('_UserMenu')) {
                             }
 
                             $nthread = $gettopic['first'] == 1 ? _no_new_thread : _new_thread;
-
                             if (check_new($gettopic['lp'])) {
                                 $intern = ($getkat['intern'] != 1 ? '' : '<span class="fontWichtig">' . _internal . ':</span>&nbsp;&nbsp;&nbsp;');
                                 $wichtig = ($gettopic['sticky'] != 1 ? '' : '<span class="fontWichtig">' . _sticky . ':</span> ');
-
                                 $date = (date("d.m.") == date("d.m.", $gettopic['lp'])) ? '[' . date("H:i", $gettopic['lp']) . ']' : date("d.m.", $gettopic['lp']) . ' [' . date("H:i", $gettopic['lp']) . ']';
-
                                 $can_erase = true;
-                                $forumposts_show .= '&nbsp;&nbsp;' . $date . show(_user_new_forum, array("cnt" => $cnt,
-                                            "tid" => $gettopic['id'],
-                                            "thread" => re($gettopic['topic']),
-                                            "intern" => $intern,
-                                            "wichtig" => $wichtig,
-                                            "post" => $post,
-                                            "page" => $pagenr,
-                                            "nthread" => $nthread,
-                                            "lp" => $lp + 1));
+                                $forumposts_show .= "&nbsp;&nbsp;" . $date . show(_user_new_forum, array("cnt" => $cnt,
+                                                    "tid" => $gettopic['id'],
+                                                    "thread" => re($gettopic['topic']),
+                                                    "intern" => $intern,
+                                                    "wichtig" => $wichtig,
+                                                    "post" => $post,
+                                                    "page" => $pagenr,
+                                                    "nthread" => $nthread,
+                                                    "lp" => ($lp + 1)));
                             }
                         }
                     }
@@ -80,15 +72,14 @@ if(defined('_UserMenu')) {
         }
 
         /** Neue Clanwars anzeigen */
-        $qrycw = db("SELECT s1.*,s2.icon FROM " . $db['cw'] . " AS s1
-                     LEFT JOIN " . $db['squads'] . " AS s2
-                     ON s1.squad_id = s2.id
-                     ORDER BY s1.datum");
+        $qrycw = $sql->select("SELECT s1.*,s2.`icon` FROM `{prefix_clanwars}` AS `s1` "
+                            . "LEFT JOIN `{prefix_squads}` AS `s2` "
+                            . "ON s1.`squad_id` = s2.`id` ORDER BY s1.`datum`;");
         $cws = '';
-        if (_rows($qrycw) >= 1) {
-            while ($getcw = _fetch($qrycw)) {
+        if($sql->rowCount()) {
+            foreach($qrycw as $getcw) {
                 if (!empty($getcw) && check_new($getcw['datum'])) {
-                    $check = cnt($db['cw'], " WHERE datum >" . $lastvisit . "");
+                    $check = cnt('{prefix_clanwars}', " WHERE `datum` > ?",'id',array($lastvisit));
 
                     if ($check == 1) {
                         $cnt = 1;
@@ -100,19 +91,18 @@ if(defined('_UserMenu')) {
 
                     $can_erase = true;
                     $cws .= show(_user_new_cw, array("datum" => date("d.m. H:i", $getcw['datum']) . _uhr,
-                        "id" => $getcw['id'],
-                        "icon" => $getcw['icon'],
-                        "gegner" => re($getcw['clantag'])));
+                                                     "id" => $getcw['id'],
+                                                     "icon" => $getcw['icon'],
+                                                     "gegner" => re($getcw['clantag'])));
                 }
             }
         }
 
         /** Neue Registrierte User anzeigen */
-        $getu = db("SELECT id,regdatum FROM " . $db['users'] . " ORDER BY id DESC", false, true);
+        $getu = $sql->selectSingle("SELECT `id`,`regdatum` FROM `{prefix_users}` ORDER BY `id` DESC;");
         $user = '';
         if (!empty($getu) && check_new($getu['regdatum'])) {
-            $check = cnt($db['users'], " WHERE regdatum > " . $lastvisit . "");
-
+            $check = cnt('{prefix_users}', " WHERE `regdatum` > ?",'id',array($lastvisit));
             if ($check == 1) {
                 $cnt = 1;
                 $eintrag = _new_users_1;
@@ -122,29 +112,18 @@ if(defined('_UserMenu')) {
             }
 
             $can_erase = true;
-            $user = show(_user_new_users, array("cnt" => $cnt,
-                "eintrag" => $eintrag));
+            $user = show(_user_new_users, array("cnt" => $cnt, "eintrag" => $eintrag));
         }
 
         /** Neue Eintruage im Guastebuch anzeigen */
         $permission_gb = permission("gb");
-        $activ = "";
-        if (!$permission_gb && settings('gb_activ')) {
-            $activ = "WHERE public = 1";
-        }
-
-        $gb = '';
-        $getgb = db("SELECT id,datum FROM " . $db['gb'] . " " . $activ . " ORDER BY id DESC", false, true);
+        $activ = (!$permission_gb && settings('gb_activ')) ? " WHERE `public` = 1" : ""; $gb = '';
+        $getgb = $sql->selectSingle("SELECT `id`,`datum` FROM `{prefix_gb}`".$activ." ORDER BY `id` DESC;");
         if (!empty($getgb) && check_new($getgb['datum'])) {
-            $cntgb = "";
-            if (!$permission_gb && settings('gb_activ')) {
-                $cntgb = "AND public = 1";
-            }
-
-            $check = cnt($db['gb'], " WHERE datum > " . $lastvisit . " " . $cntgb . "");
-
-            if ($check == "1") {
-                $cnt = "1";
+            $cntgb = (!$permission_gb && settings('gb_activ')) ? " AND `public` = 1" : "";
+            $check = cnt('{prefix_gb}', " WHERE `datum` > ?".$cntgb,'id',array($lastvisit));
+            if ($check == 1) {
+                $cnt = 1;
                 $eintrag = _new_eintrag_1;
             } else {
                 $cnt = $check;
@@ -152,18 +131,16 @@ if(defined('_UserMenu')) {
             }
 
             $can_erase = true;
-            $gb = show(_user_new_gb, array("cnt" => $cnt,
-                "eintrag" => $eintrag));
+            $gb = show(_user_new_gb, array("cnt" => $cnt, "eintrag" => $eintrag));
         }
 
         /** Neue Eintruage im User Guastebuch anzeigen */
-        $getmember = db("SELECT id,datum FROM " . $db['usergb'] . " WHERE user = '" . $userid . "' ORDER BY datum DESC", false, true);
-
+        $getmember = $sql->selectSingle("SELECT `id`,`datum` FROM `{prefix_usergb}` WHERE `user` = ? ORDER BY `datum` DESC;",array($userid));
         $membergb = '';
         if (!empty($getmember) && check_new($getmember['datum'])) {
-            $check = cnt($db['usergb'], " WHERE datum > " . $lastvisit . " AND user = '" . $userid . "'");
-            if ($check == "1") {
-                $cnt = "1";
+            $check = cnt('{prefix_usergb}', " WHERE `datum` > ? AND `user` = ?",'id',array($lastvisit,$userid));
+            if ($check == 1) {
+                $cnt = 1;
                 $eintrag = _new_eintrag_1;
             } else {
                 $cnt = $check;
@@ -171,9 +148,7 @@ if(defined('_UserMenu')) {
             }
 
             $can_erase = true;
-            $membergb = show(_user_new_membergb, array("cnt" => $cnt,
-                "id" => $userid,
-                "eintrag" => $eintrag));
+            $membergb = show(_user_new_membergb, array("cnt" => $cnt, "id" => $userid, "eintrag" => $eintrag));
         }
 
         /** Neue Private Nachrichten anzeigen */
@@ -483,14 +458,14 @@ if(defined('_UserMenu')) {
                     $intern = $getft['intern'] != 1 ? "" : '<span class="fontWichtig">' . _internal . ':</span>';
                     $wichtig = $getft['sticky'] != 1 ? '' : '<span class="fontWichtig">' . _sticky . ':</span> ';
                     $ftopics .= show($dir . "/userlobby_forum", array("id" => $getft['id'],
-                        "pagenr" => $page,
-                        "p" => $lp + 1,
-                        "intern" => $intern,
-                        "wichtig" => $wichtig,
-                        "lpost" => cut(re($text), 100),
-                        "kat" => re($getft['kattopic']),
-                        "titel" => re($getft['topic']),
-                        "kid" => $getft['kid']));
+                                                                      "pagenr" => $page,
+                                                                      "p" => $lp + 1,
+                                                                      "intern" => $intern,
+                                                                      "wichtig" => $wichtig,
+                                                                      "lpost" => cut(re($text), 100),
+                                                                      "kat" => re($getft['kattopic']),
+                                                                      "titel" => re($getft['topic']),
+                                                                      "kid" => $getft['kid']));
                 }
             }
         }

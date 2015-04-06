@@ -127,9 +127,9 @@ function db_stmt($query,$params=array('si', 'hallo', '4'),$rows=false,$fetch=fal
 function db_optimize() {
     global $db,$mysqli,$securimage;
     if ($mysqli instanceof mysqli) {
-        $sql = db("SELECT `id`,`update`,`expires` FROM `".$db['autologin']."`");
-        if(_rows($sql)) {
-            while ($get = _fetch($sql)) {
+        $qry = db("SELECT `id`,`update`,`expires` FROM `".$db['autologin']."`");
+        if(_rows($qry)) {
+            while ($get = _fetch($qry)) {
                 if(($get['update'] && (($get['update'] + $get['expires']) >= time()))) {
                     db("DELETE FROM `".$db['autologin']."` WHERE `id` = ".$get['id'].";");
                 }
@@ -142,14 +142,14 @@ function db_optimize() {
             db("TRUNCATE ".$db['sessions'].";");
         }
         
-        $sql = ''; $blacklist = array('host','user','pass','db','prefix');
+        $qry = ''; $blacklist = array('host','user','pass','db','prefix');
         foreach ($db as $key => $tb) {
             if(!in_array($key,$blacklist))
-                $sql .= '`'.$tb.'`, ';
+                $qry .= '`'.$tb.'`, ';
         }
 
-        $sql = substr($sql, 0, -2);
-        db('OPTIMIZE TABLE '.$sql.';');
+        $qry = substr($qry, 0, -2);
+        db('OPTIMIZE TABLE '.$qry.';');
     }
 }
 
