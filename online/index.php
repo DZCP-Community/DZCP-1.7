@@ -15,27 +15,27 @@ $where = _site_online;
 $dir = "online";
 
 ## SECTIONS ##
-if($chkMe)
-    db("UPDATE ".$db['users']." SET `time` = '".time()."', `whereami` = '".up($where)."' WHERE id = '".$userid."'");
+if($chkMe){
+    $sql->update("UPDATE `{prefix_users}` SET `time` = ".time().", `whereami` = ? WHERE `id` = ?;",array(up($where),$userid));
+}
 
 //Users
-$qry = db("SELECT id,ip,nick,whereami FROM ".$db['users']."
-           WHERE time+'".$useronline."'>'".time()."'
-           AND online = 1
-           ".orderby_sql(array("whereami","ip"), 'ORDER BY nick'));
+$qry = $sql->select("SELECT `id`,`ip`,`nick`,`whereami` FROM `{prefix_users}` "
+                  . "WHERE (time+?) > ".time()." AND `online` = 1 ".orderby_sql(array("whereami","ip"), 'ORDER BY nick').";",array($useronline));
 
-if(_rows($qry)) {
-    while($get = _fetch($qry)) {
-        if(!preg_match("#autor_#is",$get['whereami']))
+if($sql->rowCount()) {
+    foreach($qry as $get) {
+        if (!preg_match("#autor_#is", $get['whereami'])) {
             $whereami = re($get['whereami']);
-        else
-            $whereami =  preg_replace_callback("#autor_(.*?)$#",create_function('$id', 'return autor("$id[1]");'),$get['whereami']);
+        } else {
+            $whereami = preg_replace_callback("#autor_(.*?)$#", create_function('$id', 'return autor("$id[1]");'), $get['whereami']);
+        }
 
         $online_ip = '';
         if($chkMe == 4) {
             $online_ip = $get['ip'];
-            $DNS = db("SELECT dns FROM `".$db['ip2dns']."` WHERE `ip` = '".$online_ip."';",false,true);
-            $online_host = ($gethostbyaddr=$DNS['dns']);
+            $DNS = $sql->selectSingle("SELECT `dns` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array($online_ip),'dns');
+            $online_host = ($gethostbyaddr=$DNS);
             $online_ip = ' * '.($get['ip'] == $gethostbyaddr ? $online_ip : $online_ip.' ('.$online_host.')');
         }
 
@@ -47,24 +47,25 @@ if(_rows($qry)) {
 }
 
 //Gast
-$qry = db("SELECT * FROM ".$db['c_who']."
-           WHERE online+'".$useronline."'>'".time()."'
-           AND login = 0
-           ".orderby_sql(array("whereami","ip"), 'ORDER BY whereami'));
+$qry = $sql->select("SELECT * FROM `{prefix_counter_whoison}` "
+                  . "WHERE (online+?) > ".time()." AND `login` = 0 ".orderby_sql(array("whereami","ip"), 'ORDER BY whereami').";",array($useronline));
 
-if(_rows($qry)) {
-    while($get = _fetch($qry)) {
-        if(!preg_match("#autor_#is",$get['whereami'])) $whereami = re($get['whereami']);
-        else $whereami = preg_replace_callback("#autor_(.*?)$#",create_function('$id', 'return autor("$id[1]");'),$get['whereami']);
+if($sql->rowCount()) {
+    foreach($qry as $get) {
+        if (!preg_match("#autor_#is", $get['whereami'])) {
+            $whereami = re($get['whereami']);
+        } else {
+            $whereami = preg_replace_callback("#autor_(.*?)$#", create_function('$id', 'return autor("$id[1]");'), $get['whereami']);
+        }
 
         if($chkMe == 4) {
             $online_ip = $get['ip'];
-            $DNS = db("SELECT dns FROM `".$db['ip2dns']."` WHERE `ip` = '".$online_ip."';",false,true);
-            $online_host = ($gethostbyaddr=$DNS['dns']);
+            $DNS = $sql->selectSingle("SELECT `dns` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array($online_ip),'dns');
+            $online_host = ($gethostbyaddr=$DNS);
         } else {
             $online_ip = preg_replace("#^(.*)\.(.*)#","$1",$get['ip']);
-            $DNS = db("SELECT dns FROM `".$db['ip2dns']."` WHERE `ip` = '".$get['ip']."';",false,true);
-            $online_host = preg_replace("#^(.*?)\.(.*)#","$2",($gethostbyaddr=$DNS['dns']));
+            $DNS = $sql->selectSingle("SELECT `dns` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array($get['ip']),'dns');
+            $online_host = preg_replace("#^(.*?)\.(.*)#","$2",($gethostbyaddr=$DNS));
         }
 
         $online_ip = ($get['ip'] == $gethostbyaddr ? $online_ip.'.XX' : $online_ip.'.XX (*.'.$online_host.')');
