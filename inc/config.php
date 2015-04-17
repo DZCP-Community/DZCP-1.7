@@ -15,9 +15,9 @@ define('debug_dzcp_handler', true); // Verwende fur Notices, etc. die Debug Cons
 define('fsockopen_support_bypass', false); //Umgeht die fsockopen pruefung
 define('use_curl', true); // Verwendet die CURL PHP Erweiterung, anstelle von file_get_contents() fur externe Zugriffe, wenn vorhanden.
 
-define('use_default_timezone', true); // Verwendende die Zeitzone vom Server
+define('use_default_timezone', true); // Verwendende die Zeitzone vom Web Server
 define('default_timezone', 'Europe/Berlin'); // Die zu verwendende Zeitzone selbst einstellen * 'use_default_timezone' auf false stellen *
-define('admin_view_dzcp_news', true); // Entscheidet ob der DZCP Newstricker in der Administration angezeigt wird
+define('admin_view_dzcp_news', true); // Entscheidet ob der DZCP.de News in der Administration angezeigt wird
 define('show_empty_paginator', false); //Die Paginatoren sind immer sichtbar
 
 define('thumbgen_cache', true); // Sollen die verkleinerten Bilder der Thumbgen gespeichert werden
@@ -36,14 +36,14 @@ define('cookie_dir', '/'); // Der Pfad auf dem Server, fur welchen das Cookie ve
 
 define('autologin_expire', (14*24*60*60)); // Wie lange die Autologins gultig bleiben bis zum erneuten login, bis zu 14 Tage
 
-define('auto_db_optimize', true); // Soll in der Datenbank regelmaessig ein OPTIMIZE TABLE ausgefuehrt werden?
+define('auto_db_optimize', true); // Soll in der Datenbank regelmaessig ein OPTIMIZE TABLE ausgefuehrt werden
 define('auto_db_optimize_interval', (7*24*60*60)); // Wann soll der OPTIMIZE TABLE ausgefuehrt werden, alle 7 Tage.
 
 define('dzcp_version_checker', true); // Version auf DZCP.de abgleichen und benachrichtigen ob eine neue Version zur Verfuegung steht
 define('dzcp_version_checker_refresh', (30*60)); // Wie lange soll gewartet werden um einen Versionsabgleich auszufuehren
 
 define('buffer_gzip_compress_level', 4); // Level der GZIP Kompression 1 - 9
-define('buffer_show_licence_bar', true); // Schaltet die "Powered by DZCP - deV!L`z Clanportal V1.6" am ende der Seite an oder aus
+define('buffer_show_licence_bar', true); // Schaltet die "Powered by DZCP - deV!L`z Clanportal V1.7" am ende der Seite an oder aus
 
 define('steam_enable', true); // Steam Status anzeigen
 define('steam_avatar_cache', true); // Steam Useravatare fuer schnellen Zugriff speichern

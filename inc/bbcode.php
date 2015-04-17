@@ -2502,7 +2502,8 @@ function admin_perms($userid) {
     }
 
     // no need for these admin areas & check user permission
-    $e = array('gb', 'shoutbox', 'editusers', 'votes', 'contact', 'joinus', 'intnews', 'forum', 'gs_showpw');
+    $e = array('gb', 'shoutbox', 'editusers', 'votes', 'contact', 'joinus', 'intnews', 'forum', 
+    'gs_showpw','dlintern','intforum','galleryintern');
     
     $qry = $sql->select("SELECT * FROM `{prefix_permissions}` WHERE `user` = ?;",array(intval($userid)));
     if($sql->rowCount()) {

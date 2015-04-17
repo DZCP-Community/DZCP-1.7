@@ -25,7 +25,7 @@ if(defined('_UserMenu')) {
                 if (fintern($getkat['id'])) {
                     $qrytopic = $sql->select("SELECT `lp`,`id`,`topic`,`first`,`sticky` FROM `{prefix_forumthreads}` "
                                            . "WHERE `kid` = ? AND `lp` > ? ORDER BY `lp` DESC LIMIT 150;",array($getkat['id'],$lastvisit));
-                    if ($sql->rowCount() >= 1) {
+                    if ($sql->rowCount()) {
                         $forumposts_show = '';
                         foreach($qrytopic as $gettopic) {
                             $count = cnt('{prefix_forumposts}', " WHERE `date` > ? AND `sid` = ?",'id',array($lastvisit,$gettopic['id']));
@@ -152,13 +152,10 @@ if(defined('_UserMenu')) {
         }
 
         /** Neue Private Nachrichten anzeigen */
-        $getmsg = db("SELECT id,an,datum FROM " . $db['msg'] . "
-                      WHERE an = '" . $userid . "'
-                      AND readed = 0
-                      AND see_u = 0
-                      ORDER BY datum DESC", false, true);
-
-        $check = cnt($db['msg'], " WHERE an = '" . $userid . "' AND readed = 0 AND see_u = 0");
+        $getmsg = $sql->selectSingle("SELECT `id`,`an`,`datum` FROM `{prefix_messages}` "
+                                   . "WHERE `an` = ? AND `readed` = 0 AND `see_u` = 0 "
+                                   . "ORDER BY `datum` DESC;",array($userid));
+        $check = cnt("{prefix_messages}", " WHERE `an` = ? AND `readed` = 0 AND `see_u` = 0",'id',array($userid));
         if ($check == 1) {
             $mymsg = show(_lobby_mymessage, array("cnt" => 1));
         } else if ($check >= 1) {
@@ -168,24 +165,14 @@ if(defined('_UserMenu')) {
         }
 
         /** Neue News anzeigen */
-        if ($chkMe >= 2) {
-            $qrynews = db("SELECT id,datum FROM " . $db['news'] . "
-                           WHERE public = 1
-                           AND datum <= " . time() . "
-                           ORDER BY id DESC");
-        } else {
-            $qrynews = db("SELECT id,datum FROM " . $db['news'] . "
-                           WHERE public = 1
-                           AND intern = 0
-                           AND datum <= " . time() . "
-                           ORDER BY id DESC");
-        }
-
+        $qrynews = ($qrycheckn = $sql->select("SELECT `id`,`datum`,`titel` FROM `{prefix_news}` "
+                              . "WHERE `public` = 1".($chkMe >= 2 ? '' : ' AND `intern` = 0')." AND `datum` <= ".time()." "
+                              . "ORDER BY `id` DESC;"));
         $news = '';
-        if (_rows($qrynews) >= 1) {
-            while ($getnews = _fetch($qrynews)) {
+        if ($sql->rowCount()) {
+            foreach($qrynews as $getnews) {
                 if (check_new($getnews['datum'])) {
-                    $check = cnt($db['news'], " WHERE datum > " . $lastvisit . " AND public = 1");
+                    $check = cnt("{prefix_news}", " WHERE `datum` > ?".($chkMe >= 2 ? '' : ' AND `intern` = 0')." AND `public` = 1",'id',array($lastvisit));
                     $cnt = $check == "1" ? "1" : $check;
                     $can_erase = true;
                     $news = show(_user_new_news, array("cnt" => $cnt, "eintrag" => _lobby_new_news));
@@ -193,14 +180,13 @@ if(defined('_UserMenu')) {
             }
         }
 
-        /** Neue News comments anzeigen */
-        $qrycheckn = db("SELECT id,titel FROM " . $db['news'] . " WHERE public = 1 AND datum <= " . time() . "");
+         /** Neue News comments anzeigen */
         $newsc = '';
-        if (_rows($qrycheckn) >= 1) {
-            while ($getcheckn = _fetch($qrycheckn)) {
-                $getnewsc = db("SELECT id,news,datum FROM " . $db['newscomments'] . " WHERE news = '" . $getcheckn['id'] . "' ORDER BY datum DESC", false, true);
+        if ($sql->rowCount()) {
+            foreach($qrycheckn as $getcheckn) {
+                $getnewsc = $sql->selectSingle("SELECT `id`,`news`,`datum` FROM `{prefix_newscomments}` WHERE `news` = ? ORDER BY `datum` DESC;",array($getcheckn['id']));
                 if (check_new($getnewsc['datum'])) {
-                    $check = cnt($db['newscomments'], " WHERE datum > " . $lastvisit . " AND news = '" . $getnewsc['news'] . "'");
+                    $check = cnt("{prefix_newscomments}", " WHERE `datum` > ? AND `news` = ?",'id',array($lastvisit,$getnewsc['news']));
                     if ($check == "1") {
                         $cnt = "1";
                         $eintrag = _lobby_new_newsc_1;
@@ -212,22 +198,22 @@ if(defined('_UserMenu')) {
                     if ($check) {
                         $can_erase = true;
                         $newsc .= show(_user_new_newsc, array("cnt" => $cnt,
-                            "id" => $getnewsc['news'],
-                            "news" => re($getcheckn['titel']),
-                            "eintrag" => $eintrag));
+                                                              "id" => $getnewsc['news'],
+                                                              "news" => re($getcheckn['titel']),
+                                                              "eintrag" => $eintrag));
                     }
                 }
             }
         }
 
         /** Neue Clanwars comments anzeigen */
-        $qrycheckcw = db("SELECT id FROM " . $db['cw']);
+        $qrycheckcw = $sql->select("SELECT `id` FROM `{prefix_clanwars}` ORDER BY `datum` DESC;"); 
         $cwcom = '';
-        if (_rows($qrycheckcw) >= 1) {
-            while ($getcheckcw = _fetch($qrycheckcw)) {
-                $getcwc = db("SELECT id,cw,datum FROM " . $db['cw_comments'] . " WHERE cw = '" . $getcheckcw['id'] . "' ORDER BY datum DESC", false, true);
+        if ($sql->rowCount()) {
+            foreach($qrycheckcw as $getcheckcw) {
+                $getcwc = $sql->selectSingle("SELECT `id`,`cw`,`datum` FROM `{prefix_cw_comments}` WHERE `cw` = ? ORDER BY `datum` DESC;",array($getcheckcw['id']));
                 if (!empty($getcwc) && check_new($getcwc['datum'])) {
-                    $check = cnt($db['cw_comments'], " WHERE datum > " . $lastvisit . " AND cw = '" . $getcwc['cw'] . "'");
+                    $check = cnt('{prefix_cw_comments}', " WHERE `datum` > ? AND `cw` = ?",'id',array($lastvisit,$getcwc['cw']));
                     if ($check == 1) {
                         $cnt = 1;
                         $eintrag = _lobby_new_cwc_1;
@@ -238,27 +224,17 @@ if(defined('_UserMenu')) {
 
                     $can_erase = true;
                     $cwcom .= show(_user_new_clanwar, array("cnt" => $cnt,
-                        "id" => $getcwc['cw'],
-                        "eintrag" => $eintrag));
+                                                            "id" => $getcwc['cw'],
+                                                            "eintrag" => $eintrag));
                 }
             }
         }
 
         /** Neue Votes anzeigen */
-        if (permission("votes")) {
-            $getnewv = db("SELECT datum FROM " . $db['votes'] . "
-                           WHERE forum = 0
-                           ORDER BY datum DESC", false, true);
-        } else {
-            $getnewv = db("SELECT datum FROM " . $db['votes'] . "
-                           WHERE intern = 0
-                           AND forum = 0
-                           ORDER BY datum DESC", false, true);
-        }
-
+        $getnewv = $sql->selectSingle("SELECT `datum` FROM `{prefix_votes}` WHERE `forum` = 0 ".(permission("votes") ? '' : 'AND `intern` = 0 ')."ORDER BY `datum` DESC;");
         $newv = '';
         if (!empty($getnewv) && check_new($getnewv['datum'])) {
-            $check = cnt($db['votes'], " WHERE datum > " . $lastvisit . " AND forum = 0");
+            $check = cnt('{prefix_votes}', " WHERE `datum` > ? AND `forum` = 0",'id',array($lastvisit));
             if ($check == "1") {
                 $cnt = "1";
                 $eintrag = _new_vote_1;
@@ -268,29 +244,28 @@ if(defined('_UserMenu')) {
             }
 
             $can_erase = true;
-            $newv = show(_user_new_votes, array("cnt" => $cnt,
-                "eintrag" => $eintrag));
+            $newv = show(_user_new_votes, array("cnt" => $cnt, "eintrag" => $eintrag));
         }
 
         /** Kalender Events anzeigen */
-        $getkal = db("SELECT * FROM " . $db['events'] . " WHERE datum > '" . time() . "' ORDER BY datum", false, true);
+        $getkal = $sql->selectSingle("SELECT `id`,`datum`,`title` FROM `{prefix_events}` WHERE `datum` > ".time()." ORDER BY `datum`;");
         $nextkal = '';
         if (!empty($getkal) && check_new($getkal['datum'])) {
             if (date("d.m.Y", $getkal['datum']) == date("d.m.Y", time())) {
                 $nextkal = show(_userlobby_kal_today, array("time" => mktime(0, 0, 0, date("m", $getkal['datum']), date("d", $getkal['datum']), date("Y", $getkal['datum'])),
-                    "event" => $getkal['title']));
+                                                            "event" => $getkal['title']));
             } else {
                 $nextkal = show(_userlobby_kal_not_today, array("time" => mktime(0, 0, 0, date("m", $getkal['datum']), date("d", $getkal['datum']), date("Y", $getkal['datum'])),
-                    "date" => date("d.m.Y", $getkal['datum']),
-                    "event" => $getkal['title']));
+                                                                "date" => date("d.m.Y", $getkal['datum']),
+                                                                "event" => $getkal['title']));
             }
         }
 
         /** Neue Awards anzeigen */
-        $getaw = db("SELECT id,postdate FROM " . $db['awards'] . " ORDER BY id DESC", false, true);
+        $getaw = $sql->selectSingle("SELECT `id`,`postdate` FROM `{prefix_awards}` ORDER BY `id` DESC;");
         $awards = '';
         if (!empty($getaw) && check_new($getaw['postdate'])) {
-            $check = cnt($db['awards'], " WHERE postdate > " . $lastvisit);
+            $check = cnt('{prefix_awards}', " WHERE `postdate` > ?",'id',array($lastvisit));
             if ($check == "1") {
                 $cnt = "1";
                 $eintrag = _new_awards_1;
@@ -300,15 +275,14 @@ if(defined('_UserMenu')) {
             }
 
             $can_erase = true;
-            $awards = show(_user_new_awards, array("cnt" => $cnt,
-                "eintrag" => $eintrag));
+            $awards = show(_user_new_awards, array("cnt" => $cnt, "eintrag" => $eintrag));
         }
 
         /** Neue Rankings anzeigen */
-        $getra = db("SELECT id,postdate FROM " . $db['rankings'] . " ORDER BY id DESC", false, true);
+        $getra = $sql->selectSingle("SELECT `id`,`postdate` FROM `{prefix_rankings}` ORDER BY `id` DESC;");
         $rankings = '';
         if (!empty($getra) && check_new($getra['postdate'])) {
-            $check = cnt($db['rankings'], " WHERE postdate > " . $lastvisit);
+            $check = cnt('{prefix_rankings}', " WHERE postdate > ?",'id',array($lastvisit));
             if ($check == "1") {
                 $cnt = "1";
                 $eintrag = _new_rankings_1;
@@ -318,17 +292,16 @@ if(defined('_UserMenu')) {
             }
 
             $can_erase = true;
-            $rankings = show(_user_new_rankings, array("cnt" => $cnt,
-                "eintrag" => $eintrag));
+            $rankings = show(_user_new_rankings, array("cnt" => $cnt, "eintrag" => $eintrag));
         }
 
         /** Neue Artikel anzeigen */
-        $qryart = db("SELECT id,datum FROM " . $db['artikel'] . " WHERE public = 1 ORDER BY id DESC");
+        $qryart = $sql->select("SELECT `id`,`datum` FROM `{prefix_artikel}` WHERE `public` = 1 ORDER BY `id` DESC;");
         $artikel = '';
-        if (_rows($qryart) >= 1) {
-            while ($getart = _fetch($qryart)) {
+        if ($sql->rowCount()) {
+            foreach($qryart as $getart) {
                 if (check_new($getart['datum'])) {
-                    $check = cnt($db['artikel'], " WHERE datum > " . $lastvisit . " AND public = 1");
+                    $check = cnt('{prefix_artikel}', " WHERE `datum` > ? AND `public` = 1",'id',array($lastvisit));
                     if ($check == "1") {
                         $cnt = "1";
                         $eintrag = _lobby_new_art_1;
@@ -338,23 +311,21 @@ if(defined('_UserMenu')) {
                     }
 
                     $can_erase = true;
-                    $artikel = show(_user_new_art, array("cnt" => $cnt,
-                        "eintrag" => $eintrag));
+                    $artikel = show(_user_new_art, array("cnt" => $cnt, "eintrag" => $eintrag));
                 }
             }
         }
 
         /** Neue Artikel Comments anzeigen */
-        $qrychecka = db("SELECT id FROM " . $db['artikel'] . " WHERE public = 1");
+        $qrychecka = $sql->select("SELECT `id` FROM `{prefix_artikel}` WHERE `public` = 1;");
         $artc = '';
-        if (_rows($qrychecka) >= 1) {
-            while ($getchecka = _fetch($qrychecka)) {
-                $getartc = db("SELECT id,artikel,datum FROM " . $db['acomments'] . "
-                               WHERE artikel = '" . $getchecka['id'] . "'
-                               ORDER BY datum DESC", false, true);
-
+        if ($sql->rowCount()) {
+            foreach($qrychecka as $getchecka) {
+                $getartc = $sql->selectSingle("SELECT `id`,`artikel`,`datum` FROM `{prefix_acomments}` "
+                            . "WHERE `artikel` = ? "
+                            . "ORDER BY `datum` DESC;",array($getchecka['id']));
                 if (!empty($getartc) && check_new($getartc['datum'])) {
-                    $check = cnt($db['acomments'], " WHERE datum > " . $lastvisit . " AND artikel = '" . $getartc['artikel'] . "'");
+                    $check = cnt('{prefix_acomments}', " WHERE `datum` > ? AND `artikel` = ?",'id',array($lastvisit,$getartc['artikel']));
                     if ($check == "1") {
                         $cnt = "1";
                         $eintrag = _lobby_new_artc_1;
@@ -365,17 +336,17 @@ if(defined('_UserMenu')) {
 
                     $can_erase = true;
                     $artc .= show(_user_new_artc, array("cnt" => $cnt,
-                        "id" => $getartc['artikel'],
-                        "eintrag" => $eintrag));
+                                                        "id" => $getartc['artikel'],
+                                                        "eintrag" => $eintrag));
                 }
             }
         }
 
         /** Neue Bilder in der Gallery anzeigen */
-        $getgal = db("SELECT id,datum FROM " . $db['gallery'] . " ORDER BY id DESC", false, true);
+        $getgal = $sql->selectSingle("SELECT `id`,`datum` FROM `{prefix_gallery}` ORDER BY `id` DESC;");
         $gal = '';
         if (!empty($getgal) && check_new($getgal['datum'])) {
-            $check = cnt($db['gallery'], " WHERE datum > " . $lastvisit);
+            $check = cnt('{prefix_gallery}', " WHERE `datum` > ?",'id',array($lastvisit));
             if ($check == "1") {
                 $cnt = "1";
                 $eintrag = _new_gal_1;
@@ -385,8 +356,7 @@ if(defined('_UserMenu')) {
             }
 
             $can_erase = true;
-            $gal = show(_user_new_gallery, array("cnt" => $cnt,
-                "eintrag" => $eintrag));
+            $gal = show(_user_new_gallery, array("cnt" => $cnt, "eintrag" => $eintrag));
         }
 
         /** Neue Aways anzeigen */

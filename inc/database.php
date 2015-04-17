@@ -5,6 +5,11 @@
  * Database Connect & Functions Class (PDO)
  */
 
+//Debugging PDO
+define('pdo_disable_update_statement', false);
+define('pdo_disable_insert_statement', false);
+define('pdo_disable_delete_statement', false);
+
     /*
      * 
      * LOOPS
@@ -64,6 +69,18 @@ class database {
     }
 
     public final function getInstance($active = "default") {
+        if(pdo_disable_update_statement) {
+            DebugConsole::insert_error('database::update', 'PDO-Update statement is disabled!!!');
+        }
+
+        if(pdo_disable_insert_statement) {
+            DebugConsole::insert_error('database::insert', 'PDO-Insert statement is disabled!!!');
+        }
+
+        if(pdo_disable_delete_statement) {
+            DebugConsole::insert_error('database::delete', 'PDO-Delete statement is disabled!!!');
+        }
+        
         if (!isset($this->dbConf[$active])) {
             throw new Exception("Unexisting db-config $active");
         }
@@ -109,6 +126,10 @@ class database {
     }
     
     public function delete($qry, array $params = array()) {
+        if(pdo_disable_delete_statement) {
+            return false;
+        }
+        
         if (($type = $this->getQueryType($qry)) !== "delete") {
             throw new Exception("Incorrect Delete Query");
         }
@@ -117,6 +138,10 @@ class database {
     }
 
     public function update($qry, array $params = array()) {
+        if(pdo_disable_update_statement) {
+            return false;
+        }
+        
         if (($type = $this->getQueryType($qry)) !== "update") {
             throw new Exception("Incorrect Update Query");
         }
@@ -125,6 +150,10 @@ class database {
     }
 
     public function insert($qry, array $params = array()) {
+        if(pdo_disable_insert_statement) {
+            return false;
+        }
+        
         if (($type = $this->getQueryType($qry)) !== "insert") {
             throw new Exception("Incorrect Insert Query");
         }
