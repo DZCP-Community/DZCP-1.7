@@ -141,9 +141,15 @@ $db = array("host" =>           $sql_host,
 unset($prefix,$sql_host,$sql_user,$sql_pass,$sql_db);
 
 function show($tpl="", $array=array(), $array_lang_constant=array(), $array_block=array()) {
+    global $tmpdir;
+    return show_runner($tpl,"inc/_templates_/".$tmpdir."/",$array,$array_lang_constant,$array_block,false);
+}
+
+//-> Ersetzt Platzhalter im HTML Code 
+function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=array(), $array_block=array(),$addon=false) {
     global $tmpdir,$chkMe,$cache,$config_cache,$installation;
     if(!empty($tpl) && $tpl != null) {
-        $template = basePath."/inc/_templates_/".$tmpdir."/".$tpl;
+        $template = basePath."/".$dir.$tpl;
 
         //HTML Cache for Template Files
         if(!$installation) {
@@ -167,35 +173,34 @@ function show($tpl="", $array=array(), $array_lang_constant=array(), $array_bloc
             }
         }
         else {
-            if (file_exists($template . ".html")) {
+            if(file_exists($template . ".html")) {
                 $tpl = file_get_contents($template . ".html");
             }
         }
 
         //put placeholders in array
         $array['dir'] = '../inc/_templates_/'.$tmpdir;
-        $array['idir'] = '../inc/images';
+        $array['idir'] = '../inc/images'; //Image DIR [idir]
+        $array['adir'] = ($addon ? '../'.$addon : '../inc/_templates_/'.$tmpdir); //Addon DIR [adir]
         $pholder = explode("^",pholderreplace($tpl));
         for($i=0;$i<=count($pholder)-1;$i++) {
-            if (in_array($pholder[$i], $array_block)) {
-                continue;
-            }
-
-            if (array_key_exists($pholder[$i], $array)) {
-                continue;
-            }
-
-            if (!strstr($pholder[$i], 'lang_')) {
+            if (in_array($pholder[$i], $array_block) || array_key_exists($pholder[$i], $array) || 
+               (!strstr($pholder[$i], 'lang_') && !strstr($pholder[$i], 'func_'))) {
                 continue;
             }
 
             if (defined(substr($pholder[$i], 4))) {
                 $array[$pholder[$i]] = (count($array_lang_constant) >= 1 ? show(constant(substr($pholder[$i], 4)), $array_lang_constant) : constant(substr($pholder[$i], 4)));
             }
+
+            if (function_exists(substr($pholder[$i], 5))) {
+                $function = substr($pholder[$i], 5);
+                $array[$pholder[$i]] = $function();
+            }
         }
-
+        
         unset($pholder);
-
+        
         $tpl = (!$chkMe ? preg_replace("|<logged_in>.*?</logged_in>|is", "", $tpl) : preg_replace("|<logged_out>.*?</logged_out>|is", "", $tpl));
         $tpl = str_ireplace(array("<logged_in>","</logged_in>","<logged_out>","</logged_out>"), '', $tpl);
 

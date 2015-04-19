@@ -1960,8 +1960,10 @@ function startpage() {
 }
 
 //-> Nickausgabe mit Profillink oder Emaillink (reg/nicht reg)
-function autor($uid, $class="", $nick="", $email="", $cut="", $add="") {
-    global $sql;
+function autor($uid=0, $class="", $nick="", $email="", $cut="", $add="") {
+    global $sql,$userid;
+    $uid = (!$uid ? $userid : $uid);
+    if(!$uid) return '* No UserID! *';
     if(!dbc_index::issetIndex('user_'.intval($uid))) {
         $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
         if($sql->rowCount()) {
@@ -2285,8 +2287,10 @@ function getAge($bday) {
 }
 
 //-> Ausgabe der Position des einzelnen Members
-function getrank($tid, $squad="", $profil=false) {
-    global $sql;
+function getrank($tid=0, $squad="", $profil=false) {
+    global $sql,$userid;
+    $tid = (!$tid ? $userid : $tid);
+    if(!$tid) return '* No UserID! *';
     if($squad) {
         if ($profil) {
             $qry = $sql->select("SELECT s1.`posi`,s2.`name` FROM `{prefix_userposis}` AS `s1` LEFT JOIN `{prefix_squads}` AS `s2` ON s1.`squad` = s2.`id` "
@@ -2985,6 +2989,22 @@ function CryptMailto($email='',$template=_emailicon,$custom=array()) {
     return '<span id="'.$id.'">[javascript protected email address]</span>'.$script;
 }
 
+//-> DZCP-API Klassen einbinden
+if($api_files = get_files(basePath.'/inc/api/',false,true,array('php'))) {
+    foreach($api_files AS $api)
+    { include(basePath.'/inc/api/'.$api); }
+    unset($api_files,$api);
+}
+
+//-> Laden der Menus
+$menu_index = array();
+if($menu_functions_index = get_files(basePath.'/inc/menu-functions',false,true,array('php'))) {
+    foreach ($menu_functions_index as $mfphp) {
+        $file = str_replace('.php', '', $mfphp);
+        $menu_index[$file] = file_exists(basePath.'/inc/menu-functions/'.$file.'.php');
+    } unset($menu_functions_index,$file,$mfphp);
+}
+
 //-> Neue Languages einbinden, sofern vorhanden
 if($language_files = get_files(basePath.'/inc/additional-languages/'.$language.'/',false,true,array('php'))) {
     foreach($language_files AS $languages)
@@ -3000,8 +3020,9 @@ if($functions_files = get_files(basePath.'/inc/additional-functions/',false,true
 }
 
 //-> Navigation einbinden
-if(file_exists(basePath.'/inc/menu-functions/navi.php'))
-    include_once(basePath.'/inc/menu-functions/navi.php');
+if (file_exists(basePath . '/inc/menu-functions/navi.php')) {
+    include_once(basePath . '/inc/menu-functions/navi.php');
+}
 
 //-> Verbertet wichtige Informationen zwischen JS und PHP
 class javascript {
@@ -3027,7 +3048,7 @@ class javascript {
 //-> Ausgabe des Indextemplates
 function page($index='',$title='',$where='',$index_templ='index') {
     global $userid,$userip,$tmpdir,$chkMe,$charset,$dir;
-    global $designpath,$language,$time_start;
+    global $designpath,$language,$time_start,$menu_index;
 
     // Timer Stop
     $time = round(generatetime() - $time_start,4);
@@ -3104,7 +3125,8 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
         //filter placeholders
         $dir = $designpath; //after template index autodetect!!!
-        $blArr = array("[clanname]","[title]","[java_vars]","[login]","[template_switch]","[headtitle]","[index]","[time]","[rss]","[dir]","[charset]","[where]","[lang]","[notification]","[notification_tr]");
+        $blArr = array("[clanname]","[title]","[java_vars]","[login]","[template_switch]","[headtitle]",
+        "[index]","[time]","[rss]","[dir]","[charset]","[where]","[lang]","[notification]","[notification_tr]");
         $pholdervars = '';
         for($i=0;$i<=count($blArr)-1;$i++) {
             if (preg_match("#" . $blArr[$i] . "#", $pholder)) {
@@ -3118,13 +3140,6 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
         $pholder = pholderreplace($pholder);
         $pholdervars = pholderreplace($pholdervars);
-
-        $menu_functions_index = get_files(basePath.'/inc/menu-functions',false,true,array('php'));
-        $menu_index = array();
-        foreach ($menu_functions_index as $mfphp) {
-            $file = str_replace('.php', '', $mfphp);
-            $menu_index[$file] = file_exists(basePath.'/inc/menu-functions/'.$file.'.php');
-        } unset($menu_functions_index);
 
         //put placeholders in array
         $arr = array();
