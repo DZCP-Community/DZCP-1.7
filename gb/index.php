@@ -462,9 +462,6 @@ case 'preview';
 
   echo utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>');
 
-  if(!mysqli_persistconns)
-      $mysql->close(); //MySQL
-
   exit();
 break;
 endswitch;
