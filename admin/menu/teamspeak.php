@@ -17,10 +17,6 @@ switch ($do) {
         }
 
         db("UPDATE `".$db['ts']."` SET `default_server` = 1 WHERE `id` = ".intval($_GET['id']).";");
-        
-        if(!mysqli_persistconns)
-            $mysql->close(); //MySQL
-        
         header("Location: ?admin=teamspeak");
     break;
     case 'menu':
@@ -35,10 +31,7 @@ switch ($do) {
         if($ts3_menu['id'] != intval($_GET['id'])) {
             db("UPDATE `".$db['ts']."` SET `show_navi` = 1 WHERE `id` = ".intval($_GET['id']).";");
         }
-        
-        if(!mysqli_persistconns)
-            $mysql->close(); //MySQL
-        
+
         header("Location: ?admin=teamspeak");
     break;
     case 'delete':

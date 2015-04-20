@@ -68,10 +68,5 @@ if(defined('_UserMenu')) {
                                              "rank" => getrank($userid),
                                              "ip" => $posted_ip));
 
-  echo utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>');
-
-  if(!mysqli_persistconns)
-    $mysql->close(); //MySQL
-
-  exit();
+  exit(utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>'));
 }

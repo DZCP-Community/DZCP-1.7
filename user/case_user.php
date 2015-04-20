@@ -17,10 +17,11 @@ if(defined('_UserMenu')) {
                 db("UPDATE ".$db['userstats']." SET `profilhits` = profilhits+1 WHERE user = '".$get['id']."'"); //Update Userstats
             
             $sex = '-';
-            if($get['sex'] == "1")
+            if ($get['sex'] == "1") {
                 $sex = _male;
-            elseif($get['sex'] == "2")
+            } elseif ($get['sex'] == "2") {
                 $sex = _female;
+            }
 
             $hp = empty($get['hp']) ? "-" : "<a href=\"".$get['hp']."\" target=\"_blank\">".$get['hp']."</a>";
             $email = empty($get['email']) ? "-" : CryptMailto(re($get['email']),_user_mailto_texttop);
@@ -39,7 +40,7 @@ if(defined('_UserMenu')) {
                 $icqnr = re($get['icq']);
             }
 
-            $status = ($get['status'] == 1 || ($getl['level'] != 1 && isset($_GET['sq']))) ? _aktiv_icon : _inaktiv_icon;
+            $status = ($get['status'] == 1 || ($get['level'] != 1 && isset($_GET['sq']))) ? _aktiv_icon : _inaktiv_icon;
             $getl = db("SELECT * FROM ".$db['users']." WHERE id = '".intval($_GET['id'])."'",false,true);
 
             $clan = "";

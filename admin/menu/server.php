@@ -12,10 +12,6 @@ switch ($do) {
         $get = db("SELECT `navi`,`game`,`id` FROM `".$db['server']."` WHERE `id` = ".intval($_GET['id']).";",false,true);
         if($get['game'] != 'nope') {
             db("UPDATE `".$db['server']."` SET `navi` = ".($get['navi'] ? 0 : 1)." WHERE `id` = ".$get['id'].";");
-            
-            if(!mysqli_persistconns)
-                $mysql->close(); //MySQL
-                
             header("Location: ?admin=server");
         } else {
             $show = error(_server_isnt_live);

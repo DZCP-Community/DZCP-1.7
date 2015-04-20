@@ -47,7 +47,9 @@ define("_description", 'Description');
 define('_no_news_yet', '<tr>
   <td class="contentMainFirst" colspan="[colspan]" align="center">No new news available</td>
 </tr>');
-
+define('_no_entrys_found', '<tr>
+  <td class="contentMainFirst" colspan="[colspan]" align="center">No entrys found</td>
+</tr>');
 
 //Forum
 define('_forum_last_post', 'View the latest post');

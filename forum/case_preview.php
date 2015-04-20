@@ -124,12 +124,7 @@ if(defined('_Forum')) {
                                              "f_abo" => "",
                                              "show" => $show));
     
-    echo utf8_encode('<table class="mainContent" cellspacing="1" style="margin-top:17px">'.$index.'</table>');
-
-    if(!mysqli_persistconns)
-        $mysql->close(); //MySQL
-
-    exit();
+    exit(utf8_encode('<table class="mainContent" cellspacing="1" style="margin-top:17px">'.$index.'</table>'));
   } else {
     if($do == 'editpost')
     {
@@ -212,11 +207,6 @@ if(defined('_Forum')) {
                                                   "onoff" => $onoff,
                                                   "p" => ""));
 
-    echo utf8_encode('<table class="mainContent" cellspacing="1" style="margin-top:17px">'.$index.'</table>');
-
-    if(!mysqli_persistconns)
-        $mysql->close(); //MySQL
-
-    exit();
+    exit(utf8_encode('<table class="mainContent" cellspacing="1" style="margin-top:17px">'.$index.'</table>'));
   }
 }

@@ -426,10 +426,6 @@ if(defined('_Forum')) {
                 $checks = _fetch($check);
 
                 if($checks['intern'] == 1 && !permission("intforum") && !fintern($checks['id'])) {
-
-                    if(!mysqli_persistconns)
-                        $mysql->close(); //MySQL
-
                     exit();
                 }
 

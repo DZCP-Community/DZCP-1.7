@@ -16,10 +16,6 @@ if(file_exists($file_name)) {
     header("Content-Disposition: attachment; filename=".$file_name);
     readfile($file_name);
     @unlink($file_name);
-
-    if(!mysqli_persistconns)
-        $mysql->close(); //MySQL
-
     exit();
 }
 

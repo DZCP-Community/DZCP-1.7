@@ -436,12 +436,7 @@ case 'preview';
                                            "links" => $links,
                                            "autor" => autor($userid)));
 
-    echo utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>');
-
-    if(!mysqli_persistconns)
-        $mysql->close(); //MySQL
-
-    exit();
+    exit(utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>'));
 break;
     case 'compreview';
         if($do == 'edit') {
@@ -508,12 +503,7 @@ break;
                                                   "ip" => $userip._only_for_admins));
 
         header('Content-Type: text/html; charset=utf-8');
-        echo utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>');
-
-        if(!mysqli_persistconns)
-            $mysql->close(); //MySQL
-
-        exit();
+        exit(utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>'));
     break;
 endswitch;
 

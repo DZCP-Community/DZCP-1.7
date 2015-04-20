@@ -11,12 +11,7 @@ if(_adminMenu != 'true') exit;
     {
       $show = show($dir."/nletter_prev", array("head" => _nletter_prev_head,
                                                "text" => bbcode_nletter($_POST['eintrag'])));
-      echo '<table class="mainContent" cellspacing="1">'.$show.'</table>';
-
-      if(!mysqli_persistconns)
-          $mysql->close(); //MySQL
-
-      exit();
+      exit('<table class="mainContent" cellspacing="1">'.$show.'</table>');
     } elseif($do == "send") {
         if(empty($_POST['eintrag']) || $_POST['to'] == "-")
           {
