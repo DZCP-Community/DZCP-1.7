@@ -2006,7 +2006,7 @@ function autorcolerd($uid, $class="", $cut="") {
                                          "nick" => $nickname));
 }
 
-function cleanautor($uid, $class="", $nick="", $email="", $cut="") {
+function cleanautor($uid, $class="", $nick="", $email="") {
     global $sql;
     if(!dbc_index::issetIndex('user_'.intval($uid))) {
         $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
