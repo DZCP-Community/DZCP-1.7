@@ -55,7 +55,6 @@ $support .= "Webserver: ".(array_key_exists('apache2handler', $PhpInfo) ? (array
 $support .= "PHP-Version: ".phpversion()." (".php_sapi_type().")"."\r\n";
 $support .= "MySQL-Server Version: ".mysqli_get_server_info($mysql)."\r\n";
 $support .= "MySQLi-Protocol Version: ".mysqli_get_proto_info($mysql)."\r\n";
-$support .= "MySQLi-Persistente Datenbankverbindung: ".(mysqli_persistconns ? 'On' : 'Off')."\r\n";
 $support .= "\r\n";
 
 $support .= "#####################\r\n";

@@ -2287,7 +2287,7 @@ function getAge($bday) {
 }
 
 //-> Ausgabe der Position des einzelnen Members
-function getrank($tid=0, $squad="", $profil=false) {
+function getrank($tid=0, $squad=0, $profil=false) {
     global $sql,$userid;
     $tid = (!$tid ? $userid : $tid);
     if(!$tid) return '* No UserID! *';

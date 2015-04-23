@@ -27,10 +27,8 @@ if(_adminMenu != 'true') exit;
         {
           $show = error(_profil_no_type,1);
         } else {
-          $name = preg_replace("#[[:punct:]]|[[:space:]]#Uis", "", $_POST['name']);
-
           $add = db("INSERT INTO ".$db['profile']."
-                     SET `name` = '".up($name)."',
+                     SET `name` = '".up($_POST['name'])."',
                                    `type` = '".intval($_POST['type'])."',
                          `kid`  = '".intval($_POST['kat'])."'");
               $insID = _insert_id();
@@ -77,10 +75,8 @@ if(_adminMenu != 'true') exit;
         {
           $show = error(_profil_no_name,1);
         } else {
-          $name = preg_replace("#[[:punct:]]|[[:space:]]#Uis", "", $_POST['name']);
-
               $add = db("UPDATE ".$db['profile']."
-                     SET `name`  = '".up($name)."',
+                     SET `name`  = '".up($_POST['name'])."',
                                    `kid`   = '".intval($_POST['kat'])."',
                                    `type`  = '".intval($_POST['type'])."',
                                    `shown` = '".intval($_POST['shown'])."'

@@ -65,13 +65,6 @@ define('captcha_mathematic', true); //Stellt den Usern einfache Rechenaufgaben a
 define('count_clicks_expires', (24*60*60)); // Wie Lange die IPs fur den Click-Counter gespeichert bleiben.
 
 /*
-* Bitte vor der Aktivierung der Persistent Connections lesen:
-* http://php.net/manual/de/features.persistent-connections.php
-* * Expert *
-*/
-define('mysqli_persistconns', false);
-
-/*
  * Use SMTP connection with authentication for Mailing
  */
 define('phpmailer_use_smtp', false); //Use SMTP for Mailing

@@ -6,9 +6,10 @@
       var prevURL = '../user/?action=preview[ed]';
     </script>
     <form id="usergbForm" name="usergbForm" action="?action=usergb&amp;do=[whaturl]&amp;id=[id]" method="post" onsubmit="return(DZCP.submitButton())">
+    <input type="hidden" name="reg" value="[reg]" />
       <table class="mainContent" cellspacing="1">
         <tr>
-          <td class="contentHead" colspan="2"><span class="fontBold">[lang_gb_add_head]</span><a name="eintragen"></a></td>
+          <td class="contentHead" colspan="2"><span class="fontBold">[lang_gb_edit_head]</span><a name="eintragen"></a></td>
         </tr>
         [error]
         [form]
@@ -40,7 +41,7 @@
           <td class="contentMainTop" colspan="2" align="center">[lang_iplog_info]</td>
         </tr>
         <tr>
-          <td class="contentBottom" colspan="2"><input id="contentSubmit" class="submit" type="submit" value="[lang_button_value_add]" /> <input type="button"  value="[lang_preview]" class="submit" onclick="DZCP.ajaxPreview('usergbForm')" /></td>
+          <td class="contentBottom" colspan="2"><input id="contentSubmit" class="submit" type="submit" value="[what]" /> <input type="button"  value="[preview]" class="submit" onclick="DZCP.ajaxPreview('usergbForm')" /></td>
         </tr>
       </table>
     </form>

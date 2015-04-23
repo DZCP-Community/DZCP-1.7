@@ -16,12 +16,12 @@ $where = _site_user;
 define('_UserMenu', true);
 
 function custom_content($kid=1) {
-    global $db;
+    global $sql;
     $custom_content = ''; $i = 0;
-    $qrycustom = db("SELECT * FROM ".$db['profile']." WHERE kid = '".intval($kid)."' AND shown = '1' ORDER BY id ASC");
-    if(_rows($qrycustom) >= 1) {
-        while($getcustom = _fetch($qrycustom)) {
-            $getcontent = db("SELECT ".$getcustom['feldname']." FROM ".$db['users']." WHERE id = '".intval($_GET['id'])."' LIMIT 1",false,true);
+    $qrycustom = $sql->select("SELECT `feldname`,`type`,`name` FROM `{prefix_profile}` WHERE `kid` = ? AND `shown` = 1 ORDER BY id ASC;",array($kid));
+    if($sql->rowCount()) {
+        foreach($qrycustom as $getcustom) {
+            $getcontent = $sql->selectSingle("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
             if(!empty($getcontent[$getcustom['feldname']])) {
                 switch($getcustom['type']) {
                     case 2:
@@ -44,12 +44,12 @@ function custom_content($kid=1) {
 }
 
 function getcustom($kid=1,$user=0) {
-    global $db,$userid;
+    global $sql,$userid;
     if (!$kid) { return ""; }
     $set_id = ($user != 0 ? intval($user) : $userid);
-    $qrycustom = db("SELECT `feldname`,`name` FROM `" . $db['profile'] . "` WHERE `kid` = " . intval($kid) . " AND `shown` = 1 ORDER BY id ASC"); $custom = "";
-    while ($getcustom = _fetch($qrycustom)) {
-        $getcontent = db("SELECT `" . $getcustom['feldname'] . "` FROM `" . $db['users'] . "` WHERE `id` = " . $set_id . " LIMIT 1",false,true);
+    $qrycustom = $sql->select("SELECT `feldname`,`name` FROM `{prefix_profile}` WHERE `kid` = ? AND `shown` = 1 ORDER BY id ASC",array($kid)); $custom = "";
+    foreach($qrycustom as $getcustom) {
+        $getcontent = $sql->selectSingle("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ? LIMIT 1;",array($set_id));
         $custom .= show(_profil_edit_custom, array("name" => re(pfields_name($getcustom['name'])) . ":",
                                                    "feldname" => $getcustom['feldname'],
                                                    "value" => re($getcontent[$getcustom['feldname']])));
@@ -58,6 +58,7 @@ function getcustom($kid=1,$user=0) {
     return $custom;
 }
 
+//Load Index
 if (file_exists(basePath . "/user/case_" . $action . ".php")) {
     require_once(basePath . "/user/case_" . $action . ".php");
 }

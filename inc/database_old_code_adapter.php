@@ -11,7 +11,7 @@
 
 $mysqli = null;
 if($db['host'] != '' && $db['user'] != '' && $db['pass'] != '' && $db['db'] != '' && !$thumbgen) {
-    $db_host = (mysqli_persistconns ? 'p:' : '').$db['host'];
+    $db_host = $db['host'];
     $mysqli = new mysqli($db_host,$db['user'],$db['pass'],$db['db']);
     if ($mysqli->connect_error) { die("<b>Fehler beim Zugriff auf die Datenbank!"); }
 }
