@@ -337,7 +337,7 @@ class TS3Renderer {
         $out .= "<tr><td class=\"contentMainSecond\"><span class=\"fontBold\">Server Version:</span></td></tr>\n";
 
         if(array_key_exists('virtualserver_platform', self::$data)) {
-            $os = '<img src="../inc/images/info/'.(self::$data['virtualserver_platform'] == 'Linux' ? 'linux' : 'windows').'_os.png" alt="" title="Server OS" class="icon" />'; //Server OS
+            $os = '<img src="../inc/images/'.(self::$data['virtualserver_platform'] == 'Linux' ? 'linux' : 'windows').'_os.png" alt="" title="Server OS" class="icon" />'; //Server OS
         }
 
         $out .= array_key_exists('virtualserver_version', self::$data) && array_key_exists('virtualserver_platform', self::$data) ? "<tr><td class=\"contentMainFirst\">".$os." ".self::$data['virtualserver_version']."<br /><br /></td></tr>\n" : '<tr><td class="contentMainFirst">-</td></tr>';
