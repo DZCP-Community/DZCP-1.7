@@ -2,18 +2,25 @@
 var doc = document, ie4 = document.all, opera = window.opera;
 var innerLayer, layer, x, y, doWheel = false, offsetX = 15, offsetY = 5;
 var tickerc = 0, mTimer = new Array(), tickerTo = new Array(), tickerSpeed = new Array();
-var isIE = false, isWin = false, isOpera = false; var $ = jQuery;
+var isIE = false, isWin = false, isOpera = false, jQueryV = "1.10.2", $ = jQuery; 
 
-// DZCP JAVASCRIPT LIBARY FOR JQUERY >= V1.9
+// DZCP JAVASCRIPT LIBARY FOR JQUERY >= V1.10.2
 var DZCP = {
+    jQueryCheck: function(error) {
+        if (typeof jQuery !== 'undefined' && $().jquery >= jQueryV) { 
+            return true; 
+        } else { if(error){ alert("Update your jQuery Version to >= "+jQueryV); } return false; }
+    },
+    
   //init
     init: function() {
         doc.body.id = 'dzcp-engine-1.7';
+        DZCP.DebugLogger("jQuery Version: "+$().jquery+" is loaded!");
         DZCP.DebugLogger('Load DZCP-Engine 1.7');
         
-        isIE  = (navigator.appVersion.indexOf("MSIE") != -1) ? true : false;
-        isWin = (navigator.appVersion.toLowerCase().indexOf("win") != -1) ? true : false;
-        isOpera = (navigator.userAgent.indexOf("Opera") != -1) ? true : false;
+        isIE  = (navigator.appVersion.indexOf("MSIE") !== -1) ? true : false;
+        isWin = (navigator.appVersion.toLowerCase().indexOf("win") !== -1) ? true : false;
+        isOpera = (navigator.userAgent.indexOf("Opera") !== -1) ? true : false;
         
         $('body').append('<div id="infoDiv"></div>');
 
@@ -58,6 +65,7 @@ var DZCP = {
 
     // init lightbox
     initLightbox: function() {
+      if(!DZCP.jQueryCheck(false)) return false;
       DZCP.DebugLogger('Initiation Lightbox');
       $('a[rel^=lightbox]').magnificPopup({
             type:'image',
@@ -76,20 +84,22 @@ var DZCP = {
 
     // handle events
     addEvent : function(obj, evType, fn) {
-      if(obj.addEventListener)
-      {
-        obj.addEventListener(evType, fn, false);
-        return true;
-      } else if (obj.attachEvent) {
-        var r = obj.attachEvent('on' + evType, fn);
-        return r;
-      } else return false;
+        if(!DZCP.jQueryCheck(false)) return false;
+        if(obj.addEventListener)
+        {
+          obj.addEventListener(evType, fn, false);
+          return true;
+        } else if (obj.attachEvent) {
+          var r = obj.attachEvent('on' + evType, fn);
+          return r;
+        } else return false;
     },
 
     // track mouse
     trackMouse: function(e) {
+        if(!DZCP.jQueryCheck(false)) return false;
         innerLayer = $('#infoInnerLayer')[0];
-        if(typeof(layer) == 'object') {
+        if(typeof(layer) === 'object') {
         var ie4 = doc.all;
         var ns6 = doc.getElementById && !doc.all;
         var mLeft = 5;
@@ -100,17 +110,11 @@ var DZCP = {
 
         if(innerLayer) {
             var layerW = ((ie4) ? innerLayer.offsetWidth : innerLayer.clientWidth) - 3;
-          var layerH = (ie4) ? innerLayer.offsetHeight : innerLayer.clientHeight;
-
         } else {
             var layerW = ((ie4) ? layer.clientWidth : layer.offsetWidth) - 3;
-          var layerH = (ie4) ? layer.clientHeight : layer.offsetHeight;
         }
             var winW   = (ns6) ? (window.innerWidth) + window.pageXOffset - 12
                      : doc.documentElement.clientWidth + doc.documentElement.scrollLeft;
-
-            var winH   = (ns6) ? (window.innerHeight) + window.pageYOffset
-                     : doc.documentElement.clientHeight + doc.documentElement.scrollTop;
 
           layer.style.left = ((x + offsetX + layerW >= winW - offsetX) ? x - (layerW + offsetX) : x + offsetX) + 'px';
           layer.style.top  = (y + offsetY) + 'px';
@@ -139,6 +143,7 @@ var DZCP = {
 
     // init Ajax DynLoader
     initDynLoader: function(tag,menu,options) {
+        if(!DZCP.jQueryCheck(false)) return false;
         DZCP.DebugLogger('DynLoader -> Tag: \'' + tag + '\' / URL: \'' + "../inc/ajax.php?i=" + menu + options + '\'');
         var request = $.ajax({ url: "../inc/ajax.php?i=" + menu + options, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
         request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); });
@@ -146,6 +151,7 @@ var DZCP = {
     
     // init Ajax DynLoader Sides via Ajax
     initPageDynLoader: function(tag,url) {
+        if(!DZCP.jQueryCheck(false)) return false;
         DZCP.DebugLogger('PageDynLoader -> Tag: \'' + tag + '\' / URL: \'' + url + '\'');
         var request = $.ajax({ url: url, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
         request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); DZCP.initLightbox(); });
@@ -153,6 +159,7 @@ var DZCP = {
     
     // init Ajax DynCaptcha
     initDynCaptcha: function(tag,height,width,lines,namespace,length,sid) {
+        if(!DZCP.jQueryCheck(false)) return false;
         var url_input = "../inc/ajax.php?i=securimage";
         if(height >  1) { url_input = url_input + "&height="+height; }
         if(width > 1) { url_input = url_input + "&width="+width; }
@@ -167,6 +174,7 @@ var DZCP = {
 
     // Play Sound per JS-Audio
     EvalSound: function(url) {
+        if(!DZCP.jQueryCheck(false)) return false;
         DZCP.DebugLogger('EvalSound -> URL: \'' + url + '\'');
         var audio = new Audio(url);
         audio.play();
@@ -174,7 +182,8 @@ var DZCP = {
 
     // submit shoutbox
     shoutSubmit: function() {
-      $.post('../shout/index.php?ajax', $('#shoutForm').serialize(),function(req) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        $.post('../shout/index.php?ajax', $('#shoutForm').serialize(),function(req) {
         if(req) alert(req.replace(/  /g, ' '));
         $('#navShout').load('../inc/ajax.php?i=shoutbox');
         if(!req) $('#shouteintrag').prop('value', '');
@@ -186,22 +195,23 @@ var DZCP = {
   // switch userlist
     switchuser: function() {
       var url = doc.formChange.changeme.options[doc.formChange.changeme.selectedIndex].value;
-      window.location.href = url
+      window.location.href = url;
     },
 
   // Templateswitch
     tempswitch: function() {
       var url = doc.form.tempswitch.options[doc.form.tempswitch.selectedIndex].value;
-      if(url != 'lazy') DZCP.goTo(url);
+      if(url !== 'lazy') DZCP.goTo(url);
     },
     
     autocomplete: function(type,change) {
+        if(!DZCP.jQueryCheck(false)) return false;
         DZCP.DebugLogger('Autocomplete -> URL: \'' + '../inc/ajax.php?i=autocomplete&type='+type+'&game='+selected_game + '\'');
         var selected_game = $('#status :selected').val();
         $( document ).load('../inc/ajax.php?i=autocomplete&type='+type+'&game='+selected_game, function(data) {
             var json = jQuery.parseJSON(data);
-            if(json.qport != '') {
-                if(change || $("#qport").val() == '') {
+            if(json.qport !== '') {
+                if(change || $("#qport").val() === '') {
                     $("#qport").val(json.qport);
                     $("#autochanged").show();
                 }
@@ -211,8 +221,8 @@ var DZCP = {
 
   // go to defined url
     goTo: function(url, n) {
-      if(n == 1) window.open(url);
-      else window.location.href = url
+      if(n === 1) window.open(url);
+      else window.location.href = url;
     },
 
   // limit text lenthn
@@ -223,7 +233,7 @@ var DZCP = {
 
   // handle info layer
     showInfo: function(info, kats, text, img, width, height) {
-      if(typeof(layer) == 'object')
+      if(typeof(layer) === 'object')
       {
         var output = '';
         if(kats && text){
@@ -234,7 +244,7 @@ var DZCP = {
                   katout = katout + '<tr><td>'+kat[i]+'</td><td>'+texts[i]+'</td></tr>';
             }
             output = '<tr><td class="infoTop" colspan="2">'+info+'</td></tr>'+katout+'';
-        }else if(kats && typeof(text)=="undefined"){
+        }else if(kats && typeof(text)==="undefined"){
             output = '<tr><td class="infoTop" colspan="2">'+info+'</td></tr><tr><td>'+kats+'</td></tr>';
         }else{
             output = '<tr><td>'+info+'</td></tr>';
@@ -246,6 +256,7 @@ var DZCP = {
         }else{
             userimg = '';
         }
+        
         layer.innerHTML =
           '<div id="hDiv">' +
           '  <table class="hperc" cellspacing="0" style="height:100%">' +
@@ -263,11 +274,11 @@ var DZCP = {
           '</div>';
 
       //IE Fix
-        if(ie4 && !opera)
-        {
-          layer.innerHTML += '<iframe id="ieFix" frameborder="0" width="' + $('#hDiv')[0].offsetWidth + '" height="' + $('#hDiv')[0].offsetHeight + '"></iframe>';
-          layer.style.display = 'block';
-        } else layer.style.display = 'block';
+        if(ie4 && !opera) {
+            layer.innerHTML += '<iframe id="ieFix" frameborder="0" width="' + $('#hDiv')[0].offsetWidth + '" height="' + $('#hDiv')[0].offsetHeight + '"></iframe>';
+            layer.style.display = 'block';
+        } else 
+            layer.style.display = 'block';
       }
     },
 
@@ -280,8 +291,7 @@ var DZCP = {
             default: class_state = 'offline'; break; //Offline
         }
 
-        if(typeof(layer) == 'object')
-        {
+        if(typeof(layer) === 'object') {
             layer.innerHTML =
               '<div id="hDiv">' +
               '  <table class="hperc" cellspacing="0" style="height:100%">' +
@@ -306,29 +316,26 @@ var DZCP = {
               '</div>';
 
             //IE Fix
-            if(ie4 && !opera)
-            {
+            if(ie4 && !opera) {
                 layer.innerHTML += '<iframe id="ieFix" frameborder="0" width="' + $('#hDiv')[0].offsetWidth + '" height="' + $('#hDiv')[0].offsetHeight + '"></iframe>';
                 layer.style.display = 'block';
-            }
-            else
+            } else
                 layer.style.display = 'block';
         }
     },
 
     hideInfo: function() {
-      if(typeof(layer) == 'object')
-      {
-        layer.innerHTML = '';
-        layer.style.display = 'none';
-      }
+        if(typeof(layer) === 'object') {
+            layer.innerHTML = '';
+            layer.style.display = 'none';
+        }
     },
 
     // toggle object
     toggle: function(id) {
-        if(id == 0) return;
-
-        if($('#more' + id).css('display') == 'none')
+        if(!DZCP.jQueryCheck(false)) return false;
+        if(id === 0) return;
+        if($('#more' + id).css('display') === 'none')
         {
             $("#more" + id).fadeIn("normal");
             $('#img' + id).prop('src', '../inc/images/collapse.gif');
@@ -342,79 +349,78 @@ var DZCP = {
 
     // toggle with effect *TS3
     fadetoggle: function(id) {
-        if(id == 0) return;
-
+        if(!DZCP.jQueryCheck(false)) return false;
+        if(id === 0) return;
         $("#more_"+id).fadeToggle("slow", "swing");
 
-        if($('#img_'+id).prop('alt') == "hidden")
+        if($('#img_'+id).prop('alt') === "hidden")
             $('#img_'+id).prop({alt: 'normal', src: '../inc/images/toggle_normal.png'});
         else
             $('#img_'+id).prop({alt: 'hidden', src: '../inc/images/toggle_hidden.png'});
     },
     
-  // resize images
+    // resize images
     resizeImages: function() {
-        for(var i=0;i<doc.images.length;i++)
-      {
-        var d = doc.images[i];
+        if(!DZCP.jQueryCheck(false)) return false;
+        for(var i=0;i<doc.images.length;i++) {
+            var d = doc.images[i];
+            if(d.className === 'content') {
+                var imgW = d.width;
+                var imgH = d.height;
 
-        if(d.className == 'content')
-        {
-            var imgW = d.width;
-            var imgH = d.height;
+                if(dzcp_config.maxW !== 0 && imgW > dzcp_config.maxW) {
+                    d.width = dzcp_config.maxW;
+                    d.height = Math.round(imgH * (dzcp_config.maxW / imgW));
 
-            if(dzcp_config.maxW != 0 && imgW > dzcp_config.maxW)
-          {
-                 d.width = dzcp_config.maxW;
-                d.height = Math.round(imgH * (dzcp_config.maxW / imgW));
+                    if(!DZCP.linkedImage(d)) {
+                        var textLink = doc.createElement("span");
+                        var popupLink = doc.createElement("a");
 
-                if(!DZCP.linkedImage(d))
-            {
-              var textLink = doc.createElement("span");
-              var popupLink = doc.createElement("a");
+                        textLink.appendChild(doc.createElement("br"));
+                        textLink.setAttribute('class', 'resized');
+                        textLink.appendChild(doc.createTextNode('auto resized to '+d.width+'x'+d.height+' px'));
 
-              textLink.appendChild(doc.createElement("br"));
-              textLink.setAttribute('class', 'resized');
-              textLink.appendChild(doc.createTextNode('auto resized to '+d.width+'x'+d.height+' px'));
+                        popupLink.setAttribute('href', d.src);
+                        popupLink.setAttribute('rel', 'lightbox');
+                        popupLink.appendChild(d.cloneNode(true));
 
-              popupLink.setAttribute('href', d.src);
-              popupLink.setAttribute('rel', 'lightbox');
-              popupLink.appendChild(d.cloneNode(true));
+                        d.parentNode.appendChild(textLink);
+                        d.parentNode.replaceChild(popupLink, d);
 
-              d.parentNode.appendChild(textLink);
-              d.parentNode.replaceChild(popupLink, d);
-
-              DZCP.initLightbox();
+                        DZCP.initLightbox();
+                    }
+                }
             }
-          }
-        }
         }
     },
 
     linkedImage: function(node) {
         do {
             node = node.parentNode;
-            if (node.nodeName == 'A') return true;
+            if (node.nodeName === 'A') return true;
         }
-        while(node.nodeName != 'TD' && node.nodeName != 'BODY');
+        while(node.nodeName !== 'TD' && node.nodeName !== 'BODY');
 
         return false;
     },
 
-  // ajax calendar switch
+    // ajax calendar switch
     calSwitch: function(m, y) {
+        if(!DZCP.jQueryCheck(false)) return false;
         var request = $.ajax({ url: '../inc/ajax.php?i=kalender&month=' + m + '&year=' + y, type: "GET", data: {}, cache:false, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
         request.done(function(msg) { $('#navKalender').html( msg ).hide().fadeIn("normal"); });    
     },
 
   // ajax team switch
     teamSwitch: function(obj) {
+        if(!DZCP.jQueryCheck(false)) return false;
       clearTimeout(mTimer[1]);
       $('#navTeam').load('../inc/ajax.php?i=teams&tID=' + obj, DZCP.initTicker('teams', 'h', 60));
     },
 
   // ajax vote
     ajaxVote: function(id) {
+        if(!DZCP.jQueryCheck(false)) return false;
       DZCP.submitButton('contentSubmitVote');
       $.post('../votes/index.php?action=do&ajax=1&what=vote&id=' + id, $('#navAjaxVote').serialize(), function(req) {
         $('#navVote').html(req);
@@ -425,6 +431,7 @@ var DZCP = {
 
   // ajax forum vote
     ajaxFVote: function(id) {
+     if(!DZCP.jQueryCheck(false)) return false;
      DZCP.submitButton('contentSubmitFVote');
       $.post('../votes/index.php?action=do&fajax=1&what=fvote&id=' + id, $('#navAjaxFVote').serialize(), function(req) {
         $('#navFVote').html(req);
@@ -435,13 +442,14 @@ var DZCP = {
 
   // ajax preview
     ajaxPreview: function(form) {
+      if(!DZCP.jQueryCheck(false)) return false;
       DZCP.DebugLogger('Ajax Preview -> Tag: \'' + form + '\'');
       var tag=doc.getElementsByTagName("textarea");
       for(var i=0;i<tag.length;i++)
       {
         var thisTag = tag[i].className;
         var thisID = tag[i].id;
-        if(thisTag == "editorStyle" || thisTag == "editorStyleWord" || thisTag == "editorStyleNewsletter")
+        if(thisTag === "editorStyle" || thisTag === "editorStyleWord" || thisTag === "editorStyleNewsletter")
         {
           var inst = tinyMCE.getInstanceById(thisID);
           $('#' + thisID).prop('value', inst.getBody().innerHTML);
@@ -452,7 +460,7 @@ var DZCP = {
                              + ' <img src="../inc/images/admin/loading.gif" alt="" />'
                              + '</div>');
       var addpars = "";
-      if(form == 'cwForm') {
+      if(form === 'cwForm') {
           $("input[type=file]").each(function() {
               addpars = addpars + "&" + $(this).prop('name') + "=" + $(this).prop('value');
           });
@@ -473,10 +481,12 @@ var DZCP = {
 
   // forum search
     hideForumFirst: function() {
+        if(!DZCP.jQueryCheck(false)) return false;
       $('#allkat').prop('checked', false);
     },
 
     hideForumAll: function() {
+        if(!DZCP.jQueryCheck(false)) return false;
         for(var i = 0; i < doc.forms['search'].elements.length; i++)
         {
             var box = doc.forms['search'].elements[i];
@@ -488,57 +498,62 @@ var DZCP = {
 
   // disable submit button
     submitButton: function(id) {
-      submitID = (id) ? id : 'contentSubmit';
+        if(!DZCP.jQueryCheck(false)) return false;
+        submitID = (id) ? id : 'contentSubmit';
 
-      $('#' + submitID).prop("disabled", true);
-      $('#' + submitID).css('color', '#909090');
-      $('#' + submitID).css('cursor', 'default');
+        $('#' + submitID).prop("disabled", true);
+        $('#' + submitID).css('color', '#909090');
+        $('#' + submitID).css('cursor', 'default');
 
-      return true;
+        return true;
     },
 
   // Newticker
     initTicker: function(objID, to, ms) {
-     // set settings
-      DZCP.DebugLogger('Initiation Newticker');
-      tickerTo[tickerc] = (to == 'h' || to == 'v') ? to : 'v';
-      tickerSpeed[tickerc] = (parseInt(ms) <= 10) ? 10 : parseInt(ms);
+        // set settings
+         if(!DZCP.jQueryCheck(false)) return false;
+         DZCP.DebugLogger('Initiation Newticker');
+         tickerTo[tickerc] = (to === 'h' || to === 'v') ? to : 'v';
+         tickerSpeed[tickerc] = (parseInt(ms) <= 10) ? 10 : parseInt(ms);
 
-     // prepare  object
-      var orgData = $('#' + objID).html();
-      var newData  = '  <div id="scrollDiv' + tickerc +'" class="scrollDiv" style="position:relative;left:0;z-index:1">';
-          newData += '    <table id="scrollTable' + tickerc +'" class="scrolltable"  cellpadding="0" cellspacing="0">';
-          newData += '      <tr>';
-          newData += '        <td onmouseover="clearTimeout(mTimer[' + tickerc +'])" onmouseout="DZCP.startTickerDiv(' + tickerc +')">';
-          for(var i=0;i<10;i++) newData += orgData;
-          newData += '        </td>';
-          newData += '      </tr>';
-          newData += '    </table>';
-          newData += '  </div>';
+        // prepare  object
+         var orgData = $('#' + objID).html();
+         var newData  = '  <div id="scrollDiv' + tickerc +'" class="scrollDiv" style="position:relative;left:0;z-index:1">';
+             newData += '    <table id="scrollTable' + tickerc +'" class="scrolltable"  cellpadding="0" cellspacing="0">';
+             newData += '      <tr>';
+             newData += '        <td onmouseover="clearTimeout(mTimer[' + tickerc +'])" onmouseout="DZCP.startTickerDiv(' + tickerc +')">';
+             for(var i=0;i<10;i++) newData += orgData;
+             newData += '        </td>';
+             newData += '      </tr>';
+             newData += '    </table>';
+             newData += '  </div>';
 
-      $('#' + objID).html(newData);
-     // start ticker
-      window.setTimeout("DZCP.startTickerDiv("+tickerc+");",1500);
-      tickerc++;
+         $('#' + objID).html(newData);
+        // start ticker
+         window.setTimeout("DZCP.startTickerDiv("+tickerc+");",1500);
+         tickerc++;
     },
 
     startTickerDiv: function(subID) {
-      tableObj        = $('#scrollTable' + subID)[0];
-      obj             = tableObj.parentNode;
-      objWidth        = (tickerTo[subID] == 'h') ? tableObj.offsetWidth : tableObj.offsetHeight;
-      newWidth        = (Math.floor(objWidth/2)*2)+2;
-      obj.style.width = newWidth;
+        if(!DZCP.jQueryCheck(false)) return false;
+        tableObj        = $('#scrollTable' + subID)[0];
+        obj             = tableObj.parentNode;
+        objWidth        = (tickerTo[subID] === 'h') ? tableObj.offsetWidth : tableObj.offsetHeight;
+        newWidth        = (Math.floor(objWidth/2)*2)+2;
+        obj.style.width = newWidth;
 
-      mTimer[subID] = setInterval("DZCP.moveDiv('"+obj.id+"', " + newWidth + ", " + subID + ");", tickerSpeed[subID]);
+        mTimer[subID] = setInterval("DZCP.moveDiv('"+obj.id+"', " + newWidth + ", " + subID + ");", tickerSpeed[subID]);
     },
 
     moveDiv: function(obj, width, subID) {
-      var thisObj = $('#' + obj)[0];
-      if(tickerTo[subID] == 'h') thisObj.style.left = (parseInt(thisObj.style.left) <= (0-(width/2)+2)) ? 0 : parseInt(thisObj.style.left)-1 + 'px';
-      else thisObj.style.top = (thisObj.style.top == '' || (parseInt(thisObj.style.top)<(0-(width/2)+6))) ? 0 : parseInt(thisObj.style.top)-1 + 'px';
+        if(!DZCP.jQueryCheck(false)) return false;
+        var thisObj = $('#' + obj)[0];
+        if(tickerTo[subID] === 'h') thisObj.style.left = (parseInt(thisObj.style.left) <= (0-(width/2)+2)) ? 0 : parseInt(thisObj.style.left)-1 + 'px';
+        else thisObj.style.top = (thisObj.style.top === '' || (parseInt(thisObj.style.top)<(0-(width/2)+6))) ? 0 : parseInt(thisObj.style.top)-1 + 'px';
     },
 
     GoToAnchor: function() {
+       if(!DZCP.jQueryCheck(false)) return false;
        if(!DZCP.empty(dzcp_config.AnchorMove)) {
             DZCP.DebugLogger('GoToAnchor -> Tag: \'' + dzcp_config.AnchorMove + '\'');
             $('html, body').animate({ scrollTop: $("#" + dzcp_config.AnchorMove).offset().top - 12 }, 'slow');
@@ -546,16 +561,23 @@ var DZCP = {
     },
     
     empty: function(value) {
-        return (value == null || $.noop(value) || !/\S/.test(value));
+        if(!DZCP.jQueryCheck(false)) return false;
+        return (value === null || $.noop(value) || !/\S/.test(value));
     },
     
     DebugLogger: function(message) {
         if(dzcp_config.debug) {
             console.info("DZCP Debug: " + message);
         }
-    }
-}
+    },
+    
+    checkbox_switch: function(obj,tag){
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('Change all Checkboxes with ID:'+tag+'_*');
+        $('input:checkbox[id^="'+tag+'_"]').not(obj).prop('checked', obj.checked);
+    },
+};
 
 // load global events
-$(document).ready(function() { DZCP.init(); });
-$(window).load(function() { DZCP.resizeImages(); DZCP.GoToAnchor(); });
+$(document).ready(function() { if(DZCP.jQueryCheck(true)) { DZCP.init(); }});
+$(window).load(function() { if(DZCP.jQueryCheck(false)) { DZCP.resizeImages(); DZCP.GoToAnchor(); }});
