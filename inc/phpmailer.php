@@ -605,6 +605,8 @@ class PHPMailer
      */
     private function mailPassthru($to, $subject, $body, $header, $params)
     {
+        global $view_error;
+        
         //Check overloading of mail function to avoid double-encoding
         if (ini_get('mbstring.func_overload') & 1) {
             $subject = $this->secureHeader($subject);
@@ -616,6 +618,11 @@ class PHPMailer
         } else {
             $result = @mail($to, $subject, $body, $header, $params);
         }
+        
+        if(!$result && show_mail_debug) {
+            DebugConsole::insert_error('PHPMailer::mailPassthru()','Fehler beim senden der E-Mail Benachrichtigung!<p>Grund ist ein falsch konfigurierter Server');
+        }
+        
         return $result;
     }
 
@@ -1213,8 +1220,8 @@ class PHPMailer
     protected function smtpSend($header, $body)
     {
         $bad_rcpt = array();
-
         if (!$this->smtpConnect()) {
+            DebugConsole::insert_error('PHPMailer::smtpSend()','Fehler beim senden der E-Mail Benachrichtigung!<p>Grund sind falsche SMTP-Einstellungen in der config.php');
             throw new phpmailerException($this->lang('smtp_connect_failed'), self::STOP_CRITICAL);
         }
         $smtp_from = ($this->Sender == '') ? $this->From : $this->Sender;

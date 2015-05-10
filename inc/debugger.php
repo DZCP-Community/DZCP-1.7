@@ -30,6 +30,7 @@ define('show_pdo_delete_debug', false);
 define('show_pdo_update_debug', false);
 define('show_pdo_insert_debug', false);
 define('show_pdo_select_debug', false);
+define('show_mail_debug', true);
 
 #############################################
 ############### Debug Console ###############
@@ -39,31 +40,35 @@ define('DEBUG_LOADER', true);
 class DebugConsole {
     private static $log_array = array(array());
     private static $file_data = '';
+    private static $warning_enable = false;
 
     public static final function initCon()
     { self::$log_array=array(array()); self::$file_data=''; }
 
     public static final function insert_log($file,$msg,$back=false,$func="",$line=0)
-    { self::$log_array[$file][] = ($line != 0 ? 'Line:"'.$line.'" => ' : "").($back ? $msg.$func : $func.$msg); }
+    { if(view_error_reporting) self::$log_array[$file][] = ($line != 0 ? 'Line:"'.$line.'" => ' : "").($back ? $msg.$func : $func.$msg); }
 
     public static final function insert_successful($file,$func)
-    { self::$log_array[$file][] = '<font color="#009900">'.$func.'</font>'; }
+    { if(view_error_reporting) self::$log_array[$file][] = '<font color="#009900">'.$func.'</font>'; }
 
     public static final function insert_error($file,$msg)
-    { self::$log_array[$file][] = '<font color="#FF0000">'.$msg.'</font>'; }
+    { self::$log_array[$file][] = '<font color="#FF0000">'.$msg.'</font>'; self::$warning_enable = true; }
 
     public static final function insert_loaded($file,$func)
-    { if(show_loaded) self::$log_array[$file][] = '<font color="#009900">'.$func.'</font>'; }
+    { if(show_loaded && view_error_reporting) self::$log_array[$file][] = '<font color="#009900">'.$func.'</font>'; }
 
     public static final function insert_info($file,$info)
-    { if(show_info) self::$log_array[$file][] = '<font color="#9900CC">'.$info.'</font>'; }
+    { if(show_info && view_error_reporting) self::$log_array[$file][] = '<font color="#9900CC">'.$info.'</font>'; }
 
     public static final function insert_sql_info($file,$info,$params)
     { self::$log_array[$file][] = '<font color="#2A3AEC">'.$info.' <p> Data for SQL-Query => '.json_encode($params).'</font>'; }
     
     public static final function insert_warning($file,$func)
-    { if(show_warning) self::$log_array[$file][] = '<font color="#FFFF00">'.$func.'</font>'; }
-
+    { if(show_warning && view_error_reporting) self::$log_array[$file][] = '<font color="#FFFF00">'.$func.'</font>'; }
+    
+    public static final function get_warning_enable()
+    { return self::$warning_enable; }
+    
     public static final function sql_error_handler($query) {
         global $mysql;
         $message = '#####################################################################'.EOL.

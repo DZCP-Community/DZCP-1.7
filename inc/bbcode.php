@@ -3047,7 +3047,7 @@ class javascript {
 
 //-> Ausgabe des Indextemplates
 function page($index='',$title='',$where='',$index_templ='index') {
-    global $userid,$userip,$tmpdir,$chkMe,$charset,$dir;
+    global $userid,$userip,$tmpdir,$chkMe,$charset,$dir,$view_error;
     global $designpath,$language,$time_start,$menu_index;
 
     // Timer Stop
@@ -3170,7 +3170,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
         if (debug_save_to_file) {
             DebugConsole::save_log();
         } //Debug save to file
-        $output = view_error_reporting ? DebugConsole::show_logs().$index : $index; //Debug Console + Index Out
+        $output = view_error_reporting || DebugConsole::get_warning_enable() ? DebugConsole::show_logs().$index : $index; //Debug Console + Index Out
         gz_output($output); // OUTPUT BUFFER END
     }
 }
