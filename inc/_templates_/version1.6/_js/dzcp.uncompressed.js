@@ -2,7 +2,7 @@
 var doc = document, ie4 = document.all, opera = window.opera;
 var innerLayer, layer, x, y, doWheel = false, offsetX = 15, offsetY = 5;
 var tickerc = 0, mTimer = new Array(), tickerTo = new Array(), tickerSpeed = new Array();
-var isIE = false, isWin = false, isOpera = false;
+var isIE = false, isWin = false, isOpera = false; var $ = jQuery;
 
 // DZCP JAVASCRIPT LIBARY FOR JQUERY >= V1.9
 var DZCP = {
@@ -59,19 +59,18 @@ var DZCP = {
     // init lightbox
     initLightbox: function() {
       DZCP.DebugLogger('Initiation Lightbox');
-      $('a[rel^=lightbox]').lightBox({
-          fixedNavigation:      true,
-          overlayBgColor:       '#000',
-            overlayOpacity:       0.8,
-            imageLoading:         '../inc/images/lightbox/loading.gif',
-            imageBtnClose:        '../inc/images/lightbox/close.gif',
-            imageBtnPrev:         '../inc/images/lightbox/prevlabel.gif',
-            imageBtnNext:         '../inc/images/lightbox/nextlabel.gif',
-            containerResizeSpeed: 350,
-            txtImage:             (dzcp_config.lng == 'de' ? 'Bild' : 'Image'),
-            txtOf:                (dzcp_config.lng == 'de' ? 'von' : 'of'),
-            maxHeight: screen.height * 0.9,
-            maxWidth: screen.width * 0.9
+      $('a[rel^=lightbox]').magnificPopup({
+            type:'image',
+            gallery:{enabled:true},
+            mainClass: 'mfp-with-zoom',
+            zoom: {
+                enabled: true,
+                duration: 300,
+                easing: 'ease-in-out',
+                opener: function(openerElement) {
+                    return openerElement.is('img') ? openerElement : openerElement.find('img');
+            }
+        }
       });
     },
 
@@ -143,13 +142,13 @@ var DZCP = {
         DZCP.DebugLogger('DynLoader -> Tag: \'' + tag + '\' / URL: \'' + "../inc/ajax.php?i=" + menu + options + '\'');
         var request = $.ajax({ url: "../inc/ajax.php?i=" + menu + options, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
         request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); });
-    },
+   },
     
     // init Ajax DynLoader Sides via Ajax
     initPageDynLoader: function(tag,url) {
         DZCP.DebugLogger('PageDynLoader -> Tag: \'' + tag + '\' / URL: \'' + url + '\'');
         var request = $.ajax({ url: url, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
-        request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); });
+        request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); DZCP.initLightbox(); });
     },
     
     // init Ajax DynCaptcha
