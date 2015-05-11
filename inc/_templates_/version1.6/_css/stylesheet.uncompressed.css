@@ -1500,7 +1500,8 @@ img.tsflag,img.tstrenner,img.tstoggle { margin: 1px; }
 /*---------------------------------------------
 Board Quotes
 ---------------------------------------------*/
-.quote {
+blockquote {
+  font: 14px/22px normal helvetica, sans-serif;
   width: 95%;
   margin: auto;
   border: 1px solid #000;
@@ -1513,7 +1514,7 @@ Board Quotes
   background-repeat: no-repeat;
   color: #000;
 }
-.quote b, .quote a {
+blockquote b, blockquote a {
   font-size: 11px;
   color: #000;
 }
