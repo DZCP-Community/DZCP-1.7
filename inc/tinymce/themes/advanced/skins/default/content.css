@@ -21,6 +21,28 @@ cite {border-bottom:1px dashed blue}
 acronym {border-bottom:1px dotted #CCC; cursor:help}
 abbr {border-bottom:1px dashed #CCC; cursor:help}
 
+/*---------------------------------------------
+Board Quotes
+---------------------------------------------*/
+blockquote {
+  font: 14px/22px normal helvetica, sans-serif;
+  width: 95%;
+  margin: auto;
+  border: 1px solid #000;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 16px;
+  padding-right: 2px;
+  background-color: #FFF;
+  background-image: url(../../../../../images/quote.gif);
+  background-repeat: no-repeat;
+  color: #000;
+}
+blockquote b, blockquote a {
+  font-size: 11px;
+  color: #000;
+}
+
 /* IE */
 * html body {
 scrollbar-3dlight-color:#F0F0EE;

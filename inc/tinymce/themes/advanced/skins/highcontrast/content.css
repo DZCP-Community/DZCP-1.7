@@ -22,3 +22,25 @@ abbr {border-bottom:1px dashed #CCC; cursor:help}
 img:-moz-broken {-moz-force-broken-image-icon:1; width:24px; height:24px}
 font[face=mceinline] {font-family:inherit !important}
 *[contentEditable]:focus {outline:0}
+
+/*---------------------------------------------
+Board Quotes
+---------------------------------------------*/
+blockquote {
+  font: 14px/22px normal helvetica, sans-serif;
+  width: 95%;
+  margin: auto;
+  border: 1px solid #000;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 16px;
+  padding-right: 2px;
+  background-color: #FFF;
+  background-image: url(../../../../../images/quote.gif);
+  background-repeat: no-repeat;
+  color: #000;
+}
+blockquote b, blockquote a {
+  font-size: 11px;
+  color: #000;
+}
