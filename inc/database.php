@@ -118,7 +118,10 @@ class database {
     
     public function rows($qry, array $params = array()) {
         if (($type = $this->getQueryType($qry)) !== "select") {
-            throw new Exception("Incorrect Delete Query");
+            DebugConsole::sql_error_Exception("Incorrect Select Query",$qry,$params);
+            DebugConsole::insert_error('database::rows','Incorrect Select Query!');
+            DebugConsole::insert_sql_info('database::rows',$qry,$params);
+            return 0;
         }
 
         $this->run_query($qry, $params, $type);
@@ -131,7 +134,10 @@ class database {
         }
         
         if (($type = $this->getQueryType($qry)) !== "delete") {
-            throw new Exception("Incorrect Delete Query");
+            DebugConsole::sql_error_Exception("Incorrect Delete Query",$qry,$params);
+            DebugConsole::insert_error('database::delete','Incorrect Delete Query!');
+            DebugConsole::insert_sql_info('database::delete',$qry,$params);
+            return false;
         }
 
         return $this->run_query($qry, $params, $type);
@@ -143,7 +149,10 @@ class database {
         }
         
         if (($type = $this->getQueryType($qry)) !== "update") {
-            throw new Exception("Incorrect Update Query");
+            DebugConsole::sql_error_Exception("Incorrect Update Query",$qry,$params);
+            DebugConsole::insert_error('database::update','Incorrect Update Query!');
+            DebugConsole::insert_sql_info('database::update',$qry,$params);
+            return false;
         }
 
         return $this->run_query($qry, $params, $type);
@@ -155,7 +164,10 @@ class database {
         }
         
         if (($type = $this->getQueryType($qry)) !== "insert") {
-            throw new Exception("Incorrect Insert Query");
+            DebugConsole::sql_error_Exception("Incorrect Insert Query",$qry,$params);
+            DebugConsole::insert_error('database::insert','Incorrect Insert Query!');
+            DebugConsole::insert_sql_info('database::insert',$qry,$params);
+            return false;
         }
 
         return $this->run_query($qry, $params, $type);
@@ -163,7 +175,10 @@ class database {
 
     public function select($qry, array $params = array()) {
         if (($type = $this->getQueryType($qry)) !== "select") {
-            throw new Exception("Incorrect Select Query");
+            DebugConsole::sql_error_Exception("Incorrect Select Query",$qry,$params);
+            DebugConsole::insert_error('database::select','Incorrect Select Query!');
+            DebugConsole::insert_sql_info('database::select',$qry,$params);
+            return array();
         }
 
         if ($stmnt = $this->run_query($qry, $params, $type)) {
@@ -175,7 +190,10 @@ class database {
 
     public function selectSingle($qry, array $params = array(), $field = false) {
         if (($type = $this->getQueryType($qry)) !== "select") {
-            throw new Exception("Incorrect Select Query");
+            DebugConsole::sql_error_Exception("Incorrect Select Query",$qry,$params);
+            DebugConsole::insert_error('database::selectSingle','Incorrect Select Query!');
+            DebugConsole::insert_sql_info('database::selectSingle',$qry,$params);
+            return false;
         }
 
         if ($stmnt = $this->run_query($qry, $params, $type)) {
@@ -183,6 +201,21 @@ class database {
             return ($field === false) ? $res : $res[$field];
         } else {
             return false;
+        }
+    }
+    
+    public function show($qry,array $params = array()) {
+        if (($type = $this->getQueryType($qry)) !== "show") {
+            DebugConsole::sql_error_Exception("Incorrect Show Query",$qry,$params);
+            DebugConsole::insert_error('database::show','Incorrect Show Query!');
+            DebugConsole::insert_sql_info('database::show',$qry,$params);
+            return array();
+        }
+
+        if ($stmnt = $this->run_query($qry, array(), $type)) {
+            return $stmnt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            return array();
         }
     }
 
@@ -214,13 +247,13 @@ class database {
      */
     protected final function connect($active = "default") {
         if (!isset($this->dbConf[$active])) {
-            throw new PDOException("No supported connection scheme");
+            die("PDO: No supported connection scheme!");
         }
 
         $dbConf = $this->dbConf[$active];
         try {
             if (!$dsn = $this->dsn($active)) {
-                throw new Exception("PDO driver is missing");
+                die("PDO: Driver is missing!");
             }
 
             $db = new PDO($dsn, $dbConf['db_user'], $dbConf['db_pw']);
@@ -231,13 +264,13 @@ class database {
             $this->dbHandle = $db;
             $this->active = $active; //mark as active
         } catch (PDOException $ex) {
-            throw new PDOException("Connection Exception: " . $ex->getMessage());
+            die("PDO: Connection Exception: " . $ex->getMessage());
         }
     }
     
     protected final function run_query($qry, array $params, $type) {
-        if (in_array($type, array("insert", "select", "update", "delete")) === false) {
-            throw new Exception("Unsupported Query Type");
+        if (in_array($type, array("insert", "select", "update", "delete","show")) === false) {
+            die("PDO: Unsupported Query Type!<p>".$qry);
         }
 
         // replace sql prefix
@@ -272,9 +305,9 @@ class database {
 
             $this->rowCount = $stmnt->rowCount();
 
-            return ($type === "select") ? $stmnt : true;
+            return ($type === "select" || $type === "show") ? $stmnt : true;
         } catch (PDOException $ex) {
-            throw new PDOException("PDO-Exception: " . $ex->getMessage());
+            die("PDO: Exception: " . $ex->getMessage());
         }
     }
 

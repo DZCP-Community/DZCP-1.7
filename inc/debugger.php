@@ -68,24 +68,21 @@ class DebugConsole {
     
     public static final function get_warning_enable()
     { return self::$warning_enable; }
-    
-    public static final function sql_error_handler($query) {
-        global $mysql;
+
+    public static final function sql_error_Exception($msg,$query,array $params = array()) {
         $message = '#####################################################################'.EOL.
-        '   Datum   = '.date("d.m.y H:i", time()).EOL.
-        '   URL     = http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].$_SERVER['PHP_self'].EOL.EOL.
-        '   MySQLi-Query failed:'.EOL.
-        '   ConnectErrorNo = '.mysqli_connect_errno().EOL.
-        '   ConnectError   = '.mysqli_connect_error().EOL.EOL.
-        '   QueryError   = '.mysqli_error($mysql).EOL.EOL.
-        '   Query   = '.$query.EOL.
+        'Datum   = '.date("d.m.y H:i", time()).EOL.
+        'URL     = http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].$_SERVER['PHP_self'].EOL.EOL.
+        'PDO-Exception:'.EOL.
+        'Message   = '.$msg.EOL.
+        'Query   = '.$query.EOL.
+        'Params   = '.json_encode($params).EOL.       
         '#####################################################################'.EOL.EOL;
 
-        $fp = fopen(basePath."/inc/_logs/sql_error_log.log", "a+");
+        $fp = fopen(basePath."/inc/_logs/sql_error.log", "a+");
         fwrite($fp, $message); fclose($fp);
-        return $message;
     }
-
+    
     public static final function save_log() {
         foreach(self::$log_array as $file => $msg_array)
         { foreach($msg_array as $msg) { self::$file_data .= strip_tags('"'.$file.'" => "'.$msg.'"')."\n"; } }
