@@ -995,7 +995,13 @@ function bbcode_email($txt) {
     return str_replace("&#93;","]",$txt);
 }
 
-//-> Textteil in Zitat-Tags setzen
+/**
+ * DZCP V1.7.0
+ * Textteil in ein Zitat setzen * blockquote *
+ *
+ * @param string $nick,string $zitat,
+ * @return string (html-code)
+ */
 function zitat($nick,$zitat) {
     $zitat = str_replace(chr(145), chr(39), $zitat);
     $zitat = str_replace(chr(146), chr(39), $zitat);
@@ -1005,7 +1011,7 @@ function zitat($nick,$zitat) {
     $zitat = str_replace(chr(10), " ", $zitat);
     $zitat = str_replace(chr(13), " ", $zitat);
     $zitat = preg_replace("#[\n\r]+#", "<br />", $zitat);
-    return '<div class="quote"><b>'.$nick.' '._wrote.':</b><br />'.re_bbcode($zitat).'</div><br /><br /><br />';
+    return '<br /><br /><br /><blockquote><b>'.$nick.' '._wrote.':</b><br />'.re_bbcode($zitat).'</blockquote>';
 }
 
 /**
@@ -2137,24 +2143,28 @@ function userstats($what='id',$tid=0) {
 //- Funktion zum versenden von Emails
 function sendMail($mailto,$subject,$content) {
     global $language;
-    $mail = new PHPMailer;
-    if(phpmailer_use_smtp) {
-        $mail->isSMTP();
-        $mail->Host = phpmailer_smtp_host;
-        $mail->Port = phpmailer_smtp_port;
-        $mail->SMTPAuth = phpmailer_use_auth;
-        $mail->Username = phpmailer_smtp_user;
-        $mail->Password = phpmailer_smtp_password;
+    if(phpmailer_enable) {
+        $mail = new PHPMailer;
+        if(phpmailer_use_smtp) {
+            $mail->isSMTP();
+            $mail->Host = phpmailer_smtp_host;
+            $mail->Port = phpmailer_smtp_port;
+            $mail->SMTPAuth = phpmailer_use_auth;
+            $mail->Username = phpmailer_smtp_user;
+            $mail->Password = phpmailer_smtp_password;
+        }
+
+        $mail->From = ($mailfrom =settings('mailfrom'));
+        $mail->FromName = $mailfrom;
+        $mail->AddAddress(preg_replace('/(\\n+|\\r+|%0A|%0D)/i', '',$mailto));
+        $mail->Subject = $subject;
+        $mail->msgHTML($content);
+        $mail->AltBody = bbcode_nletter_plain($content);
+        $mail->setLanguage(($language=='deutsch')?'de':'en', basePath.'/inc/lang/sendmail/');
+        return $mail->Send();
     }
     
-    $mail->From = ($mailfrom =settings('mailfrom'));
-    $mail->FromName = $mailfrom;
-    $mail->AddAddress(preg_replace('/(\\n+|\\r+|%0A|%0D)/i', '',$mailto));
-    $mail->Subject = $subject;
-    $mail->msgHTML($content);
-    $mail->AltBody = bbcode_nletter_plain($content);
-    $mail->setLanguage(($language=='deutsch')?'de':'en', basePath.'/inc/lang/sendmail/');
-    return $mail->Send();
+    return false;
 }
 
 function check_msg_emal() {
@@ -2656,7 +2666,7 @@ function getPermissions($checkID = 0, $pos = 0) {
     }
 
     $permission = array();
-    $qry = $sql->select("SHOW COLUMNS FROM `{prefix_permissions}`;");
+    $qry = $sql->show("SHOW COLUMNS FROM `dzcp_permissions`;");
     if($sql->rowCount()) {
         foreach($qry as $get) {
             if($get['Field'] != 'id' && $get['Field'] != 'user' && $get['Field'] != 'pos' && $get['Field'] != 'intforum') {
@@ -2732,7 +2742,7 @@ function count_clicks($side_tag='',$clickedID=0,$update=true) {
 
             if($sql->rows("SELECT `id` FROM `{prefix_clicks_ips}` WHERE `ip` = ? AND `ids` = ? AND `side` = ?;",array($userip,intval($clickedID),$side_tag))) {
                 if($update) {
-                    $sql->delete("UPDATE `{prefix_clicks_ips}` SET `uid` = ?, `time` = ? WHERE `ip` = ? AND `ids` = ? AND `side` = ?;",
+                    $sql->update("UPDATE `{prefix_clicks_ips}` SET `uid` = ?, `time` = ? WHERE `ip` = ? AND `ids` = ? AND `side` = ?;",
                     array(intval($userid),(time()+count_clicks_expires),$userip,intval($clickedID),$side_tag));
                 }
 

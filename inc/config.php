@@ -7,7 +7,7 @@
 #########################################
 //-> DZCP Settings Start
 #########################################
-define('view_error_reporting', true); // Zeigt alle Fehler und Notices etc.
+define('view_error_reporting', false); // Zeigt alle Fehler und Notices etc.
 define('view_javascript_debug', true); // Zeigt JavaScript aufreufe und Infos
 define('debug_all_sql_querys', false); // Speichert alle ausgefuehrten SQL-Querys in einer Datei
 define('debug_save_to_file', false); // Schreibt die die Ausgaben der Debug Console in eine Datei
@@ -67,6 +67,7 @@ define('count_clicks_expires', (24*60*60)); // Wie Lange die IPs fur den Click-C
 /*
  * Use SMTP connection with authentication for Mailing
  */
+define('phpmailer_enable', true); //Aktiviert oder Deaktiviert das Senden von E-Mails von der Webseite.
 define('phpmailer_use_smtp', false); //Use SMTP for Mailing
 define('phpmailer_use_auth', true); //Use SMTP authentication
 define('phpmailer_smtp_host', 'localhost'); //Hostname of the mail server
@@ -109,7 +110,7 @@ define('sessions_sql_db', 'test'); //SQL Database
 
 $config_cache = array();
 $config_cache['use_cache'] = true; // verwende einen Cache, um abfragen zwischenzuspeichern
-$config_cache['storage'] = "apc"; // welcher Cache: auto,memcache,files,sqlite,wincache,xcache oder apc
+$config_cache['storage'] = "files"; // welcher Cache: auto,memcache,files,sqlite,wincache,xcache oder apc
 $config_cache['server'] = array(array("127.0.0.1",11211,1)); //adressen fur die memcache server
 $config_cache['dbc'] = true; //verwende database query caching * nur mit memory cache
 $config_cache['dbc_auto_memcache'] = false; //automatische memcache verfugbarkeisprufung
