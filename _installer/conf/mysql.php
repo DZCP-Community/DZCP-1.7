@@ -1808,6 +1808,7 @@ function update_mysql_1_7() {
     db("ALTER TABLE `".$db['cw_comments']."` ADD INDEX(`cw`);");
     db("ALTER TABLE `".$db['cw_player']."` ADD INDEX(`cwid`);");
     db("ALTER TABLE `".$db['profile']."` ADD INDEX(`kid`);");
+    db("ALTER TABLE `".$db['buddys']."` ADD INDEX(`user`);");
         
     if(!file_exists(basePath.'/inc/cryptkey.php')) {
         $fp = @fopen("../inc/cryptkey.php","w");
