@@ -447,7 +447,6 @@ define('_msg_sendnews_user', '
       <input type="hidden" name="action" value="msg" />
       <input type="hidden" name="do" value="sendnewsdone" />
       <input type="hidden" name="id" value="[id]" />
-      <input type="hidden" name="datum" value="[datum]" />
       <input id="contentSubmit" type="submit" class="submit" value="Best&auml;tigen" />
     </form>
   </td>
