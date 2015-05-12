@@ -58,6 +58,16 @@ function getcustom($kid=1,$user=0) {
     return $custom;
 }
 
+//Setzt die IDs der Messages Tabelle auf 1 zuruck, wenn alle Nachrichten geloscht wurden.
+function msg_truncate() {
+    if(auto_db_optimize) {
+        $sql->select("SELECT `id` FROM `{prefix_messages}`;");
+        if(!$sql->rowCount()) {
+            $sql->query("TRUNCATE `{prefix_messages}`;");
+        }
+    }
+}
+
 //Load Index
 if (file_exists(basePath . "/user/case_" . $action . ".php")) {
     require_once(basePath . "/user/case_" . $action . ".php");
