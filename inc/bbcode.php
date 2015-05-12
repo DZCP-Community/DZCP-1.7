@@ -916,28 +916,41 @@ function make_clickable($ret) {
 
 //Diverse BB-Codefunktionen
 function bbcode($txt, $tinymce=false, $no_vid=false, $ts=false, $nolink=false) {
-    global $charset;
-
-    $txt = html_entity_decode($txt,ENT_COMPAT,$charset);
-    if(!$no_vid && settings('urls_linked') && !$nolink)
+    $txt = string::decode($txt);
+    if (!$no_vid && settings('urls_linked') && !$nolink) {
         $txt = make_clickable($txt);
+    }
 
     $txt = str_replace("\\","\\\\",$txt);
     $txt = str_replace("\\n","<br />",$txt);
     $txt = BadwordFilter($txt);
-    $txt = replace($txt,$tinymce,$no_vid);
-    $txt = highlight_text($txt);
 
-    if(!$tinymce) $txt = re_bbcode($txt);
-    if(!$ts) $txt = strip_tags($txt,"<br><object><em><param><embed><strong><iframe><hr><table><tr><td><div><span><a><b><font><i><u><p><ul><ol><li><br /><img>");
+    if($tinymce != false) {
+        $txt = replace($txt,$tinymce,$no_vid);
+    }
+    
+    $txt = highlight_text($txt);
+    if (!$tinymce) {
+        $txt = re_bbcode($txt);
+    }
+    
+    if(!$ts) {
+        $allowable_tags = "<br><object><em><param><embed><strong><iframe><hr><table><tr><td><div>"
+        . "<span><a><b><font><i><u><p><ul><ol><li><br /><img><blockquote>";
+        $txt = strip_tags($txt, $allowable_tags);
+    }
+
     $txt = smileys($txt);
-    if(!$no_vid) $txt = glossar($txt);
+    
+    if (!$no_vid) {
+        $txt = glossar($txt);
+    }
+    
     return str_replace(array("&#34;","<p></p>"),array("\"","<p>&nbsp;</p>"),$txt);
 }
 
 function bbcode_nletter($txt) {
-    $txt = stripslashes($txt);
-    $txt = nl2br(trim($txt));
+    $txt = nl2br(trim(stripslashes($txt)));
     return '<style type="text/css">p { margin: 0px; padding: 0px; }</style>'.$txt;
 }
 
@@ -2670,7 +2683,7 @@ function getPermissions($checkID = 0, $pos = 0) {
     if($sql->rowCount()) {
         foreach($qry as $get) {
             if($get['Field'] != 'id' && $get['Field'] != 'user' && $get['Field'] != 'pos' && $get['Field'] != 'intforum') {
-                $lang = constant(_perm_.$get['Field']);
+                $lang = constant('_perm_'.$get['Field']);
                 $chk = empty($checked[$get['Field']]) ? '' : ' checked="checked"';
                 $permission[$lang] = '<input type="checkbox" class="checkbox" id="'.$get['Field'].'" name="perm[p_'.$get['Field'].']" value="1"'.$chk.' /><label for="'.$get['Field'].'"> '.$lang.'</label> ';
             }
