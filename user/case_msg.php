@@ -11,9 +11,9 @@ if(defined('_UserMenu')) {
     } else {
         switch ($do) {
             case 'show':
-                $get = db("SELECT * FROM ".$db['msg']." WHERE id = ".intval($_GET['id']),false,true);
+                $get = $sql->selectSingle("SELECT * FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
                 if($get['von'] == $userid || $get['an'] == $userid) {
-                    db("UPDATE ".$db['msg']." SET `readed` = 1 WHERE id = ".intval($_GET['id']));
+                    $sql->update("UPDATE `{prefix_messages}` SET `readed` = 1 WHERE `id` = ?;",array($get['id']));
                     $delete = show(_delete, array("id" => $get['id']));
 
                     if(!$get['von']) {
@@ -41,16 +41,18 @@ if(defined('_UserMenu')) {
                 }
             break;
             case 'sendnewsdone':
-                $qry = db("SELECT id FROM ".$db['msg']." WHERE id = '".intval($_GET['id'])."'");
-                while($get = _fetch($qry)) {
-                    db("UPDATE ".$db['msg']." SET `sendnews` = 3, `sendnewsuser` = '".intval($userid)."', `readed`= 1
-                        WHERE datum = '".intval($_GET['datum'])."'");
-
+                $get = $sql->selectSingle("SELECT `id` FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
+                if($sql->rowCount()) {
+                    $sql->update("UPDATE `{prefix_messages}` "
+                               . "SET `sendnews` = 3, `sendnewsuser` = ?, `readed`= 1 "
+                               . "WHERE `id` = ?;",array($userid,$get['id']));
                     $index = info(_send_news_done, "?action=msg&do=show&id=".$get['id']."");
                 }
             break;
             case 'showsended':
-                $get = db("SELECT * FROM ".$db['msg']." WHERE id = ".intval($_GET['id']),false,true);
+                $get = $sql->selectSingle("SELECT `von`,`an`,`titel`,`nachricht` "
+                                        . "FROM `{prefix_messages}` "
+                                        . "WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
                 if($get['von'] == $userid || $get['an'] == $userid) {
                     $answermsg = show(_msg_sended_msg, array("nick" => autor($get['an'])));
                     $answer = _back;
@@ -63,40 +65,29 @@ if(defined('_UserMenu')) {
                 }
             break;
             case 'answer':
-                $get = db("SELECT * FROM ".$db['msg']." WHERE id = ".intval($_GET['id']),false,true);
+                $get = $sql->selectSingle("SELECT * FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
                 if($get['von'] == $userid || $get['an'] == $userid) {
                     $titel = (preg_match("#RE:#is",re($get['titel'])) ? re($get['titel']) : "RE: ".re($get['titel']));
                     $index = show($dir."/answer", array("von" => $userid,
                                                         "an" => $get['von'],
                                                         "titel" => $titel,
-                                                        "headtitel" => _msg_titel_answer,
-                                                        "titelhead" => _titel,
-                                                        "nickhead" => _to,
-                                                        "value" => _button_value_msg,
-                                                        "bbcodehead" => _bbcode,
-                                                        "eintraghead" => _answer,
                                                         "nick" => autor($get['von']),
-                                                        "zitat" => zitat(autor($get['von']),$get['nachricht'])));
+                                                        "zitat" => zitat(autor($get['von']),re($get['nachricht']))));
                 }
             break;
             case 'pn':
-                if(!$chkMe)
+                $uid = (isset($_GET['id']) && !empty($_GET['id']) ? intval($_GET['id']) : $userid);
+                if (!$chkMe) {
                     $index = error(_error_have_to_be_logged);
-                elseif($_GET['id'] == $userid)
+                } elseif ($uid == $userid) {
                     $index = error(_error_msg_self, 1);
-                else {
+                } else {
                     $titel = show(_msg_from_nick, array("nick" => data("nick")));
-                    $index = show($dir."/answer", array("von" => $userid,
-                                                        "an" => $_GET['id'],
-                                                        "titel" => $titel,
-                                                        "value" => _button_value_msg,
-                                                        "titelhead" => _titel,
-                                                        "headtitel" => _msg_titel,
-                                                        "nickhead" => _to,
-                                                        "bbcodehead" => _bbcode,
-                                                        "eintraghead" => _answer,
-                                                        "nick" => autor($_GET['id']),
-                                                        "zitat" => ""));
+                    $index = show($dir . "/answer", array("von" => $userid,
+                                                          "an" => $uid,
+                                                          "titel" => $titel,
+                                                          "nick" => autor($uid),
+                                                          "zitat" => ""));
                 }
             break;
             case 'sendanswer':
@@ -104,80 +95,91 @@ if(defined('_UserMenu')) {
                     $index = error(_empty_titel, 1);
                 } elseif(empty($_POST['eintrag'])) {
                     $index = error(_empty_eintrag, 1);
+                } elseif (intval($_POST['an']) == $userid) {
+                    $index = error(_error_msg_self, 1);
                 } else {
-                    db("INSERT INTO ".$db['msg']."
-                         SET `datum`      = ".time().",
-                             `von`        = ".intval($_POST['von']).",
-                             `an`         = ".intval($_POST['an']).",
-                             `titel`      = '".up($_POST['titel'])."',
-                             `nachricht`  = '".up($_POST['eintrag'])."',
-                             `see`        = 1");
-
-                    db("UPDATE ".$db['userstats']." SET `writtenmsg` = writtenmsg+1 WHERE `user` = ".intval($userid));
+                    $sql->insert("INSERT INTO `{prefix_messages}` "
+                               . "SET `datum`  = ".time().","
+                               . "`von`        = ?,"
+                               . "`an`         = ?,"
+                               . "`titel`      = ?,"
+                               . "`nachricht`  = ?,"
+                               . "`see`        = 1;",
+                    array($userid,intval($_POST['an']),up($_POST['titel']),up($_POST['eintrag'])));
+                    $sql->update("UPDATE `{prefix_userstats}` SET `writtenmsg` = (writtenmsg+1) WHERE `user` = ?;",array($userid));
                     $index = info(_msg_answer_done, "?action=msg");
                 }
             break;
             case 'delete':
-                $qry = db("SELECT id,see FROM ".$db['msg']." WHERE `an` = '".intval($userid)."' AND `see_u` = 0");
-                while($get = _fetch($qry)) {
-                    if(isset($_POST['pe'.$get['id']])) {
-                        if(!$get['see'])
-                            db("DELETE FROM ".$db['msg']." WHERE `id` = ".intval($_POST['pe'.$get['id']]));
-                        else
-                            db("UPDATE ".$db['msg']." SET `see_u` = 1 WHERE `id` = ".intval($_POST['pe'.$get['id']]));
+                if(!empty($_POST)) {
+                    foreach ($_POST as $key => $id) {
+                        if(strpos($key, 'posteingang_') !== false) {
+                            $get = $sql->selectSingle("SELECT `id`,`see` FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($id)));
+                            if(!$get['see']) {
+                                $sql->delete("DELETE FROM `{prefix_messages}` WHERE `id` = ?;",array($get['id']));
+                            } else {
+                                $sql->update("UPDATE `{prefix_messages}` SET `see_u` = 1 WHERE `id` = ?;",array($get['id']));
+                            }
+                        }
                     }
+                    
+                    msg_truncate();
                 }
-
                 header("Location: ?action=msg");
             break;
             case 'deletethis':
-                $get = db("SELECT see FROM ".$db['msg']." WHERE id = '".intval($_GET['id'])."'",false,true);
-                if(!$get['see'])
-                    db("DELETE FROM ".$db['msg']." WHERE id = ".intval($_GET['id']));
-                else
-                    db("UPDATE ".$db['msg']." SET `see_u` = 1 WHERE id = ".intval($_GET['id']));
+                $get = $sql->selectSingle("SELECT `id`,`see` FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
+                if($sql->rowCount()) {
+                    if(!$get['see']) {
+                        $sql->delete("DELETE FROM `{prefix_messages}` WHERE `id` = ?;",array($get['id']));
+                    } else {
+                        $sql->update("UPDATE `{prefix_messages}` SET `see_u` = 1 WHERE `id` = ?;",array($get['id']));
+                    }
 
+                    msg_truncate();
+                }
+                
                 $index = info(_msg_deleted, "?action=msg");
             break;
             case 'deletesended':
-                $qry = db("SELECT id,see_u FROM ".$db['msg']." WHERE `von` = '".intval($userid)."' AND `see` = 1");
-                while($get = _fetch($qry)) {
-                    if(isset($_POST['pa'.$get['id']])) {
-                        if($get['see_u'])
-                            db("DELETE FROM ".$db['msg']." WHERE `id` = ".intval($_POST['pa'.$get['id']]));
-                        else
-                            db("UPDATE ".$db['msg']." SET `see` = 0 WHERE `id` = ".intval($_POST['pa'.$get['id']]));
+                if(!empty($_POST)) {
+                    foreach ($_POST as $key => $id) {
+                        if(strpos($key, 'postausgang_') !== false) {
+                            $sql->delete("DELETE FROM `{prefix_messages}` WHERE `id` = ?;",array(intval($id)));
+                        }
                     }
+                    
+                    msg_truncate();
                 }
-
                 header("Location: ?action=msg");
             break;
             case 'new':
-                $qry = db("SELECT id,nick FROM ".$db['users']." WHERE id != '".intval($userid)."' ORDER BY nick"); $users = '';
-                while($get = _fetch($qry)) {
+                $qry = $sql->select("SELECT `id`,`nick` "
+                                  . "FROM `{prefix_users}` "
+                                  . "WHERE `id` != ? "
+                                  . "ORDER BY `nick`;",array($userid)); 
+                $users = ''; $buddys = '';
+                foreach($qry as $get) {
                     $users .= show(_to_users, array("id" => $get['id'],
                                                     "selected" => "",
-                                                    "nick" => data("nick",$get['id'])));
+                                                    "nick" => re($get['nick'])));
                 }
 
-                $qry = db("SELECT id,user,buddy FROM ".$db['buddys']." WHERE user = ".intval($userid)." ORDER BY user"); $buddys = '';
-                while($get = _fetch($qry)) {
+                $qry = $sql->select("SELECT userbuddy.`buddy`,user.`nick` "
+                                  . "FROM `dzcp_userbuddys` AS `userbuddy` "
+                                  . "LEFT JOIN `dzcp_users` AS `user` "
+                                  . "ON (user.`id` = userbuddy.`buddy`) "
+                                  . "WHERE userbuddy.`user` = ? "
+                                  . "ORDER BY userbuddy.`user`;",array($userid));
+                foreach($qry as $get) {
                     $buddys .= show(_to_buddys, array("id" => $get['buddy'],
                                                       "selected" => "",
-                                                      "nick" => data("nick",$get['buddy'])));
+                                                      "nick" => re($get['nick'])));
                 }
 
                 $index = show($dir."/new", array("von" => $userid,
-                                                 "an" => _to,
-                                                 "or" => _or,
                                                  "buddys" => $buddys,
                                                  "users" => $users,
-                                                 "value" => _button_value_msg,
-                                                 "titelhead" => _titel,
-                                                 "titel" => _msg_titel,
-                                                 "nickhead" => _nick,
-                                                 "bbcodehead" => _bbcode,
-                                                 "eintraghead" => _eintrag,
                                                  "posttitel" => "",
                                                  "error" => "",
                                                  "posteintrag" => ""));
@@ -185,91 +187,99 @@ if(defined('_UserMenu')) {
             case 'send':
                 if(empty($_POST['titel']) || empty($_POST['eintrag']) || $_POST['buddys'] == "-" && $_POST['users'] == "-" || $_POST['buddys'] != "-"
                    && $_POST['users'] != "-" || $_POST['users'] == $userid || $_POST['buddys'] == $userid) {
-
-                    if(empty($_POST['titel']))
+                    if (empty($_POST['titel'])) {
                         $error = _empty_titel;
-                    elseif(empty($_POST['eintrag']))
+                    } elseif (empty($_POST['eintrag'])) {
                         $error = _empty_eintrag;
-                    elseif($_POST['buddys'] == "-" AND $_POST['users'] == "-")
+                    } elseif ($_POST['buddys'] == "-" AND $_POST['users'] == "-") {
                         $error = _empty_to;
-                    elseif($_POST['buddys'] != "-" AND $_POST['users'] != "-")
+                    } elseif ($_POST['buddys'] != "-" AND $_POST['users'] != "-") {
                         $error = _msg_to_just_1;
-                    elseif($_POST['buddys'] OR $_POST['users'] == $userid)
+                    } elseif ($_POST['buddys'] == $userid || $_POST['users'] == $userid) {
                         $error = _msg_not_to_me;
+                    }
 
                     $error = show("errors/errortable", array("error" => $error));
-
-                    $qry = db("SELECT id FROM ".$db['users']." WHERE id != '".intval($userid)."' ORDER BY nick"); $users = '';
-                    while($get = _fetch($qry)) {
+                    $qry = $sql->select("SELECT `id`,`nick` "
+                                      . "FROM `{prefix_users}` "
+                                      . "WHERE `id` != ? "
+                                      . "ORDER BY `nick`;",array($userid)); 
+                    $users = ''; $buddys = '';
+                    foreach($qry as $get) {
                         $selected = isset($_POST['users']) && $get['id'] == $_POST['users'] ? 'selected="selected"' : '';
                         $users .= show(_to_users, array("id" => $get['id'],
-                                                        "nick" => data("nick",$get['id']),
+                                                        "nick" => re($get['nick']),
                                                         "selected" => $selected));
                     }
 
-                    $qry = db("SELECT id,user,buddy FROM ".$db['buddys']." WHERE user = ".intval($userid)); $buddys = '';
-                    while($get = _fetch($qry)) {
+                    $qry = $sql->select("SELECT userbuddy.`buddy`,user.`nick` "
+                            . "FROM `dzcp_userbuddys` AS `userbuddy` "
+                            . "LEFT JOIN `dzcp_users` AS `user` "
+                            . "ON (user.`id` = userbuddy.`buddy`) "
+                            . "WHERE userbuddy.`user` = ? "
+                            . "ORDER BY userbuddy.`user`;",array($userid));
+                    foreach($qry as $get) {
                         $selected = isset($_POST['buddys']) && $get['buddy'] == $_POST['buddys'] ? 'selected="selected"' : '';
                         $buddys .= show(_to_buddys, array("id" => $get['buddy'],
-                                                          "nick" => data("nick",$get['buddy']),
+                                                          "nick" => re($get['nick']),
                                                           "selected" => $selected));
                     }
 
                     $index = show($dir."/new", array("von" => $userid,
-                                                     "an" => _to,
-                                                     "or" => _or,
                                                      "posttitel" => re($_POST['titel']),
                                                      "posteintrag" => re_bbcode($_POST['eintrag']),
                                                      "postto" => $_POST['buddys']."".$_POST['users'],
                                                      "buddys" => $buddys,
-                                                     "value" => _button_value_msg,
                                                      "users" => $users,
-                                                     "titelhead" => _titel,
-                                                     "titel" => _msg_titel,
-                                                     "nickhead" => _nick,
-                                                     "bbcodehead" => _bbcode,
-                                                     "error" => $error,
-                                                     "eintraghead" => _eintrag));
+                                                     "error" => $error));
                 } else {
                     $to = ($_POST['buddys'] == "-" ? $_POST['users'] : $_POST['buddys']);
-                    db("INSERT INTO ".$db['msg']."
-                        SET `datum`      = ".time().",
-                            `von`        = ".intval($userid).",
-                            `an`         = ".intval($to).",
-                            `titel`      = '".up($_POST['titel'])."',
-                            `nachricht`  = '".up($_POST['eintrag'])."',
-                            `see`        = 1");
+                    $sql->insert("INSERT INTO `{prefix_messages}` "
+                               . "SET `datum` = ".time().", "
+                               . "`von` = ?, "
+                               . "`an` = ?, "
+                               . "`titel` = ?, "
+                               . "`nachricht` = ?,"
+                               . "`see` = 1;",array($userid,$to,up($_POST['titel']),up($_POST['eintrag'])));
 
-                    db("UPDATE ".$db['userstats']." SET `writtenmsg` = writtenmsg+1 WHERE `user` = ".intval($userid));
+                    $sql->update("UPDATE `{prefix_userstats}` SET `writtenmsg` = (writtenmsg+1) WHERE `user` = ?;",array($userid));
                     $index = info(_msg_answer_done, "?action=msg");
                 }
             break;
             default:
-                $qry = db("SELECT * FROM ".$db['msg']." WHERE `an` = ".intval($userid)." AND `see_u` = 0 ORDER BY datum DESC");
-                $posteingang = '';
-                while($get = _fetch($qry)) {
-                    $titel = "-"; $absender = "-"; $date = "-"; $delete = ""; $new = "";
-                    if(_rows($qry)) {
+                $qry = $sql->select("SELECT `von`,`titel`,`datum`,`readed`,`see_u`,`id` "
+                                  . "FROM `{prefix_messages}` "
+                                  . "WHERE `an` = ? AND `see_u` = 0 "
+                                  . "ORDER BY datum DESC;",array($userid));
+                $posteingang = "";
+                if($sql->rowCount()) {
+                    foreach($qry as $get) {
                         $absender = !$get['von'] ? _msg_bot : autor($get['von']);
                         $titel = show(_msg_in_title, array("titel" => re($get['titel'])));
                         $delete = _delete;
                         $date = date("d.m.Y H:i", $get['datum'])._uhr;
                         $new = !$get['readed'] && !$get['see_u'] ? _newicon : '';
+                        $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
+                        $posteingang.= show($dir."/posteingang", array("titel" => $titel,
+                                                                       "absender" => $absender,
+                                                                       "datum" => $date,
+                                                                       "class" => $class,
+                                                                       "delete" => $delete,
+                                                                       "new" => $new,
+                                                                       "id" => $get['id']));
                     }
-
-                    $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-                    $posteingang.= show($dir."/posteingang", array("titel" => $titel,
-                                                                   "absender" => $absender,
-                                                                   "datum" => $date,
-                                                                   "class" => $class,
-                                                                   "delete" => $delete,
-                                                                   "new" => $new,
-                                                                   "id" => $get['id']));
                 }
-
-                $qry = db("SELECT * FROM ".$db['msg']." WHERE `von` = ".$userid." AND `see` = 1 ORDER BY datum DESC");
-                $postausgang = '';
-                while($get = _fetch($qry)) {
+                
+                if(empty($posteingang)) {
+                    $posteingang = show(_no_entrys_found, array("colspan" => "4"));
+                }
+                
+                $qry = $sql->select("SELECT `titel`,`datum`,`readed`,`an`,`id` "
+                                  . "FROM `{prefix_messages}` "
+                                  . "WHERE `von` = ? AND `see` = 1 "
+                                  . "ORDER BY datum DESC;", array($userid));
+                $postausgang = "";
+                foreach($qry as $get) {
                     $titel = show(_msg_out_title, array("titel" => re($get['titel'])));
                     $delete = _msg_delete_sended;
                     $date = date("d.m.Y H:i", $get['datum'])._uhr;
@@ -284,22 +294,12 @@ if(defined('_UserMenu')) {
                                                                    "id" => $get['id']));
                 }
 
+                if (empty($postausgang)) {
+                    $postausgang = show(_no_entrys_found, array("colspan" => "4"));
+                }
+
                 $msghead = show(_msghead, array("nick" => autor($userid)));
                 $index = show($dir."/msg", array("msghead" => $msghead,
-                                                 "posteingang" => _posteingang,
-                                                 "postausgang" => _postausgang,
-                                                 "titel" => _msg_title,
-                                                 "del" => _msg_del,
-                                                 "absender" => _msg_absender,
-                                                 "legende" => _legende,
-                                                 "legendemsg" => _legende_msg,
-                                                 "legendereaded" => _legende_readed,
-                                                 "empfaenger" => _msg_empfaenger,
-                                                 "datum" => _datum,
-                                                 "new" => _msg_new,
-                                                 "newicon" => _newicon,
-                                                 "yesno" => _yesno,
-                                                 "deleteicon" => _deleteicon_blank,
                                                  "showincoming" => $posteingang,
                                                  "showsended" => $postausgang));
             break;
