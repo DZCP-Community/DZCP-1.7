@@ -22,6 +22,7 @@ function feed() {
     if(!file_exists(basePath.'/rss.xml') || time() - filemtime(basePath.'/rss.xml') > feed_update_time) {
         $host = GetServerVars('HTTP_HOST');
         $pfad = preg_replace("#^(.*?)\/(.*?)#Uis","$1",dirname(GetServerVars('PHP_SELF')));
+        $data = fopen("../rss.xml","w+");
         $feed = '<?xml version="1.0" encoding="'.$charset.'" ?>';
         $feed .= "\r\n";
         $feed .= '<rss version="0.91">';
@@ -38,8 +39,8 @@ function feed() {
         $feed .= "\r\n";
         $feed .= '  <copyright>'.date("Y", time()).' '.convert_feed(settings('clanname')).'</copyright>';
         $feed .= "\r\n";
-
-        $data = @fopen("../rss.xml","w+"); @fwrite($data, $feed);
+        fwrite($data, $feed);
+        
         $qry = $sql->select("SELECT `id`,`autor`,`datum`,`titel`,`text` FROM `{prefix_news}` WHERE `intern` = 0 AND `public` = 1 ORDER BY `datum` DESC LIMIT 15;");
         if($sql->rowCount()) {
             foreach($qry as $get) {
@@ -59,16 +60,19 @@ function feed() {
                 $feed .= "\r\n";
                 $feed .= '  </item>';
                 $feed .= "\r\n";
-                $data = @fopen("../rss.xml","w+");
-                @fwrite($data, $feed);
+                fwrite($data, $feed);
             }
         }
 
         $feed .= '</channel>';
         $feed .= "\r\n";
         $feed .= '</rss>';
-        $data = @fopen("../rss.xml","w+");
-        @fwrite($data, $feed);
+        fwrite($data, $feed);
+        fclose($data);
+        
+        if(!file_exists(basePath.'/rss.xml') && view_error_reporting) {
+            DebugConsole::insert_warning('news:feed', 'Permission denied! Can not write ./rss.xml');
+        }
     }
 }
 
