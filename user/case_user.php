@@ -132,9 +132,9 @@ if(defined('_UserMenu')) {
             } else if(isset($_GET['show']) && $_GET['show'] == "gb") {
                 $addgb = show(_usergb_eintragen, array("id" => $_GET['id']));
                 $qrygb = $sql->select("SELECT * FROM `{prefix_usergb}` "
-                        . "WHERE `user` = ? "
-                        . "ORDER BY `datum` DESC "
-                        . "LIMIT ".($page - 1) * config('m_usergb').",".config('m_usergb').";",array($get['id']));
+                                    . "WHERE `user` = ? "
+                                    . "ORDER BY `datum` DESC "
+                                    . "LIMIT ".($page - 1) * config('m_usergb').",".config('m_usergb').";",array($get['id']));
 
                 $entrys = cnt('{prefix_usergb}', " WHERE `user` = ".$get['id']);
                 $i = $entrys - ($page - 1) * config('m_usergb');
@@ -214,9 +214,9 @@ if(defined('_UserMenu')) {
                                                             "posteintrag" => "",
                                                             "error" => ""));
                 }
-
+                
                 $seiten = nav($entrys, config('m_usergb'), "?action=user&amp;id=" . $_GET['id'] . "&show=gb");
-                $qryperm = db("SELECT perm_gb FROM " . $db['users'] . " WHERE id = " . $_GET['id'], false, true);
+                $qryperm = $sql->selectSingle("SELECT `perm_gb` FROM `{prefix_users}` WHERE id = ?;", array(intval($_GET['id'])));
                 $add = $qryperm['perm_gb'] != 1 ? "" : $add;
                 $show = show($dir . "/profil_gb", array("gbhead" => _membergb,
                                                         "show" => $membergb,
@@ -243,156 +243,105 @@ if(defined('_UserMenu')) {
 
                 $city = re($get['city']);
                 $beschreibung = bbcode($get['beschreibung']);
-                $show = show($dir . "/profil_show", array("hardware_head" => $hardware_head,
-                    "about" => _profil_about,
-                    "country" => flag($get['country']),
-                    "pcity" => _profil_city,
-                    "city" => (empty($city) ? '-' : $city),
-                    "stats_hits" => _profil_pagehits,
-                    "stats_profilhits" => _profil_profilhits,
-                    "stats_msgs" => _profil_msgs,
-                    "stats_lastvisit" => _profil_last_visit,
-                    "stats_forenposts" => _profil_forenposts,
-                    "stats_logins" => _profil_logins,
-                    "stats_cws" => _profil_cws,
-                    "stats_reg" => _profil_registered,
-                    "stats_votes" => _profil_votes,
-                    "logins" => userstats("logins", $_GET['id']),
-                    "hits" => userstats("hits", $_GET['id']),
-                    "msgs" => userstats("writtenmsg", $_GET['id']),
-                    "forenposts" => userstats("forumposts", $_GET['id']),
-                    "votes" => userstats("votes", $_GET['id']),
-                    "cws" => userstats("cws", $_GET['id']),
-                    "regdatum" => date("d.m.Y H:i", $get['regdatum']) . _uhr,
-                    "lastvisit" => date("d.m.Y H:i", userstats("lastvisit", $_GET['id'])) . _uhr,
-                    "contact" => _profil_contact,
-                    "preal" => _profil_real,
-                    "pemail" => _email,
-                    "picq" => _icq,
-                    "phlsw" => _hlswstatus,
-                    "psteam" => _steam,
-                    "xboxl" => _xboxstatus,
-                    "xboxavatarl" => _xboxuserpic,
-                    "psnl" => _psnstatus,
-                    "skypel" => _skypestatus,
-                    "originl" => _originstatus,
-                    "battlenetl" => _battlenetstatus,
-                    "php" => _hp,
-                    "hp" => $hp,
-                    "pnick" => _nick,
-                    "pbday" => _profil_bday,
-                    "page" => _profil_age,
-                    "psex" => _profil_sex,
-                    "gamestuff" => _profil_gamestuff,
-                    "xfire" => re($get['hlswid']),
-                    "xboxx" => re($get['xboxid']),
-                    "psnn" => re($get['psnid']),
-                    "originn" => re($get['originid']),
-                    "battlenett" => re($get['battlenetid']),
-                    "buddyadd" => $buddyadd,
-                    "userstats" => _profil_userstats,
-                    "pos" => _profil_os,
-                    "pcpu" => _profil_cpu,
-                    "pram" => _profil_ram,
-                    "phdd" => _profil_hdd,
-                    "pboard" => _profil_board,
-                    "pmaus" => _profil_maus,
-                    "nick" => autor($get['id']),
-                    "rlname" => $rlname,
-                    "bday" => $bday,
-                    "age" => getAge($get['bday']),
-                    "sex" => $sex,
-                    "email" => $email,
-                    "icq" => $icq,
-                    "icqnr" => $icqnr,
-                    "skypename" => $skypename,
-                    "skype" => $get['skypename'],
-                    "pn" => $pn,
-                    "edituser" => $edituser,
-                    "hlswid" => $hlsw,
-                    "xboxid" => $xboxu,
-                    "xboxavatar" => $xboxuser,
-                    "psnid" => $psnu,
-                    "originid" => $originu,
-                    "battlenetid" => $battlenetu,
-                    "steam" => $steam,
-                    "onoff" => onlinecheck($get['id']),
-                    "clan" => $clan,
-                    "picture" => userpic($get['id']),
-                    "favos_head" => $favos_head,
-                    "sonst" => _profil_sonst,
-                    "pich" => _profil_ich,
-                    "pposition" => _profil_position,
-                    "pstatus" => _profil_status,
-                    "position" => getrank($get['id']),
-                    "status" => $status,
-                    "ich" => (empty($beschreibung) ? '-' : $beschreibung),
-                    "custom_about" => $custom_about['content'],
-                    "custom_contact" => $custom_contact['content'],
-                    "custom_favos" => $custom_favos['content'],
-                    "custom_hardware" => $custom_hardware['content']));
+                $show = show($dir."/profil_show", array("hardware_head" => $hardware_head,
+                                                        "country" => flag($get['country']),
+                                                        "city" => (empty($city) ? '-' : $city),
+                                                        "logins" => userstats("logins", $_GET['id']),
+                                                        "hits" => userstats("hits", $_GET['id']),
+                                                        "msgs" => userstats("writtenmsg", $_GET['id']),
+                                                        "forenposts" => userstats("forumposts", $_GET['id']),
+                                                        "votes" => userstats("votes", $_GET['id']),
+                                                        "cws" => userstats("cws", $_GET['id']),
+                                                        "regdatum" => date("d.m.Y H:i", $get['regdatum']) . _uhr,
+                                                        "lastvisit" => date("d.m.Y H:i", userstats("lastvisit", $_GET['id'])) . _uhr,
+                                                        "hp" => $hp,
+                                                        "xfire" => re($get['hlswid']),
+                                                        "xboxx" => re($get['xboxid']),
+                                                        "psnn" => re($get['psnid']),
+                                                        "originn" => re($get['originid']),
+                                                        "battlenett" => re($get['battlenetid']),
+                                                        "buddyadd" => $buddyadd,
+                                                        "nick" => autor($get['id']),
+                                                        "rlname" => $rlname,
+                                                        "bday" => $bday,
+                                                        "age" => getAge($get['bday']),
+                                                        "sex" => $sex,
+                                                        "email" => $email,
+                                                        "icq" => $icq,
+                                                        "icqnr" => $icqnr,
+                                                        "skypename" => $skypename,
+                                                        "skype" => $get['skypename'],
+                                                        "pn" => $pn,
+                                                        "edituser" => $edituser,
+                                                        "hlswid" => $hlsw,
+                                                        "xboxid" => $xboxu,
+                                                        "xboxavatar" => $xboxuser,
+                                                        "psnid" => $psnu,
+                                                        "originid" => $originu,
+                                                        "battlenetid" => $battlenetu,
+                                                        "steam" => $steam,
+                                                        "onoff" => onlinecheck($get['id']),
+                                                        "clan" => $clan,
+                                                        "picture" => userpic($get['id']),
+                                                        "favos_head" => $favos_head,
+                                                        "position" => getrank($get['id']),
+                                                        "status" => $status,
+                                                        "ich" => (empty($beschreibung) ? '-' : $beschreibung),
+                                                        "custom_about" => $custom_about['content'],
+                                                        "custom_contact" => $custom_contact['content'],
+                                                        "custom_favos" => $custom_favos['content'],
+                                                        "custom_hardware" => $custom_hardware['content']));
             }
 
             $navi_profil = show(_profil_navi_profil, array("id" => $_GET['id']));
             $navi_gb = show(_profil_navi_gb, array("id" => $_GET['id']));
             $navi_gallery = show(_profil_navi_gallery, array("id" => $_GET['id']));
             $profil_head = show(_profil_head, array("profilhits" => userstats("profilhits", $_GET['id'])));
-
             $index = show($dir . "/profil", array("profilhead" => $profil_head,
-                "show" => $show,
-                "nick" => autor($_GET['id']),
-                "profil" => $navi_profil,
-                "gb" => $navi_gb,
-                "gallery" => $navi_gallery));
+                                                  "show" => $show,
+                                                  "nick" => autor($_GET['id']),
+                                                  "profil" => $navi_profil,
+                                                  "gb" => $navi_gb,
+                                                  "gallery" => $navi_gallery));
 
-            if ($do == "delete") {
-                if ($chkMe == "4" || $_GET['id'] == $userid) {
-                    db("DELETE FROM " . $db['usergb'] . "
-                        WHERE user = '" . intval($_GET['id']) . "'
-                        AND id = '" . intval($_GET['gbid']) . "'");
-
-                    $index = info(_gb_delete_successful, "?action=user&amp;id=" . $_GET['id'] . "&show=gb");
-                } else {
-                    $index = error(_error_wrong_permissions, 1);
-                }
-            }
-            else if ($do == "edit") {
-                $get = db("SELECT * FROM " . $db['usergb'] . "
-                           WHERE id = '" . intval($_GET['gbid']) . "'", false, true);
-
-                if ($get['reg'] == $userid || permission('editusers')) {
-                    if ($get['reg'] != 0) {
-                        $form = show("page/editor_regged", array("nick" => autor($get['reg']), "von" => _autor));
+            switch ($do) {
+                case 'delete':
+                    if ($chkMe == 4 || intval($_GET['id']) == $userid) {
+                        $sql->delete("DELETE FROM `{prefix_usergb}` "
+                                   . "WHERE `user` = ? AND `id` = ?;",
+                                array(intval($_GET['id']),intval($_GET['gbid'])));
+                        $index = info(_gb_delete_successful, "?action=user&amp;id=" . $_GET['id'] . "&show=gb");
                     } else {
-                        $form = show("page/editor_notregged", array("nickhead" => _nick,
-                            "emailhead" => _email,
-                            "hphead" => _hp,
-                            "postemail" => re($get['email']),
-                            "posthp" => re($get['hp']),
-                            "postnick" => re($get['nick'])));
+                        $index = error(_error_wrong_permissions, 1);
                     }
+                break;
+                case 'edit':
+                    $get = $sql->selectSingle("SELECT * FROM `{prefix_usergb}` "
+                                            . "WHERE `id` = ?;", array(intval($_GET['gbid'])));
 
-                    $index = show($dir . "/usergb_edit", array("nickhead" => _nick,
-                        "bbcodehead" => _bbcode,
-                        "emailhead" => _email,
-                        "preview" => _preview,
-                        "whaturl" => "edit&gbid=" . $_GET['gbid'],
-                        "ed" => "&amp;do=edit&amp;uid=" . $_GET['id'] . "&amp;gbid=" . $_GET['gbid'],
-                        "security" => _register_confirm,
-                        "what" => _button_value_edit,
-                        "reg" => $get['reg'],
-                        "hphead" => _hp,
-                        "id" => $_GET['id'],
-                        "form" => $form,
-                        "postemail" => re($get['email']),
-                        "posthp" => $get['hp'],
-                        "postnick" => re($get['nick']),
-                        "posteintrag" => re_bbcode($get['nachricht']),
-                        "error" => $error,
-                        "ip" => _iplog_info,
-                        "eintraghead" => _eintrag));
-                } else
-                    $index = error(_error_edit_post, 1);
+                    if ($get['reg'] == $userid || permission('editusers')) {
+                            if ($get['reg'] != 0) {
+                                $form = show("page/editor_regged", array("nick" => autor($get['reg']), "von" => _autor));
+                            } else {
+                                $form = show("page/editor_notregged", array("postemail" => re($get['email']),
+                                                                            "posthp" => re($get['hp']),
+                                                                            "postnick" => re($get['nick'])));
+                            }
+
+                            $index = show($dir . "/usergb_edit", array("whaturl" => "edit&gbid=" . $_GET['gbid'],
+                                                                       "ed" => "&amp;do=edit&amp;uid=" . $_GET['id'] . "&amp;gbid=" . $_GET['gbid'],
+                                                                       "reg" => $get['reg'],
+                                                                       "id" => $_GET['id'],
+                                                                       "form" => $form,
+                                                                       "postemail" => re($get['email']),
+                                                                       "posthp" => $get['hp'],
+                                                                       "postnick" => re($get['nick']),
+                                                                       "posteintrag" => re_bbcode($get['nachricht']),
+                                                                       "error" => ''));
+                        } else {
+                            $index = error(_error_edit_post, 1);
+                        }
+                    break;
             }
         }
     }
