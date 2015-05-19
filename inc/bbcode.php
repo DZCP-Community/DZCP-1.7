@@ -1761,12 +1761,6 @@ function mkpwd($passwordLength=8,$specialcars=true) {
     return $password;
 }
 
-//-> Passwortabfrage
-function checkpwd($user, $pwd) {
-    global $sql;
-    return ($sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user` = ? AND `pwd` = ? AND `level` != 0;",array(up($user),up($pwd))));
-}
-
 //-> Infomeldung ausgeben
 function info($msg, $url, $timeout = 5) {
     if (config('direct_refresh')) {

@@ -7,8 +7,8 @@
 if(defined('_UserMenu')) {
     $where = _site_user_logout;
     if($chkMe && $userid) {
-        db("UPDATE ".$db['users']." SET online = '0', sessid = '' WHERE id = '".$userid."'");
-        db("DELETE FROM `".$db['autologin']."` WHERE `ssid` = '".session_id()."';");
+        $sql->update("UPDATE `{prefix_users}` SET `online` = 0, `sessid` = '' WHERE `id` = ?;",array($userid));
+        $sql->delete("DELETE FROM `{prefix_autologin}` WHERE `ssid` = ?;",array(session_id()));
         setIpcheck("logout(".$userid.")");
         dzcp_session_destroy();
     }

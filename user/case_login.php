@@ -13,62 +13,64 @@ if(defined('_UserMenu')) {
             default: $securimage->namespace = 'default'; break;
         }
 
-        if(config('securelogin') && (!isset($_POST['secure']) || !$securimage->check($_POST['secure'])))
+        if (config('securelogin') && (!isset($_POST['secure']) || !$securimage->check($_POST['secure']))) {
             $index = error(captcha_mathematic ? _error_invalid_regcode_mathematic : _error_invalid_regcode);
-        else {
-            if(checkpwd($_POST['user'], md5($_POST['pwd']))) {
-                $get = db_stmt("SELECT `id`,`user`,`nick`,`pwd`,`email`,`level`,`time` FROM ".$db['users']." WHERE `user` = ? AND `pwd` = ? AND `level` != '0'", array('ss', up($_POST['user']), md5($_POST['pwd'])),false,true);
-                if(!isBanned($get['id'])) {
+        } else {
+            if($sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user` = ? AND `pwd` = ? AND `level` != 0;",array(up($_POST['user']),md5($_POST['pwd'])))) {
+                $get = db_stmt("SELECT `id`,`user`,`nick`,`pwd`,`email`,`level`,`time` FROM " . $db['users'] . " WHERE `user` = ? AND `pwd` = ? AND `level` != '0'", array('ss', up($_POST['user']), md5($_POST['pwd'])), false, true);
+                if (!isBanned($get['id'])) {
                     $permanent_key = '';
                     if(isset($_POST['permanent'])) {
                         cookie::put('id', $get['id']);
                         $permanent_key = md5(mkpwd(8));
-                        if(db_stmt("SELECT `id` FROM `".$db['autologin']."` WHERE `host` = ?", array('s', gethostbyaddr($userip)),true) >= 1) {
+                        if (db_stmt("SELECT `id` FROM `" . $db['autologin'] . "` WHERE `host` = ?", array('s', gethostbyaddr($userip)), true) >= 1) {
                             //Update Autologin
-                            db_stmt("UPDATE `".$db['autologin']."` SET `ssid` = '".session_id()."',
-                                                                       `pkey` = '".$permanent_key."',
-                                                                       `ip` = '".$userip."',
-                                                                       `date` = ".time().",
-                                                                       `update` = ".time().",
-                                                                       `expires` = ".autologin_expire." WHERE `host` = ?", array('s', gethostbyaddr($userip)));
+                            db_stmt("UPDATE `" . $db['autologin'] . "` SET `ssid` = '" . session_id() . "',
+                                                                       `pkey` = '" . $permanent_key . "',
+                                                                       `ip` = '" . $userip . "',
+                                                                       `date` = " . time() . ",
+                                                                       `update` = " . time() . ",
+                                                                       `expires` = " . autologin_expire . " WHERE `host` = ?", array('s', gethostbyaddr($userip)));
                         } else {
                             //Insert Autologin
-                            db_stmt("INSERT INTO `".$db['autologin']."` SET `uid` = ".$get['id'].",
-                                                                     `ssid` = '".session_id()."',
-                                                                     `pkey` = '".$permanent_key."',
-                                                                     `ip` = '".$userip."',
+                            db_stmt("INSERT INTO `" . $db['autologin'] . "` SET `uid` = " . $get['id'] . ",
+                                                                     `ssid` = '" . session_id() . "',
+                                                                     `pkey` = '" . $permanent_key . "',
+                                                                     `ip` = '" . $userip . "',
                                                                      `name` = ?,
                                                                      `host` = ?,
-                                                                     `date` = ".time().",
+                                                                     `date` = " . time() . ",
                                                                      `update` = 0,
-                                                                     `expires` = ".autologin_expire.";",array('ss', cut(gethostbyaddr($userip),20), gethostbyaddr($userip)));
-                        }                        
+                                                                     `expires` = " . autologin_expire . ";", array('ss', cut(gethostbyaddr($userip), 20), gethostbyaddr($userip)));
+                        }
                         cookie::put('pkey', $permanent_key);
                         cookie::save();
                     }
 
-                    $_SESSION['id']         = $get['id'];
-                    $_SESSION['pwd']        = $get['pwd'];
-                    $_SESSION['lastvisit']  = $get['time'];
-                    $_SESSION['ip']         = $userip;
+                    $_SESSION['id'] = $get['id'];
+                    $_SESSION['pwd'] = $get['pwd'];
+                    $_SESSION['lastvisit'] = $get['time'];
+                    $_SESSION['ip'] = $userip;
 
-                    db("UPDATE ".$db['userstats']." SET `logins` = logins+1 WHERE user = ".$get['id']);
-                    db("UPDATE ".$db['users']." SET `online` = '1', `sessid` = '".session_id()."', `ip` = '".$userip."' WHERE id = ".$get['id']);
-                    setIpcheck("login(".$get['id'].")");
+                    db("UPDATE " . $db['userstats'] . " SET `logins` = logins+1 WHERE user = " . $get['id']);
+                    db("UPDATE " . $db['users'] . " SET `online` = '1', `sessid` = '" . session_id() . "', `ip` = '" . $userip . "' WHERE id = " . $get['id']);
+                    setIpcheck("login(" . $get['id'] . ")");
 
                     //-> Aktualisiere Ip-Count Tabelle
-                    $qry = db("SELECT id FROM `".$db['clicks_ips']."` WHERE `ip` LIKE '".$userip."' AND `uid` = 0");
-                    if(_rows($qry)) while($get_ci = _fetch($qry)) { db("UPDATE `".$db['clicks_ips']."` SET `uid` = ".$get['id']." WHERE `id` = ".$get_ci['id'].";"); }
+                    $qry = db("SELECT id FROM `" . $db['clicks_ips'] . "` WHERE `ip` LIKE '" . $userip . "' AND `uid` = 0");
+                    if (_rows($qry))
+                        while ($get_ci = _fetch($qry)) {
+                            db("UPDATE `" . $db['clicks_ips'] . "` SET `uid` = " . $get['id'] . " WHERE `id` = " . $get_ci['id'] . ";");
+                        }
 
                     header("Location: ?action=userlobby");
-                }
-                else
+                } else
                     $index = error(_login_banned);
             } else {
-                $qry = db("SELECT id FROM ".$db['users']." WHERE user = '".up($_POST['user'])."'");
-                if(_rows($qry)) {
+                $qry = db("SELECT id FROM " . $db['users'] . " WHERE user = '" . up($_POST['user']) . "'");
+                if (_rows($qry)) {
                     $get = _fetch($qry);
-                    setIpcheck("trylogin(".$get['id'].")");
+                    setIpcheck("trylogin(" . $get['id'] . ")");
                 }
 
                 cookie::put('id', '');
@@ -77,15 +79,16 @@ if(defined('_UserMenu')) {
             }
         }
     } else {
-        if(!$chkMe) {
-            $secure = config('securelogin') ? show($dir."/secure", array("help" => _login_secure_help, "security" => _register_confirm)) : '';
-            $index = show($dir."/login", array("loginhead" => _login_head,
-                                               "loginname" => _loginname,
-                                               "secure" => $secure,
-                                               "lostpwd" => _login_lostpwd,
-                                               "permanent" => _login_permanent,
-                                               "pwd" => _pwd));
-        } else
+        if (!$chkMe) {
+            $secure = config('securelogin') ? show($dir . "/secure", array("help" => _login_secure_help, "security" => _register_confirm)) : '';
+            $index = show($dir . "/login", array("loginhead" => _login_head,
+                "loginname" => _loginname,
+                "secure" => $secure,
+                "lostpwd" => _login_lostpwd,
+                "permanent" => _login_permanent,
+                "pwd" => _pwd));
+        } else {
             $index = error(_error_user_already_in, 1);
+        }
     }
 }
