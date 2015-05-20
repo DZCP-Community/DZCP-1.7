@@ -212,7 +212,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                     $nick = show(_link_mailto, array("nick" => re($getc['nick']), "email" => $email));
                 }
 
-                $titel = show(_eintrag_titel, array("postid" => $i,
+                $titel = show(_eintrag_titel, array("postid" => $i+1,
                                                     "datum" => date("d.m.Y", $getc['datum']),
                                                     "zeit" => date("H:i", $getc['datum']) . _uhr,
                                                     "edit" => $edit,

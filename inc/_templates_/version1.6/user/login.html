@@ -3,10 +3,10 @@
       <form name="contentLogin" action="../user/?action=login&amp;do=yes" method="post" onsubmit="return(DZCP.submitButton())">
         <table class="mainContent" cellspacing="1">
           <tr>
-            <td class="contentHead" colspan="2" align="center"><span class="fontBold">[loginhead]</span></td>
+            <td class="contentHead" colspan="2" align="center"><span class="fontBold">[lang_login_head]</span></td>
           </tr>
           <tr>
-            <td class="contentMainTop" width="25%"><span class="fontBold">[loginname]:</span></td>
+            <td class="contentMainTop" width="25%"><span class="fontBold">[lang_loginname]:</span></td>
             <td class="contentMainFirst">
               <input type=text name="user" class="inputField_dis"
               onfocus="this.className='inputField_en';"
@@ -14,13 +14,13 @@
             </td>
           </tr>
           <tr>
-            <td class="contentMainTop"><span class="fontBold">[pwd]:</span></td>
+            <td class="contentMainTop"><span class="fontBold">[lang_pwd]:</span></td>
             <td class="contentMainFirst">
               <input type=password name="pwd" class="inputField_dis"
               onfocus="this.className='inputField_en';"
               onblur="this.className='inputField_dis';" [dis] required><br /><br />
-              <input class="checkbox" type="checkbox" name="permanent" value="1"> [permanent]<br />
-              <a href="../user/?action=lostpwd">[lostpwd]?</a>
+              <input class="checkbox" type="checkbox" name="permanent" value="1"> [lang_login_permanent]<br />
+              <a href="../user/?action=lostpwd">[lang_login_lostpwd]?</a>
             </td>
           </tr>
           [secure]
