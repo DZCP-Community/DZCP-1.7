@@ -116,8 +116,33 @@ ob_implicit_flush(false);
             break;
         case 'securimage_audio':
             if(!headers_sent()) {
-                if(file_exists(basePath.'/inc/securimage/audio/en/0.wav'))
-                    $securimage->audio_path = basePath.'/inc/securimage/audio/en/';
+                $securimage->audio_path = basePath.'/inc/securimage/audio/en/';
+                switch($language) {
+                    case 'deutsch':
+                        if(file_exists(basePath.'/inc/securimage/audio/de/0.wav')) {
+                            $securimage->audio_path = basePath.'/inc/securimage/audio/de/';
+                        }
+                    break;
+                    case 'english':
+                        if(file_exists(basePath.'/inc/securimage/audio/en/0.wav')) {
+                            $securimage->audio_path = basePath.'/inc/securimage/audio/en/';
+                        }
+                    break;
+                    default:
+                        if(file_exists(basePath.'/inc/securimage/audio/'.$language.'/0.wav')) {
+                            $securimage->audio_path = basePath.'/inc/securimage/audio/'.$language.'/';
+                        }
+                    break;
+                }
+                
+                if(captcha_audio_use_sox) {
+                    $securimage->audio_use_sox   = true;
+                    $securimage->audio_use_noise = captcha_audio_use_noise;
+                    $securimage->degrade_audio   = captcha_degrade_audio;
+                    $securimage->sox_binary_path = captcha_sox_binary_path;
+                } else {
+                    $securimage->audio_use_sox   = false;
+                }
 
                 $securimage->namespace = isset($_GET['namespace']) ? $_GET['namespace'] : 'default';
                 echo $securimage->outputAudioFile();

@@ -61,6 +61,10 @@ define('ts3viewer_dns_dissolve', true); //Prufen ob ein TS3 DNS Server zur verfu
 
 define('captcha_case_sensitive', false); //Unterscheidet Groﬂ und Kleinschreibung beim Captcha
 define('captcha_mathematic', true); //Stellt den Usern einfache Rechenaufgaben anstelle eines Captcha Codes
+define('captcha_audio_use_sox', false); //Using SoX for captcha audio effects
+define('captcha_audio_use_noise', true);
+define('captcha_degrade_audio', false);
+define('captcha_sox_binary_path', 'sox');
 
 define('count_clicks_expires', (24*60*60)); // Wie Lange die IPs fur den Click-Counter gespeichert bleiben.
 

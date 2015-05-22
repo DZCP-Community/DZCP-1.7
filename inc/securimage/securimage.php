@@ -1,11 +1,9 @@
 <?php
-// error_reporting(E_ALL); ini_set('display_errors', 1); // uncomment this line for debugging
-
 /**
- * Project:     Securimage: A PHP class for creating and managing form CAPTCHA images<br />
- * File:        securimage.php<br />
+ * Project:     Securimage: A PHP class for creating and managing form CAPTCHA images
+ * File:        securimage.php
  *
- * Copyright (c) 2013, Drew Phillips
+ * Copyright (c) 2014, Drew Phillips
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -30,9 +28,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * Any modifications to the library should be indicated clearly in the source code
- * to inform users that the changes are not a part of the original software.<br /><br />
+ * to inform users that the changes are not a part of the original software.
  *
- * If you found this script useful, please take a quick moment to rate it.<br />
+ * If you found this script useful, please take a quick moment to rate it.
  * http://www.hotscripts.com/rate/49400.html  Thanks.
  *
  * @link http://www.phpcaptcha.org Securimage PHP CAPTCHA
@@ -40,20 +38,12 @@
  * @link http://www.phpcaptcha.org/Securimage_Docs/ Online Documentation
  * @copyright 2013 Drew Phillips
  * @author Drew Phillips <drew@drew-phillips.com>
- * @version 3.5.1 (June 21, 2013)
+ * @version 3.5.4 (Aug 27, 2014)
  * @package Securimage
+ * @modified Lucas Brucksch for DZCP 1.7
  *
  */
 
-/**
- * Securimage CAPTCHA Class.
- *
- * @version    3.5
- * @package    Securimage
- * @subpackage classes
- * @author     Drew Phillips <drew@drew-phillips.com>
- *
- */
 class Securimage {
     // All of the public variables below are securimage options
     // They can be passed as an array to the Securimage constructor, set below,
@@ -237,6 +227,14 @@ class Securimage {
      */
     public $wordlist_file;
     /**
+     * Font size is calculated by image height and this ratio - leave blank for default ratio of 0.4.
+     * Valid range: 0.1 - 0.99.
+     * Depending on image_width, values > 0.6 are probably too large and values < 0.3 are too small.
+     *
+     * @var float
+     */
+    public $font_ratio;
+    /**
      * The directory to scan for background images, if set a random background will be chosen from this folder
      * @var string
      */
@@ -250,6 +248,22 @@ class Securimage {
      * </code>
      */
     public $audio_path;
+
+    /**
+     * Use SoX (The Swiss Army knife of audio manipulation) for audio effects and processing
+     *
+     * @see Securimage::$sox_binary_path
+     * @var bool true to use SoX, false to use PHP
+     */
+    public $audio_use_sox = false;
+
+    /**
+     * The path to the SoX binary on your system
+     *
+     * @var string
+     */
+    public $sox_binary_path = '/usr/bin/sox';
+
     /**
      * The path to the directory containing audio files that will be selected
      * randomly and mixed with the captcha audio.
@@ -283,12 +297,12 @@ class Securimage {
      *            above which amplitudes are comressed linearly. <br />
      *            e.g. -0.6 to leave amplitudes up to 60% "as is" and compress above. </li></ul>
      *
-     * Default: 0.6
+     * Default: 0.8
      *
      * @since 3.0.4
      * @var float
      */
-    public $audio_mix_normalization = 0.6;
+    public $audio_mix_normalization = 0.8;
     /**
      * Whether or not to degrade audio by introducing random noise (improves security of audio captcha)
      * Default: true
@@ -310,7 +324,7 @@ class Securimage {
      * @since 3.0.3
      * @var float
      */
-    public $audio_gap_max = 600;
+    public $audio_gap_max = 3000;
 
     /**
      * Captcha ID if using static captcha
@@ -547,7 +561,7 @@ class Securimage {
             $audio = $this->getAudibleCode();
         }
         catch (Exception $ex) {
-            if (($fp = @fopen(dirname(__FILE__) . '/si.error_log', 'a+')) !== false) {
+            if (($fp = @fopen(basePath.'/inc/_logs/si.error.log', 'a+')) !== false) {
                 fwrite($fp, date('Y-m-d H:i:s') . ': Securimage audio error "' . $ex->getMessage() . '"' . "\n");
                 fclose($fp);
             }
@@ -848,12 +862,16 @@ class Securimage {
     protected function drawWord() {
         $width2  = $this->image_width * $this->iscale;
         $height2 = $this->image_height * $this->iscale;
+        $ratio   = ($this->font_ratio) ? $this->font_ratio : 0.4;
+        if ((float)$ratio < 0.1 || (float)$ratio >= 1) {
+            $ratio = 0.4;
+        }
 
         if (!is_readable($this->ttf_file)) {
             imagestring($this->im, 4, 10, ($this->image_height / 2) - 5, 'Failed to load TTF font file!', $this->gdtextcolor);
         } else {
             if ($this->perturbation > 0) {
-                $font_size = $height2 * .4;
+                $font_size = $height2 * $ratio;
                 $bb = imageftbbox($font_size, 0, $this->ttf_file, $this->code_display);
                 $tx = $bb[4] - $bb[0];
                 $ty = $bb[5] - $bb[1];
@@ -862,7 +880,7 @@ class Securimage {
 
                 imagettftext($this->tmpimg, $font_size, 0, $x, $y, $this->gdtextcolor, $this->ttf_file, $this->code_display);
             } else {
-                $font_size = $this->image_height * .4;
+                $font_size = $this->image_height * $ratio;
                 $bb = imageftbbox($font_size, 0, $this->ttf_file, $this->code_display);
                 $tx = $bb[4] - $bb[0];
                 $ty = $bb[5] - $bb[1];
@@ -971,17 +989,14 @@ class Securimage {
         }
 
         $t0 = microtime(true);
-
         $noise_level *= 125; // an arbitrary number that works well on a 1-10 scale
-
-        $points = $this->image_width * $this->image_height * $this->iscale;
         $height = $this->image_height * $this->iscale;
         $width  = $this->image_width * $this->iscale;
         for ($i = 0; $i < $noise_level; ++$i) {
             $x = mt_rand(10, $width);
             $y = mt_rand(10, $height);
             $size = mt_rand(7, 10);
-            if ($x - $size <= 0 && $y - $size <= 0) continue; // dont cover 0,0 since it is used by imagedistortedcopy
+            if ($x - $size <= 0 && $y - $size <= 0) { continue; } // dont cover 0,0 since it is used by imagedistortedcopy
             imagefilledarc($this->tmpimg, $x, $y, $size, $size, 0, 360, $this->gdnoisecolor, IMG_ARC_PIE);
         }
 
@@ -1039,13 +1054,13 @@ class Securimage {
      * @return The audio representation of the captcha in Wav format
      */
     protected function getAudibleCode() {
-        $letters = array();
+        $letters = array(); $eq = null;
         $code    = $this->getCode(true, true);
 
         if ($code['code'] == '') {
-            if (strlen($this->display_value) > 0)
+            if (strlen($this->display_value) > 0) {
                 $code = array('code' => $this->display_value, 'display' => $this->display_value);
-            else {
+            } else {
                 $this->createCode();
                 $code = $this->getCode(true);
             }
@@ -1080,7 +1095,9 @@ class Securimage {
      */
     protected function readCodeFromFile($numWords = 1) {
         $fp = fopen($this->wordlist_file, 'rb');
-        if (!$fp) return false;
+        if (!$fp) {
+            return false;
+        }
 
         $fsize = filesize($this->wordlist_file);
         if ($fsize < 128) return false; // too small of a list to be effective
@@ -1141,17 +1158,18 @@ class Securimage {
      */
     protected function validate() {
         $this->correct_code = false;
-        if (!is_string($this->code) || strlen($this->code) == 0)
+        if (!is_string($this->code) || strlen($this->code) == 0) {
             $code = $this->getCode();
-        else
+        } else {
             $code = $this->code;
-        if(empty($code)) return;
+        }
 
-        if ($this->case_sensitive == false && preg_match('/[A-Z]/', $code))
+        if (empty($code)) { return; }
+        if ($this->case_sensitive == false && preg_match('/[A-Z]/', $code)) {
             $this->case_sensitive = true;
+        }
 
         $code_entered = trim( (($this->case_sensitive) ? $this->code_entered : strtolower($this->code_entered)));
-
         if (!empty($code) && !empty($code_entered)) {
             if (strpos($code, ' ') !== false) {
                 // for multi word captchas, remove more than once space from input
@@ -1170,21 +1188,22 @@ class Securimage {
      * Saves the code to the sqlite database
      */
     protected function saveCodeToDatabase() {
-        global $db;
-        $success   = false;
-        $id        = $this->getCaptchaId(false);
-        $id        = empty($id) ? visitorIp() : $id;
-        $time      = time();
-        $code      = $this->code;
-        $code_disp = $this->code_display;
-
-        // This is somewhat expensive in PDO Sqlite3 (when there is something to delete)
+        global $sql;
+        $id = $this->getCaptchaId(false);
+        $id = empty($id) ? visitorIp() : $id;
         $this->clearCodeFromDatabase();
+        $sql->insert("INSERT INTO `{prefix_captcha}` SET "
+                    . "`id` = ?, "
+                    . "`code` = ?, "
+                    . "`code_display` = ?, "
+                    . "`namespace` = ?, "
+                    . "`created` = ?;",
+        array(md5($id),up($this->code),up($this->code_display),up($this->namespace),time()));
+        if($sql->lastInsertId() >= 1) {
+            return true;
+        }
 
-        if(db("INSERT INTO `".$db['captcha']."` SET `id` = '".md5($id)."', `code` = '".$code."', `code_display` = '".$code_disp."', `namespace` = '".$this->namespace."', `created` = ".$time.";"))
-            $success = true;
-
-        return $success !== false;
+        return false;
     }
 
     /**
@@ -1195,37 +1214,50 @@ class Securimage {
      * returns an array with indices "code" and "code_disp"
      */
     protected function getCodeFromDatabase() {
-        global $db;
-        $code = '';
-        if (Securimage::$_captchaId !== null)
-            $result = db("SELECT `code`,`created`,`code_display` FROM `".$db['captcha']."` WHERE `id` = '".md5(Securimage::$_captchaId)."' AND `namespace` = '".$this->namespace."';");
-        else
-            $result = db("SELECT `code`,`created`,`code_display` FROM `".$db['captcha']."` WHERE `id` = '".md5(visitorIp())."' AND `namespace` = '".$this->namespace."';");
+        global $sql;
+        $params = array(md5(visitorIp()),up($this->namespace));
+        if (Securimage::$_captchaId !== null) {
+            $params = array(md5(Securimage::$_captchaId),up($this->namespace));
+        }
 
-        if (_rows($result)) {
-            if($row = _fetch($result)) {
-                if (!$this->isCodeExpired($row['created'])) {
-                    if (Securimage::$_captchaId !== null)
-                        $code = array('code' => $row['code'], 'code_disp' => $row['code_display']); // return an array when using captchaId
-                    else
-                        $code = $row['code'];
+        $row = $sql->selectSingle("SELECT `code`,`created`,`code_display` FROM `{prefix_captcha}` WHERE `id` = ? AND `namespace` = ?;",$params);
+        if($sql->rowCount()) {
+            if (!$this->isCodeExpired($row['created'])) {
+                if (Securimage::$_captchaId !== null) {
+                    return array('code' => re($row['code']), 'code_disp' => re($row['code_display'])); // return an array when using captchaId
+                } else {
+                    return re($row['code']);
                 }
             }
         }
 
-        return $code;
+        return '';
+    }
+    
+    /**
+     * Set the namespace for the captcha being stored in the session or database.
+     *
+     * @param string $namespace  Namespace value, String consisting of characters "a-zA-Z0-9_-"
+     */
+    public function setNamespace($namespace) {
+        $namespace = substr(preg_replace('/[^a-z0-9-_]/i', '', $namespace), 0, 64);
+        if (!empty($namespace)) {
+            $this->namespace = $namespace;
+        } else {
+            $this->namespace = 'default';
+        }
     }
 
     /**
      * Remove an entered code from the database
      */
     protected function clearCodeFromDatabase() {
-        global $db;
+        global $sql;
         $id = empty(Securimage::$_captchaId) ? visitorIp() : Securimage::$_captchaId;
-        db("DELETE FROM `".$db['captcha']."` WHERE id = '".md5($id)."' AND namespace = '".$this->namespace."';");
-        $qry = db("SELECT `id` FROM `".$db['captcha']."` WHERE `created` < ".(time()-(30*30)).";");
-        while ($get = _fetch($qry)) {
-            db("DELETE FROM `".$db['captcha']."` WHERE `id` = '".$get['id']."'");
+        $sql->delete("DELETE FROM `{prefix_captcha}` WHERE `id` = ? AND `namespace` = ?;",array(md5($id),up($this->namespace)));
+        $qry = $sql->select("SELECT `id` FROM `{prefix_captcha}` WHERE `created` < ".(time()-(30*30)).";");
+        foreach($qry as $get) {
+            $sql->delete("DELETE FROM `{prefix_captcha}` WHERE `id` = ?;",array($get['id']));
         }
     }
 
@@ -1233,9 +1265,9 @@ class Securimage {
      * Deletes old codes from sqlite database
      */
     public function clearOldCodesFromDatabase() {
-        global $db;
+        global $sql;
         $limit = (!is_numeric($this->expiry_time) || $this->expiry_time < 1) ? 86400 : $this->expiry_time;
-        db("DELETE FROM `".$db['captcha']."` WHERE ".time()." - created > ".$limit);
+        $sql->delete("DELETE FROM `{prefix_captcha}` WHERE (? - created) > ?;",array(time(),$limit));
     }
 
     /**
@@ -1244,7 +1276,6 @@ class Securimage {
      */
     protected function isCodeExpired($creation_time) {
         $expired = true;
-
         if (!is_numeric($this->expiry_time) || $this->expiry_time < 1) {
             $expired = false;
         } else if (time() - $creation_time < $this->expiry_time) {
@@ -1263,12 +1294,28 @@ class Securimage {
     protected function generateWAV($letters) {
         $wavCaptcha = new WavFile();
         $first      = true;     // reading first wav file
+        if ($this->audio_use_sox && !is_executable($this->sox_binary_path)) {
+            throw new Exception("Path to SoX binary is incorrect or not executable");
+        }
 
         foreach ($letters as $letter) {
             $letter = strtoupper($letter);
-
             try {
-                $l = new WavFile($this->audio_path . '/' . $letter . '.wav');
+                $letter_file = realpath($this->audio_path) . DIRECTORY_SEPARATOR . $letter . '.wav';
+                if ($this->audio_use_sox) {
+                    $sox_cmd = sprintf("%s %s -t wav - %s",
+                                       $this->sox_binary_path,
+                                       $letter_file,
+                                       $this->getSoxEffectChain());
+
+                    $data = `$sox_cmd`;
+
+                    $l = new WavFile();
+                    $l->setIgnoreChunkSizes(true);
+                    $l->setWavData($data);
+                } else {
+                    $l = new WavFile($letter_file);
+                }
 
                 if ($first) {
                     // set sample rate, bits/sample, and # of channels for file based on first letter
@@ -1288,18 +1335,32 @@ class Securimage {
             } catch (Exception $ex) {
                 // failed to open file, or the wav file is broken or not supported
                 // 2 wav files were not compatible, different # channels, bits/sample, or sample rate
-                throw $ex;
+                throw new Exception("Error generating audio captcha on letter '$letter': " . $ex->getMessage());
             }
         }
 
         /********* Set up audio filters *****************************/
         $filters = array();
-
         if ($this->audio_use_noise == true) {
             // use background audio - find random file
-            $noiseFile = $this->getRandomNoiseFile();
+            $wavNoise   = false;
+            $randOffset = 0;
 
-            if ($noiseFile !== false && is_readable($noiseFile)) {
+            // uncomment to try experimental SoX noise generation.
+            // warning: sounds may be considered annoying
+            if ($this->audio_use_sox) {
+                $duration = $wavCaptcha->getDataSize() / ($wavCaptcha->getBitsPerSample() / 8) /
+                            $wavCaptcha->getNumChannels() / $wavCaptcha->getSampleRate();
+                $duration = round($duration, 2);
+                $wavNoise = new WavFile();
+                $wavNoise->setIgnoreChunkSizes(true);
+                $noiseData = $this->getSoxNoiseData($duration,
+                                                    $wavCaptcha->getNumChannels(),
+                                                    $wavCaptcha->getSampleRate(),
+                                                    $wavCaptcha->getBitsPerSample());
+                $wavNoise->setWavData($noiseData, true);
+
+            } else if ( ($noiseFile = $this->getRandomNoiseFile()) !== false) {
                 try {
                     $wavNoise = new WavFile($noiseFile, false);
                 } catch(Exception $ex) {
@@ -1308,7 +1369,9 @@ class Securimage {
 
                 // start at a random offset from the beginning of the wavfile
                 // in order to add more randomness
+
                 $randOffset = 0;
+
                 if ($wavNoise->getNumBlocks() > 2 * $wavCaptcha->getNumBlocks()) {
                     $randBlock = mt_rand(0, $wavNoise->getNumBlocks() - $wavCaptcha->getNumBlocks());
                     $wavNoise->readWavData($randBlock * $wavNoise->getBlockAlign(), $wavCaptcha->getNumBlocks() * $wavNoise->getBlockAlign());
@@ -1316,9 +1379,13 @@ class Securimage {
                     $wavNoise->readWavData();
                     $randOffset = mt_rand(0, $wavNoise->getNumBlocks() - 1);
                 }
+            }
 
+            if ($wavNoise !== false) {
+                $mixOpts = array('wav'  => $wavNoise,
+                                 'loop' => true,
+                                 'blockOffset' => $randOffset);
 
-                $mixOpts = array('wav'  => $wavNoise, 'loop' => true, 'blockOffset' => $randOffset);
                 $filters[WavFile::FILTER_MIX]       = $mixOpts;
                 $filters[WavFile::FILTER_NORMALIZE] = $this->audio_mix_normalization;
             }
@@ -1330,8 +1397,9 @@ class Securimage {
             $filters[WavFile::FILTER_DEGRADE] = mt_rand(95, 98) / 100.0;
         }
 
-        if (!empty($filters))
+        if (!empty($filters)) {
             $wavCaptcha->filter($filters);  // apply filters to captcha audio
+        }
 
         return $wavCaptcha->__toString();
     }
@@ -1358,6 +1426,126 @@ class Securimage {
 
         return $return;
     }
+    
+    protected function getSoxEffectChain($numEffects = 2) {
+        $effectsList = array('bend', 'chorus', 'overdrive', 'pitch', 'reverb', 'tempo', 'tremolo');
+        $effects     = array_rand($effectsList, $numEffects);
+        $outEffects  = array();
+
+        if (!is_array($effects)) $effects = array($effects);
+
+        foreach($effects as $effect) {
+            $effect = $effectsList[$effect];
+
+            switch($effect) {
+                case 'bend':
+                    $delay = mt_rand(0, 15) / 100.0;
+                    $cents = mt_rand(-120, 120);
+                    $dur   = mt_rand(75, 400) / 100.0;
+                    $outEffects[] = "$effect $delay,$cents,$dur";
+                    break;
+
+                case 'chorus':
+                    $gainIn  = mt_rand(75, 90) / 100.0;
+                    $gainOut = mt_rand(70, 95) / 100.0;
+                    $chorStr = "$effect $gainIn $gainOut";
+
+                    for ($i = 0; $i < mt_rand(2, 3); ++$i) {
+                        $delay = mt_rand(20, 100);
+                        $decay = mt_rand(10, 100) / 100.0;
+                        $speed = mt_rand(20, 50) / 100.0;
+                        $depth = mt_rand(150, 250) / 100.0;
+
+                        $chorStr .= " $delay $decay $speed $depth -s";
+                    }
+
+                    $outEffects[] = $chorStr;
+                    break;
+
+                case 'overdrive':
+                    $gain = mt_rand(5, 25);
+                    $color = mt_rand(20, 70);
+                    $outEffects[] = "$effect $gain $color";
+                    break;
+
+                case 'pitch':
+                    $cents = mt_rand(-300, 300);
+                    $outEffects[] = "$effect $cents";
+                    break;
+
+                case 'reverb':
+                    $reverberance = mt_rand(20, 80);
+                    $damping      = mt_rand(10, 80);
+                    $scale        = mt_rand(85, 100);
+                    $depth        = mt_rand(90, 100);
+                    $predelay     = mt_rand(0, 5);
+                    $outEffects[] = "$effect $reverberance $damping $scale $depth $predelay";
+                    break;
+
+                case 'tempo':
+                    $factor = mt_rand(65, 135) / 100.0;
+                    $outEffects[] = "$effect -s $factor";
+                    break;
+
+                case 'tremolo':
+                    $hz    = mt_rand(10, 30);
+                    $depth = mt_rand(40, 85);
+                    $outEffects[] = "$effect $hz $depth";
+                    break;
+            }
+        }
+
+        return implode(' ', $outEffects);
+    }
+
+    /**
+     * Not yet used - Generate random background noise from sweeping oscillators
+     *
+     * @param float $duration  How long in seconds the generated sound will be
+     * @param int $numChannels Number of channels in output wav
+     * @param int $sampleRate  Sample rate of output wav
+     * @param int $bitRate     Bits per sample (8, 16, 24)
+     * @return string          Audio data in wav format
+     */
+    protected function getSoxNoiseData($duration, $numChannels, $sampleRate, $bitRate) {
+        $shapes = array('sine', 'square', 'triangle', 'sawtooth', 'trapezium');
+        $steps  = array(':', '+', '/', '-');
+        $selShapes = array_rand($shapes, 2);
+        $selSteps  = array_rand($steps, 2);
+        $sweep0    = array();
+        $sweep0[0] = mt_rand(100, 700);
+        $sweep0[1] = mt_rand(1500, 2500);
+        $sweep1    = array();
+        $sweep1[0] = mt_rand(500, 1000);
+        $sweep1[1] = mt_rand(1200, 2000);
+
+        if (mt_rand(0, 10) % 2 == 0) {
+            $sweep0 = array_reverse($sweep0);
+        }
+
+        if (mt_rand(0, 10) % 2 == 0) {
+            $sweep1 = array_reverse($sweep1);
+        }
+
+        $cmd = sprintf("%s -c %d -r %d -b %d -n -t wav - synth noise create vol 0.3 synth %.2f %s mix %d%s%d vol 0.3 synth %.2f %s fmod %d%s%d vol 0.3",
+                       $this->sox_binary_path,
+                       $numChannels,
+                       $sampleRate,
+                       $bitRate,
+                       $duration,
+                       $shapes[$selShapes[0]],
+                       $sweep0[0],
+                       $steps[$selSteps[0]],
+                       $sweep0[1],
+                       $duration,
+                       $shapes[$selShapes[1]],
+                       $sweep1[0],
+                       $steps[$selSteps[1]],
+                       $sweep1[1]);
+        $data = `$cmd`;
+
+        return $data;
+    }
 
     /**
      * Return a wav file saying there was an error generating file
@@ -1365,7 +1553,7 @@ class Securimage {
      * @return string The binary audio contents
      */
     protected function audioError() {
-        return @file_get_contents(basePath. '/inc/securimage/audio/en/error.wav');
+        return file_get_contents(basePath. '/inc/securimage/audio/en/error.wav');
     }
 
     /**
@@ -1374,10 +1562,12 @@ class Securimage {
      * @return bool true if headers haven't been sent and no output/errors will break audio/images, false if unsafe
      */
     protected function canSendHeaders() {
-        if (headers_sent())
-            return false; // output has been flushed and headers have already been sent
-        else if (strlen((string)ob_get_contents()) > 0)
-            return false; // headers haven't been sent, but there is data in the buffer that will break image and audio data
+        if (headers_sent()) {
+            return false;
+        } // output has been flushed and headers have already been sent
+        else if (strlen((string) ob_get_contents()) > 0) {
+            return false;
+        } // headers haven't been sent, but there is data in the buffer that will break image and audio data
 
         return true;
     }
@@ -1397,19 +1587,19 @@ class Securimage {
      * @param Securimage_Color $default The defalt color to use if $color is invalid
      */
     protected function initColor($color, $default) {
-        if ($color == null)
+        if ($color == null) {
             return new Securimage_Color($default);
-        else if (is_string($color)) {
+        } else if (is_string($color)) {
             try {
                 return new Securimage_Color($color);
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 return new Securimage_Color($default);
             }
-        }
-        else if (is_array($color) && sizeof($color) == 3)
+        } else if (is_array($color) && sizeof($color) == 3) {
             return new Securimage_Color($color[0], $color[1], $color[2]);
-        else
+        } else {
             return new Securimage_Color($default);
+        }
     }
 
     /**
