@@ -2662,16 +2662,20 @@ function generatetime() {
 //-> Rechte abfragen
 function getPermissions($checkID = 0, $pos = 0) {
     global $sql;
+    //Rechte des Users oder des Teams suchen
     if(!empty($checkID)) {
         $check = empty($pos) ? 'user' : 'pos'; $checked = array();
-        $qry = $sql->select("SELECT * FROM `{prefix_permissions}` WHERE `".$check."` = ?;",array(intval($checkID)));
+        $qry = $sql->selectSingle("SELECT * FROM `{prefix_permissions}` WHERE `".$check."` = ?;",array(intval($checkID)));
         if ($sql->rowCount()) {
             foreach($qry as $k => $v) {
-                $checked[$k] = $v;
+                if($k != 'id' && $k != 'user' && $k != 'pos' && $k != 'intforum') {
+                    $checked[$k] = $v;
+                }
             }
         }
     }
 
+    //Liste der Rechte zusammenstellen
     $permission = array();
     $qry = $sql->show("SHOW COLUMNS FROM `dzcp_permissions`;");
     if($sql->rowCount()) {
@@ -2684,16 +2688,16 @@ function getPermissions($checkID = 0, $pos = 0) {
         }
     }
 
-    $p = '';
+    $permissions = '';
     if(count($permission)) {
         natcasesort($permission); $break = 1;
         foreach($permission AS $perm) {
             $br = ($break % 2) ? '<br />' : ''; $break++;
-            $p .= $perm.$br;
+            $permissions .= $perm.$br;
         }
     }
 
-    return $p;
+    return $permissions;
 }
 
 //-> interne Foren-Rechte abfragen
