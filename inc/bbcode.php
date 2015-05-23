@@ -1274,7 +1274,14 @@ function fileExists($url,$timeout=1) {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT , $timeout);
         curl_setopt($curl, CURLOPT_TIMEOUT, $timeout * 2); // x 2
-
+        
+        $gzip = false;
+        if(function_exists('gzinflate')) {
+            $gzip = true;
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept-Encoding: gzip,deflate'));
+            curl_setopt($curl, CURLINFO_HEADER_OUT, true);
+        }
+        
         if($url_p['scheme'] == 'https') { //SSL
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
@@ -1284,18 +1291,42 @@ function fileExists($url,$timeout=1) {
             return false;
         }
 
+        if($gzip) {
+            $curl_info = curl_getinfo($curl,CURLINFO_HEADER_OUT);
+            if(stristr($curl_info, 'accept-encoding') && stristr($curl_info, 'gzip')) {
+                $content = gzinflate( substr($content,10,-8) );
+            }
+        }
+
         @curl_close($curl);
         unset($curl);
     } else {
         if($url_p['scheme'] == 'https') //HTTPS not Supported!
             $url = str_replace('https', 'http', $url);
         
-        $context = stream_context_create(array('http' => array('method'=>"GET", 
-        'header'=>"Content-Type: text/html; charset=utf-8" , 'timeout' => $timeout * 2)));
+        $opts = array();
+        $opts['http']['method'] = "GET";
+        $opts['http']['timeout'] = $timeout * 2;
+                
+        $gzip = false;
+        if(function_exists('gzinflate')) {
+            $gzip = true;
+            $opts['http']['header'] = 'Accept-Encoding:gzip,deflate'."\r\n";
+        }
+        
+        $context = stream_context_create($opts);
         if(!$content = @file_get_contents($url, false, $context, -1, 40000))
             return false;
-    }
 
+        if($gzip) {
+            foreach($http_response_header as $c => $h) {
+                if(stristr($h, 'content-encoding') && stristr($h, 'gzip')) {
+                    $content = gzinflate( substr($content,10,-8) );
+                }
+            }
+        }
+    }
+    
     return ((string)(trim($content)));
 }
 
