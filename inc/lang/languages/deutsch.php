@@ -50,6 +50,8 @@ define('_no_news_yet', '<tr>
 define('_no_entrys_found', '<tr>
   <td class="contentMainFirst" colspan="[colspan]" align="center">Keine Eintr&auml;ge gefunden</td>
 </tr>');
+define('_admin_news_readed', 'Gelesen');
+define('_admin_news_refresh', 'Aktualisieren');
 
 //Forum
 define("_forum_last_post", 'Neuesten Beitrag anzeigen');
