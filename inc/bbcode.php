@@ -2557,7 +2557,7 @@ function admin_perms($userid) {
     $e = array('gb', 'shoutbox', 'editusers', 'votes', 'contact', 'joinus', 'intnews', 'forum', 
     'gs_showpw','dlintern','intforum','galleryintern');
     
-    $qry = $sql->select("SELECT * FROM `{prefix_permissions}` WHERE `user` = ?;",array(intval($userid)));
+    $qry = $sql->selectSingle("SELECT * FROM `{prefix_permissions}` WHERE `user` = ?;",array(intval($userid)));
     if($sql->rowCount()) {
         foreach($qry as $v => $k) {
             if($v != 'id' && $v != 'user' && $v != 'pos' && !in_array($v, $e)) {
