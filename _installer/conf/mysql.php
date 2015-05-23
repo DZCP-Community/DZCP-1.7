@@ -1973,6 +1973,8 @@ function update_mysql_1_7() {
     db("ALTER TABLE `".$db['server']."` ADD `custom_icon` VARCHAR(100) NOT NULL DEFAULT '' AFTER `qport`;",false,false,true);
     db("ALTER TABLE `".$db['users']."` ADD `startpage` INT(11) NOT NULL DEFAULT '0' AFTER `profile_access`;",false,false,true);
     db("ALTER TABLE `".$db['permissions']."` ADD `startpage` INT(1) NOT NULL DEFAULT '0' AFTER `ipban`;",false,false,true);
+    db("ALTER TABLE `".$db['permissions']."` ADD `teamspeak` INT(1) NOT NULL DEFAULT '0' AFTER `startpage`;",false,false,true);
+    db("ALTER TABLE `".$db['permissions']."` ADD `security` INT(1) NOT NULL DEFAULT '0' AFTER `teamspeak`;",false,false,true);
     db("ALTER TABLE `".$db['settings']."` ADD `dbversion` VARCHAR(20) NOT NULL DEFAULT '1.7.0.0' AFTER `db_optimize`;",false,false,true);
     db("INSERT INTO `".$db['startpage']."` SET `name` = 'Artikel', `url` = 'artikel/', `level` = 1;",false,false,true);
     db("INSERT INTO `".$db['startpage']."` SET `name` = 'News', `url` = 'news/', `level` = 1;",false,false,true);
