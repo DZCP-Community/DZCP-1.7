@@ -1343,11 +1343,6 @@ VALUES
 
 
     db("ALTER TABLE ".$db['partners']." ADD `textlink` INT(1) NOT NULL default '0'");
-
-    db("INSERT INTO ".$db['partners']." (`link`, `banner`, `textlink`) VALUES ('http://www.dzcp.de', 'dzcp.de', 1);");
-    db("INSERT INTO ".$db['partners']." (`link`, `banner`, `textlink`) VALUES ('http://www.hogibo.net', 'Webspace', 1);");
-    db("INSERT INTO ".$db['partners']." (`link`, `banner`, `textlink`) VALUES ('http://www.freunde.org', 'Freunde finden', 1);");
-
     db("ALTER TABLE ".$db['permissions']." ADD `pos` INT( 1 ) NOT NULL AFTER `user`");
     db("ALTER TABLE ".$db['f_access']." ADD `pos` INT( 1 ) NOT NULL AFTER `user` ");
     db("ALTER TABLE ".$db['squads']." ADD `beschreibung` TEXT");
