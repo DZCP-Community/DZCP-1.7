@@ -124,7 +124,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                                                                "prevurl" => '../news/?action=compreview&do=edit&id=' . $_GET['id'] . '&cid=' . $_GET['cid'],
                                                                "action" => '?action=show&amp;do=editcom&amp;id=' . $_GET['id'] . '&amp;cid=' . $_GET['cid'],
                                                                "id" => (isset($_GET['id']) ? $_GET['id'] : '1'),
-                                                               "posteintrag" => re_bbcode($get['comment'])));
+                                                               "posteintrag" => re($get['comment'])));
                     } else {
                         javascript::set('AnchorMove', 'notification-box');
                         notification::set_global(false);

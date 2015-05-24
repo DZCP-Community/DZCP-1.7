@@ -227,7 +227,7 @@ if(defined('_UserMenu')) {
 
                     $index = show($dir."/new", array("von" => $userid,
                                                      "posttitel" => re($_POST['titel']),
-                                                     "posteintrag" => re_bbcode($_POST['eintrag']),
+                                                     "posteintrag" => re($_POST['eintrag']),
                                                      "postto" => $_POST['buddys']."".$_POST['users'],
                                                      "buddys" => $buddys,
                                                      "users" => $users,

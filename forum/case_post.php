@@ -46,7 +46,7 @@ if(defined('_Forum')) {
                                         "eintraghead" => _eintrag,
                                         "error" => "",
                                         "what" => _button_value_edit,
-                                        "posteintrag" => re_bbcode($get['text'])));
+                                        "posteintrag" => re($get['text'])));
     } else {
       $index = error(_error_wrong_permissions, 1);
     }
@@ -100,7 +100,7 @@ if(defined('_Forum')) {
                                           "br2" => "-->",
                                                                             "postemail" => re($get['email']),
                                                                             "postnick" => re($get['nick']),
-                                                                              "posteintrag" => re_bbcode($_POST['eintrag']),
+                                                                              "posteintrag" => re($_POST['eintrag']),
                                                                                "error" => $error,
                                                                            "eintraghead" => _eintrag));
       } else {
@@ -631,7 +631,7 @@ if(defined('_Forum')) {
                                                                                         "postemail" => $_POST['email'],
                                                                                         "posthp" => $_POST['hp'],
                                                                                         "postnick" => re($_POST['nick']),
-                                                                                        "posteintrag" => re_bbcode($_POST['eintrag']),
+                                                                                        "posteintrag" => re($_POST['eintrag']),
                                                                                         "error" => $error,
                                                                                         "eintraghead" => _eintrag));
                 } else {

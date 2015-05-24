@@ -88,16 +88,16 @@ if(defined('_UserMenu')) {
                 $msg = _info_reg_valid_pwd;
             }
 
-            $sql->insert("INSERT INTO `{prefix_users}`
-                SET `user`     = ?,
-                    `nick`     = ?,
-                    `email`    = ?,
-                    `ip`       = ?,
-                    `pwd`      = ?,
-                    `regdatum` = ".time().",
-                    `level`    = 1,
-                    `time`     = ".time().",
-                    `status`   = 1;",
+            $sql->insert("INSERT INTO `{prefix_users}` "
+               . "SET `user`     = ?, "
+                   . "`nick`     = ?, "
+                   . "`email`    = ?, "
+                   . "`ip`       = ?, "
+                   . "`pwd`      = ?, "
+                   . "`regdatum` = ".time().", "
+                   . "`level`    = 1, "
+                   . "`time`     = ".time().", "
+                   . "`status`   = 1;",
             array(up(trim($_POST['user'])),up(trim($_POST['nick'])),up(trim($_POST['email'])),visitorIp(),$pwd));
 
             $insert_id = $sql->lastInsertId();

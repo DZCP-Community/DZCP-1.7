@@ -269,7 +269,7 @@ case 'show';
                                                                                                          "posthp" => links($_POST['hp']),
                                                                                                          "postnick" => re($_POST['nick']),
                                                                                                          "show" => "",
-                                                                                                         "posteintrag" => re_bbcode($_POST['comment']),
+                                                                                                         "posteintrag" => re($_POST['comment']),
                                                                                                          "error" => $error,
                                                                                                          "eintraghead" => _eintrag));
                     } else {
@@ -365,7 +365,7 @@ case 'show';
                                                  "id" => $_GET['id'],
                                                  "what" => _button_value_edit,
                                                  "show" => "",
-                                                 "posteintrag" => re_bbcode($get['comment']),
+                                                 "posteintrag" => re($get['comment']),
                                                  "error" => "",
                                                  "eintraghead" => _eintrag));
       } else {

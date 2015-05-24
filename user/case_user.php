@@ -336,7 +336,7 @@ if(defined('_UserMenu')) {
                                                                        "postemail" => re($get['email']),
                                                                        "posthp" => $get['hp'],
                                                                        "postnick" => re($get['nick']),
-                                                                       "posteintrag" => re_bbcode($get['nachricht']),
+                                                                       "posteintrag" => re($get['nachricht']),
                                                                        "error" => ''));
                         } else {
                             $index = error(_error_edit_post, 1);

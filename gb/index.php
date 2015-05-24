@@ -200,7 +200,7 @@ case 'do';
                                                                            "postemail" => $_POST['email'],
                                                                            "posthp" => links($_POST['hp']),
                                                                            "postnick" => $_POST['nick'],
-                                                                           "posteintrag" => re_bbcode($_POST["eintrag"]),
+                                                                           "posteintrag" => re($_POST["eintrag"]),
                                                                            "error" => $error,
                                                                            "eintraghead" => _eintrag));
       } else {
@@ -285,7 +285,7 @@ case 'do';
                                        "preview" => _preview,
                                                                        "id" => $get['id'],
                                        "form" => $form,
-                                                                       "posteintrag" => re_bbcode($get['nachricht']),
+                                                                       "posteintrag" => re($get['nachricht']),
                                        "ip" => _iplog_info,
                                                                        "error" => "",
                                                                    "eintraghead" => _eintrag));

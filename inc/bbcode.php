@@ -281,8 +281,8 @@ if(isset($_GET['set_language']) && !empty($_GET['set_language'])) {
 }
 
 lang($language); //Lade Sprache
-$userid = userid();
-$chkMe = checkme();
+$userid = intval(userid());
+$chkMe = intval(checkme());
 if(!$chkMe && (!empty($_SESSION['id']) || !empty($_SESSION['pwd']))) {
     $_SESSION['id']        = '';
     $_SESSION['pwd']       = '';
@@ -558,7 +558,7 @@ function languages() {
 
 //-> User Hits und Lastvisit aktualisieren
 if($userid >= 1 && $ajaxJob != true && isset($_SESSION['lastvisit'])) {
-    $sql->update("UPDATE `{prefix_userstats}` SET `hits` = (hits+1), `lastvisit` = ? WHERE `user` = ?;",array(intval($_SESSION['lastvisit']),$userid));
+    $sql->update("UPDATE `{prefix_userstats}` SET `hits` = (hits+1), `lastvisit` = ? WHERE `user` = ?;",array(intval($_SESSION['lastvisit']),intval($userid)));
 }
 
 //-> Settings auslesen
@@ -854,13 +854,6 @@ function convSpace($string) {
     return str_replace(" ","+",$string);
 }
 
-//-> BBCode
-function re_bbcode($txt) {
-    $search  = array("'","[","]","&lt;","&gt;");
-    $replace = array("&#39;","&#91;","&#93;","&#60;","&#62;");
-    return stripslashes(str_replace($search, $replace, spChars($txt)));
-}
-
 /* START # from wordpress under GBU GPL license
    URL autolink function */
 function _make_url_clickable_cb($matches) {
@@ -930,10 +923,7 @@ function bbcode($txt, $tinymce=false, $no_vid=false, $ts=false, $nolink=false) {
     }
     
     $txt = highlight_text($txt);
-    if (!$tinymce) {
-        $txt = re_bbcode($txt);
-    }
-    
+   
     if(!$ts) {
         $allowable_tags = "<br><object><em><param><embed><strong><iframe><hr><table><tr><td><div>"
         . "<span><a><b><font><i><u><p><ul><ol><li><br /><img><blockquote>";
@@ -996,7 +986,6 @@ function bbcode_html($txt,$tinymce=0) {
     $txt = BadwordFilter($txt);
     $txt = replace($txt,$tinymce);
     $txt = highlight_text($txt);
-    $txt = re_bbcode($txt);
     $txt = smileys($txt);
     $txt = glossar($txt);
     return str_replace("&#34;","\"",$txt);
@@ -1024,7 +1013,7 @@ function zitat($nick,$zitat) {
     $zitat = str_replace(chr(10), " ", $zitat);
     $zitat = str_replace(chr(13), " ", $zitat);
     $zitat = preg_replace("#[\n\r]+#", "<br />", $zitat);
-    return '<br /><br /><br /><blockquote><b>'.$nick.' '._wrote.':</b><br />'.re_bbcode($zitat).'</blockquote>';
+    return '<br /><br /><br /><blockquote><b>'.$nick.' '._wrote.':</b><br />'.re($zitat).'</blockquote>';
 }
 
 /**

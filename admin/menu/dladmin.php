@@ -90,7 +90,7 @@ if(_adminMenu != 'true') exit;
                                             "exist" => _downloads_exist,
                                             "nofile" => _downloads_nofile,
                                             "oder" => _or,
-                                            "dbeschreibung" => re_bbcode($get['beschreibung']),
+                                            "dbeschreibung" => re($get['beschreibung']),
                                             "kat" => _downloads_kat,
                                             "what" => _button_value_edit,
                                             "do" => "editdl&amp;id=".$_GET['id']."",

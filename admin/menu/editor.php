@@ -87,7 +87,7 @@ if($do == "add") {
                                                 "wichtig" => _navi_wichtig,
                                                 "titel" => _titel,
                                                 "e_titel" => re($_POST['titel']),
-                                                "e_inhalt" => re_bbcode($_POST['inhalt']),
+                                                "e_inhalt" => re($_POST['inhalt']),
                                                 "allow_html" => _editor_allow_html,
                                                 "inhalt" => _inhalt,
                                                 "do" => "addsite"));
@@ -144,7 +144,7 @@ if($do == "add") {
                                             "preview" => _preview,
                                             "titel" => _titel,
                                             "e_titel" => re($gets['titel']),
-                                            "e_inhalt" => re_bbcode($gets['text']),
+                                            "e_inhalt" => re($gets['text']),
                                             "checked" => $checked,
                                             "pos" => _position,
                                             "name" => _editor_linkname,
@@ -199,7 +199,7 @@ if($do == "add") {
                                                 "wichtig" => _navi_wichtig,
                                                 "titel" => _titel,
                                                 "e_titel" => re($_POST['titel']),
-                                                "e_inhalt" => re_bbcode($_POST['inhalt']),
+                                                "e_inhalt" => re($_POST['inhalt']),
                                                 "allow_html" => _editor_allow_html,
                                                 "inhalt" => _inhalt,
                                                 "do" => "editsite&amp;id=".$_GET['id'].""));
