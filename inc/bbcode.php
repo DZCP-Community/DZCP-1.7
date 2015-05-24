@@ -1245,7 +1245,7 @@ function array_var_exists($var,$search)
  * Funktion um eine Datei im Web auf Existenz zu prufen und abzurufen
  * @return String
  **/
-function fileExists($url,$timeout=1) {
+function fileExists($url,$timeout=file_get_contents_timeout) {
     if((!allow_url_fopen_support() && !use_curl || (use_curl && !extension_loaded('curl'))))
         return false;
     
