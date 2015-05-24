@@ -8,15 +8,22 @@ if(defined('_UserMenu')) {
     $where = _site_user_lobby;
     if ($chkMe) {
         $can_erase = false;
+        if(isset($_POST['erase']) && intval($_POST['erase']) == 1) {
+            $_SESSION['lastvisit'] = time();
+            $sql->update("UPDATE `{prefix_userstats}` "
+                       . "SET `lastvisit` = ? "
+                       . "WHERE `user` = ?;",
+            array(intval($_SESSION['lastvisit']),$userid));
+        }
 
         //Get Userinfos
         $lastvisit = $_SESSION['lastvisit'];
 
         /** Neue Foreneintraege anzeigen */
-        $qrykat = $sql->select("SELECT s1.id,s2.kattopic,s1.intern,s2.id FROM `{prefix_forumkats}` AS s1 "
-                             . "LEFT JOIN `{prefix_forumsubkats}` AS s2 "
-                             . "ON s1.id = s2.sid "
-                             . "ORDER BY s1.kid,s2.kattopic");
+        $qrykat = $sql->select("SELECT s1.`id`,s2.`kattopic`,s1.`intern`,s2.`id` FROM `{prefix_forumkats}` AS `s1` "
+                             . "LEFT JOIN `{prefix_forumsubkats}` AS `s2` "
+                             . "ON s1.`id` = s2.`sid` "
+                             . "ORDER BY s1.`kid`,s2.`kattopic`;");
 
         $forumposts = '';
         if ($sql->rowCount()) {

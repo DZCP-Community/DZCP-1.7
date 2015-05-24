@@ -509,7 +509,7 @@ define('_msg_answer' , '
       <input type="hidden" name="id" value="[id]" />
       <input id="contentSubmit" type="submit" class="submit" value="Answer" />
     </form>');
-define('_user_new_erase' , '<form method="get" action="" onsubmit="DZCP.submitButton()"><input type="hidden" name="action" value="erase" /><input id="contentSubmit" type="submit" name="submit" class="submit" value="Mark all as readed" /></form>');
+define('_user_new_erase' , '<form method="post" action="?action=userlobby"><input type="hidden" name="erase" value="1" /><input id="contentSubmit" type="submit" name="submit" class="submit" value="Mark all as readed" /></form>');
 define('_klapptext_server_link' , '<a href="javascript:DZCP.toggle(\'[id]\')"><img src="../inc/images/[moreicon].gif" alt="" id="img[id]">[link]</a>');
 define('_target' , 'New window');
 define('_profile_add' , '<form action="" method="get" onsubmit="return(DZCP.submitButton())">
