@@ -45,7 +45,6 @@ if(_adminMenu != 'true') exit;
           $esquads .= show(_checkfield_squads, array("id" => $getsq['id'],
                                                      "check" => $check,
                                                      "eposi" => $posi,
-                                                     "noposi" => _user_noposi,
                                                      "squad" => re($getsq['name'])));
         }
 

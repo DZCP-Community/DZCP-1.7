@@ -3,13 +3,13 @@
 <form name="edituser" action="?action=admin&amp;do=update&amp;user=[user]" method="post" onsubmit="return(DZCP.submitButton())" autocomplete="off">
 <table class="hperc" cellspacing="1">
 <tr>
-  <td class="contentHead" align="center" colspan="3"><span class="fontBold">[edithead]</span></td>
+  <td class="contentHead" align="center" colspan="3"><span class="fontBold">[lang_admin_user_edithead]</span></td>
 </tr>
 <tr>
-  <td class="contentMainTop" align="center" colspan="3"><span class="fontBold">[personalhead]</span></td>
+  <td class="contentMainTop" align="center" colspan="3"><span class="fontBold">[lang_admin_user_personalhead]</span></td>
 </tr>
 <tr>
-  <td class="contentMainTop" width="150"><span class="fontBold">[nick]:</span></td>
+  <td class="contentMainTop" width="150"><span class="fontBold">[lang_nick]:</span></td>
   <td class="contentMainFirst" colspan="2" align="center">
     <input type="text" name="nick" value="[enick]" class="inputField_dis"
     onfocus="this.className='inputField_en';"
@@ -17,7 +17,7 @@
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop" width="150"><span class="fontBold">[email]:</span></td>
+  <td class="contentMainTop" width="150"><span class="fontBold">[lang_email]:</span></td>
   <td class="contentMainFirst" colspan="2" align="center">
     <input type="text" name="email" value="[eemail]" class="inputField_dis"
     onfocus="this.className='inputField_en';"
@@ -29,7 +29,7 @@
   <td class="contentMainFirst" colspan="2" align="center"></td>
 </tr>
 <tr>
-  <td class="contentMainTop" width="150"><span class="fontBold">[loginname]:</span></td>
+  <td class="contentMainTop" width="150"><span class="fontBold">[lang_loginname]:</span></td>
   <td class="contentMainFirst" colspan="2" align="center">
     <input type="text" name="loginname" value="[eloginname]" class="inputField_dis"
     onfocus="this.className='inputField_en';"
@@ -38,14 +38,14 @@
 </tr>
 [editpwd]
 <tr>
-  <td class="contentMainTop" width="150" valign="top"><span class="fontBold">[identitat]:</span></td>
+  <td class="contentMainTop" width="150" valign="top"><span class="fontBold">[lang_admin_user_identitat]:</span></td>
   <td class="contentMainFirst" colspan="2" align="center">[get]</td>
 </tr>
 <tr>
-  <td class="contentMainTop" align="center" colspan="3"><span class="fontBold">[squadhead]</span></td>
+  <td class="contentMainTop" align="center" colspan="3"><span class="fontBold">[lang_admin_user_squadhead]</span></td>
 </tr>
 <tr>
-  <td class="contentMainTop" width="150" valign="top"><span class="fontBold">[squad]/[posi]:</span></td>
+  <td class="contentMainTop" width="150" valign="top"><span class="fontBold">[lang_member_admin_squad]/[lang_profil_position]:</span></td>
   <td class="contentMainFirst" colspan="2">
     <table width="100%">
       [esquad]
@@ -53,32 +53,32 @@
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop" align="center" colspan="3"><span class="fontBold">[clanhead]</span><br /><small>[auth_info]</small></td>
+  <td class="contentMainTop" align="center" colspan="3"><span class="fontBold">[lang_admin_user_clanhead]</span><br /><small>[lang_admin_user_clanhead_info]</small></td>
 </tr>
 <tr>
-  <td class="contentMainTop" width="150"><span class="fontBold">[level]:</span></td>
+  <td class="contentMainTop" width="150"><span class="fontBold">[lang_admin_user_level]:</span></td>
   <td class="contentMainFirst" colspan="2" align="center">
-    <select name="level" class="dropdown" onchange="hidelevels(this.value)">
-			[elevel]
+    <select name="level" class="dropdown">
+        [elevel]
     </select>
   </td>
 </tr>
 <tr>
-  <td class="contentMainFirst" colspan="3" style="text-align: center; padding:2px;">[level_info]</td>
+  <td class="contentMainFirst" colspan="3" style="text-align: center; padding:2px;">[lang_level_info]</td>
 </tr>
 </table>
 <table id="hideLvl" class="mainContent" cellspacing="1" style="margin:0;margin-top:-1px">
 <tr>
-  <td class="contentMainTop" width="150"><span class="fontBold">[rechte]:</span></td>
+  <td class="contentMainTop" width="150"><span class="fontBold">[lang_config_positions_rights]:</span></td>
   <td class="contentMainFirst" align="center">
     <div class="permissions">
       [getpermissions]
-      <input type="checkbox" class="checkbox" id="listck" name="listck" value="1" [listck] /><label for="listck"> [clankasse]</label>
+      <input type="checkbox" class="checkbox" id="listck" name="listck" value="1" [listck] /><label for="listck"> [lang_user_list_ck]</label>
     </div>
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[forenrechte]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_config_positions_boardrights]:</span></td>
   <td class="contentMainFirst" align="center">
     <div class="permissions">
       [getboardpermissions]
@@ -88,17 +88,9 @@
 </table>
 <table class="mainContent" cellspacing="1" style="margin:0;margin-top:-1px">
 <tr>
-  <td class="contentBottom" colspan="3"><input id="contentSubmit" type="submit" value="[value]" class="submit" /></td>
+  <td class="contentBottom" colspan="3"><input id="contentSubmit" type="submit" value="[lang_button_value_edit]" class="submit" /></td>
 </tr>
 </table>
-<script language="javascript" type="text/javascript">
-  function hidelevels(lvl)
-  {
-    if(lvl == 4) $('#hideLvl').css('display', 'none');
-    else         $('#hideLvl').css('display', '');
-  }
-  hidelevels([alvl]);
-</script>
 </form>
 </td>
 </tr>

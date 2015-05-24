@@ -36,7 +36,8 @@ if(defined('_UserMenu')) {
                                     . "`date` = ?,"
                                     . "`update` = ?,"
                                     . "`expires` = ? "
-                                    . "WHERE `host` = ?;", array(session_id(), $permanent_key, $userip, $time = time(), $time, autologin_expire, $gethostbyaddr));
+                                    . "WHERE `host` = ?;",
+                            array(session_id(), $permanent_key, $userip, $time = time(), $time, autologin_expire, $gethostbyaddr));
                         } else {
                             //Insert Autologin
                             $sql->insert("INSERT INTO `{prefix_autologin}` "
@@ -48,7 +49,8 @@ if(defined('_UserMenu')) {
                                     . "`host` = ?, "
                                     . "`date` = ?, "
                                     . "`update` = 0, "
-                                    . "`expires` = ?;", array($get['id'], session_id(), $permanent_key, $userip, cut($gethostbyaddr, 20), $gethostbyaddr, time(), autologin_expire));
+                                    . "`expires` = ?;",
+                            array($get['id'], session_id(), $permanent_key, $userip, cut($gethostbyaddr, 20), $gethostbyaddr, time(), autologin_expire));
                         }
 
                         cookie::put('pkey', $permanent_key);
