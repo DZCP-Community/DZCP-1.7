@@ -1552,6 +1552,7 @@ function checkme($userid_set=0) {
     global $sql;
     if (!$userid = ($userid_set != 0 ? intval($userid_set) : userid())) { return 0; }
     if (empty($_SESSION['id']) || empty($_SESSION['pwd'])) { return 0; }
+    if (rootAdmin($userid)) { return 4; }
     if(!dbc_index::issetIndex('user_'.intval($userid))) {
         $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ? AND `pwd` = ? AND `ip` = ?;",array(intval($userid),$_SESSION['pwd'],$_SESSION['ip']));
         if (!$sql->rowCount()) { return 0; }
