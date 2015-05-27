@@ -10,9 +10,8 @@ if(defined('_UserMenu')) {
         $index = error(_error_have_to_be_logged, 1);
     } else {
         if (isset($_GET['gallery']) && $_GET['gallery'] == "delete") {
-            $qrygl = db("SELECT * FROM `" . $db['usergallery'] . "` WHERE `user` = " . $userid . " AND `id` = " . intval($_GET['gid']) . ";");
-            if(_rows($qrygl)) {
-                $getgl = _fetch($qrygl);
+            $getgl = $sql->selectSingle("SELECT `pic` FROM `{prefix_usergallery}` WHERE `user` = ? AND `id` = ?;",array($userid,intval($_GET['gid'])));
+            if($sql->rowCount()) {
                 $files = get_files(basePath."/inc/images/uploads/usergallery/",false,true,$picformat);
                 foreach ($files as $file) {
                     $pic = explode('.', $getgl['pic']); $pic = $pic[0];
@@ -28,16 +27,20 @@ if(defined('_UserMenu')) {
                     unlink(basePath . '/inc/images/uploads/usergallery/'.$userid.'_'.$getgl['pic']);
                 }
                 
-                db("DELETE FROM `" . $db['usergallery'] . "` WHERE `id` = " . intval($_GET['gid']) . ";");
+                $sql->delete("DELETE FROM `{prefix_usergallery}` WHERE `id` = ?;",array(intval($_GET['gid'])));
             }
 
             $index = info(_info_edit_gallery_done, "?action=editprofile&show=gallery");
         } else {
             switch ($do) {
                 case 'edit':
-                    $check_user = db_stmt("SELECT id FROM " . $db['users'] . " WHERE `user`= ? AND `id` != ?", array('si', up($_POST['user']), $userid), true, false);
-                    $check_nick = db_stmt("SELECT id FROM " . $db['users'] . " WHERE `nick`= ? AND `id` != ?", array('si', up($_POST['nick']), $userid), true, false);
-                    $check_email = db_stmt("SELECT id FROM " . $db['users'] . " WHERE `email`= ? AND `id` != ?", array('si', up($_POST['email']), $userid), true, false);
+                    $check_user = false; $check_nick = false; $check_email = false;
+                    if($sql->rows("SELECT `id` FROM `{prefix_users}` WHERE (`user`= ? OR `nick`= ? OR `email`= ?) AND `id` != ?;",
+                            array(up($_POST['user']),up($_POST['nick']),up($_POST['email']),$userid))) {
+                        $check_user  = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user` = ? AND `id` != ?;", array(up($_POST['user']),  $userid));
+                        $check_nick  = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `nick` = ? AND `id` != ?;", array(up($_POST['nick']),  $userid));
+                        $check_email = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `email`= ? AND `id` != ?;", array(up($_POST['email']), $userid));
+                    }
 
                     if(!isset($_POST['user']) || empty($_POST['user'])) {
                         $index = error(_empty_user, 1);
@@ -56,98 +59,58 @@ if(defined('_UserMenu')) {
                     } else {
                         $index = info(_info_edit_profile_done, "?action=user&amp;id=" . $userid . "");
                         $newpwd = "";
-                        
                         if (isset($_POST['pwd']) && !empty($_POST['pwd'])) {
-                            if ($_POST['pwd'] == $_POST['cpwd']) {
+                            if(md5($_POST['pwd']) == md5($_POST['cpwd'])) {
                                 $_SESSION['pwd'] = md5($_POST['pwd']);
-                                $newpwd = "pwd = '" . $_SESSION['pwd'] . "',";
+                                $newpwd = "`pwd` = '".$_SESSION['pwd']."',";
                                 $index = info(_info_edit_profile_done, "?action=user&amp;id=" . $userid . "");
                             } else {
                                 $index = error(_error_passwords_dont_match, 1);
                             }
                         }
 
-                        $icq = preg_replace("=-=Uis", "", $_POST['icq']);
                         $bday = ($_POST['t'] && $_POST['m'] && $_POST['j'] ? cal($_POST['t']) . "." . cal($_POST['m']) . "." . $_POST['j'] : 0);
-
-                        $qrycustom = db("SELECT feldname,type FROM " . $db['profile']); $customfields = '';
-                        while ($getcustom = _fetch($qrycustom)) {
-                            $customfields .= " " . $getcustom['feldname'] . " = '" . ($getcustom['type'] == 2 ? links($_POST[$getcustom['feldname']]) : up($_POST[$getcustom['feldname']])) . "', ";
+                        $qrycustom = $sql->select("SELECT `feldname`,`type` FROM `" . $db['profile']."`"); $customfields = '';
+                        foreach($qrycustom as $getcustom) {
+                            $customfields .= " `".$getcustom['feldname']."` = '".($getcustom['type'] == 2 ? links($_POST[$getcustom['feldname']]) : up($_POST[$getcustom['feldname']]))."', ";
                         }
 
-                        db("UPDATE " . $db['users'] . " SET " . $newpwd . "
-                                                            " . $customfields . "
-                                                            `country`        = '" . $_POST['land'] . "',
-                                                            `user`           = '" . up($_POST['user']) . "',
-                                                            `nick`           = '" . up($_POST['nick']) . "',
-                                                            `rlname`         = '" . up($_POST['rlname']) . "',
-                                                            `sex`            = '" . intval( $_POST['sex']) . "',
-                                                            `status`         = '" . intval( $_POST['status']) . "',
-                                                            `bday`           = '" . (!$bday ? 0 : strtotime($bday)) . "',
-                                                            `email`          = '" . up($_POST['email']) . "',
-                                                            `nletter`        = '" . intval( $_POST['nletter']) . "',
-                                                            `pnmail`         = '" . intval( $_POST['pnmail']) . "',
-                                                            `city`           = '" . up($_POST['city']) . "',
-                                                            `gmaps_koord`    = '" . up($_POST['gmaps_koord']) . "',
-                                                            `hp`             = '" . links($_POST['hp']) . "',
-                                                            `icq`            = '" . intval( $icq) . "',
-                                                            `hlswid`         = '" . up(trim($_POST['hlswid'])) . "',
-                                                            `xboxid`         = '" . up(trim($_POST['xboxid'])) . "',
-                                                            `psnid`          = '" . up(trim($_POST['psnid'])) . "',
-                                                            `originid`       = '" . up(trim($_POST['originid'])) . "',
-                                                            `battlenetid`    = '" . up(trim($_POST['battlenetid'])) . "',
-                                                            `steamid`        = '" . up(trim($_POST['steamid'])) . "',
-                                                            `skypename`      = '" . up(trim($_POST['skypename'])) . "',
-                                                            `signatur`       = '" . up($_POST['sig']) . "',
-                                                            `beschreibung`   = '" . up($_POST['ich']) . "',
-                                                            `perm_gb`        = '" . up($_POST['visibility_gb']) . "',
-                                                            `perm_gallery`   = '" . up($_POST['visibility_gallery']) . "',
-                                                            `startpage`      = " . intval($_POST['startpage']).",
-                                                            `profile_access` = " . intval($_POST['visibility_profile']) . "
-                                                        WHERE id = " . $userid);
-            }
+                        $sql->update("UPDATE `{prefix_users}` SET " . $newpwd . " " . $customfields . " `country` = ?,`user` = ?, `nick` = ?, `rlname` = ?, `sex` = ?,`status` = ?, "
+                        ."`bday` = ?, `email` = ?, `nletter` = ?, `pnmail` = ?, `city` = ?, `gmaps_koord` = ?, `hp` = ?, `icq` = ?, `hlswid` = ?, `xboxid` = ?, `psnid` = ?,"
+                        ."`originid` = ?, `battlenetid` = ?,`steamid` = ?,`skypename` = ?,`signatur` = ?,`beschreibung` = ?, `perm_gb` = ?, `perm_gallery` = ?, `startpage` = ?, `profile_access` = ?"
+                        ." WHERE id = ?;", array(up($_POST['land']),up($_POST['user']),up($_POST['nick']),up($_POST['rlname']),intval( $_POST['sex']),intval( $_POST['status']),
+                                (!$bday ? 0 : strtotime($bday)),up($_POST['email']),intval( $_POST['nletter']),intval( $_POST['pnmail']),up($_POST['city']),
+                                up($_POST['gmaps_koord']),up(links($_POST['hp'])),intval($_POST['icq']),up(trim($_POST['hlswid'])),up(trim($_POST['xboxid'])),
+                                up(trim($_POST['psnid'])),up(trim($_POST['originid'])),up(trim($_POST['battlenetid'])),up(trim($_POST['steamid'])),up(trim($_POST['skypename'])),
+                                up($_POST['sig']),up($_POST['ich']),up($_POST['visibility_gb']),up($_POST['visibility_gallery']),intval($_POST['startpage']),intval($_POST['visibility_profile']),$userid));
+                        
+                        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($userid)));
+                        dbc_index::setIndex('user_' . $get['id'], $get); //Update Cache
+                    }
                 break;
                 case 'delete':
                     if(!rootAdmin($userid)) {
-                        $getdel = db("SELECT `id`,`nick`,`email`,`hp` FROM " . $db['users'] . " WHERE `id` = '" . intval($userid) . "'",false,true);
-                        db("UPDATE " . $db['f_threads'] . " SET `t_nick`   = '" . $getdel['nick'] . "',
-                                                                `t_email`  = '" . $getdel['email'] . "',
-                                                                `t_hp`     = '" . links($getdel['hp']) . "',
-                                                                `t_reg`    = 0,
-                                                           WHERE t_reg     = " . $getdel['id'] . ";");
+                        $getdel = $sql->selectSingle("SELECT `id`,`nick`,`email`,`hp` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
+                        $sql->update("UPDATE `{prefix_forumthreads}` SET `t_nick` = ?, `t_email` = ?, `t_hp` = ?, `t_reg` = 0, WHERE t_reg = ?;",
+                        array($getdel['nick'],$getdel['email'],up(links($getdel['hp'])),$getdel['id']));
+                        $sql->update("UPDATE `{prefix_forumposts}` SET `nick` = ?, `email` = ?, `hp` = ?, WHERE `reg` = ?;",
+                        array($getdel['nick'],$getdel['email'],up(links($getdel['hp'])),$getdel['id']));
+                        $sql->update("UPDATE `{prefix_newscomments}` SET `nick` = ?,`email` = ?, `hp` = ?, `reg` = 0, WHERE `reg` = ?;",
+                        array($getdel['nick'],$getdel['email'],up(links($getdel['hp'])),$getdel['id']));
+                        $sql->update("UPDATE `{prefix_acomments}` SET `nick` = ?, `email` = ?, `hp` = ?, `reg` = 0, WHERE `reg` = ?;",
+                        array($getdel['nick'],$getdel['email'],up(links($getdel['hp'])),$getdel['id']));
+                        $sql->delete("DELETE FROM `{prefix_messages}` WHERE `von` = ? OR   `an`  = ?;",array($getdel['id'],$getdel['id']));
+                        $sql->update("UPDATE `{prefix_usergb}` SET `reg` = 0 WHERE `reg` = ?;",array($getdel['id']));
+                        $sql->delete("DELETE FROM `{prefix_news}` WHERE `autor` = ?;",array($getdel['id']));
+                        $sql->delete("DELETE FROM `{prefix_permissions}` WHERE `user` = ?;",array($getdel['id']));
+                        $sql->delete("DELETE FROM `{prefix_squaduser}` WHERE `user` = ?;",array($getdel['id']));
+                        $sql->delete("DELETE FROM `{prefix_userbuddys}` WHERE `user` = ? OR `buddy` = ?;",array($getdel['id'],$getdel['id']));
+                        $sql->delete("DELETE FROM `{prefix_userstats}` WHERE `user` = ?;",array($getdel['id']));
+                        $sql->delete("DELETE FROM `{prefix_users}` WHERE `id` = ?;",array($getdel['id']));
+                        $sql->delete("DELETE FROM `{prefix_userstats}` WHERE `user` = ?;",array($getdel['id']));
+                        $sql->delete("DELETE FROM `{prefix_clicks_ips}` WHERE `uid` = ?;",array($getdel['id']));
 
-                        db("UPDATE " . $db['f_posts'] . " SET `nick`   = '" . $getdel['nick'] . "',
-                                                              `email`  = '" . $getdel['email'] . "',
-                                                              `hp`     = '" . links($getdel['hp']) . "',
-                                                        WHERE `reg`    = " . $getdel['id'] . ";");
-
-                        db("UPDATE " . $db['newscomments'] . " SET `nick`     = '" . $getdel['nick'] . "',
-                                                                   `email`    = '" . $getdel['email'] . "',
-                                                                   `hp`       = '" . links($getdel['hp']) . "',
-                                                                   `reg`      = 0,
-                                                             WHERE `reg`      = " . $getdel['id'] . ";");
-
-                        db("UPDATE " . $db['acomments'] . " SET `nick`     = '" . $getdel['nick'] . "',
-                                                                `email`    = '" . $getdel['email'] . "',
-                                                                `hp`       = '" . links($getdel['hp']) . "',
-                                                                `reg`      = 0,
-                                                          WHERE `reg`      = " . $getdel['id'] . ";");
-
-                        db("DELETE FROM " . $db['msg'] . " WHERE `von` = " . $getdel['id'] . "
-                                                            OR   `an`  = " . $getdel['id'] . ";");
-
-                        db("UPDATE " . $db['usergb'] . " SET `reg` = 0 WHERE `reg` = " . $getdel['id'] . ";");
-                        db("DELETE FROM " . $db['news'] . " WHERE `autor` = " . $getdel['id'] . ";");
-                        db("DELETE FROM " . $db['permissions'] . " WHERE `user` = " . $getdel['id'] . ";");
-                        db("DELETE FROM " . $db['squaduser'] . " WHERE `user` = " . $getdel['id'] . ";");
-                        db("DELETE FROM " . $db['buddys'] . " WHERE `user` = " . $getdel['id'] . "
-                                                                OR `buddy` = " . $getdel['id'] . ";");
-                        db("DELETE FROM " . $db['userpos'] . " WHERE `user` = " . $getdel['id'] . ";");
-                        db("DELETE FROM " . $db['users'] . " WHERE `id` = " . $getdel['id'] . ";");
-                        db("DELETE FROM " . $db['userstats'] . " WHERE `user` = " . $getdel['id'] . ";");
-                        db("DELETE FROM " . $db['clicks_ips'] . " WHERE `uid` = " . $getdel['id']. ";");
-
-                        $qrygl = db("SELECT * FROM `" . $db['usergallery'] . "` WHERE `user` = " . $getdel['id'] . ";");
+                        $qrygl = $sql->select("SELECT * FROM `{prefix_usergallery}` WHERE `user` = ?;",array($getdel['id']));
                         if(_rows($qrygl)) {
                             while ($getgl = _fetch($qrygl)) {
                                 $files = get_files(basePath."/inc/images/uploads/usergallery/",false,true,$picformat);
@@ -165,7 +128,7 @@ if(defined('_UserMenu')) {
                                     unlink(basePath . '/inc/images/uploads/usergallery/'.$getdel['id'].'_'.$getgl['pic']);
                                 }
                                 
-                                db("DELETE FROM `" . $db['usergallery'] . "` WHERE `id` = " . $getgl['id'] . ";");
+                                $sql->delete("DELETE FROM `{prefix_usergallery}` WHERE `id` = ?;",array($getgl['id']));
                             }
                         }
                         
@@ -204,11 +167,12 @@ if(defined('_UserMenu')) {
                     }
                 break;
                 default:
-                    $get = db("SELECT * FROM `" . $db['users'] . "` WHERE `id` = " . $userid . ";", false, true);
+                    $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
                     switch(isset($_GET['show']) ? $_GET['show'] : '') {
                         case 'gallery':
-                            $qrygl = db("SELECT * FROM `" . $db['usergallery'] . "` WHERE `user` = " . $userid . " ORDER BY id DESC"); $gal = ""; $color = 0;
-                            while ($getgl = _fetch($qrygl)) {
+                            $qrygl = $sql->select("SELECT `id`,`pic`,`beschreibung` FROM `{prefix_usergallery}` WHERE `user` = ? ORDER BY `id` DESC;",array($userid)); 
+                            $gal = ""; $color = 0;
+                            foreach($qrygl as $getgl) {
                                 $pic = show(_gallery_pic_link, array("img" => $getgl['pic'], "user" => $userid));
                                 $delete = show(_gallery_deleteicon, array("id" => $getgl['id']));
                                 $edit = show(_gallery_editicon, array("id" => $getgl['id']));
@@ -223,37 +187,38 @@ if(defined('_UserMenu')) {
                             if(empty($gal))
                                 $gal = '<tr><td colspan="3" class="contentMainSecond">'._no_entrys.'</td></tr>';
 
-                            $show = show($dir . "/edit_gallery", array("galleryhead" => _gallery_head,
-                                                                       "pic" => _gallery_pic,
-                                                                       "new" => _gallery_edit_new,
-                                                                       "del" => _deleteicon_blank,
-                                                                       "edit" => _editicon_blank,
-                                                                       "beschr" => _gallery_beschr,
-                                                                       "showgallery" => $gal));
+                            $show = show($dir . "/edit_gallery", array("showgallery" => $gal));
                         break;
                         case 'almgr':
                             switch ($do) {
                                 case 'self_add':
                                     $permanent_key = md5(mkpwd(8));
-                                    if(db_stmt("SELECT `id` FROM `".$db['autologin']."` WHERE `host` = ?", array('s', gethostbyaddr($userip)),true) >= 1) {
+                                    if($sql->rows("SELECT `id` FROM `{prefix_autologin}` WHERE `host` = ?;", array(gethostbyaddr($userip)))) {
                                         //Update Autologin
-                                        db_stmt("UPDATE `".$db['autologin']."` SET `ssid` = '".session_id()."',
-                                                                                   `pkey` = '".$permanent_key."',
-                                                                                   `ip` = '".$userip."',
-                                                                                   `date` = ".time().",
-                                                                                   `update` = ".time().",
-                                                                                   `expires` = ".autologin_expire." WHERE `host` = ?", array('s', gethostbyaddr($userip)));
+                                        $sql->update("UPDATE `{prefix_autologin}` SET "
+                                                          . "`ssid` = ?, "
+                                                          . "`pkey` = ?, "
+                                                          . "`ip` = ?, "
+                                                          . "`date` = ?, "
+                                                          . "`update` = ?, "
+                                                          . "`expires` = ? "
+                                                    . "WHERE `host` = ?;", 
+                                        array(session_id(),$permanent_key,$userip,$time=time(),$time,autologin_expire,
+                                              gethostbyaddr($userip)));
                                     } else {
                                         //Insert Autologin
-                                        db_stmt("INSERT INTO `".$db['autologin']."` SET `uid` = ".$get['id'].",
-                                                                                        `ssid` = '".session_id()."',
-                                                                                        `pkey` = '".$permanent_key."',
-                                                                                        `ip` = '".$userip."',
-                                                                                        `name` = ?, 
-                                                                                        `host` = ?,
-                                                                                        `date` = ".time().",
-                                                                                        `update` = 0,
-                                                                                        `expires` = ".autologin_expire.";",array('ss', cut(gethostbyaddr($userip),20), gethostbyaddr($userip)));
+                                        $sql->insert("INSERT INTO `{prefix_autologin}` SET "
+                                                               . "`uid` = ?,"
+                                                               . "`ssid` = ?,"
+                                                               . "`pkey` = ?,"
+                                                               . "`ip` = ?,"
+                                                               . "`name` = ?, "
+                                                               . "`host` = ?,"
+                                                               . "`date` = ?,"
+                                                               . "`update` = 0,"
+                                                               . "`expires` = ?;",
+                                        array($get['id'],session_id(),$permanent_key,$userip,time(),autologin_expire,
+                                              cut(gethostbyaddr($userip),20), gethostbyaddr($userip)));
                                     }
                                     
                                     cookie::put('id', $get['id']);
@@ -262,8 +227,8 @@ if(defined('_UserMenu')) {
                                     $index = info(_info_almgr_self_added, '../user/?action=editprofile&show=almgr');
                                 break;
                                 case 'self_remove':
-                                    if(db_stmt("SELECT `id` FROM `".$db['autologin']."` WHERE `host` = ? AND `ssid` = ?", array('ss', gethostbyaddr($userip), session_id()),true) >= 1) {
-                                        db("DELETE FROM `".$db['autologin']."` WHERE `ssid` = '".session_id()."';");
+                                    if($sql->rows("SELECT `id` FROM `{prefix_autologin}` WHERE `host` = ? AND `ssid` = ?;", array(gethostbyaddr($userip), session_id()))) {
+                                        $sql->delete("DELETE FROM `{prefix_autologin}` WHERE `ssid` = ?;",array(session_id()));
                                         cookie::delete('pkey');
                                         cookie::delete('id');
                                         cookie::save();
@@ -271,8 +236,8 @@ if(defined('_UserMenu')) {
                                     }
                                 break;
                                 case 'almgr_delete':
-                                    if(db_stmt("SELECT `id` FROM `".$db['autologin']."` WHERE `id` = ?", array('i', $_GET['id']),true) >= 1) {
-                                        db("DELETE FROM `".$db['autologin']."` WHERE `id` = '".  intval($_GET['id'])."';");
+                                    if($sql->rows("SELECT `id` FROM `{prefix_autologin}` WHERE `id` = ?;", array(intval($_GET['id'])))) {
+                                        $sql->delete("DELETE FROM `{prefix_autologin}` WHERE `id` = ?;",array(intval($_GET['id'])));
                                         cookie::delete('pkey');
                                         cookie::delete('id');
                                         cookie::save();
@@ -280,36 +245,34 @@ if(defined('_UserMenu')) {
                                     }
                                 break;
                                 case 'almgr_edit':
-                                    $qry = db_stmt("SELECT * FROM `".$db['autologin']."` WHERE `id` = ?", array('i', $_GET['id']));
-                                    if(_rows($qry) >= 1) {
-                                        $get = _fetch($qry);
+                                    $get = $sql->selectSingle("SELECT * FROM `{prefix_autologin}` WHERE `id` = ?;", array(intval($_GET['id'])));
+                                    if($sql->rowCount()) {
                                         $show = show($dir . "/edit_almgr_from", array("name" => re($get['name']),
-                                                                                      "id" => $get['id'],
-                                                                                      "host" => $get['host'],
-                                                                                      "ip" => $get['ip'],
-                                                                                      "ssid" => $get['ssid'],
-                                                                                      "pkey" => $get['pkey'],
-                                                                                      "value" => _button_value_edit));
+                                                                                      "id" => re($get['id']),
+                                                                                      "host" => re($get['host']),
+                                                                                      "ip" => re($get['ip']),
+                                                                                      "ssid" => re($get['ssid']),
+                                                                                      "pkey" => re($get['pkey'])));
                                     }
                                 break;
                                 case 'almgr_edit_save':
-                                    if(db_stmt("SELECT id FROM `".$db['autologin']."` WHERE `id` = ?", array('i', $_GET['id']),true) >= 1) {
-                                        db_stmt("UPDATE `".$db['autologin']."` SET `name` = ? WHERE `id` = ?", array('si', up($_POST['name']), $_GET['id']));
+                                    if($sql->rows("SELECT id FROM `{prefix_autologin}` WHERE `id` = ?;", array(intval($_GET['id'])))) {
+                                        $sql->update("UPDATE `{prefix_autologin}` SET `name` = ? WHERE `id` = ?;", array(up($_POST['name']), intval($_GET['id'])));
                                         $index = info(_almgr_editd, '../user/?action=editprofile&show=almgr');
                                     }
                                 break;
                             }
                             
                             if(empty($index)) {
-                                $qry = db("SELECT * FROM `".$db['autologin']."` WHERE `uid` = ".$userid.";"); $almgr = ""; $color = 0;
-                                if(_rows($qry)) {
-                                    while($get = _fetch($qry)) { 
+                                $qry = $sql->select("SELECT * FROM `{prefix_autologin}` WHERE `uid` = ?;",array($userid)); $almgr = ""; $color = 0;
+                                if($sql->rowCount()) {
+                                    foreach($qry as $get) {
                                         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
                                         $almgr .= show($dir . "/edit_almgr_show", array("delete" => show(_almgr_deleteicon, array("id" => $get['id'])),
                                                                                         "edit" => show(_almgr_editicon, array("id" => $get['id'])),                                            
                                                                                         "class" => $class,
                                                                                         "name" => re($get['name']),
-                                                                                        "host" => $get['host'],
+                                                                                        "host" => re($get['host']),
                                                                                         "ip" => $get['ip'],
                                                                                         "create" => date('d.m.Y',$get['date']),
                                                                                         "lused" => !$get['update'] ? '-' : date('d.m.Y',$get['update']),
@@ -353,28 +316,25 @@ if(defined('_UserMenu')) {
                             }
                             
                             // Startpage
-                            $sql_startpage = db("SELECT `name`,`id` FROM `".$db['startpage']."`");
+                            $sql_startpage = $sql->select("SELECT `name`,`id` FROM `{prefix_startpage}`;");
                             $startpage = '<option value="0">'._userlobby.'</option>';
-                            if(_rows($sql_startpage) >= 1) {
-                                while($get_startpage = _fetch($sql_startpage))
-                                { $startpage .= show(_select_field,array('value' => $get_startpage['id'], 'sel' => ($get_startpage['id'] == $get['startpage'] ? 'selected="selected"' : ''), 'what' => $get_startpage['name'])); }
+                            if($sql->rowCount()) {
+                                foreach($sql_startpage as $get_startpage) {
+                                    $startpage .= show(_select_field,array('value' => $get_startpage['id'], 'sel' => ($get_startpage['id'] == $get['startpage'] ? 'selected="selected"' : ''), 'what' => $get_startpage['name'])); }
                             }
 
                             if ($get['level'] == 1) {
                                 $clan = '<input type="hidden" name="status" value="1" />';
                             } else {
-                                $qrycustom = db("SELECT `feldname`,`name` FROM " . $db['profile'] . " WHERE kid = 2 AND shown = 1 ORDER BY id ASC"); $custom_clan = "";
-                                while ($getcustom = _fetch($qrycustom)) {
-                                    $getcontent = db("SELECT " . $getcustom['feldname'] . " FROM " . $db['users'] . " WHERE id = " . $userid . ";",false,true);
+                                $qrycustom = $sql->select("SELECT `feldname`,`name` FROM `{prefix_profile}` WHERE `kid` = 2 AND `shown` = 1 ORDER BY `id` ASC;"); $custom_clan = "";
+                                foreach($qrycustom as $getcustom) {
+                                    $getcontent = $sql->selectSingle("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
                                     $custom_clan .= show(_profil_edit_custom, array("name" => pfields_name($getcustom['name']) . ":", 
                                                                                     "feldname" => $getcustom['feldname'],
                                                                                     "value" => re($getcontent[$getcustom['feldname']])));
                                 }
 
-                                $clan = show($dir . "/edit_clan", array("clan" => _profil_clan,
-                                                                        "pstatus" => _profil_status,
-                                                                        "pexclans" => _profil_exclans,
-                                                                        "status" => $status,
+                                $clan = show($dir . "/edit_clan", array("status" => $status,
                                                                         "exclans" => re($get['ex']),
                                                                         "custom_clan" => $custom_clan));
                             }
@@ -408,43 +368,10 @@ if(defined('_UserMenu')) {
                                                                                    "value" => _button_title_del_account,
                                                                                    "del" => convSpace(_confirm_del_account)));
 
-                            $show = show($dir . "/edit_profil", array("hardware" => _profil_hardware,
-                                                                      "hphead" => _profil_hp,
-                                                                      "visibility" => _pedit_visibility,
-                                                                      "pvisibility_gb" => _pedit_visibility_gb,
-                                                                      "pvisibility_gallery" => _pedit_visibility_gallery,
-                                                                      "pvisibility_profile" =>  _pedit_visibility_profile,
-                                                                      "country" => show_countrys($get['country']),
-                                                                      "pcountry" => _profil_country,
-                                                                      "about" => _profil_about,
-                                                                      "picturehead" => _profil_pic,
-                                                                      "contact" => _profil_contact,
-                                                                      "preal" => _profil_real,
-                                                                      "pnick" => _nick,
-                                                                      "pemail1" => _email,
-                                                                      "php" => _hp,
-                                                                      "pava" => _profil_avatar,
-                                                                      "pbday" => _profil_bday,
-                                                                      "psex" => _profil_sex,
-                                                                      "pname" => _loginname,
-                                                                      "ppwd" => _new_pwd,
-                                                                      "cppwd" => _pwd2,
-                                                                      "picq" => _icq,
-                                                                      "psig" => _profil_sig,
-                                                                      "ppic" => _profil_ppic,
-                                                                      "phlswid" => _hlswid,
-                                                                      "xboxidl" => _xboxid,
-                                                                      "psnidl" => _psnid,
-                                                                      "skypeidl" => _skypeid,
-                                                                      "originidl" => _originid,
-                                                                      "battlenetidl" => _battlenetid,
-                                                                      "pcity" => _profil_city,
+                            $show = show($dir . "/edit_profil", array("country" => show_countrys($get['country']),
                                                                       "city" => re($get['city']),
-                                                                      "psteamid" => _steamid,
                                                                       "v_steamid" => re($get['steamid']),
-                                                                      "skypename" => $get['skypename'],
-                                                                      "nletter" => _profil_nletter,
-                                                                      "pnmail" => _profil_pnmail,
+                                                                      "skypename" => re($get['skypename']),
                                                                       "pnl" => $pnl,
                                                                       "pnm" => $pnm,
                                                                       "pwd" => "",
@@ -465,7 +392,7 @@ if(defined('_UserMenu')) {
                                                                       "visibility_gallery" => $perm_gallery,
                                                                       "visibility_profile" => $perm_profile,
                                                                       "icqnr" => $icq,
-                                                                      "sig" => re_bbcode($get['signatur']),
+                                                                      "sig" => re($get['signatur']),
                                                                       "hlswid" => $get['hlswid'],
                                                                       "xboxid" => $get['xboxid'],
                                                                       "psnid" => $get['psnid'],
@@ -473,36 +400,22 @@ if(defined('_UserMenu')) {
                                                                       "battlenetid" => $get['battlenetid'],
                                                                       "clan" => $clan,
                                                                       "pic" => $pic,
-                                                                      "editpic" => _profil_edit_pic,
-                                                                      "editava" => _profil_edit_ava,
                                                                       "deleteava" => $deleteava,
                                                                       "deletepic" => $deletepic,
                                                                       "startpage" => $startpage,
-                                                                      "favos" => _profil_favos,
-                                                                      "pich" => _profil_ich,
-                                                                      "pposition" => _profil_position,
-                                                                      "pstatus" => _profil_status,
                                                                       "position" => getrank($get['id']),
-                                                                      "value" => _button_value_edit,
                                                                       "status" => $status,
-                                                                      "sonst" => _profil_sonst,
                                                                       "custom_about" => getcustom(1),
                                                                       "custom_contact" => getcustom(3),
                                                                       "custom_favos" => getcustom(4),
                                                                       "custom_hardware" => getcustom(5),
-                                                                      "ich" => re_bbcode($get['beschreibung']),
-                                                                      "del" => _profil_del_account,
+                                                                      "ich" => re($get['beschreibung']),
                                                                       "delete" => $delete));
                         break;
                     }
 
                     if(empty($index))
-                        $index = show($dir . "/edit", array("profilhead" => _profil_edit_head,
-                                                            "editgallery" => _profil_edit_gallery_link,
-                                                            "editprofil" => _profil_edit_profil_link,
-                                                            "editalmgr" => _profil_edit_almgr_link,
-                                                            "nick" => autor($get['id']),
-                                                            "show" => $show));
+                        $index = show($dir . "/edit", array("show" => $show),array("nick" => autor($get['id'])));
                 break;
             }
         }
