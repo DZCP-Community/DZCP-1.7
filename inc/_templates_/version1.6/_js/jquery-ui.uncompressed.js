@@ -25,7 +25,6 @@
  * http://api.jqueryui.com/category/ui-core/
  */
 
-
 // $.ui might exist from components with no dependencies, e.g., $.ui.position
 $.ui = $.ui || {};
 

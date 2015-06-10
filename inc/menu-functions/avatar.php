@@ -4,7 +4,9 @@
  * http://www.dzcp.de
  * Menu: Avatar
  */
+
 function avatar() {
     global $chkMe;
+    
     return $chkMe >= 1 ? show("menu/avatars", array("avatar_show" => useravatar(0,70,70))) : '';
 }

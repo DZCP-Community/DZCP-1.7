@@ -1,13 +1,17 @@
 <?php
 /**
- * DZCP - deV!L`z ClanPortal 1.7.0
+ * DZCP - deV!L`z ClanPortal
  * http://www.dzcp.de
- * Menu: Login Box
+ * Menu: Login
  */
-$secure = config('securelogin') ? show("menu/secure", array("help" => _login_secure_help)) : '';
-$login = show("menu/login", array("register" => _register,
-                                  "what" => _login_login,
-                                  "secure" => $secure,
-                                  "signup" => _login_signup,
-                                  "permanent" => _login_permanent,
-                                  "lostpwd" => _login_lostpwd));
+
+function login() {
+    global $chkMe;
+    
+    if(!$chkMe) {
+        $secure = config('securelogin') ? show("menu/secure") : '';
+        return show("menu/login", array("secure" => $secure));
+    }
+
+    return '';
+}

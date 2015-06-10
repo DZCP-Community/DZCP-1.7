@@ -4,21 +4,21 @@
  * http://www.dzcp.de
  * Menu: Teamspeak
  */
-function teamspeak($js = 0) {
-    global $db,$cache;
-    header('Content-Type: text/html; charset=iso-8859-1');
 
+function teamspeak($js = 0) {
+    global $sql,$cache;
+    
+    header('Content-Type: text/html; charset=iso-8859-1');
     if(!fsockopen_support())
         return '<center style="margin:2px 0">'.error(_fopen,'0',false).'</center>';
 
     if(!$js) {
         return "<div id=\"navTeamspeakServer\">
         <div style=\"width:100%;padding:10px 0;text-align:center\"><img src=\"../inc/images/ajax_loading.gif\" alt=\"\" /></div>
-        <script language=\"javascript\" type=\"text/javascript\">DZCP.initDynLoader('navTeamspeakServer','teamspeak','');</script></div>";
+        <script language=\"javascript\" type=\"text/javascript\">DZCP.initDynLoader('navTeamspeakServer','teamspeak','',true);</script></div>";
     } else {
-        $qry = db("SELECT * FROM `".$db['ts']."` WHERE `show_navi` = 1 LIMIT 1;");
-        if(!_rows($qry)) return '<br /><center>'._no_ts.'</center><br />';
-            $get = _fetch($qry);
+        $get = $sql->selectSingle("SELECT * FROM `{prefix_teamspeak}` WHERE `show_navi` = 1 LIMIT 1;");
+        if(!$sql->rowCount()) return '<br /><center>'._no_ts.'</center><br />';
 
         if(!empty($get['host_ip_dns']) && !empty($get['server_port']) && !empty($get['query_port'])) {
             $ip_port = TS3Renderer::tsdns($get['host_ip_dns']);

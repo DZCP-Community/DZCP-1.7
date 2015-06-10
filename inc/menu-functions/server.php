@@ -6,26 +6,28 @@
  */
 
 function server($serverID = 0) {
-    global $picformat,$cache,$db;
+    global $picformat,$cache,$sql;
+    
+    header('Content-Type: text/html; charset=iso-8859-1');
     if(!fsockopen_support())
         return '<center style="margin:2px 0">'.error(_fopen,'0',false).'</center>';
 
     $servernavi=''; $st = 0;
     if(empty($serverID)) {
-        $qry = db("SELECT id FROM ".$db['server']." WHERE navi = '1' AND game != 'nope'");
-        while($get = _fetch($qry)) {
+        $qry = $sql->select("SELECT `id` FROM `{prefix_server}` WHERE `navi` = 1 AND `game` != 'nope' ORDER BY `id` DESC LIMIT 10;");
+        foreach($qry as $get) {
             $servernavi .= "
                 <div class=\"navGameServer\" id=\"navGameServer_".$get['id']."\">
                 <div style=\"width:100%;padding:10px 0;text-align:center\"><img src=\"../inc/images/ajax_loading.gif\" alt=\"\" /></div>
-                <script language=\"javascript\" type=\"text/javascript\">DZCP.initDynLoader('navGameServer_".$get['id']."','server','&serverID=".$get['id']."');</script></div>";
+                <script language=\"javascript\" type=\"text/javascript\">DZCP.initDynLoader('navGameServer_".$get['id']."','server','&serverID=".$get['id']."',true);</script></div>";
             $st++;
         }
 
         return empty($servernavi) ? '<center style="margin:2px 0">'._no_server_navi.'</center>' : (!$st ? '<table class="navContent" cellspacing="0">'.$servernavi.'</table>' : $servernavi);
     } else {
         if(fsockopen_support()) {
-            $sID = $_GET['serverID'];
-            $get = db("SELECT * FROM ".$db['server']." WHERE `id` = ".$sID,false,true);
+            $sID = intval($_GET['serverID']);
+            $get = $sql->selectSingle("SELECT * FROM `{prefix_server}` WHERE `id` = ?;",array($sID));
             $cache_hash = md5($get['ip'].':'.$get['port'].'_'.$get['game']);
             if(!$cache->isExisting('server_'.$cache_hash)) {
                 $get['ip'] = str_replace(' ', '', $get['ip']);
@@ -90,7 +92,7 @@ function server($serverID = 0) {
 
                 $game_icon_inp = GameQ::search_game_icon($game_icon);
                 if($game_icon_inp['found'] && stristr($icon_basic_inp['image'], 'unknown') === FALSE && empty($get['icon'])) {
-                    db("UPDATE `".$db['server']."` SET `icon` = '".up($game_icon)."' WHERE `id` = ".$get['id'].";");
+                    $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(up($game_icon),$get['id']));
                 }
                 
                 $game_icon = $game_icon_inp['image'];
@@ -99,8 +101,9 @@ function server($serverID = 0) {
                 if(!empty($server['game_mod'])) {
                     $icon_mod_inp = GameQ::search_game_icon($icon_mod);
                     if($icon_mod_inp['found']) {
-                        db("UPDATE `".$db['server']."` SET `icon` = '".up($icon_mod)."' WHERE `id` = ".$get['id'].";");
+                        $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(up($icon_mod),$get['id']));
                     }
+                    
                     $icon_mod = $icon_mod_inp['image'];
                     unset($icon_mod_inp);
                 }
@@ -117,7 +120,7 @@ function server($serverID = 0) {
                 }
 
                 if(!empty($server['game_hostname']))
-                    db("UPDATE `".$db['server']."` SET `name` = '".up($server['game_hostname'])."' WHERE `id` = ".$get['id'].";"); //Update Hostname to DB
+                    $sql->update("UPDATE `{prefix_server}` SET `name` = ? WHERE `id` = ?;",array(up($server['game_hostname']),$get['id'])); //Update Hostname to DB
             } else  {
                 //Server Status
                 $server['game_hostname'] =  $get['name'];

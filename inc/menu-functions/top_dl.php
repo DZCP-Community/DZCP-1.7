@@ -4,16 +4,19 @@
  * http://www.dzcp.de
  * Menu: Top Downloads
  */
-function top_dl() {
-    global $db;
 
-    $qry = db("SELECT `id`,`kat`,`download`,`date`,`hits` FROM `".$db['downloads']."` ".(permission('dlintern') ? "" : " WHERE `intern` = '0'")." ORDER BY hits ".(!config('m_topdl') ? "DESC LIMIT ".config('m_topdl') : ""));
+function top_dl() {
+    global $sql;
+    
+    $qry = $sql->select("SELECT `id`,`kat`,`download`,`date`,`hits` "
+                      . "FROM `{prefix_downloads}`".(permission('dlintern') ? "" : " WHERE `intern` = 0")." "
+                      . "ORDER BY `hits` ".(!config('m_topdl') ? "DESC LIMIT ".config('m_topdl').";" : ";"));
     $top_dl = '';
-    if(_rows($qry)) {
-        while($get = _fetch($qry)) {
+    if($sql->rowCount()) {
+        foreach($qry as $get) {
             $info = '';
             if(config('allowhover') == 1) {
-                $getkat = db("SELECT name FROM ".$db['dl_kat']." WHERE id = '".$get['kat']."'",false,true);
+                $getkat = $sql->selectSingle("SELECT `name` FROM `{prefix_download_kat}` WHERE `id` = ?;",array($get['kat']));
                 $info = 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['download'])).'\', \''._datum.';'._dl_dlkat.';'._hits.'\', \''.date("d.m.Y H:i", $get['date'])._uhr.';'.jsconvert(re($getkat['name'])).';'.$get['hits'].'\')" onmouseout="DZCP.hideInfo()"';
             }
 

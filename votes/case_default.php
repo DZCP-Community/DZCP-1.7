@@ -5,37 +5,33 @@
  */
 
 if(defined('_Votes')) {
-    $whereIntern = ' AND intern = 0';
-    $order = 'datum DESC';
+    $whereIntern = ' AND `intern` = 0';
     if(permission('votes')) {
         $whereIntern = '';
-        $order = 'intern DESC';
     }
 
     $fvote = '';
     if(!settings('forum_vote'))
-        $fvote = empty($whereIntern) ? ' AND forum = 0' : ' AND forum = 0';
+        $fvote = empty($whereIntern) ? ' AND `forum` = 0' : ' AND `forum` = 0';
 
-    $qry = db('SELECT votes.*,sum(votes_result.stimmen) as ges_stimmen FROM '.$db['votes'].' votes,'.$db['vote_results'].' votes_result
-               WHERE votes.id = votes_result.vid '.$whereIntern.$fvote.'
-               GROUP by votes.id '.orderby_sql(array('titel','datum','von','ges_stimmen'), 'ORDER BY datum'));
-
-    while($get = _fetch($qry)) {
-        $qryv = db('SELECT * FROM '.$db['vote_results'] .
-                  ' WHERE vid = ' . (int) $get['id'] .
-                  ' ORDER BY id');
+    $qry = $sql->select('SELECT votes.*,sum(votes_result.`stimmen`) as `ges_stimmen` FROM `{prefix_votes}` as votes, `{prefix_vote_results}` as `votes_result`'
+            . ' WHERE votes.`id` = votes_result.`vid` '.$whereIntern.$fvote.''
+            . ' GROUP by votes.`id` '.orderby_sql(array('titel','datum','von','ges_stimmen'), 'ORDER BY `datum`;'));
+    foreach($qry as $get) {
+        $qryv = $sql->select('SELECT * FROM `{prefix_vote_results}` '
+                           . 'WHERE `vid` = '.$get['id'].' ORDER BY `id`;');
 
         $check = ''; $ipcheck = false; $intern = '';
         $stimmen = $get['ges_stimmen'];
-        $vid = 'vid_' . (int)$get['id'];
-        if($get['intern'] == 1) {
+        $vid = 'vid_'.$get['id'];
+        if($get['intern']) {
             $showVoted = '';
             $intern = _votes_intern;
         }
 
         $results = ''; $color2 = 0;
         $ipcheck = !count_clicks('vote',$get['id'],0,false);
-        while($getv = _fetch($qryv)) {
+        foreach($qryv as $getv) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             if($ipcheck || cookie::get('vid_'.$get['id']) != false || $get['closed']) {
                 $percent = @round($getv['stimmen']/$stimmen*100,2);
@@ -45,7 +41,6 @@ if(defined('_Votes')) {
                 $votebutton = "";
                 $results .= show($dir."/votes_results", array("answer" => re($getv['sel']),
                                                               "percent" => $percent,
-                                                              "lng_stimmen" => _votes_stimmen,
                                                               "class" => $class,
                                                               "stimmen" => $getv['stimmen'],
                                                               "balken" => $balken));
@@ -60,7 +55,7 @@ if(defined('_Votes')) {
 
         $showVoted = '';
         if($get['intern'] && $stimmen != 0 && ($get['von'] == $userid || permission('votes'))) {
-            $showVoted = ' <a href="?action=showvote&amp;id='.(int)$get['id'].'"><img src="../inc/images/lupe.gif" alt="" title="'.
+            $showVoted = ' <a href="?action=showvote&amp;id='.$get['id'].'"><img src="../inc/images/lupe.gif" alt="" title="'.
             _show_who_voted.'" class="icon" /></a>';
         }
 
@@ -98,14 +93,9 @@ if(defined('_Votes')) {
         $show = show(_no_entrys_yet, array("colspan" => "4"));
     }
     
-    $index = show($dir."/votes", array("head" => _votes_head,
-                                       "show" => $show,
-                                       "titel" => _titel,
-                                       "autor" => _autor,
-                                       "datum" => _datum,
+    $index = show($dir."/votes", array("show" => $show,
                                        "order_titel" => orderby('titel'),
                                        "order_autor" => orderby('von'),
                                        "order_datum" => orderby('datum'),
-                                       "order_stimmen" => orderby('ges_stimmen'),
-                                       "stimmen" => _votes_stimmen));
+                                       "order_stimmen" => orderby('ges_stimmen')));
 }

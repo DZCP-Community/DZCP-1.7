@@ -4,6 +4,7 @@
  * http://www.dzcp.de
  * Menu: Begrüßung nach Tageszeit
  */
+
 function welcome() {
     global $chkMe,$userid;
 

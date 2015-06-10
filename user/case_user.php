@@ -239,7 +239,7 @@ if(defined('_UserMenu')) {
 
                 $rlname = $get['rlname'] ? re($get['rlname']) : "-";
                 $skypename = $get['skypename'] ? "<a href=\"skype:" . $get['skypename'] . "?chat\"><img src=\"http://mystatus.skype.com/smallicon/" . $get['skypename'] . "\" style=\"border: none;\" width=\"16\" height=\"16\" alt=\"" . $get['skypename'] . "\"/></a>" : "-";
-                $steam = (!empty($get['steamid']) && steam_enable ? '<div id="infoSteam_' . md5(re($get['steamid'])) . '"><div style="width:100%;text-align:center"><img src="../inc/images/ajax-loader-mini.gif" alt="" /></div><script language="javascript" type="text/javascript">DZCP.initDynLoader("infoSteam_' . md5(re($get['steamid'])) . '","steam","&steamid=' . re($get['steamid']) . '");</script></div>' : '-');
+                $steam = (!empty($get['steamid']) && steam_enable ? '<div id="infoSteam_' . md5(re($get['steamid'])) . '"><div style="width:100%;text-align:center"><img src="../inc/images/ajax-loader-mini.gif" alt="" /></div><script language="javascript" type="text/javascript">DZCP.initDynLoader("infoSteam_' . md5(re($get['steamid'])) . '","steam","&steamid=' . re($get['steamid']) . '",true);</script></div>' : '-');
 
                 $city = re($get['city']);
                 $beschreibung = bbcode($get['beschreibung']);

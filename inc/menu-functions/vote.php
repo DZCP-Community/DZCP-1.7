@@ -4,23 +4,22 @@
  * http://www.dzcp.de
  * Menu: Votes
  */
-function vote($ajax = false) {
-    global $db,$chkMe;
 
-    $qry = db("SELECT `id`,`closed`,`titel`,`intern` FROM ".$db['votes']." WHERE `menu` = '1' AND `forum` = 0"); $vote = '';
-    if(_rows($qry)) {
-        $get = _fetch($qry);
+function vote($ajax = false) {
+    global $sql,$chkMe;
+    
+    $get = $sql->selectSingle("SELECT `id`,`closed`,`titel`,`intern` FROM `{prefix_votes}` WHERE `menu` = 1 AND `forum` = 0;"); $vote = '';
+    if($sql->rowCount()) {
         if(!$get['intern'] || $chkMe >= 1) {
-            $qryv = db("SELECT `id`,`stimmen`,`sel` FROM ".$db['vote_results']." WHERE `vid` = '".$get['id']."' ORDER BY what");
+            $qryv = $sql->select("SELECT `id`,`stimmen`,`sel` FROM `{prefix_vote_results}` WHERE `vid` = ? ORDER BY `what`;",array($get['id']));
             $results = '';
-            while ($getv = _fetch($qryv)) {
+            foreach($qryv as $getv) {
                 $ipcheck = !count_clicks('vote',$get['id'],0,false);
-                $stimmen = sum($db['vote_results'], " WHERE `vid` = '".$get['id']."'", "stimmen");
+                $stimmen = sum("{prefix_vote_results}", " WHERE `vid` = '".$get['id']."'", "stimmen",array($get['id']));
                 if($stimmen != 0) {
-                    if($ipcheck || cookie::get('vid_'.$get['id']) != false || $get['closed'] == 1) {
+                    if($ipcheck || cookie::get('vid_'.$get['id']) != false || $get['closed']) {
                         $percent = round($getv['stimmen']/$stimmen*100,1);
                         $rawpercent = round($getv['stimmen']/$stimmen*100,0);
-
                         $balken = show(_votes_balken, array("width" => $rawpercent));
 
                         $votebutton = "";

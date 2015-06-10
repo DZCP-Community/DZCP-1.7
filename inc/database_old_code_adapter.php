@@ -55,7 +55,7 @@ function db($query='',$rows=false,$fetch=false) {
         if(debug_all_sql_querys) DebugConsole::wire_log('debug', 9, 'SQL_Query', $query);
         if($updater) { $qry = $mysqli->query($query); } else {
             if(!$qry = $mysqli->query($query)) {
-                $message = DebugConsole::sql_error_handler($query);
+                $message = DebugConsole::sql_error_Exception($query,$query);
                 include_once(basePath."/inc/lang/languages/english.php");
                 $message = 'SQL-Debug:<p>'.$message;
                 die(show('<b>Upps...</b><br /><br />Entschuldige bitte! Das h&auml;tte nicht passieren d&uuml;rfen. Wir k&uuml;mmern uns so schnell wie m&ouml;glich darum.<br><br>'.$clanname.'<br><br>'.(view_error_reporting ? nl2br($message).'<br><br>' : '').'[lang_back]'));

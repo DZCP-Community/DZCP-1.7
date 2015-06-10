@@ -53,6 +53,8 @@ $support .= "GameQ: ".GameQ::VERSION."\r\n";
 $support .= "Server OS: ".@php_uname()."\r\n";
 $support .= "Webserver: ".(array_key_exists('apache2handler', $PhpInfo) ? (array_key_exists('Apache Version', $PhpInfo['apache2handler']) ? $PhpInfo['apache2handler']['Apache Version'] : 'PHP l&auml;uft als CGI <Keine Info>' ) : 'PHP l&auml;uft als CGI <Keine Info>')."\r\n";
 $support .= "PHP-Version: ".phpversion()." (".php_sapi_type().")"."\r\n";
+$support .= "PHP-Alternative PHP Cache (APC) : ".(extension_loaded('apc') ? 'On' : 'Off')."\r\n";
+$support .= "PHP-Memcache: ".(extension_loaded('memcache') ? 'On' : 'Off')."\r\n";
 $support .= "MySQL-Server Version: ".$sql->selectSingle("SELECT VERSION() as mysql_version",array(),'mysql_version')."\r\n";
 $support .= "\r\n";
 

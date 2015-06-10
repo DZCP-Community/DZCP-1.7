@@ -4,6 +4,7 @@
  * http://www.dzcp.de
  */
 
+## INCLUDES ##
 require_once(basePath."/inc/debugger.php");
 require_once(basePath."/inc/config.php");
 require_once(basePath."/inc/database.php");
@@ -163,6 +164,9 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
             else {
                 if(file_exists($template.".html")) {
                     $tpl = file_get_contents($template.".html");
+                    if (substr($tpl, 0, 3) === pack("CCC", 0xef, 0xbb, 0xbf)) {
+                        $tpl = substr($tpl, 3);
+                    }
                     if(template_cache && $config_cache['use_cache'] && dbc_index::useMem()) {
                         $cache->set('tpl_'.$cacheHash,up($tpl),template_cache_time);
                         if (show_dbc_debug) {
@@ -175,9 +179,14 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
         else {
             if(file_exists($template . ".html")) {
                 $tpl = file_get_contents($template . ".html");
+                if (substr($tpl, 0, 3) === pack("CCC", 0xef, 0xbb, 0xbf)) {
+                    $tpl = substr($tpl, 3);
+                }
             }
         }
 
+        
+        
         //put placeholders in array
         $array['dir'] = '../inc/_templates_/'.$tmpdir;
         $array['idir'] = '../inc/images'; //Image DIR [idir]

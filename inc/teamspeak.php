@@ -160,7 +160,7 @@ class TS3Renderer {
      */
     public static function channel_name($channel=array(),$tpl=false,$joints='',$ebene=1,$cut=false) {
         if($cut) $channel['channel_name'] = (mb_strlen($channel['channel_name']) > (30 - ($ebene * 2)) ? cut($channel['channel_name'],(30 - ($ebene * 2)),true) : $channel['channel_name'] );
-        return '<a href="javascript:DZCP.popup(\'../teamspeak/login.php?ts3&amp;cName='.rawurlencode($joints).'\', \'600\', \'100\')"
+        return '<a href="javascript:DZCP.popup(\'../teamspeak/login.php?ts3&amp;cName='.base64_encode($joints).'\', \'600\', \'100\')"
         class="navTeamspeak" style="font-weight:bold;white-space:nowrap" title="'.spChars($channel['channel_name']).'">'.self::rep($channel['channel_name']).'</a>'."\n";
     }
 

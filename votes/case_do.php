@@ -6,46 +6,48 @@
 
 if(defined('_Votes')) {
     if(isset($_GET['what']) && $_GET['what'] == "vote") {
-        if(empty($_POST['vote']))
+        if(empty($_POST['vote'])) {
             $index = error(_vote_no_answer);
-        else {
-            $get = db("SELECT * FROM ".$db['votes']." WHERE id = '".intval($_GET['id'])."'",false,true);
+        } else {
+            $get = $sql->selectSingle("SELECT `id`,`closed` FROM `{prefix_votes}` WHERE `id` = ?;",array(intval($_GET['id'])));
             if($get['intern'] && $chkMe >= 1) {
-                if(!count_clicks('vote',$get['id']))
+                if(!count_clicks('vote',$get['id'])) {
                     $index = error(_error_voted_again,1);
-                else if($get['closed'])
+                } else if($get['closed']) {
                     $index = error(_error_vote_closed,1);
-                else {
-                    db("UPDATE ".$db['userstats']." SET `votes` = votes+1 WHERE user = '".$userid."'");
-                    db("UPDATE ".$db['vote_results']." SET `stimmen` = stimmen+1 WHERE id = '".intval($_POST['vote'])."'");
+                } else {
+                    $sql->update("UPDATE `{prefix_userstats}` SET `votes` = (votes+1) WHERE `user` = ?;",array($userid));
+                    $sql->update("UPDATE `{prefix_vote_results}` SET `stimmen` = (stimmen+1) WHERE `id` = ?;",array(intval($_POST['vote'])));
 
                     setIpcheck("vid_".intval($_GET['id']));
                     setIpcheck("vid(".intval($_GET['id']).")");
 
-                    if(!isset($_GET['ajax']))
+                    if(!isset($_GET['ajax'])) {
                         $index = info(_vote_successful, "?show=".$_GET['id']."");
+                    }
                 }
             } else {
-                if(!count_clicks('vote',intval($_GET['id'])))
+                if(!count_clicks('vote',intval($_GET['id']))) {
                     $index = error(_error_voted_again,1);
-                else if($get['closed'])
+                } else if($get['closed']) {
                     $index = error(_error_vote_closed,1);
-                else {
-                    if($userid >= 1)
-                        db("UPDATE ".$db['userstats']." SET `votes` = votes+1 WHERE user = '".$userid."'");
+                } else {
+                    if($userid >= 1) {
+                        $sql->update("UPDATE `{prefix_userstats}` SET `votes` = (votes+1) WHERE `user` = ?;",array($userid));
+                    }
 
-                    db("UPDATE ".$db['vote_results']." SET `stimmen` = stimmen+1 WHERE id = ".intval($_POST['vote']));
-
+                    $sql->update("UPDATE `{prefix_vote_results}` SET `stimmen` = (stimmen+1) WHERE `id` = ?;",array(intval($_POST['vote'])));
                     setIpcheck("vid_".intval($_GET['id']));
                     setIpcheck("vid(".intval($_GET['id']).")");
 
-                    if(!isset($_GET['ajax']))
-                        $index = info(_vote_successful, "?show=".$_GET['id']."");
+                    if(!isset($_GET['ajax'])) {
+                        $index = info(_vote_successful, "?show=".intval($_GET['id'])."");
+                    }
                 }
             }
 
-            $cookie = $userid >= 1 ? $userid : "voted";
-            cookie::put('vid_'.$_GET['id'], $cookie);
+            $cookie = ($userid >= 1 ? $userid : "voted");
+            cookie::put('vid_'.intval($_GET['id']), $cookie);
         }
 
         if(isset($_GET['ajax'])) {
@@ -58,31 +60,31 @@ if(defined('_Votes')) {
     }
 
     if(isset($_GET['what']) && $_GET['what'] == "fvote") {
-        if(empty($_POST['vote']))
+        if(empty($_POST['vote'])) {
             $index = error(_vote_no_answer);
-        else {
-            $get = db("SELECT * FROM ".$db['votes']." WHERE id = '".intval($_GET['id'])."'",false,true);
-
-            if(!count_clicks('vote',$get['id']))
+        } else {
+            $get = $sql->selectSingle("SELECT `id`,`closed` FROM `{prefix_votes}` WHERE `id` = ?;",array(intval($_GET['id'])));
+            if(!count_clicks('vote',$get['id'])) {
                 $index = error(_error_voted_again,1);
-            else if($get['closed'])
+            } else if($get['closed']) {
                 $index = error(_error_vote_closed,1);
-            else {
-                if($userid >= 1)
-                    db("UPDATE ".$db['userstats']." SET `votes` = votes+1 WHERE user = '".$userid."'");
+            } else {
+                if($userid >= 1) {
+                    $sql->update("UPDATE `{prefix_userstats}` SET `votes` = (votes+1) WHERE `user` = ?;",array($userid));
+                }
 
-                db("UPDATE ".$db['vote_results']." SET `stimmen` = stimmen+1 WHERE id = '".intval($_POST['vote'])."'");
-
+                $sql->update("UPDATE `{prefix_vote_results}` SET `stimmen` = (stimmen+1) WHERE `id` = ?;",array(intval($_POST['vote'])));
                 setIpcheck("vid_".intval($_GET['id']));
                 setIpcheck("vid(".intval($_GET['id']).")");
 
-                if(!isset($_GET['fajax']))
-                    $index = info(_vote_successful, "../forum/?action=showthread&amp;kid=".$_POST['kid']."&amp;id=".$_POST['fid']."");
+                if(!isset($_GET['fajax'])) {
+                    $index = info(_vote_successful, "../forum/?action=showthread&amp;kid=".intval($_POST['kid'])."&amp;id=".intval($_POST['fid'])."");
+                }
             }
         }
 
         $cookie = $userid >= 1 ? $userid : "voted";
-        cookie::put('vid_'.$_GET['id'], $cookie);
+        cookie::put('vid_'.intval($_GET['id']), $cookie);
     }
 
     if(isset($_GET['fajax'])) {

@@ -3098,7 +3098,8 @@ function page($index='',$title='',$where='',$index_templ='index') {
     javascript::set('maxW',config('maxwidth'));
     javascript::set('shoutInterval',15000);  // refresh interval of the shoutbox in ms
     javascript::set('slideshowInterval',6000);  // refresh interval of the shoutbox in ms
-    
+    javascript::set('autoRefresh',1);  // Enable Auto-Refresh for Ajax
+
     // JS-Dateine einbinden * json *
     $java_vars = '<script language="javascript" type="text/javascript">var json=\''.javascript::encode().'\',dzcp_config=JSON&&JSON.parse(json)||$.parseJSON(json);</script>'."\n";
     
@@ -3127,10 +3128,10 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
         //check permissions
         if(!$chkMe) {
-            include_once(basePath.'/inc/menu-functions/login.php');
             $check_msg = '';
         } else {
-            $check_msg = check_msg(); set_lastvisit(); $login = "";
+            $check_msg = check_msg(); 
+            set_lastvisit();
         }
 
         //init templateswitch
@@ -3167,7 +3168,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
         //filter placeholders
         $dir = $designpath; //after template index autodetect!!!
-        $blArr = array("[clanname]","[title]","[java_vars]","[login]","[template_switch]","[headtitle]",
+        $blArr = array("[clanname]","[title]","[java_vars]","[template_switch]","[headtitle]",
         "[index]","[time]","[rss]","[dir]","[charset]","[where]","[lang]","[notification]","[notification_tr]");
         $pholdervars = '';
         for($i=0;$i<=count($blArr)-1;$i++) {

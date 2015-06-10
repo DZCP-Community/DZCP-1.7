@@ -4,14 +4,14 @@
  * http://www.dzcp.de
  * Menu: Zufallsgalerie
  */
-function random_gallery() {
-    global $db,$picformat;
 
+function random_gallery() {
+    global $sql,$picformat;
+    
     $gallery = '';
     $files = get_files(basePath.'/gallery/images/',false,true,$picformat,false,array(),'minimize');
     if(count($files) >= 1) {
-        $get = db("SELECT `id`,`kat` FROM ".$db['gallery']." ORDER BY RAND()",false,true);
-
+        $get = $sql->selectSingle("SELECT `id`,`kat` FROM `{prefix_gallery}` ORDER BY RAND();");
         $imgArr = array();
         foreach($files AS $file) {
             if(intval($file) == $get['id'])

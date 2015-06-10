@@ -10,16 +10,8 @@ ob_start();
 ob_implicit_flush(false);
     $ajaxJob = true;
 
-    ## INCLUDES #
+    ## INCLUDES ##
     include(basePath."/inc/common.php");
-
-    ## FUNCTIONS ##
-    require_once(basePath."/inc/menu-functions/server.php");
-    require_once(basePath."/inc/menu-functions/shout.php");
-    require_once(basePath."/inc/menu-functions/teamspeak.php");
-    require_once(basePath."/inc/menu-functions/kalender.php");
-    require_once(basePath."/inc/menu-functions/team.php");
-    require_once(basePath."/inc/menu-functions/counter.php");
 
     ## SETTINGS ##
     $dir = "sites";
@@ -42,17 +34,24 @@ ob_implicit_flush(false);
                 $steam['user']['avatarIcon_url'] = 'data:image/png;base64,'.base64_encode($img_stream);
                 if(steam_avatar_cache && $config_cache['use_cache'])
                     $cache->set('steam_avatar_'.$steamID, bin2hex($img_stream), steam_avatar_refresh);
-            } else return '-';
-        } else $steam['user']['avatarIcon_url'] = 'data:image/png;base64,'.base64_encode(hextobin($cache->get('steam_avatar_'.$steamID)));
+            } else 
+                return '-';
+        } else 
+            $steam['user']['avatarIcon_url'] = 'data:image/png;base64,'.base64_encode(hextobin($cache->get('steam_avatar_'.$steamID)));
 
         switch($steam['user']['onlineState']) {
             case 'in-game': $status_set = '2'; $text_1 = _steam_in_game; $text_2 = $steam['user']['gameextrainfo']; break;
             case 'online': $status_set = '1'; $text_1 = _steam_online; $text_2 = ''; break;
-            default: $status_set = '0'; $text_1 = $steam['user']['runnedSteamAPI'] ? show(_steam_offline,array('time' => get_elapsed_time($steam['user']['lastlogoff'],time(),1))) : _steam_offline_simple; $text_2 = ''; break;
+            default: $status_set = '0'; $text_1 = $steam['user']['runnedSteamAPI'] ? show(_steam_offline,array('time' => 
+                get_elapsed_time($steam['user']['lastlogoff'],time(),1))) : _steam_offline_simple; $text_2 = ''; break;
         }
 
-        return show((isset($_GET['list']) ? _steamicon_nouser : _steamicon), array('profile_url' => $steam['user']['profile_url'],'username' => $steam['user']['nickname'],'avatar_url' => $steam['user']['avatarIcon_url'],
-               'text1' => $text_1,'text2' => $text_2,'status' => $status_set));
+        return show((isset($_GET['list']) ? _steamicon_nouser : _steamicon), array('profile_url' => $steam['user']['profile_url'],
+                                                                                   'username' => $steam['user']['nickname'],
+                                                                                   'avatar_url' => $steam['user']['avatarIcon_url'],
+                                                                                   'text1' => $text_1,
+                                                                                   'text2' => $text_2,
+                                                                                   'status' => $status_set));
     }
 
     $mod = isset($_GET['i']) ? $_GET['i'] : '';
@@ -63,15 +62,31 @@ ob_implicit_flush(false);
 
     switch ($mod):
         case 'kalender':
+            require_once(basePath."/inc/menu-functions/kalender.php");
             $month = (isset($_GET['month']) ? $_GET['month'] : '');
             $year = (isset($_GET['year']) ? $_GET['year'] : '');
             echo kalender($month,$year,true);
         break;
-        case 'counter':   echo counter(true); break;
-        case 'teams':     echo team($_GET['tID']); break;
-        case 'server':    echo '<table class="hperc" cellspacing="0">'.server($_GET['serverID']).'</table>'; break;
-        case 'shoutbox':  echo '<table class="hperc" cellspacing="1">'.shout(1).'</table>'; break;
-        case 'teamspeak': echo '<table class="hperc" cellspacing="0">'.teamspeak(1).'</table>'; break;
+        case 'counter':
+            require_once(basePath."/inc/menu-functions/counter.php");
+            echo counter(true); 
+        break;
+        case 'teams':
+            require_once(basePath."/inc/menu-functions/team.php");
+            echo team($_GET['tID']); 
+        break;
+        case 'server':    
+            require_once(basePath."/inc/menu-functions/server.php"); 
+            echo '<table class="hperc" cellspacing="0">'.server($_GET['serverID']).'</table>'; 
+        break;
+        case 'shoutbox':
+            require_once(basePath."/inc/menu-functions/shout.php");
+            echo '<table class="hperc" cellspacing="1">'.shout(1).'</table>'; 
+        break;
+        case 'teamspeak':
+            require_once(basePath."/inc/menu-functions/teamspeak.php");
+            echo '<table class="hperc" cellspacing="0">'.teamspeak(1).'</table>'; 
+        break;
         case 'steam':     echo steamIMG(trim($_GET['steamid'])); break;
         case 'autocomplete':
             if($_GET['type'] == 'srv') {

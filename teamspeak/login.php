@@ -102,7 +102,7 @@ if($_POST) {
     <table class="hperc" cellspacing="1">
     <?php if($ok) { ?>
   <tr>
-    <td class="contentHead" colspan="2"><span class="fontBold">Channel: <?php echo rawurldecode($_GET['cName'])?></span></td>
+      <td class="contentHead" colspan="2"><span class="fontBold">Channel: <?php echo base64_decode($_GET['cName'])?></span></td>
   </tr>
     <tr>
         <td class="contentMainTop"><span class="fontBold">Nickname:</span></td>

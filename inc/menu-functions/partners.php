@@ -4,15 +4,16 @@
  * http://www.dzcp.de
  * Menu: Partners
  */
-function partners() {
-    global $db;
 
-    $qry = db("SELECT `textlink`,`link`,`banner` FROM ".$db['partners']." ORDER BY `textlink` ASC");
+function partners() {
+    global $sql;
+    
+    $qry = $sql->select("SELECT `textlink`,`link`,`banner` FROM `{prefix_partners}` ORDER BY `textlink` ASC;");
     $partners = '';
-    if(_rows($qry)) {
-        while($get = _fetch($qry)) {
+    if($sql->rowCount()) {
+        foreach($qry as $get) {
             if($get['textlink']) {
-                $partners .= show("menu/partners_textlink", array("link" => $get['link'],
+                $partners .= show("menu/partners_textlink", array("link" => re($get['link']),
                                                                   "name" => re($get['banner'])));
             } else {
                 $partners .= show("menu/partners", array("link" => re($get['link']),

@@ -4,22 +4,24 @@
  * http://www.dzcp.de
  * Menu: Navigation
  */
+
 function navi($kat) {
-    global $db,$chkMe,$userid,$designpath;
-
+    global $sql,$chkMe,$userid,$designpath;
+    
     $navi="";
-    if($k = db("SELECT `level` FROM `".$db['navi_kats']."` WHERE `placeholder` = '".up($kat)."';",false,true)) {
+    if($k = $sql->selectSingle("SELECT `level` FROM `{prefix_navi_kats}` WHERE `placeholder` = ?;",array(up($kat)))) {
         $permissions = ($kat == 'nav_admin' && admin_perms($userid)) ? "" : ($chkMe >= 2 ? '' : " AND s1.`internal` = 0")." AND ".intval($chkMe)." >= ".intval($k['level']);
-        $qry = db("SELECT s1.* FROM `".$db['navi']."` AS `s1` LEFT JOIN `".$db['navi_kats']."` AS `s2` ON s1.`kat` = s2.`placeholder`
-                   WHERE s1.`kat` = '".up($kat)."' AND s1.`shown` = 1 ".$permissions."
-                   ORDER BY s1.`pos`;");
+        $qry = $sql->select("SELECT s1.* FROM `{prefix_navi}` AS `s1` "
+                . "LEFT JOIN `{prefix_navi_kats}` AS `s2` ON s1.`kat` = s2.`placeholder` "
+                . "WHERE s1.`kat` = ? AND s1.`shown` = 1 ".$permissions." "
+                . "ORDER BY s1.`pos`;",array(up($kat)));
 
-        if(_rows($qry)) {
-            while($get = _fetch($qry)) {
+        if($sql->rowCount()) {
+            foreach($qry as $get) {
                 $link = '';
                 if($get['type'] == 1 || $get['type'] == 2 || $get['type'] == 3) {
-                    $name = ($get['wichtig'] == 1) ? '<span class="fontWichtig">'.navi_name(re($get['name'])).'</span>' : navi_name(re($get['name']));
-                    $target = ($get['target'] == 1) ? '_blank' : '_self';
+                    $name = ($get['wichtig']) ? '<span class="fontWichtig">'.navi_name(re($get['name'])).'</span>' : navi_name(re($get['name']));
+                    $target = ($get['target']) ? '_blank' : '_self';
 
                     if(file_exists($designpath.'/menu/'.$get['kat'].'.html')) {
                         $link = show("menu/".$get['kat']."", array("target" => $target,

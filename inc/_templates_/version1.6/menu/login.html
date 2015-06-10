@@ -7,29 +7,29 @@
           <tr>
             <td>
               <input type="text" name="user" class="loginName_dis" 
-               onblur="this.className='loginName_dis';if(this.value=='')this.value='Loginname'" 
-               onfocus="this.className='loginName_en';if(this.value=='Loginname') this.value='';" value="Loginname"/>
+               onblur="this.className='loginName_dis';if(this.value=='')this.value='[lang_loginname]'" 
+               onfocus="this.className='loginName_en';if(this.value=='[lang_loginname]') this.value='';" value="[lang_loginname]"/>
             </td>
           </tr>
           <tr>
             <td>
               <input type="password" name="pwd" class="loginPwd_dis" 
-              onblur="this.className='loginPwd_dis';if(this.value=='')this.value='Password'" 
-              onfocus="this.className='loginPwd_en';if(this.value=='Password') this.value='';" value="Password"/>
+              onblur="this.className='loginPwd_dis';if(this.value=='')this.value='[lang_pwd]'" 
+              onfocus="this.className='loginPwd_en';if(this.value=='[lang_pwd]') this.value='';" value="[lang_pwd]"/>
             </td>
           </tr>
           <tr>
-            <td><input class="checkbox" type="checkbox" id="permanent" name="permanent" value="1" /><label for="permanent"> [permanent]</label></td>
+            <td><input class="checkbox" type="checkbox" id="permanent" name="permanent" value="1" /><label for="permanent"> [lang_login_permanent]</label></td>
           </tr>
           [secure]
           <tr>
-            <td align="center"><input id="navLogin" type="submit" value="[what]" class="loginSubmit" name="send" /></td>
+            <td align="center"><input id="navLogin" type="submit" value="[lang_login_login]" class="loginSubmit" name="send" /></td>
           </tr>
           <tr>
-            <td>&raquo; <a class="navLostPwd" href="../user/?action=register" title="[signup]">[signup]</a></td>
+            <td>&raquo; <a class="navLostPwd" href="../user/?action=register" title="[lang_login_signup]">[lang_login_signup]</a></td>
           </tr>
           <tr>
-            <td>&raquo; <a class="navLostPwd" href="../user/?action=lostpwd" title="[lostpwd]">[lostpwd]</a></td>
+            <td>&raquo; <a class="navLostPwd" href="../user/?action=lostpwd" title="[lang_login_lostpwd]">[lang_login_lostpwd]</a></td>
           </tr>
         </table>
       </form>

@@ -117,7 +117,7 @@ if(defined('_UserMenu')) {
         if (!empty($get['steamid'])) {
             $steam = '<div id="infoSteam_' . md5($get['steamid']) . '">
             <div style="width:100%;text-align:center"><img src="../inc/images/ajax-loader-mini.gif" alt="" /></div>
-            <script language="javascript" type="text/javascript">DZCP.initDynLoader("infoSteam_' . md5($get['steamid']) . '","steam","&steamid=' . $get['steamid'] . '&list=true");</script></div>';
+            <script language="javascript" type="text/javascript">DZCP.initDynLoader("infoSteam_' . md5($get['steamid']) . '","steam","&steamid=' . $get['steamid'] . '&list=true",true);</script></div>';
         }
 
         $userliste .= show($dir."/userliste_show", array("nick" => autor($get['id'],'','',10),

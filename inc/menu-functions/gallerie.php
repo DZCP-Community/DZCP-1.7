@@ -4,12 +4,13 @@
  * http://www.dzcp.de
  * Menu: Image Gallerie
  */
+
 function gallerie() {
-    global $db,$picformat;
-    $get = db("SELECT `id`,`kat` FROM ".$db['gallery']." ".(permission('galleryintern') ? "" : " WHERE `intern` = 0")." ORDER BY RAND()",false,true);
+    global $sql,$picformat;
+    
+    $get = $sql->selectSingle("SELECT `id`,`kat` FROM `{prefix_gallery}` ".(permission('galleryintern') ? "" : " WHERE `intern` = 0")." ORDER BY RAND();");
     $files = get_files(basePath.'/gallery/images/',false,true,$picformat,"#^".$get['id']."_(.*)#",array(),'minimize');
     $cnt = count($files);
-
     $gallery = '';
     if($files && $cnt >= 1) {
         shuffle($files); $files = limited_array($files,1,4);

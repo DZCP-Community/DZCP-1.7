@@ -4,22 +4,26 @@
  * http://www.dzcp.de
  * Menu: Forum Topics
  */
-function ftopics() {
-    global $db;
 
-    $qry = db("SELECT s1.*,s2.kattopic,s2.id AS subid FROM ".$db['f_threads']." s1, ".$db['f_skats']." s2, ".$db['f_kats']." s3
-               WHERE s1.kid = s2.id AND s2.sid = s3.id ORDER BY s1.lp DESC LIMIT 100");
+function ftopics() {
+    global $sql;
+    
+    $qry = $sql->select("SELECT s1.*,s2.`kattopic`,s2.`id` as `subid` "
+            . "FROM `{prefix_forumthreads}` as `s1`, `{prefix_forumsubkats}` as `s2`, {prefix_forumkats} as `s3` "
+            . "WHERE s1.`kid` = s2.`id` AND s2.`sid` = s3.`id` ORDER BY s1.`lp` DESC LIMIT 100;");
 
     $f = 0; $ftopics = '';
-    if(_rows($qry)) {
-        while($get = _fetch($qry)) {
-            if($f == config('m_ftopics'))  break;
-
+    if($sql->rowCount()) {
+        foreach($qry as $get) {
+            if($f == config('m_ftopics')) { break; }
             if(fintern($get['kid'])) {
-                $lp = cnt($db['f_posts'], " WHERE `sid` = '".$get['id']."'");
+                $lp = cnt("{prefix_forumposts}", " WHERE `sid` = ?","id",array($get['id']));
                 $pagenr = ceil($lp/config('m_fposts'));
                 $page = !$pagenr ? 1 : $pagenr;
-                $info = !config('allowhover') == 1 ? '' : 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['topic'])).'\', \''._forum_kat.';'._forum_posts.';'._forum_lpost.'\', \''.re($get['kattopic']).';'.++$lp.';'.date("d.m.Y H:i", $get['lp'])._uhr.'\')" onmouseout="DZCP.hideInfo()"';
+                $info = !config('allowhover') == 1 ? '' : 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['topic'])).'\', \''.
+                        _forum_kat.';'._forum_posts.';'._forum_lpost.'\', \''.re($get['kattopic']).';'.++$lp.';'.
+                        date("d.m.Y H:i", $get['lp'])._uhr.'\')" onmouseout="DZCP.hideInfo()"';
+                
                 $ftopics .= show("menu/forum_topics", array("id" => $get['id'],
                                                             "pagenr" => $page,
                                                             "p" => $lp,

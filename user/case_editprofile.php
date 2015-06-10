@@ -111,8 +111,8 @@ if(defined('_UserMenu')) {
                         $sql->delete("DELETE FROM `{prefix_clicks_ips}` WHERE `uid` = ?;",array($getdel['id']));
 
                         $qrygl = $sql->select("SELECT * FROM `{prefix_usergallery}` WHERE `user` = ?;",array($getdel['id']));
-                        if(_rows($qrygl)) {
-                            while ($getgl = _fetch($qrygl)) {
+                        if($sql->rowCount()) {
+                            foreach($qrygl as $getgl) {
                                 $files = get_files(basePath."/inc/images/uploads/usergallery/",false,true,$picformat);
                                 foreach ($files as $file) {
                                     $pic = explode('.', $getgl['pic']); $pic = $pic[0];

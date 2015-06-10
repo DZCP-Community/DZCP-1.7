@@ -4,12 +4,14 @@
  * http://www.dzcp.de
  * Menu: Slideshow
  */
+
 function slideshow() {
-    global $db,$picformat;
-    $qry = db("SELECT `id`,`desc`,`showbez`,`bez`,`url`,`target` FROM ".$db['slideshow']." ORDER BY `pos` ASC LIMIT 4");
-    if(_rows($qry) >= 1) {
+    global $sql,$picformat;
+    
+    $qry = $sql->select("SELECT `id`,`desc`,`showbez`,`bez`,`url`,`target` FROM `{prefix_slideshow}` ORDER BY `pos` ASC LIMIT 4;");
+    if($sql->rowCount()) {
         $pic = ''; $tabs = '';
-        while($get = _fetch($qry)) {
+        foreach($qry as $get) {
             if(empty($get['desc']) && !$get['showbez'])
                 $slideroverlay = '';
             else if(!empty($get['desc']) && !$get['showbez'])
@@ -27,7 +29,7 @@ function slideshow() {
 
             $pic .= show("menu/slideshowbild", array("image" => "<img src=\"".$image."\" alt=\"\" />",
                                                      "link" => "'".$get['url']."'",
-                                                     "bez" => re(cut($get['bez'],32)),
+                                                     "bez" => cut(re($get['bez']),32),
                                                      "text" => $slideroverlay,
                                                      "target" => $get['target']));
 

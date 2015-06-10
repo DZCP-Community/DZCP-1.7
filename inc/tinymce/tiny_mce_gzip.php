@@ -37,8 +37,7 @@ class TinyMCE_Compressor {
         "compress"   => true,
         "suffix"     => "",
         "files"      => "",
-        "source"     => false,
-    );
+        "source"     => false);
 
     /**
      * Constructs a new compressor instance.

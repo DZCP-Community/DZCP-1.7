@@ -4,18 +4,19 @@
  * http://www.dzcp.de
  * Menu: Forum Vote
  */
-function fvote($id, $ajax=false) {
-    global $db;
 
-    $qry = db("SELECT `id`,`closed`,`titel` FROM ".$db['votes']." WHERE `id` = '".$id."' ".(permission("votes") ? "" : " AND `intern` = 0")."");
-    if(_rows($qry)) {
-        $get = _fetch($qry); $results = ''; $votebutton = '';
-        $qryv = db("SELECT `id`,`stimmen`,`sel` FROM ".$db['vote_results']." WHERE `vid` = '".$get['id']."' ORDER BY id ASC");
-        if(_rows($qryv)) {
-            while($getv = _fetch($qryv)) {
-                $stimmen = sum($db['vote_results'], " WHERE `vid` = '".$get['id']."'", "stimmen");
+function fvote($id, $ajax=false) {
+    global $sql;
+    
+    $get = $sql->selectSingle("SELECT `id`,`closed`,`titel` FROM `{prefix_votes}` WHERE `id` = ? ".(permission("votes") ? ";" : " AND `intern` = 0;"),array(intval($id)));
+    if($sql->rowCount()) {
+        $results = ''; $votebutton = '';
+        $qryv = $sql->select("SELECT `id`,`stimmen`,`sel` FROM `{prefix_vote_results}` WHERE `vid` = ? ORDER BY `id` ASC;",array($get['id']));
+        if($sql->rowCount()) {
+            foreach($qryv as $getv) {
+                $stimmen = sum('{prefix_vote_results}', " WHERE `vid` = ?", "stimmen",array($get['id']));
                 if($stimmen != 0) {
-                    if(ipcheck("vid_".$get['id']) || cookie::get('vid_'.$get['id']) != false || $get['closed'] == 1) {
+                    if(ipcheck("vid_".$get['id']) || cookie::get('vid_'.$get['id']) != false || $get['closed']) {
                         $percent = round($getv['stimmen']/$stimmen*100,1);
                         $rawpercent = round($getv['stimmen']/$stimmen*100,0);
                         $balken = show(_votes_balken, array("width" => $rawpercent));
@@ -36,12 +37,11 @@ function fvote($id, $ajax=false) {
             }
         }
 
-        $getf = db("SELECT `id`,`kid` FROM ".$db['f_threads']." WHERE `vote` = '".$get['id']."'",false,true);
+        $getf = $sql->selectSingle("SELECT `id`,`kid` FROM `{prefix_forumthreads}` WHERE `vote` = ?;",array($get['id']));
         $vote = show("forum/vote", array("titel" => re($get['titel']),
                                          "vid" => $get['id'],
                                          "fid" => $getf['id'],
                                          "kid" => $getf['kid'],
-                                         "umfrage" => _forum_vote,
                                          "results" => $results,
                                          "votebutton" => $votebutton,
                                          "stimmen" => $stimmen));

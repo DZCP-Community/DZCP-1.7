@@ -1,10 +1,16 @@
+/**
+ * DZCP - deV!L`z ClanPortal 1.7.0
+ * http://www.dzcp.de
+ * DZCP - jQuery Class 1.7
+ */
+
 // GLOBAL VARS
 var doc = document, ie4 = document.all, opera = window.opera;
 var innerLayer, layer, x, y, doWheel = false, offsetX = 15, offsetY = 5;
 var tickerc = 0, mTimer = new Array(), tickerTo = new Array(), tickerSpeed = new Array();
-var isIE = false, isWin = false, isOpera = false, jQueryV = "1.10.2", $ = jQuery; 
+var isIE = false, isWin = false, isOpera = false, jQueryV = "1.11.3", $ = jQuery; 
 
-// DZCP JAVASCRIPT LIBARY FOR JQUERY >= V1.10.2
+// DZCP JAVASCRIPT LIBARY FOR JQUERY >= V1.11.3
 var DZCP = {
     jQueryCheck: function(error) {
         if (typeof jQuery !== 'undefined' && $().jquery >= jQueryV) { 
@@ -23,16 +29,9 @@ var DZCP = {
         isOpera = (navigator.userAgent.indexOf("Opera") !== -1) ? true : false;
         
         $('body').append('<div id="infoDiv"></div>');
-
         layer = $('#infoDiv')[0];
         doc.body.onmousemove = DZCP.trackMouse;
-
-        // refresh shoutbox
-        if(dzcp_config.shoutInterval > 1) { //set shoutInterval to 0 for disable
-            if($('#navShout')[0]) 
-                window.setInterval("$('#navShout').load('../inc/ajax.php?i=shoutbox');", dzcp_config.shoutInterval);
-        }
-
+       
         // init lightbox
         DZCP.initLightbox();
         
@@ -58,16 +57,33 @@ var DZCP = {
             });
         }
 
+        // init Auto-Refresh
+        if(dzcp_config.autoRefresh) {
+            DZCP.initAutoRefresh();
+        }
+
         // init template
         $(".tabs").tabs("> .switchs");
         $(".tabs2").tabs(".switchs2 > div", { effect: 'fade', rotate: true });
     },
+    
+    // init Auto-Refresh
+    initAutoRefresh: function() {
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('Initiation Auto-Refresh');
+        
+        // refresh shoutbox
+        if($("#navShout").length && dzcp_config.shoutInterval > 1000) { //set shoutInterval to 0 for disable >= 1000ms
+            DZCP.DebugLogger('Auto-Refresh for Shoutbox in '+dzcp_config.shoutInterval+"ms");
+            setInterval(function(){ DZCP.initDynLoader('navShout','shoutbox','',false); }, dzcp_config.shoutInterval);
+        }
+    },
 
     // init lightbox
     initLightbox: function() {
-      if(!DZCP.jQueryCheck(false)) return false;
-      DZCP.DebugLogger('Initiation Lightbox');
-      $('a[rel^=lightbox]').magnificPopup({
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('Initiation Lightbox');
+        $('a[rel^=lightbox]').magnificPopup({
             type:'image',
             gallery:{enabled:true},
             mainClass: 'mfp-with-zoom',
@@ -79,7 +95,7 @@ var DZCP = {
                     return openerElement.is('img') ? openerElement : openerElement.find('img');
             }
         }
-      });
+        });
     },
 
     // handle events
@@ -133,20 +149,20 @@ var DZCP = {
 
   // init Gameserver via Ajax
     initGameServer: function(serverID) {
-        DZCP.initDynLoader('navGameServer_' + serverID,'server','&serverID=' + serverID);
+        DZCP.initDynLoader('navGameServer_' + serverID,'server','&serverID=' + serverID,true);
     },
 
   // init Teamspeakserver via Ajax
     initTeamspeakServer: function() {
-        DZCP.initDynLoader('navTeamspeakServer','teamspeak','');
+        DZCP.initDynLoader('navTeamspeakServer','teamspeak','',true);
     },
 
     // init Ajax DynLoader
-    initDynLoader: function(tag,menu,options) {
+    initDynLoader: function(tag,menu,options,fade) {
         if(!DZCP.jQueryCheck(false)) return false;
         DZCP.DebugLogger('DynLoader -> Tag: \'' + tag + '\' / URL: \'' + "../inc/ajax.php?i=" + menu + options + '\'');
-        var request = $.ajax({ url: "../inc/ajax.php?i=" + menu + options, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
-        request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); });
+        var request = $.ajax({ url: "../inc/ajax.php?i=" + menu + options, type: "GET", data: {}, timeout: 8000, cache:false, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
+        request.done(function(msg) { if(fade) { $('#' + tag).html( msg ).hide().fadeIn("normal"); } else { $('#' + tag).html( msg ); } });
    },
     
     // init Ajax DynLoader Sides via Ajax

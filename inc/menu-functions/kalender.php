@@ -4,12 +4,14 @@
  * http://www.dzcp.de
  * Menu: Kalender
  */
+
 function kalender($month="",$year="",$js=false) {
     global $db;
+    
     header('Content-Type: text/html; charset=iso-8859-1');
     if(!$js) {
         $kalender = '<div style="width:100%;padding:10px 0;text-align:center"><img src="../inc/images/ajax_loading.gif" alt="" /></div>'.
-                    "<script language=\"javascript\" type=\"text/javascript\">DZCP.initDynLoader('navKalender','kalender','');</script>";
+                    "<script language=\"javascript\" type=\"text/javascript\">DZCP.initDynLoader('navKalender','kalender','',true);</script>";
     } else {
         if(!empty($month) && !empty($year)) {
             $monat = cal($month);
@@ -122,14 +124,7 @@ function kalender($month="",$year="",$js=false) {
                                                 "nm" => $nm,
                                                 "ny" => $ny,
                                                 "lm" => $lm,
-                                                "ly" => $ly,
-                                                "montag" => _nav_montag,
-                                                "dienstag" => _nav_dienstag,
-                                                "mittwoch" => _nav_mittwoch,
-                                                "donnerstag" => _nav_donnerstag,
-                                                "freitag" => _nav_freitag,
-                                                "samstag" => _nav_samstag,
-                                                "sonntag" => _nav_sonntag));
+                                                "ly" => $ly));
 
     }
 
