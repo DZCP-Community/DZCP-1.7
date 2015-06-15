@@ -13,11 +13,8 @@ if(defined('_Upload')) {
 
         $infos = show(_upload_usergallery_info, array("userpicsize" => config('upicsize')));
         $index = show($dir."/upload", array("uploadhead" => _upload_newskats_head,
-                                            "file" => _upload_file,
                                             "name" => "file",
                                             "action" => $action,
-                                            "upload" => _button_value_upload,
-                                            "info" => _upload_info,
                                             "infos" => "-"));
 
         if($do == "upload") {

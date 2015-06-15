@@ -13,12 +13,13 @@ require(basePath."/inc/debugger.php");
 require(basePath."/inc/config.php");
 require(basePath."/inc/bbcode.php");
 
-##  * Bot Trap * Google und co. werden auf Grund der robots.txt nicht gesperrt ##
-if(!db("SELECT `id` FROM `".$db['ipban']."` WHERE `ip` = '".$userip."' LIMIT 1",true)) {
+##  * Bot Trap *
+if(!$sql->rows("SELECT `id` FROM `{prefix_ipban}` WHERE `ip` = ? LIMIT 1;",array($userip))) {
     $data_array = array();
     $data_array['confidence'] = ''; $data_array['frequency'] = ''; $data_array['lastseen'] = '';
     $data_array['banned_msg'] = up('SpamBot detected by System * Bot Trap *');
-    db("INSERT INTO `".$db['ipban']."` SET `time` = ".time().", `ip` = '".$userip."', `data` = '".serialize($data_array)."', `typ` = 3;");
+    $sql->insert("INSERT INTO `{prefix_ipban}` SET `time` = ?, `ip` = ?, `data` = ?, `typ` = 3;",
+            array(time(),$userip,serialize($data_array)));
     check_ip(); // IP Prufung * No IPV6 Support *
 }
 ob_end_flush();

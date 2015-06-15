@@ -10,9 +10,9 @@ if(show_teamspeak_debug) {
 }
 
 if(fsockopen_support()) {
-    $qry = db("SELECT `id`,`default_server` FROM `".$db['ts']."` ORDER BY `default_server` DESC");
-    if(_rows($qry)) {
-        while($get = _fetch($qry)) {
+    $qry = $sql->select("SELECT `id`,`default_server` FROM `{prefix_teamspeak}` ORDER BY `default_server` DESC;");
+    if($sql->rowCount()) {
+        foreach($qry as $get) {
             if(show_teamspeak_debug) {
                 $show_id = 0;
                 if(isset($_GET['show'])) $show_id = intval($_GET['show']);

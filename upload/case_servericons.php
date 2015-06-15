@@ -9,11 +9,8 @@ if(defined('_Upload')) {
         $set_action = isset($_GET['id']) ? "&amp;edit=1&amp;id=".$_GET['id'] : "";
         $infos = show(_upload_usergallery_info, array("userpicsize" => config('upicsize')));
         $index = show($dir."/upload", array("uploadhead" => _upload_icons_head,
-                                            "file" => _upload_file,
                                             "name" => "file",
                                             "action" => "?action=servericons&amp;do=upload".$set_action,
-                                            "upload" => _button_value_upload,
-                                            "info" => _upload_info,
                                             "infos" => $infos));
 
         if($do == "upload") {

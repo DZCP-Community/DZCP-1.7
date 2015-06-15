@@ -23,10 +23,11 @@ if(defined('_Upload')) {
                     $index = error(_upload_file_exists, 1);
                 else {
                     if(move_uploaded_file($tmpname, basePath."/inc/images/uploads/usergallery/".$userid."_".strtolower($_FILES['file']['name']))) {
-                        db("INSERT INTO ".$db['usergallery']."
-                            SET `user`         = '".intval($userid)."',
-                                `beschreibung` = '".up($_POST['beschreibung'])."',
-                                `pic`          = '".up(strtolower($_FILES['file']['name']))."'");
+                        $sql->insert("INSERT INTO `{prefix_usergallery}` "
+                                . "SET `user` = ?, "
+                                . "`beschreibung` = ?, "
+                                . "`pic`          = ?;",
+                                array(intval($userid),up($_POST['beschreibung']),up(strtolower($_FILES['file']['name']))));
 
                         $index = info(_info_upload_success, "../user/?action=editprofile&show=gallery");
                     } else
@@ -34,18 +35,13 @@ if(defined('_Upload')) {
                 }
             break;
             case 'edit':
-                $get = db("SELECT id,user,pic,beschreibung FROM ".$db['usergallery']." WHERE id = '".intval($_GET['gid'])."'",false,true);
+                $get = $sql->selectSingle("SELECT `id`,`user`,`pic`,`beschreibung` FROM `{prefix_usergallery}` WHERE `id` = ?;",array(intval($_GET['gid'])));
                 if($get['user'] == $userid) {
                     $infos = show(_upload_usergallery_info, array("userpicsize" => config('upicsize')));
-                    $index = show($dir."/usergallery_edit", array("uploadhead" => _upload_head_usergallery,
-                                                                  "file" => _upload_file,
-                                                                  "showpic" => img_size("inc/images/uploads/usergallery/".$get['user']."_".$get['pic']),
+                    $index = show($dir."/usergallery_edit", array("showpic" => img_size("inc/images/uploads/usergallery/".$get['user']."_".$get['pic']),
                                                                   "id" => $get['id'],
                                                                   "showbeschreibung" => re($get['beschreibung']),
                                                                   "name" => "file",
-                                                                  "upload" => _button_value_edit,
-                                                                  "beschreibung" => _upload_beschreibung,
-                                                                  "info" => _upload_info,
                                                                   "infos" => $infos));
                 }
                 else
@@ -60,7 +56,7 @@ if(defined('_Upload')) {
                 $endung = explode(".", $_FILES['file']['name']);
                 $endung = strtolower($endung[count($endung)-1]);
 
-                $get = db("SELECT pic FROM ".$db['usergallery']." WHERE id = ".intval($_POST['id']),false,true); $pic = '';
+                $get = $sql->selectSingle("SELECT `pic` FROM `{prefix_usergallery}` WHERE `id` = ?;",array(intval($_POST['id']))); $pic = '';
                 if(!empty($_FILES['file']['size'])) {
                     if(file_exists(basePath."/inc/images/uploads/usergallery/".$userid."_".$get['pic']))
                         @unlink(basePath."/inc/images/uploads/usergallery/".$userid."_".$get['pic']);
@@ -70,29 +66,22 @@ if(defined('_Upload')) {
                         $index = error(_upload_error, 1);
                         break;
                     }
-
-                    if(empty($index))
-                        $pic = "`pic` = '".$_FILES['file']['name']."',";
+                    
+                    if(empty($index)) {
+                        $pic = "`pic` = ?, ";
+                        $params = array(up($_FILES['file']['name']));
+                    }
                 }
 
                 if(empty($index)) {
-                    db("UPDATE ".$db['usergallery']."
-                        SET ".$pic."`beschreibung` = '".up($_POST['beschreibung'])."'
-                        WHERE id = '".intval($_POST['id'])."'
-                        AND `user` = '".intval($userid)."'");
-
+                    $params = array_merge($params,array(up($_POST['beschreibung']),intval($_POST['id']),intval($userid)));
+                    db("UPDATE `{prefix_usergallery}` SET ".$pic."`beschreibung` = ? WHERE `id` = ? AND `user` = ?;",$params);
                     $index = info(_edit_gallery_done, "../user/?action=editprofile&show=gallery");
                 }
             break;
             default:
                 $infos = show(_upload_usergallery_info, array("userpicsize" => config('upicsize')));
-                $index = show($dir."/usergallery", array("uploadhead" => _upload_head_usergallery,
-                                                         "file" => _upload_file,
-                                                         "name" => "file",
-                                                         "upload" => _button_value_upload,
-                                                         "beschreibung" => _upload_beschreibung,
-                                                         "info" => _upload_info,
-                                                         "infos" => $infos));
+                $index = show($dir."/usergallery", array("infos" => $infos));
             break;
         }
     }

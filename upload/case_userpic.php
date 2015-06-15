@@ -43,11 +43,8 @@ if(defined('_Upload')) {
             default:
                 $infos = show(_upload_userpic_info, array("userpicsize" => config('upicsize')));
                 $index = show($dir."/upload", array("uploadhead" => _upload_head,
-                                                    "file" => _upload_file,
                                                     "name" => "file",
                                                     "action" => "?action=userpic&amp;do=upload",
-                                                    "upload" => _button_value_upload,
-                                                    "info" => _upload_info,
                                                     "infos" => $infos));
             break;
         }

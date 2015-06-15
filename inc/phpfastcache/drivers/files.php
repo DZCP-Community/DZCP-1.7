@@ -20,10 +20,8 @@ class phpfastcache_files extends  phpFastCache implements phpfastcache_driver  {
      * Init Cache Path
      */
     function __construct($option = array()) {
-
         $this->setOption($option);
         $this->getPath();
-
         if(!$this->checkdriver() && !isset($option['skipError'])) {
             throw new Exception("Can't use this driver for your website!");
         }
@@ -56,13 +54,12 @@ class phpfastcache_files extends  phpFastCache implements phpfastcache_driver  {
         return $file_path;
     }
 
-
     function driver_set($keyword, $value = "", $time = 300, $option = array() ) {
         $file_path = $this->getFilePath($keyword);
       //  echo "<br>DEBUG SET: ".$keyword." - ".$value." - ".$time."<br>";
         $data = $this->encode($value);
-
         $toWrite = true;
+        
         /*
          * Skip if Existing Caching in Options
          */
@@ -81,9 +78,6 @@ class phpfastcache_files extends  phpFastCache implements phpfastcache_driver  {
                 fclose($f);
         }
     }
-
-
-
 
     function driver_get($keyword, $option = array()) {
 
@@ -196,10 +190,7 @@ class phpfastcache_files extends  phpFastCache implements phpfastcache_driver  {
                 } // end read subdir
             } // end if
         } // end while
-
-
     }
-
 
     function driver_isExisting($keyword) {
         $file_path = $this->getFilePath($keyword,true);
@@ -217,15 +208,10 @@ class phpfastcache_files extends  phpFastCache implements phpfastcache_driver  {
     }
 
     function isExpired($object) {
-
         if(isset($object['expired_time']) && @date("U") >= $object['expired_time']) {
             return true;
         } else {
             return false;
         }
     }
-
-
-
-
 }

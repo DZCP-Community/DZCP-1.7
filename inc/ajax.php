@@ -4,7 +4,7 @@
  * http://www.dzcp.de
  */
 
-## OUTPUT BUFFER START #
+## OUTPUT BUFFER START ##
 define('basePath', dirname(dirname(__FILE__).'../'));
 ob_start();
 ob_implicit_flush(false);

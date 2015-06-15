@@ -8,11 +8,8 @@ if(defined('_Upload')) {
     if(permission('partners')) {
         $infos = show(_upload_partners_info, array("userpicsize" => config('upicsize')));
         $index = show($dir."/upload", array("uploadhead" => _upload_partners_head,
-                                            "file" => _upload_file,
                                             "name" => "file",
                                             "action" => "?action=partners&amp;do=upload",
-                                            "upload" => _button_value_upload,
-                                            "info" => _upload_info,
                                             "infos" => $infos));
         if($do == "upload") {
             $tmpname = $_FILES['file']['tmp_name'];

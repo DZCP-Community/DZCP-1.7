@@ -136,6 +136,7 @@ table.mainContent td {
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
     border-radius: 6px;
+    behavior: url(border-radius.htc);
 }
 /* Clear Fix */
 .clearFix {
@@ -1505,6 +1506,10 @@ blockquote {
   width: 95%;
   margin: auto;
   border: 1px solid #000;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  behavior: url(border-radius.htc);
   padding-top: 10px;
   padding-bottom: 10px;
   padding-left: 16px;
@@ -1746,6 +1751,10 @@ input.searchSubmit:hover {
 
 img.border {
   border: 1px solid #777;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  behavior: url(border-radius.htc);
 }
 /*TeamSpeak Channeltree*/
 .tstree_left {
