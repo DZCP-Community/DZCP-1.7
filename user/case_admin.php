@@ -169,7 +169,6 @@ if(defined('_UserMenu')) {
                         $sql->delete("DELETE FROM `{prefix_news}` WHERE `autor` = ?;",array($delUID));
                         $sql->delete("DELETE FROM `{prefix_permissions}` WHERE `user` = ?;",array($delUID));
                         $sql->delete("DELETE FROM `{prefix_squaduser}` WHERE `user` = ?;",array($delUID));
-                        $sql->delete("DELETE FROM `{prefix_taktiken}` WHERE `autor` = ?;",array($delUID));
                         $sql->delete("DELETE FROM `{prefix_userbuddys}` WHERE `user` = ? OR `buddy` = ?;",array($delUID,$delUID));
                         $sql->update("UPDATE `{prefix_usergb}` SET `reg` = 0 WHERE `reg` = ?;",array($delUID));
                         $sql->delete("DELETE FROM `{prefix_userposis}` WHERE `user` = ?;",array($delUID));

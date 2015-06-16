@@ -7,21 +7,24 @@
 if (!defined('_Server')) exit();
 
 function server_show($sID = 0, $showID = 0) {
-    global $dir,$picformat,$charset,$db,$cache,$config_cache;
+    global $dir,$picformat,$charset,$sql,$cache,$config_cache;
     $no_ajax = !empty($sID) && $sID != 0 ? true : false;
 
     if(!$no_ajax)
         header("Content-Type: text/xml; charset=".$charset);
 
     $sID = (!empty($_GET['sID']) && $sID == 0 ? intval($_GET['sID']) : $sID);
-    $get = db("SELECT * FROM ".$db['server']." WHERE `id` = ".$sID,false,true);
+    $get = $sql->selectSingle("SELECT * FROM `{prefix_server}` WHERE `id` = ?;",array($sID));
     $cache_hash = md5($get['ip'].':'.$get['port'].'_'.$get['game']);
     $static_server = ($get['game'] == 'nope');
 
     if(!$static_server) {
         if(!$config_cache['use_cache'] || !$cache->isExisting('server_'.$cache_hash)) {
             $get['ip'] = str_replace(' ', '', $get['ip']);
-            DebugConsole::insert_info('server/case_ajax.php', 'Summon data from host: "'.$get['ip'].':'.$get['port'].'"');
+            
+            if(show_gameserver_debug)
+                DebugConsole::insert_info('server/case_ajax.php', 'Summon data from host: "'.$get['ip'].':'.$get['port'].'"');
+            
             GameQ::addServers(array(array('id' => 'gs' ,'type' => $get['game'], 'host' => $get['ip'].':'.$get['port'], 'query_port' => empty($get['qport']) ? false : $get['qport'])));
             GameQ::setOption('timeout', 6);
             $server = GameQ::requestData();
@@ -31,7 +34,10 @@ function server_show($sID = 0, $showID = 0) {
                 $cache->set('server_'.$cache_hash,$server,config('cache_server'));
         } else {
             $get['ip'] = str_replace(' ', '', $get['ip']);
-            DebugConsole::insert_successful('server/case_ajax.php', 'Summon data from DZCP-Cache, Server: "'.$get['ip'].':'.$get['port'].'"');
+            
+            if(show_gameserver_debug)
+                DebugConsole::insert_successful('server/case_ajax.php', 'Summon data from DZCP-Cache, Server: "'.$get['ip'].':'.$get['port'].'"');
+            
             $server = $cache->get('server_'.$cache_hash);
         }
     }
@@ -121,7 +127,7 @@ function server_show($sID = 0, $showID = 0) {
         //Admin MSG
         $icon_basic_inp = GameQ::search_game_icon($icon_basic);
         if($icon_basic_inp['found'] && stristr($icon_basic_inp['image'], 'unknown') === FALSE && empty($get['icon'])) {
-            db("UPDATE `".$db['server']."` SET `icon` = '".up($icon_basic)."' WHERE `id` = ".$get['id'].";");
+            $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(up($icon_basic),$get['id']));
         }
         
         if((checkme() == 4 || permission('editserver')) && !$icon_basic_inp['found']) {
@@ -144,7 +150,7 @@ function server_show($sID = 0, $showID = 0) {
             }
 
             if($icon_mod_inp['found']) {
-                db("UPDATE `".$db['server']."` SET `icon` = '".up($icon_mod)."' WHERE `id` = ".$get['id'].";");
+                $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(up($icon_mod),$get['id']));
             }
             $icon_mod = $icon_mod_inp['image'];
             unset($icon_mod_inp);
@@ -194,7 +200,7 @@ function server_show($sID = 0, $showID = 0) {
         }
 
         if(!empty($server['game_hostname']))
-            db("UPDATE `".$db['server']."` SET `name` = '".up($server['game_hostname'])."' WHERE `id` = ".$get['id'].";"); //Update Hostname to DB
+            $sql->update("UPDATE `{prefix_server}` SET `name` = ? WHERE `id` = ?;",array(up($server['game_hostname']),$get['id'])); //Update Hostname to DB
     } else {
         //Server Status
         $server['game_hostname'] =  $get['name'];

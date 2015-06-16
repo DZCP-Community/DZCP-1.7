@@ -350,14 +350,6 @@ $data_dbu['squads']  = array('name' => array('VARCHAR(40)','NOT NULL DEFAULT \'\
 /************** Squad User **************/
 $data_dbu['squaduser'] = ($lines_dbu['squaduser'] = array());
 
-/************** Taktiken **************/
-$lines_dbu['taktik'] = array('map','spart','standardt','sparct','standardct');
-$data_dbu['taktik']  = array('map'        => array('VARCHAR(20)','NOT NULL DEFAULT \'\'',false),
-                             'spart'      => array('TEXT','NULL DEFAULT NULL',false),
-                             'standardt'  => array('TEXT','NULL DEFAULT NULL',false),
-                             'sparct'     => array('TEXT','NULL DEFAULT NULL',false),
-                             'standardct' => array('TEXT','NULL DEFAULT NULL',false));
-
 /************** User Gallery **************/
 $lines_dbu['usergallery'] = array('beschreibung','pic');
 $data_dbu['usergallery']  = array('beschreibung' => array('TEXT','NULL DEFAULT NULL',false),

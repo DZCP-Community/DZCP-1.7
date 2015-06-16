@@ -3043,7 +3043,9 @@ $menu_index = array();
 if($menu_functions_index = get_files(basePath.'/inc/menu-functions',false,true,array('php'))) {
     foreach ($menu_functions_index as $mfphp) {
         $file = str_replace('.php', '', $mfphp);
-        $menu_index[$file] = file_exists(basePath.'/inc/menu-functions/'.$file.'.php');
+        if($file != 'navi') {
+           $menu_index[$file] = file_exists(basePath.'/inc/menu-functions/'.$file.'.php');
+        }
     } unset($menu_functions_index,$file,$mfphp);
 }
 
@@ -3090,7 +3092,7 @@ class javascript {
 //-> Ausgabe des Indextemplates
 function page($index='',$title='',$where='',$index_templ='index') {
     global $userid,$userip,$tmpdir,$chkMe,$charset,$dir,$view_error;
-    global $designpath,$language,$time_start,$menu_index;
+    global $designpath,$language,$time_start,$menu_index,$isSpider;
 
     // Timer Stop
     $time = round(generatetime() - $time_start,4);
@@ -3109,29 +3111,28 @@ function page($index='',$title='',$where='',$index_templ='index') {
     }
 
     if(settings("wmodus") && $chkMe != 4) {
-        if (config('securelogin')) {
-            $secure = show("menu/secure", array("help" => _login_secure_help, "security" => _register_confirm));
-        }
-
-        $login = show("errors/wmodus_login", array("what" => _login_login, "secure" => $secure, "signup" => _login_signup, "permanent" => _login_permanent, "lostpwd" => _login_lostpwd));
+        $login = show("errors/wmodus_login", array("secure" => config('securelogin') ? show("user/secure") : ''));
         cookie::save(); //Save Cookie
-        echo show("errors/wmodus", array("wmodus" => _wartungsmodus,
-                                         "head" => _wartungsmodus_head,
-                                         "tmpdir" => $tmpdir,
+        echo show("errors/wmodus", array("tmpdir" => $tmpdir,
                                          "java_vars" => $java_vars,
                                          "dir" => $designpath,
-                                         "title" => re(strip_tags($title)),
+                                         "title" => strip_tags(re($title)),
                                          "login" => $login));
     } else {
-        updateCounter();
-        update_maxonline();
+        if(!$isSpider) {
+            updateCounter();
+            update_maxonline();
+        }
 
         //check permissions
         if(!$chkMe) {
+            $secure = config('securelogin') ? show("menu/secure") : '';
+            $login = show("menu/login", array("secure" => $secure));
             $check_msg = '';
         } else {
             $check_msg = check_msg(); 
             set_lastvisit();
+            $login = "";
         }
 
         //init templateswitch
@@ -3165,10 +3166,10 @@ function page($index='',$title='',$where='',$index_templ='index') {
         
         //check if placeholders are given
         $pholder = file_get_contents($designpath."/".$index_templ.".html");
-
+        
         //filter placeholders
         $dir = $designpath; //after template index autodetect!!!
-        $blArr = array("[clanname]","[title]","[java_vars]","[template_switch]","[headtitle]",
+        $blArr = array("[clanname]","[title]","[java_vars]","[template_switch]","[headtitle]","[login]",
         "[index]","[time]","[rss]","[dir]","[charset]","[where]","[lang]","[notification]","[notification_tr]");
         $pholdervars = '';
         for($i=0;$i<=count($blArr)-1;$i++) {
@@ -3191,9 +3192,8 @@ function page($index='',$title='',$where='',$index_templ='index') {
             if (strstr($pholder[$i], 'nav_')) {
                 $arr[$pholder[$i]] = navi($pholder[$i]);
             } else {
-                //optimize code * spart ~8ms
                 if (array_key_exists($pholder[$i], $menu_index) && $menu_index[$pholder[$i]]) {
-                    include_once(basePath . '/inc/menu-functions/' . $pholder[$i] . '.php');
+                    require_once(basePath . '/inc/menu-functions/' . $pholder[$i] . '.php');
                 }
 
                 if (function_exists($pholder[$i])) {
@@ -3201,7 +3201,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
                 }
             }
         }
-
+        
         $pholdervars = explode("^",$pholdervars);
         for($i=0;$i<=count($pholdervars)-1;$i++)
         { $arr[$pholdervars[$i]] = $$pholdervars[$i]; }

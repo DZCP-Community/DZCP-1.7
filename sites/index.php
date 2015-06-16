@@ -16,36 +16,36 @@ $dir = "sites";
 ## SECTIONS ##
 switch ($action):
 default:
-  $qry = db("SELECT s1.*,s2.internal FROM ".$db['sites']." AS s1
-             LEFT JOIN ".$db['navi']." AS s2
-             ON s1.id = s2.editor
-             WHERE s1.id = '".intval($_GET['show'])."'");
-  $get = _fetch($qry);
+    $qry = $sql->selectSingle("SELECT s1.*,s2.`internal` "
+                            . "FROM `{prefix_sites}` AS `s1` "
+                            . "LEFT JOIN `{prefix_navi}` AS `s2` "
+                            . "ON s1.`id` = s2.`editor` "
+                            . "WHERE s1.`id` = ?;",array(intval($_GET['show'])));
+    if($sql->rowCount()) {
+        if($get['internal'] && !$chkMe)
+          $index = error(_error_wrong_permissions, 1);
+        else {
+          $where = re($get['titel']);
 
-  if(_rows($qry))
-  {
-    if($get['internal'] == 1 && ($chkMe == 1 || !$chkMe))
-      $index = error(_error_wrong_permissions, 1);
-    else {
-      $where = re($get['titel']);
+          if($get['html']) 
+              $inhalt = bbcode_html(re($get['text']));
+          else 
+              $inhalt = bbcode(re($get['text']));
 
-      if($get['html'] == "1") $inhalt = bbcode_html($get['text']);
-      else $inhalt = bbcode($get['text']);
-
-      $index = show($dir."/sites", array("titel" => re($get['titel']),
-                                         "inhalt" => $inhalt));
-    }
-  } else $index = error(_sites_not_available,1);
+          $index = show($dir."/sites", array("titel" => re($get['titel']), "inhalt" => $inhalt));
+        }
+    } else 
+        $index = error(_sites_not_available,1);
 break;
 case 'preview';
-  header("Content-type: text/html; charset=utf-8");
-  if($_POST['html'] == "1") $inhalt = bbcode_html(re($_POST['inhalt']),1);
-  else $inhalt = bbcode(re($_POST['inhalt']),true);
+    header("Content-type: text/html; charset=utf-8");
+    if($_POST['html']) 
+        $inhalt = bbcode_html($_POST['inhalt'],true);
+    else 
+        $inhalt = bbcode($_POST['inhalt'],true);
 
-  $index = show($dir."/sites", array("titel" => re($_POST['titel']),
-                                     "inhalt" => $inhalt));
-
-  exit(utf8_encode('<table class="mainContent" cellspacing="1"'.$index.'</table>'));
+    $index = show($dir."/sites", array("titel" => re($_POST['titel']), "inhalt" => $inhalt));
+    exit(utf8_encode('<table class="mainContent" cellspacing="1"'.$index.'</table>'));
 break;
 endswitch;
 

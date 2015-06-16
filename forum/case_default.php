@@ -147,7 +147,7 @@ if(defined('_Forum')) {
     
     
     
-    
+    $sql->rows("SELECT * FROM `{prefix_userstats}` WHERE `forumposts` >= 1");
     
     
     /* Index */

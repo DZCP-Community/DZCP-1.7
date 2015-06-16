@@ -1,55 +1,55 @@
 <tr>
-  <td class="contentHead" colspan="3" align="center"><span class="fontBold">[add_head]</span></td>
+  <td class="contentHead" colspan="3" align="center"><span class="fontBold">[lang_slist_add]</span></td>
 </tr>
 <tr>
 <td>
-<form name="serverliste" action="?action=addserver" method="post" onsubmit="return(DZCP.submitButton())">
-<input type="hidden" name="datum" value="[datum]">
+[notification_page]
+<form id="serverliste" name="serverliste" action="" method="post" onsubmit="return(DZCP.submitButton())">
 <table class="hperc" cellspacing="1">
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[clan]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_profil_clan]:</span></td>
   <td class="contentMainFirst" align="center">
-    <input type=text name="clanname" class="inputField_dis"
+    <input type=text name="clanname" value="[clanname]" class="inputField_dis"
     onfocus="this.className='inputField_en';"
     onblur="this.className='inputField_dis';" />
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[hp]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_profil_hp]:</span></td>
   <td class="contentMainFirst" align="center">
-    <input type=text name="clanurl" value="http://" class="inputField_dis"
+    <input type=text name="clanurl" value="[clanurl]" class="inputField_dis"
     onfocus="this.className='inputField_en';"
     onblur="this.className='inputField_dis';" />
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[serverip]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_slist_serverip]:</span></td>
   <td class="contentMainFirst" align="center">
-    <input type=text name="ip" class="inputField_dis"
+    <input type=text name="ip" value="[ip]" class="inputField_dis"
     onfocus="this.className='inputField_en';"
     onblur="this.className='inputField_dis';" />
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[serverport]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_slist_serverport]:</span></td>
   <td class="contentMainFirst" align="center">
-    <input type=text name="port" class="inputField_dis_mid"
+    <input type=text name="port" value="[port]" class="inputField_dis_mid"
     onfocus="this.className='inputField_en_mid';"
     onblur="this.className='inputField_dis_mid';" />
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[slots]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_slist_slots]:</span></td>
   <td class="contentMainFirst" align="center">
-    <input type=text name="slots" class="inputField_dis_mid"
+    <input type=text name="slots" value="[slots]" class="inputField_dis_mid"
     onfocus="this.className='inputField_en_mid';"
     onblur="this.className='inputField_dis_mid';" />
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[serverpasswort]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_server_password]:</span></td>
   <td class="contentMainFirst" align="center">
-    <input type=text name="pwd" class="inputField_dis_mid"
+    <input type=text name="pwd" value="[pwd]" class="inputField_dis_mid"
     onfocus="this.className='inputField_en_mid';"
     onblur="this.className='inputField_dis_mid';" />
   </td>
@@ -74,7 +74,7 @@
 </tr>
 </logged_out>
 <tr>
-  <td class="contentBottom" colspan="3"><input id="contentSubmit" type="submit" value="[value]" class="submit" name="send" /></td>
+  <td class="contentBottom" colspan="3"><input id="contentSubmit" type="submit" value="[lang_button_value_add]" class="submit" name="send" /></td>
 </tr>
 </table>
 </form>

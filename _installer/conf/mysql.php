@@ -477,7 +477,6 @@ function install_mysql($login, $nick, $pwd, $email) {
         $qry = db("INSERT INTO ".$db['navi']." (id, pos, kat, shown, name, url, type, internal) VALUES (31, 4, 'nav_user', 1, '_edit_profile_', '../user/?action=editprofile', 1, 0)");
         $qry = db("INSERT INTO ".$db['navi']." (id, pos, kat, shown, name, url, type, internal, wichtig) VALUES (32, 5, 'nav_user', 1, '_logout_', '../user/?action=logout', 1, 0, 1)");
         $qry = db("INSERT INTO ".$db['navi']." (id, pos, kat, shown, name, url, type, internal) VALUES (34, 1, 'nav_member', 1, '_clankasse_', '../clankasse/', 1, 0)");
-        $qry = db("INSERT INTO ".$db['navi']." (id, pos, kat, shown, name, url, type, internal) VALUES (35, 2, 'nav_member', 1, '_taktiken_', '../taktik/', 1, 0)");
 //-> Newskategorien
   $qry = db("DROP TABLE IF EXISTS ".$db['newskat']."");
   $qry = db("CREATE TABLE ".$db['newskat']." (
@@ -625,7 +624,6 @@ function install_mysql($login, $nick, $pwd, $email) {
              `shoutbox` int(1) NOT NULL default '0',
              `serverliste` int(1) NOT NULL default '0',
              `editusers` int(1) NOT NULL default '0',
-             `edittactics` int(1) NOT NULL default '0',
              `editsquads` int(1) NOT NULL default '0',
              `editserver` int(1) NOT NULL default '0',
              `editkalender` int(1) NOT NULL default '0',
@@ -646,7 +644,7 @@ function install_mysql($login, $nick, $pwd, $email) {
              `artikel` int(1) NOT NULL default '0',
              PRIMARY KEY  (`id`)
              ) ");
-  $qry = db("INSERT INTO ".$db['permissions']." (`id`, `user`, `intforum`, `clankasse`, `clanwars`, `gallery`, `serverliste`, `editusers`, `edittactics`, `editsquads`, `editserver`, `editkalender`, `news`, `gb`, `forum`, `votes`, `votesadmin`, `links`, `downloads`, `newsletter`, `intnews`, `rankings`, `contact`, `joinus`, `awards`, `shoutbox`, `artikel`) VALUES (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)");
+  $qry = db("INSERT INTO ".$db['permissions']." (`id`, `user`, `intforum`, `clankasse`, `clanwars`, `gallery`, `serverliste`, `editusers`, `editsquads`, `editserver`, `editkalender`, `news`, `gb`, `forum`, `votes`, `votesadmin`, `links`, `downloads`, `newsletter`, `intnews`, `rankings`, `contact`, `joinus`, `awards`, `shoutbox`, `artikel`) VALUES (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)");
 //-> Positionen
   $qry = db("DROP TABLE IF EXISTS ".$db['pos']."");
   $qry = db("CREATE TABLE ".$db['pos']." (
@@ -760,19 +758,6 @@ function install_mysql($login, $nick, $pwd, $email) {
              PRIMARY KEY  (`id`)
              ) ");
   $qry = db("INSERT INTO ".$db['squaduser']." (`id`, `user`, `squad`) VALUES (1, 1, 1)");
-//-> Taktiken
-  $qry = db("DROP TABLE IF EXISTS ".$db['taktik']."");
-  $qry = db("CREATE TABLE ".$db['taktik']." (
-             `id` int(10) NOT NULL auto_increment,
-             `datum` int(20) NOT NULL default '0',
-             `map` varchar(20) NOT NULL default '',
-             `spart` text NOT NULL,
-             `standardt` text NOT NULL,
-             `sparct` text NOT NULL,
-             `standardct` text NOT NULL,
-             `autor` int(5) NOT NULL default '0',
-             PRIMARY KEY  (`id`)
-             ) ");
 //-> Users
   $qry = db("DROP TABLE IF EXISTS ".$db['users']."");
   $qry = db("CREATE TABLE ".$db['users']." (
@@ -1765,7 +1750,6 @@ function update_mysql_1_7() {
     db("ALTER TABLE `".$db['sponsoren']."` CHANGE `hits` `hits` INT(11) NOT NULL DEFAULT '0';",false,false,true);
     db("ALTER TABLE `".$db['squads']."` CHANGE `id` `id` INT(11) NOT NULL AUTO_INCREMENT;",false,false,true);
     db("ALTER TABLE `".$db['squaduser']."` CHANGE `id` `id` INT(11) NOT NULL AUTO_INCREMENT;",false,false,true);
-    db("ALTER TABLE `".$db['taktik']."` CHANGE `id` `id` INT(11) NOT NULL AUTO_INCREMENT;",false,false,true);
     db("ALTER TABLE `".$db['buddys']."` CHANGE `id` `id` INT(11) NOT NULL AUTO_INCREMENT;",false,false,true);
     db("ALTER TABLE `".$db['users']."` CHANGE `sessid` `sessid` VARCHAR(32) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT '';",false,false,true);
     db("ALTER TABLE `".$db['usergallery']."` CHANGE `id` `id` INT(11) NOT NULL AUTO_INCREMENT;",false,false,true);
@@ -1980,7 +1964,10 @@ function update_mysql_1_7() {
     db("ALTER TABLE `".$db['pos']."` ADD `color` VARCHAR(7) NOT NULL DEFAULT '#000000' AFTER `nletter`;",false,false,true);
     db("ALTER TABLE `".$db['f_access']."` CHANGE `pos` `pos` INT(5) NOT NULL DEFAULT '0';",false,false,true);
     db("ALTER TABLE `".$db['pos']."` CHANGE `nletter` `nletter` INT(1) NOT NULL DEFAULT '0';",false,false,true);
-    
+    db("DROP TABLE `dzcp_taktiken`;",false,false,true);
+    db("ALTER TABLE `dzcp_permissions` DROP `edittactics`;",false,false,true);
+    db("ALTER TABLE `dzcp_userstats` ADD INDEX(`user`);",false,false,true);
+        
     // Check group Permissions is exists
     $sql = db('SELECT `id` FROM `'.$db['pos'].'`;');
     while($get = _fetch($sql)) {

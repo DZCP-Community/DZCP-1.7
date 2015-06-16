@@ -130,7 +130,6 @@ $db = array("host" =>           $sql_host,
             "slideshow" =>      $prefix."slideshow",
             "sessions" =>       $prefix."sessions",
             "startpage" =>      $prefix."startpage",
-            "taktik" =>         $prefix."taktiken",
             "ts" =>             $prefix."teamspeak",
             "users" =>          $prefix."users",
             "usergallery" =>    $prefix."usergallery",
@@ -162,7 +161,7 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
                 }
             }
             else {
-                if(file_exists($template.".html")) {
+                if(file_exists($template.".html") && is_file($template.".html")) {
                     $tpl = file_get_contents($template.".html");
                     if (substr($tpl, 0, 3) === pack("CCC", 0xef, 0xbb, 0xbf)) {
                         $tpl = substr($tpl, 3);
@@ -177,7 +176,7 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
             }
         }
         else {
-            if(file_exists($template . ".html")) {
+            if(file_exists($template . ".html") && is_file($template.".html")) {
                 $tpl = file_get_contents($template . ".html");
                 if (substr($tpl, 0, 3) === pack("CCC", 0xef, 0xbb, 0xbf)) {
                     $tpl = substr($tpl, 3);
@@ -185,8 +184,6 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
             }
         }
 
-        
-        
         //put placeholders in array
         $array['dir'] = '../inc/_templates_/'.$tmpdir;
         $array['idir'] = '../inc/images'; //Image DIR [idir]

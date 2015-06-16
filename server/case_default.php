@@ -11,11 +11,12 @@ if(show_gameserver_debug) {
 }
 
 if(fsockopen_support()) {
-    $sql_ext = '';
+    $sql_ext = ''; $params = array();
     if(isset($_GET['showID'])) {
-        $qry = db("SELECT id FROM ".$db['server']." WHERE `id` = ".intval($_GET['showID']).";");
-        while($get = _fetch($qry)) {
-            $sql_ext = " AND `id` != '".intval($_GET['showID'])."'";
+        $qry = $sql->select("SELECT `id` FROM `{prefix_server}` WHERE `id` = ?;",array(intval($_GET['showID'])));
+        foreach($qry as $get) {
+            $sql_ext = " AND `id` != ?";
+            $params = array(intval($_GET['showID']));
 
             if(show_gameserver_debug)
                 $index .= server_show($get['id'],(isset($_GET['showID']) ? $_GET['showID'] : 0)); //Debug
@@ -29,8 +30,8 @@ if(fsockopen_support()) {
         }
     }
 
-    $qry = db("SELECT id FROM ".$db['server']." WHERE `game` != 'nope' ".$sql_ext." ORDER BY `game` ASC");
-    while($get = _fetch($qry)) {
+    $qry = $sql->select("SELECT `id` FROM `{prefix_server}` WHERE `game` != 'nope'".$sql_ext." ORDER BY `game` ASC;",$params);
+    foreach($qry as $get) {
         if(show_gameserver_debug)
             $index .= server_show($get['id'],(isset($_GET['showID']) ? $_GET['showID'] : 0)); //Debug
         else {
@@ -42,8 +43,8 @@ if(fsockopen_support()) {
         }
     }
 
-    $qry = db("SELECT id FROM ".$db['server']." WHERE `game` = 'nope' ORDER BY `id` ASC");
-    while($get = _fetch($qry)) {
+    $qry = $sql->select("SELECT `id` FROM `{prefix_server}` WHERE `game` = 'nope' ORDER BY `id` ASC;");
+    foreach($qry as $get) {
         if(show_gameserver_debug)
             $index .= server_show($get['id'],(isset($_GET['showID']) ? $_GET['showID'] : 0)); //Debug
         else {

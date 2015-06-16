@@ -426,9 +426,6 @@ define('_user_new_gallery', '&nbsp;&nbsp;<a href="../gallery/"><span class="font
 ## Unzugeordnet ##
 define('_user_new_artc', '&nbsp;&nbsp;<a href="../artikel/?action=show&amp;id=[id]#lastcomment"><span class="fontWichtig">[cnt]</span> [eintrag]</a><br />');
 define('_artike_sites', '<a href="?action=show&amp;id=[id]&part=[part]">[num]</a> ');
-## Taktiken ##
-define('_taktik_select', '<option value="[iconimg]">[iconimg]</option>');
-define('_upload_image_taktiken', '<img src="../inc/images/uploads/taktiken/[file]" alt="" />');
 ## Sonstiges ##
 define('_klapptext_show', '<a href="javascript:DZCP.toggle(\'[id]\')"><img id="img[id]" src="../inc/images/collapse.gif" alt="" class="icon" /></a>');
 define('_klapptext_dont_show', '<a href="javascript:DZCP.toggle(\'[id]\')"><img id="img[id]" src="../inc/images/expand.gif" alt="" class="icon" /></a>');
