@@ -1967,6 +1967,7 @@ function update_mysql_1_7() {
     db("DROP TABLE `dzcp_taktiken`;",false,false,true);
     db("ALTER TABLE `dzcp_permissions` DROP `edittactics`;",false,false,true);
     db("ALTER TABLE `dzcp_userstats` ADD INDEX(`user`);",false,false,true);
+    db("ALTER TABLE `dzcp_artikel` ADD `viewed` INT(11) NOT NULL DEFAULT '0' AFTER `public`;",false,false,true);
         
     // Check group Permissions is exists
     $sql = db('SELECT `id` FROM `'.$db['pos'].'`;');
@@ -1991,6 +1992,21 @@ function update_mysql_1_7() {
       `show_navi` int(1) NOT NULL DEFAULT '0',
       PRIMARY KEY (`id`)
     ) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",false,false,true);
+    
+    db("DROP TABLE IF EXISTS `dzcp_gbcomments`;",false,false,true);
+    db("CREATE TABLE `dzcp_gbcomments` (
+      `id` int(10) NOT NULL AUTO_INCREMENT,
+      `gbe` int(10) NOT NULL DEFAULT '0',
+      `nick` varchar(50) NOT NULL DEFAULT '',
+      `datum` int(20) NOT NULL DEFAULT '0',
+      `email` varchar(130) NOT NULL DEFAULT '',
+      `hp` varchar(50) NOT NULL DEFAULT '',
+      `reg` int(5) NOT NULL DEFAULT '0',
+      `comment` text NOT NULL,
+      `ip` varchar(50) NOT NULL DEFAULT '',
+      `editby` text,
+      PRIMARY KEY (`id`)
+    ) DEFAULT CHARSET=utf8 PAGE_CHECKSUM=1;",false,false,true);
     
     //-> Cookie initialisierung * Autologin *
     if(!headers_sent()) {

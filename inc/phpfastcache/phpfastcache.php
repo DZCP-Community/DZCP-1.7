@@ -44,10 +44,7 @@ class phpFastCache {
             "server"        =>  array(
                 array("127.0.0.1",11211,1),
                 //  array("new.host.ip",11211,1),
-            ),
-
-            "extensions"    =>  array(),
-
+            )
     );
 
     var $tmp = array();
@@ -478,7 +475,6 @@ class phpFastCache {
 
         $full_path = $this->option("path")."/".$this->option("securityKey")."/";
         if($create_path == false && $this->checked['path'] == false) {
-
             if(!file_exists($full_path) || !is_writable($full_path)) {
                 if(!file_exists($full_path)) {
                     @mkdir($full_path,0777);

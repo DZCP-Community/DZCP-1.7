@@ -794,6 +794,7 @@ function replace($txt,$type=false,$no_vid_tag=false) {
 }
 
 /**
+ * DZCP V1.7.0
  * Führt den BBCode des TS3 Servers aus.
  *
  * @param string $string
@@ -1231,6 +1232,7 @@ function array_var_exists($var,$search)
 { foreach($search as $key => $var_) { if($var_==$var) return true; } return false; }
 
 /**
+ * DZCP V1.7.0
  * Funktion um eine Datei im Web auf Existenz zu prufen und abzurufen
  * @return String
  **/
@@ -1605,6 +1607,32 @@ function permission($check,$uid=0) {
         } else {
             return false;
         }
+    }
+}
+
+/*
+ * DZCP V1.7.0
+ * Aktualisierung des Online Status *preview
+ */
+function update_user_status_preview() {
+    global $sql,$userip;
+    ## User aus der Datenbank suchen ##
+    $get = $sql->selectSingle("SELECT `id`,`time` FROM `{prefix_users}` "
+            . "WHERE `id` = ? AND `sessid` = ? AND `ip` = ? AND level != 0;",
+            array(intval($_SESSION['id']),session_id(),up($userip)));
+
+    if($sql->rowCount()) {
+        ## Schreibe Werte in die Server Sessions ##
+        $_SESSION['lastvisit']  = $get['time'];
+
+        if(re(data($get['id'], "ip")) != $_SESSION['ip'])
+            $_SESSION['lastvisit'] = data($get['id'], "time");
+
+        if(empty($_SESSION['lastvisit']))
+            $_SESSION['lastvisit'] = data($get['id'], "time");
+
+        ## Aktualisiere Datenbank ##
+        $sql->update("UPDATE `{prefix_users}` SET `online` = 1 WHERE `id` = ?;",array($get['id']));
     }
 }
 

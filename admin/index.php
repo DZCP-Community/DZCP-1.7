@@ -130,8 +130,8 @@ if (!admin_perms($_SESSION['id'])) {
                 }
 
                 $dzcp_news_db = array();
-                if (file_exists(basePath . '/inc/_cache_/admin_dzcp_news.dat')) {
-                    $dzcp_news_db = json_decode(file_get_contents(basePath . '/inc/_cache_/admin_dzcp_news.dat'), true);
+                if (file_exists(basePath . '/inc/_cache_/admin_news.json')) {
+                    $dzcp_news_db = json_decode(file_get_contents(basePath . '/inc/_cache_/admin_news.json'), true);
                     if (isset($_POST['what']) && $_POST['what'] == 'news') {
                         switch ($_POST['do']) {
                             case 'remove':
@@ -149,10 +149,10 @@ if (!admin_perms($_SESSION['id'])) {
                                 break;
                         }
 
-                        file_put_contents(basePath . '/inc/_cache_/admin_dzcp_news.dat', json_encode($dzcp_news_db));
+                        file_put_contents(basePath . '/inc/_cache_/admin_news.json', json_encode($dzcp_news_db));
                     }
                 } else {
-                    file_put_contents(basePath . '/inc/_cache_/admin_dzcp_news.dat', json_encode(array()));
+                    file_put_contents(basePath . '/inc/_cache_/admin_news.json', json_encode(array()));
                 }
 
                 if (count($dzcp_news_stream) >= 1) {

@@ -143,9 +143,9 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                 $sql->update("UPDATE `{prefix_news}` SET `viewed` = (viewed+1) WHERE `id` = ?;",array($news_id));
             }
 
-            $klapp = ($get_news['klapptext'] ? show(_news_klapplink, array("klapplink" => re($get['klapplink']), 
+            $klapp = ($get_news['klapptext'] ? show(_news_klapplink, array("klapplink" => re($get_news['klapplink']), 
                                                                            "which" => "expand", 
-                                                                           "id" => $get['id'])) : '');
+                                                                           "id" => $get_news['id'])) : '');
             $viewed = show(_news_viewed, array("viewed" => $get_news['viewed']));
             $links1 = ""; $rel = "";
             if (!empty($get_news['url1'])) {
@@ -180,7 +180,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
             $qryc = $sql->select("SELECT * FROM `{prefix_newscomments}` WHERE `news` = ? "
                                 ."ORDER BY `datum` DESC LIMIT ".($page - 1)*config('m_comments').",".config('m_comments').";",
                                 array($news_id));
-
+            
             $entrys = cnt('{prefix_newscomments}', " WHERE `news` = ".$news_id);
             $i = ($entrys - ($page - 1) * config('m_comments')); $comments = '';
             foreach($qryc as $getc) {
@@ -196,10 +196,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                                                                       "del" => convSpace(_confirm_del_entry)));
                 }
 
-                $email = ""; $hp = "";
-                $onoff = onlinecheck($getc['reg']);
-                $nick = autor($getc['reg']);
-                $avatar = ""; $onoff = "";
+                $email = ""; $hp = ""; $avatar = "";
                 if (!$getc['reg']) {
                     if ($getc['hp']) {
                         $hp = show(_hpicon_forum, array("hp" => links(re($getc['hp']))));
@@ -210,9 +207,12 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                     }
 
                     $nick = show(_link_mailto, array("nick" => re($getc['nick']), "email" => $email));
+                } else {
+                    $onoff = onlinecheck($getc['reg']);
+                    $nick = autor($getc['reg']);
                 }
 
-                $titel = show(_eintrag_titel, array("postid" => $i+1,
+                $titel = show(_eintrag_titel, array("postid" => $i,
                                                     "datum" => date("d.m.Y", $getc['datum']),
                                                     "zeit" => date("H:i", $getc['datum']) . _uhr,
                                                     "edit" => $edit,
@@ -276,9 +276,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                                                         "comments" => "",
                                                         "dp" => "compact",
                                                         "notification_page" => (!empty($notification_p) ? notification::get($notification_p) : ''),
-                                                        "nautor" => _autor,
                                                         "dir" => $designpath,
-                                                        "ndatum" => _datum,
                                                         "rel" => $rel,
                                                         "sticky" => "",
                                                         "intern" => $intern,
@@ -286,7 +284,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                                                         "showmore" => $showmore,
                                                         "klapp" => $klapp,
                                                         "more" => bbcode($get_news['klapptext']),
-                                                        "viewed" => "",
+                                                        "viewed" => $viewed,
                                                         "text" => bbcode($get_news['text']),
                                                         "datum" => date("j.m.y H:i", (empty($get_news['datum']) ? time() : $get_news['datum']))._uhr,
                                                         "links" => $links,

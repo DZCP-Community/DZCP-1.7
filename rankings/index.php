@@ -15,11 +15,11 @@ $where = _site_rankings;
 $dir = "rankings";
 
 ## SECTIONS ##
-$qry = db("SELECT s1.`id`,s1.`lastranking`,s1.`rank`,s1.`squad`,s1.`league`,s1.`url`,s2.`name` "
-        . "FROM `{prefix_rankings}` AS `s1` "
-        . "LEFT JOIN `{prefix_squads}` AS `s2` "
-        . "ON s1.`squad` = s2.`id`".orderby_sql(array("rank","league"), orderby_sql(array("name"), ''
-        . 'ORDER BY s1.`postdate DESC`', 's2'), 's1').";");
+$qry = $sql->select("SELECT s1.`id`,s1.`lastranking`,s1.`rank`,s1.`squad`,s1.`league`,s1.`url`,s2.`name` "
+                  . "FROM `{prefix_rankings}` AS `s1` "
+                  . "LEFT JOIN `{prefix_squads}` AS `s2` "
+                  . "ON s1.`squad` = s2.`id`".orderby_sql(array("rank","league"), orderby_sql(array("name"), ''
+                 . 'ORDER BY s1.`postdate DESC`', 's2'), 's1').";");
 
 if($sql->rowCount()) {
     foreach($qry as $get) {

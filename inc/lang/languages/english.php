@@ -8,6 +8,12 @@ $charset = 'iso-8859-1';
 header("Content-type: text/html; charset=".$charset);
 
 ## ADDED / REDEFINED FOR 1.7.0
+define('_iban', 'IBAN');
+define('_bic', 'BIC');
+define('_gb_addcomment_from', 'Comment from');
+define('_gb_addcomment_edit', 'Edit Guestbook Comment');
+define('_gb_addcomment_new', 'Add new guestbook comment');
+define('_gb_comment_edited', 'The guestbook comment has been edited successfully!');
 define('_login_head_admin', 'Administrator Login');
 define('_no_entrys', 'No entrys');
 define('_profil_edit_almgr_link', '<a href="?action=editprofile&amp;show=almgr">Autologin editieren</a>');
@@ -731,8 +737,8 @@ define('_info_reg_valid' , 'You successfully registered on this page!<br />
 Your password were send to your e-mail adress [email]');
 define('_edited_by' , '<br /><br /><i>last edited by [autor] at [time]</i>');
 define('_linkus_empty_text' , 'You have to indicate an url of the banner!');
-define('_gb_titel' , '<span class="fontBold">#[postid]</span> from [nick] [email] [hp] at [datum] on [zeit][uhr] [edit] [delete] [comment] [public]');
-define('_gb_titel_noreg' , '<span class="fontBold">#[postid]</span> from <span class="fontBold">[nick]</span> [email] [hp] at [datum] on [zeit][uhr]  [edit] [delete] [comment] [public]');
+define('_gb_titel' , '<span class="fontBold">#[postid]</span> from [nick] [email] [hp] at [datum] on [zeit][lang_uhr] [edit] [delete] [comment] [public]');
+define('_gb_titel_noreg' , '<span class="fontBold">#[postid]</span> from <span class="fontBold">[nick]</span> [email] [hp] at [datum] on [zeit][lang_uhr]  [edit] [delete] [comment] [public]');
 define('_empty_news_title' , 'You have to indicate a news headline!');
 define('_member_admin_votes' , 'View internal votes');
 define('_member_admin_votesadmin' , 'Admin: Votes');
@@ -2059,10 +2065,10 @@ define('_clankasse_bank' , 'Bank');
 define('_clankasse_head' , 'Clan cash');
 define('_clankasse_cakt' , 'actual balance');
 define('_clankasse_admin_minus' , 'Minus');
-define('_clankasse_plus' , '<span class="fontGreen">[betrag] [w]</span>');
-define('_clankasse_minus' , '<span class="fontRed">- [betrag] [w]</span>');
-define('_clankasse_summe_plus' , '<span class="fontGreen">[summe] [w]</span>');
-define('_clankasse_summe_minus' , '<span class="fontRed">[summe] [w]</span>');
+define('_clankasse_plus' , '<span class="fontGreen">[betrag],- [w]</span>');
+define('_clankasse_minus' , '<span class="fontRed">- [betrag],- [w]</span>');
+define('_clankasse_summe_plus' , '<span class="fontGreen">[summe],- [w]</span>');
+define('_clankasse_summe_minus' , '<span class="fontRed">[summe],- [w]</span>');
 define('_clankasse_trans' , '[transaktion] from/to [member]');
 define('_clankasse_head_edit' , 'Edit contribution');
 define('_clankasse_head_new' , 'Insert contribution');

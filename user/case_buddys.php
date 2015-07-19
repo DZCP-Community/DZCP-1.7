@@ -41,7 +41,7 @@ if(defined('_UserMenu')) {
                 } elseif(!check_buddy($user)) {
                     $index = error(_error_buddy_already_in, 1);
                 } else {
-                    db("INSERT INTO `{prefix_userbuddys}` SET `user` = ?, `buddy` = ?;",array(intval($userid),intval($user)));
+                    $sql->insert("INSERT INTO `{prefix_userbuddys}` SET `user` = ?, `buddy` = ?;",array(intval($userid),intval($user)));
 
                     $msg = show(_buddy_added_msg, array("user" => addslashes(autor($userid))));
                     $title = _buddy_title;

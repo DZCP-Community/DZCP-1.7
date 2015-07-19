@@ -10,7 +10,7 @@ if(defined('_News')) {
     if($_POST['klapptitel']) {
         $klapp = show(_news_klapplink, array("klapplink" => re($_POST['klapptitel']),
                                              "which" => "collapse",
-                                             "id" => 0));
+                                             "id" => "_prev"));
     }
 
     $links1 = ""; $rel = "";
@@ -59,12 +59,10 @@ if(defined('_News')) {
                                            "comments" => _news_comments_prev,
                                            "showmore" => "",
                                            "dp" => "",
+                                           "notification_page" => "",
                                            "dir" => $designpath,
-                                           "nautor" => _autor,
                                            "intern" => $intern,
                                            "sticky" => $sticky,
-                                           "ndatum" => _datum,
-                                           "ncomments" => _news_kommentare.":",
                                            "klapp" => $klapp,
                                            "more" => bbcode($_POST['morenews'],true),
                                            "viewed" => $viewed,
@@ -73,5 +71,6 @@ if(defined('_News')) {
                                            "links" => $links,
                                            "autor" => autor($_SESSION['id'])));
 
+    update_user_status_preview();
     exit(utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>'));
 }

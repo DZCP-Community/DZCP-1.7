@@ -57,5 +57,6 @@ if(defined('_UserMenu')) {
                                              "rank" => getrank($userid),
                                              "ip" => $posted_ip));
 
+    update_user_status_preview();
     exit(utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>'));
 }

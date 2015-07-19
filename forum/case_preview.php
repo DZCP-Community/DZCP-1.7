@@ -123,7 +123,7 @@ if(defined('_Forum')) {
                                              "vote" => $vote,
                                              "f_abo" => "",
                                              "show" => $show));
-    
+    update_user_status_preview();
     exit(utf8_encode('<table class="mainContent" cellspacing="1" style="margin-top:17px">'.$index.'</table>'));
   } else {
     if($do == 'editpost')
@@ -207,6 +207,7 @@ if(defined('_Forum')) {
                                                   "onoff" => $onoff,
                                                   "p" => ""));
 
+    update_user_status_preview();
     exit(utf8_encode('<table class="mainContent" cellspacing="1" style="margin-top:17px">'.$index.'</table>'));
   }
 }

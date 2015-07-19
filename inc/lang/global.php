@@ -269,7 +269,7 @@ define('_select_field_waehrung', '
 <option value="EEK">(EEK) Estonian Kroon</option>
 <option value="EGP">(EGP) Egyptian Pound</option>
 <option value="ETB">(ETB) Ethiopian Birr</option>
-<option value="&euro;">(EUR) Euro</option>
+<option value="EUR">(EUR) Euro</option>
 <option value="FJD">(FJD) Fiji Dollar</option>
 <option value="FKP">(FKP) Falkland Islands Pound</option>
 <option value="GBP">(GBP) British Pound</option>
@@ -366,7 +366,7 @@ define('_select_field_waehrung', '
 <option value="TZS">(TZS) Tanzanian Shilling</option>
 <option value="UAH">(UAH) Ukraine Hryvnia</option>
 <option value="UGS">(UGS) Uganda Shilling</option>
-<option value="$">(USD) US Dollar</option>
+<option value="USD">(USD) US Dollar</option>
 <option value="UYP">(UYP) Uruguayan Peso</option>
 <option value="VEB">(VEB) Venezuelan Bolivar</option>
 <option value="VND">(VND) Vietnamese Dong</option>

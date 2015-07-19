@@ -124,7 +124,7 @@ function spChars($txt) {
     $txt = str_replace("Ö","&Ouml;",$txt);
     $txt = str_replace("ö","&ouml;",$txt);
     $txt = str_replace("ß","&szlig;",$txt);
-    return str_replace("€","&euro;",$txt);
+    return str_replace("?","&euro;",$txt);
 }
 
 function visitorIp() {

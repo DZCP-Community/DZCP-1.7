@@ -75,7 +75,7 @@ if(defined('_Upload')) {
 
                 if(empty($index)) {
                     $params = array_merge($params,array(up($_POST['beschreibung']),intval($_POST['id']),intval($userid)));
-                    db("UPDATE `{prefix_usergallery}` SET ".$pic."`beschreibung` = ? WHERE `id` = ? AND `user` = ?;",$params);
+                    $sql->update("UPDATE `{prefix_usergallery}` SET ".$pic."`beschreibung` = ? WHERE `id` = ? AND `user` = ?;",$params);
                     $index = info(_edit_gallery_done, "../user/?action=editprofile&show=gallery");
                 }
             break;

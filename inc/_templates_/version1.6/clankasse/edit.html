@@ -3,25 +3,25 @@
 <form name="clankasse" action="?action=admin&amp;do=editck&amp;id=[id]" method="post" onsubmit="return(DZCP.submitButton())">
 <table class="hperc" cellspacing="1">
 <tr>
-  <td class="contentHead" align="center" colspan="2"><span class="fontBold">[newhead]</span></td>
+  <td class="contentHead" align="center" colspan="2"><span class="fontBold">[lang_clankasse_head_edit]</span></td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[datum]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_datum]:</span></td>
   <td class="contentMainFirst" align="center">[dropdown_date]</td>
 </tr>
 <tr>
-  <td class="contentMainTop"><span class="fontBold">[transaktion]:</span></td>
+  <td class="contentMainTop"><span class="fontBold">[lang_clankasse_ctransaktion]:</span></td>
   <td class="contentMainFirst" align="center">
     <select name="transaktion" class="dropdown">
       [trans]
-    </select> [vonan]
+    </select> [lang_clankasse_for]
     <input type="text" name="member" value="[evonan]" class="inputField_dis_mid"
     onfocus="this.className='inputField_en_mid';"
     onblur="this.className='inputField_dis_mid';" />
   </td>
 </tr>
 <tr>
-  <td class="contentMainTop" width="100"><span class="fontBold">[betrag]:</span></td>
+  <td class="contentMainTop" width="100"><span class="fontBold">[lang_clankasse_cbetrag]:</span></td>
   <td class="contentMainFirst" align="center">
     <select name="pm" class="dropdown">
       <option value="0" [psel]>+</option>
@@ -32,7 +32,7 @@
     onblur="this.className='inputField_dis_mid';" /><span class="fontBold"> [w]</span></td>
 </tr>
 <tr>
-  <td class="contentBottom" colspan="2"><input id="contentSubmit" type="submit" value="[value]" class="submit" /></td>
+  <td class="contentBottom" colspan="2"><input id="contentSubmit" type="submit" value="[lang_button_value_edit]" class="submit" /></td>
 </tr>
 </table>
 </form>

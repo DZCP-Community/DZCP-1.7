@@ -13,41 +13,10 @@ include(basePath."/inc/common.php");
 ## SETTINGS ##
 $dir = "links";
 $where = _site_links;
+define('_Links', true);
 
-## SECTIONS ##
-switch ($action):
-    default:
-        $qry = db("SELECT * FROM ".$db['links']." ORDER BY banner DESC");
-        if(_rows($qry)) {
-            while($get = _fetch($qry)) {
-                if($get['banner']) {
-                    $banner = show(_links_bannerlink, array("id" => $get['id'],
-                                                            "banner" => re($get['text'])));
-                } else {
-                    $banner = show(_links_textlink, array("id" => $get['id'],
-                                                          "text" => str_replace('http://','',re($get['url']))));
-                }
-
-                $show .= show($dir."/links_show", array("beschreibung" => bbcode($get['beschreibung']),
-                                                        "hits" => $get['hits'],
-                                                        "hit" => _hits,
-                                                        "banner" => $banner));
-            }
-        }
-
-        if(empty($show))
-            $show = _no_entrys_yet;
-
-        $index = show($dir."/links", array("head" => _links_head, "show" => $show));
-    break;
-    case 'link';
-        $get = db("SELECT `url`,`hits`,`id` FROM ".$db['links']." WHERE `id` = '".intval($_GET['id'])."'",false,true);
-        if(count_clicks('link',$get['id']))
-            db("UPDATE ".$db['links']." SET `hits` = ".($get['hits'] + 1)." WHERE `id` = '".$get['id']."'");
-
-        header("Location: ".$get['url']);
-    break;
-endswitch;
+if(file_exists(basePath."/links/case_".$action.".php"))
+    require_once(basePath."/links/case_".$action.".php");
 
 ## INDEX OUTPUT ##
 $title = $pagetitle." - ".$where;

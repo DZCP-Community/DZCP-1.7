@@ -82,7 +82,7 @@ if(defined('_UserMenu')) {
                 $qry = $sql->select('SELECT `id`,`forum` FROM `{prefix_f_access}` WHERE `user` = ?;',array($edituser));
                 foreach($qry as $get) {
                     if (!array_var_exists($get['forum'], $_POST['board'])) {
-                        db('DELETE FROM `{prefix_f_access}` WHERE `id` = ?;',array($get['id']));
+                        $sql->delete('DELETE FROM `{prefix_f_access}` WHERE `id` = ?;',array($get['id']));
                     }
                 }
 
