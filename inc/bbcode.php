@@ -43,9 +43,10 @@ dbc_index::init();
 //-> Automatische Datenbank Optimierung
 if(!$ajaxJob && auto_db_optimize && settings('db_optimize',false) < time() && !$installer && !$updater) {
     @ignore_user_abort(true);
-    db("UPDATE `".$db['settings']."` SET `db_optimize` = ".(time()+auto_db_optimize_interval)." WHERE `id` = 1;");
+    $sql->update("UPDATE `{prefix_settings}` SET `db_optimize` = ? WHERE `id` = 1;",
+            array((time()+auto_db_optimize_interval)));
     db_optimize();
-    setIpcheck("db_optimize()");
+    $sql->insert("INSERT INTO `{prefix_ipcheck}` SET `ip` = ?, `user_id` = ?, `what` = 'db_optimize()', `time` = ?;",array('0.0.0.0',intval(userid()),time()));
     @ignore_user_abort(false);
 }
 
@@ -188,7 +189,8 @@ function check_ip() {
         !validateIpV4Range($userip, '[172].[16-31].[0-255].[0-255]')) {
             sfs::check(); //SFS Update
             if(sfs::is_spammer()) {
-                db("DELETE FROM `".$db['ip2dns']."` WHERE `sessid` = '".session_id()."';");
+                $sql->delete("DELETE FROM `{prefix_iptodns}` WHERE `sessid` = ?;",
+                        array(session_id()));
                 dzcp_session_destroy();
                 die('Deine IP-Adresse ist auf <a href="http://www.stopforumspam.com/" target="_blank">http://www.stopforumspam.com/</a> gesperrt, die IP wurde zu oft für Spam Angriffe auf Webseiten verwendet.<p>
                      Your IP address is known on <a href="http://www.stopforumspam.com/" target="_blank">http://www.stopforumspam.com/</a>, your IP has been used for spam attacks on websites.');
@@ -561,14 +563,21 @@ if($userid >= 1 && $ajaxJob != true && isset($_SESSION['lastvisit'])) {
     $sql->update("UPDATE `{prefix_userstats}` SET `hits` = (hits+1), `lastvisit` = ? WHERE `user` = ?;",array(intval($_SESSION['lastvisit']),intval($userid)));
 }
 
-//-> Settings auslesen
+/**
+ * DZCP V1.7.0
+ * Werte aus der Settings Tabelle auslesen
+ *
+ * @param string $what
+ * @param boolean $use_dbc
+ * @return string
+ */
 function settings($what,$use_dbc=true) {
     global $sql;
     if(is_array($what)) {
         if ($use_dbc) {
             $dbd = dbc_index::getIndex('settings');
         } else {
-            $dbd = $sql->selectSingle("SELECT * FROM `{prefix_settings}` WHERE `id` = 1 LIMIT 1");
+            $dbd = $sql->selectSingle("SELECT * FROM `{prefix_settings}` WHERE `id` = 1 LIMIT 1;");
         }
 
         $return = array();
@@ -590,14 +599,21 @@ function settings($what,$use_dbc=true) {
     }
 }
 
-//-> Config auslesen
+/**
+ * DZCP V1.7.0
+ * Werte aus der Config Tabelle auslesen
+ *
+ * @param string $what
+ * @param boolean $use_dbc
+ * @return string
+ */
 function config($what,$use_dbc=true) {
     global $sql;
     if(is_array($what)) {
         if ($use_dbc) {
             $dbd = dbc_index::getIndex('config');
         } else {
-            $dbd = $sql->selectSingle("SELECT * FROM `{prefix_config}` WHERE `id` = 1 LIMIT 1");
+            $dbd = $sql->selectSingle("SELECT * FROM `{prefix_config}` WHERE `id` = 1 LIMIT 1;");
         }
 
         $return = array();
@@ -1029,11 +1045,8 @@ function re($txt = '') {
     return string::decode($txt);
 }
 
-function re_entry($txt) {
-    return stripslashes($txt);
-}
-
 /**
+ * DZCP V1.7.0
  * BBCODE in Smileys umwandeln
  * @param string $txt
  * @return string
@@ -1060,8 +1073,8 @@ function smileys($txt) {
                   " <img src=\"../inc/images/smileys/traurig.gif\" alt=\"\" />",
                   " <img src=\"../inc/images/smileys/zwinker.gif\" alt=\"\" />");
 
-  $txt = preg_replace($var,$repl, $txt);
-  return str_replace(" ^^"," <img src=\"../inc/images/smileys/^^.gif\" alt=\"\" />", $txt);
+    $txt = preg_replace($var,$repl, $txt);
+    return str_replace(" ^^"," <img src=\"../inc/images/smileys/^^.gif\" alt=\"\" />", $txt);
 }
 
 //-> Flaggen ausgeben
@@ -1121,7 +1134,11 @@ function flagge($txt) {
     return preg_replace($var,$repl, $txt);
 }
 
-//-> Funktion um Ausgaben zu kuerzen
+/**
+ * DZCP V1.7.0
+ * Funktion um Ausgaben zu kuerzen
+ * @return string
+ **/
 function cut($str, $length = null, $dots = true) {
     if($length === 0)
         return '';
@@ -1157,7 +1174,11 @@ function wrap($str, $width = 75, $break = "\n", $cut = true) {
     return strtr(str_replace(htmlentities($break), $break, htmlentities(wordwrap(html_entity_decode($str), $width, $break, $cut), ENT_QUOTES)), array_flip(get_html_translation_table(HTML_SPECIALCHARS, ENT_COMPAT)));
 }
 
-//-> Funktion um Dateien aus einem Verzeichnis auszulesen
+/**
+ * DZCP V1.7.0
+ * Funktion um Dateien aus einem Verzeichnis auszulesen
+ * @return array
+ **/
 function get_files($dir=null,$only_dir=false,$only_files=false,$file_ext=array(),$preg_match=false,$blacklist=array(),$blacklist_word=false) {
     $files = array();
     if(!file_exists($dir) && !is_dir($dir)) return $files;
@@ -1216,8 +1237,12 @@ function get_files($dir=null,$only_dir=false,$only_files=false,$file_ext=array()
         return false;
 }
 
-//-> Gibt einen Teil eines nummerischen Arrays wieder
-function limited_array($array=array(),$begin,$max) {
+/**
+ * DZCP V1.7.0
+ * Gibt einen Teil eines nummerischen Arrays wieder
+ * @return array
+ **/
+function limited_array($array=array(),$begin=1,$max=10) {
     $array_exp = array();
     $range=range($begin=($begin-1), ($begin+$max-1));
     foreach($array as $key => $wert) {
@@ -1449,15 +1474,6 @@ function orderby_nav() {
     return $orderby;
 }
 
-//-> Funktion um ein Datenbankinhalt zu highlighten
-function highlight($word) {
-    if (substr(phpversion(), 0, 1) == 5) {
-        return str_ireplace($word, '<span class="fontRed">' . $word . '</span>', $word);
-    } else {
-        return str_replace($word, '<span class="fontRed">' . $word . '</span>', $word);
-    }
-}
-
 //-> Counter updaten
 function updateCounter() {
     global $sql,$reload,$userip;
@@ -1647,18 +1663,6 @@ function check_msg() {
     return false;
 }
 
-//-> Prueft sicherheitsrelevante Gegebenheiten im Forum
-function forumcheck($tid, $what) {
-    global $db;
-    return db("SELECT `".$what."` FROM `".$db['f_threads']."` WHERE `id` = ".intval($tid)." AND ".$what." = 1;",true) ? true : false;
-}
-
-//-> Prueft ob ein User schon in der Buddyliste vorhanden ist
-function check_buddy($buddy) {
-    global $db,$userid;
-    return !db("SELECT `buddy` FROM `".$db['buddys']."` WHERE `user` = ".intval($userid)." AND `buddy` = ".intval($buddy).";",true) ? true : false;
-}
-
 //-> Funktion um bei Clanwars Endergebnisse auszuwerten
 function cw_result($punkte, $gpunkte) {
     if ($punkte > $gpunkte) {
@@ -1811,7 +1815,7 @@ function mkpwd($passwordLength=8,$specialcars=true) {
 }
 
 //-> Infomeldung ausgeben
-function info($msg, $url, $timeout = 5) {
+function info($msg, $url="", $timeout = 5) {
     if (config('direct_refresh')) {
         return header('Location: ' . str_replace('&amp;', '&', $url));
     }
@@ -1962,7 +1966,7 @@ class notification {
 
     public static function get($input=false) {
         $notification = '';
-        if($input) {
+        if(!empty($input)) {
             if($input['link']) {
                 $input['link'] = '<script language="javascript" type="text/javascript">window.setTimeout("DZCP.goTo(\''.$input['link'].'\');", '.($input['time']*1000).');</script>'
                 . '<noscript><meta http-equiv="refresh" content="'.$input['time'].';url='.$input['link'].'"></noscript>';
@@ -2146,7 +2150,7 @@ function data($what='id',$tid=0) {
         dbc_index::setIndex('user_'.$tid, $get);
     }
 
-    return re_entry(dbc_index::getIndexKey('user_'.$tid, $what));
+    return stripslashes(dbc_index::getIndexKey('user_'.$tid, $what));
 }
 
 function ping_port($address='',$port=0000,$timeout=2,$udp=false) {
@@ -2193,7 +2197,7 @@ function userstats($what='id',$tid=0) {
         dbc_index::setIndex('userstats_'.$tid, $get);
     }
 
-    return re_entry(dbc_index::getIndexKey('userstats_'.$tid, $what));
+    return stripslashes(dbc_index::getIndexKey('userstats_'.$tid, $what));
 }
 
 //- Funktion zum versenden von Emails
@@ -2830,8 +2834,9 @@ function count_clicks($side_tag='',$clickedID=0,$update=true) {
     return false;
 }
 
-function is_php($version='5.3.0')
-{ return (floatval(phpversion()) >= $version); }
+function is_php($version='5.3.0') { 
+    return (floatval(phpversion()) >= $version); 
+}
 
 function hextobin($hexstr) {
     if (is_php('5.4.0')) {
@@ -2850,6 +2855,32 @@ function hextobin($hexstr) {
     }
 
     return $sbin;
+}
+
+function db_optimize() {
+    global $sql,$securimage;
+    $qry = $sql->select("SELECT `id`,`update`,`expires` FROM `{prefix_autologin}` LIMIT 100;");
+    if($sql->rowCount()) {
+        foreach($qry as $get) {
+            if(($get['update'] && (($get['update'] + $get['expires']) >= time()))) {
+                $sql->delete("DELETE FROM `{prefix_autologin}` WHERE `id` = ?;",array($get['id']));
+            }
+        }
+    }
+
+    $securimage->clearOldCodesFromDatabase();
+    $sql->query("TRUNCATE {prefix_iptodns};");
+    if(sessions_backend == 'mysql') {
+        $sql->query("TRUNCATE `{prefix_sessions}`;");
+    }
+
+    $qry = $sql->show("SHOW TABLES FROM `".$sql->getConfig('db')."`");
+    foreach($qry as $tb) {
+        $qry .= '`'.$tb.'`, ';
+    }
+
+    $qry = substr($qry, 0, -2);
+    $sql->query('OPTIMIZE TABLE '.$qry.';');
 }
 
 //-> Codiert Text zur Speicherung

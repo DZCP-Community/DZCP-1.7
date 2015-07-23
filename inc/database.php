@@ -348,6 +348,11 @@ class database {
 
         return $dsn;
     }
+    
+    public function getConfig($key='host',$active='default') {
+        $dbConf = $this->dbConf[$active];
+        return $dbConf[$key];
+    }
 
     protected function getQueryType($qry) {
         list($type, ) = explode(" ", strtolower($qry), 2);

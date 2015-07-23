@@ -1,4 +1,4 @@
-tinyMCE_GZ.init({ plugins : 'contextmenu,dzcp,advimage,paste,table,fullscreen,inlinepopups,spellchecker,searchreplace,insertdatetime,media', themes : 'advanced', languages : (dzcp_config.lng == 'de' ? dzcp_config.lng : 'en'), disk_cache : true, debug : false });
+tinyMCE_GZ.init({ plugins : 'contextmenu,dzcp,advimage,paste,table,fullscreen,inlinepopups,spellchecker,searchreplace,insertdatetime,media', themes : 'advanced', languages : (dzcp_config.lng == 'de' ? dzcp_config.lng : 'en'), disk_cache : true, debug : false, compress : true });
 
 //default wysiwyg editor
 tinyMCE.init({

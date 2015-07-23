@@ -124,35 +124,6 @@ function db_stmt($query,$params=array('si', 'hallo', '4'),$rows=false,$fetch=fal
     }
 }
 
-function db_optimize() {
-    global $db,$mysqli,$securimage;
-    if ($mysqli instanceof mysqli) {
-        $qry = db("SELECT `id`,`update`,`expires` FROM `".$db['autologin']."`");
-        if(_rows($qry)) {
-            while ($get = _fetch($qry)) {
-                if(($get['update'] && (($get['update'] + $get['expires']) >= time()))) {
-                    db("DELETE FROM `".$db['autologin']."` WHERE `id` = ".$get['id'].";");
-                }
-            }
-        }
-
-        $securimage->clearOldCodesFromDatabase();
-        db("TRUNCATE ".$db['ip2dns'].";");
-        if(sessions_backend == 'mysql') {
-            db("TRUNCATE ".$db['sessions'].";");
-        }
-        
-        $qry = ''; $blacklist = array('host','user','pass','db','prefix');
-        foreach ($db as $key => $tb) {
-            if(!in_array($key,$blacklist))
-                $qry .= '`'.$tb.'`, ';
-        }
-
-        $qry = substr($qry, 0, -2);
-        db('OPTIMIZE TABLE '.$qry.';');
-    }
-}
-
 function refValues($arr) {
     if (strnatcmp(phpversion(),'5.3') >= 0) {
         $refs = array();

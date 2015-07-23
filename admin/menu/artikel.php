@@ -9,22 +9,15 @@ $where = $where.': '._artikel;
 
 switch($do) {
     case 'add':
-        $qryk = db("SELECT id,kategorie FROM ".$db['newskat'].""); $kat = '';
-        while($getk = _fetch($qryk)) {
-            $kat .= show(_select_field, array("value" => $getk['id'],
-                                              "sel" => "",
-                                              "what" => re($getk['kategorie'])));
+        $qryk = $sql->select("SELECT `id`,`kategorie` FROM `{prefix_newskat}`;"); $kat = '';
+        foreach($qryk as $getk) {
+            $kat .= show(_select_field, array("value" => $getk['id'],"sel" => "","what" => re($getk['kategorie'])));
         }
 
         $show = show($dir."/artikel_form", array("head" => _artikel_add,
-                                                 "nautor" => _autor,
                                                  "autor" => autor($userid),
-                                                 "nkat" => _news_admin_kat,
                                                  "kat" => $kat,
-                                                 "preview" => _preview,
-                                                 "ntitel" => _titel,
                                                  "do" => "insert",
-                                                 "ntext" => _eintrag,
                                                  "error" => "",
                                                  "titel" => "",
                                                  "artikeltext" => "",
@@ -35,12 +28,8 @@ switch($do) {
                                                  "url2" => "",
                                                  "url3" => "",
                                                  "button" => _button_value_add,
-                                                 "nmore" => _news_admin_more,
-                                                 "linkname" => _linkname,
-                                                 "aimage" => _artikel_userimage,
                                                  "n_artikelpic" => '',
-                                                 "delartikelpic" => '',
-                                                 "nurl" => _url));
+                                                 "delartikelpic" => ''));
     break;
     case 'insert':
         if(empty($_POST['titel']) || empty($_POST['artikel'])) {
@@ -110,9 +99,7 @@ switch($do) {
         $qryk = db("SELECT id,kategorie FROM ".$db['newskat'].""); $kat = '';
         while($getk = _fetch($qryk)) {
             $sel = ($get['kat'] == $getk['id'] ? 'selected="selected"' : '');
-            $kat .= show(_select_field, array("value" => $getk['id'],
-                                              "sel" => $sel,
-                                              "what" => re($getk['kategorie'])));
+            $kat .= show(_select_field, array("value" => $getk['id'], "sel" => $sel, "what" => re($getk['kategorie'])));
         }
 
         $artikelimage = ""; $delartikelpic = "";
@@ -151,17 +138,11 @@ switch($do) {
     break;
     case 'editartikel':
         if(isset($_POST)) {
-            db("UPDATE ".$db['artikel']."
-                SET `kat`    = '".intval($_POST['kat'])."',
-                    `titel`  = '".up($_POST['titel'])."',
-                    `text`   = '".up($_POST['artikel'])."',
-                    `link1`  = '".up($_POST['link1'])."',
-                    `link2`  = '".up($_POST['link2'])."',
-                    `link3`  = '".up($_POST['link3'])."',
-                    `url1`   = '".links($_POST['url1'])."',
-                    `url2`   = '".links($_POST['url2'])."',
-                    `url3`   = '".links($_POST['url3'])."'
-                WHERE id = '".intval($_GET['id'])."'");
+            $sql->update("UPDATE `{prefix_artikel}` SET `kat` = ?, `titel` = ?, `text` = ?, `link1` = ?, "
+            . "`link2` = ?, `link3` = ?, `url1` = ?, `url2` = ?, `url3` = ? WHERE `id` = ?;",
+            array(intval($_POST['kat']),up($_POST['titel']),up($_POST['artikel']),up($_POST['link1']),
+                up($_POST['link2']),up($_POST['link3']),up(links($_POST['url1'])),
+                up(links($_POST['url2'])),up(links($_POST['url3'])),intval($_GET['id'])));
 
             if(isset($_FILES['artikelpic']['tmp_name']) && !empty($_FILES['artikelpic']['tmp_name'])) {
                 foreach($picformat as $tmpendung) {
@@ -190,8 +171,8 @@ switch($do) {
         }
     break;
     case 'delete':
-        db("DELETE FROM ".$db['artikel']." WHERE id = '".intval($_GET['id'])."'");
-        db("DELETE FROM ".$db['acomments']." WHERE artikel = '".intval($_GET['id'])."'");
+        $sql->delete("DELETE FROM `{prefix_artikel}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $sql->delete("DELETE FROM `{prefix_acomments}` WHERE `artikel` = ?;",array(intval($_GET['id'])));
 
         //Remove Pic
         foreach($picformat as $tmpendung) {
@@ -236,19 +217,15 @@ switch($do) {
     break;
     case 'public':
         if(isset($_GET['what']) && $_GET['what'] == 'set')
-            db("UPDATE ".$db['artikel']." SET `public` = '1', `datum`  = '".time()."' WHERE id = '".intval($_GET['id'])."'");
+            $sql->update("UPDATE `{prefix_artikel}` SET `public` = 1, `datum`  = ? WHERE `id` = ?",array(time(),intval($_GET['id'])));
         else
-            db("UPDATE ".$db['artikel']." SET `public` = '0' WHERE id = '".intval($_GET['id'])."'");
+            $sql->update("UPDATE `{prefix_artikel}` SET `public` = 0 WHERE `id` = ?;",array(intval($_GET['id'])));
 
         header("Location: ?admin=artikel");
     break;
     default:
-        $entrys = cnt($db['artikel']);
-        $qry = db("SELECT * FROM ".$db['artikel']."
-                  ".orderby_sql(array("titel","datum","autor"),'ORDER BY `public` ASC, `datum` DESC')."
-                  LIMIT ".($page - 1)*config('m_adminartikel').",".config('m_adminartikel')."");
-        while($get = _fetch($qry))
-        {
+        $qry = $sql->select("SELECT * FROM `{prefix_artikel}` ".orderby_sql(array("titel","datum","autor"),'ORDER BY `public` ASC, `datum` DESC')." LIMIT ".($page - 1)*config('m_adminartikel').",".config('m_adminartikel').";");
+        foreach($qry as $get) {
             $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                           "action" => "admin=artikel&amp;do=edit",
                                                           "title" => _button_title_edit));
@@ -258,8 +235,7 @@ switch($do) {
                                                               "title" => _button_title_del,
                                                               "del" => convSpace(_confirm_del_artikel)));
 
-            $titel = show(_artikel_show_link, array("titel" => re(cut($get['titel'],config('l_newsadmin'))), "id" => $get['id']));
-
+            $titel = show(_artikel_show_link, array("titel" => cut(re($get['titel']),config('l_newsadmin')), "id" => $get['id']));
             $public = ($get['public'] ? '<a href="?admin=artikel&amp;do=public&amp;id='.$get['id'].'&amp;what=unset"><img src="../inc/images/public.gif" alt="" title="'._non_public.'" /></a>'
                     : '<a href="?admin=artikel&amp;do=public&amp;id='.$get['id'].'&amp;what=set"><img src="../inc/images/nonpublic.gif" alt="" title="'._public.'" /></a>');
 
@@ -279,19 +255,15 @@ switch($do) {
         if(empty($show))
             $show = '<tr><td colspan="6" class="contentMainSecond">'._no_entrys.'</td></tr>';
 
+        $entrys = cnt('{prefix_artikel}');
         $nav = nav($entrys,config('m_adminnews'),"?admin=artikel".(isset($_GET['show']) ? $_GET['show'] : '').orderby_nav());
         $show = show($dir."/admin_news", array("head" => _artikel,
                                                "nav" => $nav,
-                                               "autor" => _autor,
-                                               "titel" => _titel,
-                                               "date" => _datum,
                                                "order_autor" => orderby('autor'),
                                                "order_date" => orderby('datum'),
                                                "order_titel" => orderby('titel'),
                                                "show" => $show,
                                                "val" => "artikel",
-                                               "edit" => _editicon_blank,
-                                               "delete" => _deleteicon_blank,
                                                "add" => _artikel_add));
     break;
 }

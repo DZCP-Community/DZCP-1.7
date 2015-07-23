@@ -1,5 +1,13 @@
 <?php
 /**
+ * DZCP - deV!L`z ClanPortal 1.7.0
+ * http://www.dzcp.de
+ *
+ * This class is modified for DZCP 1.7.0 by Hammermaps.de
+ * Original License by Moxiecode Systems AB
+ */
+
+/**
  * tiny_mce_gzip.php
  *
  * Copyright 2010, Moxiecode Systems AB
@@ -8,16 +16,16 @@
  * License: http://tinymce.moxiecode.com/license
  * Contributing: http://tinymce.moxiecode.com/contributing
  */
-
 define('basePath', dirname(dirname(dirname(__FILE__))));
 ob_start();
 
 ## Require ##
 $ajaxJob = true;
 include(basePath."/inc/common.php");
+TinyMCE_Compressor::getParams();
 
 // Handle incoming request if it's a script call
-if (TinyMCE_Compressor::getParam("js")) {
+if(TinyMCE_Compressor::getParam("js")) {
     // Default settings
     $tinyMCECompressor = new TinyMCE_Compressor();
 
@@ -27,17 +35,20 @@ if (TinyMCE_Compressor::getParam("js")) {
 
 class TinyMCE_Compressor {
     private $files, $settings;
-    private static $defaultSettings = array(
-        "plugins"    => "",
-        "themes"     => "",
-        "languages"  => "",
-        "disk_cache" => true,
-        "expires"    => "30d",
-        "cache_dir"  => "",
-        "compress"   => true,
-        "suffix"     => "",
-        "files"      => "",
-        "source"     => false);
+    private static $opt_params = array();
+    private static $defaultSettings = array("plugins"    => "",
+                                            "themes"     => "",
+                                            "languages"  => "",
+                                            "disk_cache" => true,
+                                            "core"       => true,
+                                            "expires"    => "30d",
+                                            "headers"    => true,
+                                            "compress"   => true,
+                                            "debug"      => false,
+                                            "cc"         => true,
+                                            "suffix"     => "",
+                                            "files"      => "",
+                                            "source"     => false);
 
     /**
      * Constructs a new compressor instance.
@@ -46,10 +57,6 @@ class TinyMCE_Compressor {
      */
     public function __construct($settings = array()) {
         $this->settings = array_merge(self::$defaultSettings, $settings);
-
-        if (empty($this->settings["cache_dir"])) {
-            $this->settings["cache_dir"] = dirname(__FILE__);
-        }
     }
 
     /**
@@ -68,10 +75,11 @@ class TinyMCE_Compressor {
     public function handleRequest() {
         global $cache;
         $files = array();
+        $this->settings["debug"] = (self::getParam("debug") && view_error_reporting);
         $expiresOffset = $this->parseTime($this->settings["expires"]);
         $tinymceDir = dirname(__FILE__);
         $cacheHash = md5(implode($_GET));
-        if (true || !$cache->isExisting($cacheHash)) {
+        if (!$this->settings["disk_cache"] || $this->settings["debug"] || !$cache->isExisting($cacheHash)) {
             // Override settings with querystring params
             if ($plugins = self::getParam("plugins")) {
                 $this->settings["plugins"] = $plugins;
@@ -90,35 +98,67 @@ class TinyMCE_Compressor {
 
             if ($tagFiles = self::getParam("files")) {
                 $this->settings["files"] = $tagFiles;
-            }
+            } unset($tagFiles);
 
-            $src = self::getParam("src");
-            if ($src) {
+            if ($src = self::getParam("src")) {
                 $this->settings["source"] = ($src === "true");
-            }
+            } unset($src);
+            
+            if ($suffix = self::getParam("suffix")) {
+                $this->settings["suffix"] = $suffix;
+            } unset($suffix);
+            
+            //Set Cache
+            $this->settings["disk_cache"] = self::getParam("disk_cache");
+            
+            //Set Compress
+            $this->settings['compress'] = self::getParam("compress");
+            
+            //Set Core
+            $this->settings['core'] = self::getParam("core");
+            
+            //Set Headers
+            $this->settings['headers'] = self::getParam("headers");
+            
+            //Set Cache-Control
+            $this->settings['cc'] = self::getParam("cc");
 
+            if($this->settings["debug"]) {
+                echo '<p>########################<br>Settings:<br>########################<p>';
+                var_dump($this->settings);
+            }
+            
             // Add core
-            $files[] = "tiny_mce";
+            if($this->settings["core"]) {
+                $files[] = "tiny_mce";
+            }
+            
             foreach ($languages as $language) {
-                $files[] = "langs/$language";
-            }
+                $files[] = "langs/".$language;
+            } unset($language);
 
-            // Add plugins
+            // Add plugins && languages
             foreach ($plugins as $plugin) {
-                $files[] = "plugins/$plugin/editor_plugin";
+                $files[] = "plugins/".$plugin."/editor_plugin";
+                
                 foreach ($languages as $language) {
-                    $files[] = array("file"=>"plugins/$plugin/langs/$language");
+                    $files[] = array("file"=>"plugins/".$plugin."/langs/".$language);
                 }
-            }
+            } unset($plugins, $plugin);
 
             // Add themes
             foreach ($themes as $theme) {
                 $files[] = "themes/$theme/editor_template";
                 foreach ($languages as $language) {
-                    $files[] = "themes/$theme/langs/$language";
+                    $files[] = "themes/".$theme."/langs/".$language;
                 }
-            }
+            } unset($themes, $theme);
 
+            if($this->settings["debug"]) {
+                echo '<p>########################<br>Files on Call:<br>########################<p>';
+                var_export($files);
+            }
+            
             // Add any specified files.
             $allFiles = array_merge($files, explode(',', $this->settings['files']));
             $newallFiles = array();
@@ -147,111 +187,128 @@ class TinyMCE_Compressor {
                         fwrite($fp, $message); fclose($fp);
                     }
                 }
+            } unset($allFiles, $file);
+
+            if($this->settings["debug"]) {
+                echo '<p>########################<br>Files for Load:<br>########################<p>';
+                var_export($newallFiles);
             }
-            unset($allFiles, $file);
-
+            
             // Set base URL for where tinymce is loaded from
-            $buffer = "var tinyMCEPreInit={base:'" . dirname($_SERVER["SCRIPT_NAME"]) . "',suffix:''};";
+            $buffer = "var tinyMCEPreInit={base:'" . dirname($_SERVER["SCRIPT_NAME"]) . "',suffix:'".$this->settings["suffix"]."'};";
 
+            if($this->settings["debug"]) {
+                echo '<p>########################<br>Files Loaded:<br>########################<p>';
+            }
+            
             // Load all tinymce script files into buffer
             foreach ($newallFiles as $file) {
-                if ($file) {
+                if (file_exists($tinymceDir . "/" . $file)) {
                     $fileContents = $this->getFileContents($tinymceDir . "/" . $file);
+                    if($this->settings["debug"]) {
+                        echo 'File:'.$file.' -> Content: "'.strlen($fileContents).'" characters<br>';
+                    }
                     $buffer .= $fileContents;
+                } else {
+                    if($this->settings["debug"]) {
+                        echo 'File not found:'.$file.'<br>';
+                    }
+                    $message = '#####################################################################'.EOL.
+                    'Datum           = '.date("d.m.y H:i", time()).EOL.
+                    'Message         = TinyMCE Files not found'.EOL.
+                    'File            = '.$tinymceDir."/".$file.EOL.
+                    '#####################################################################'.EOL.EOL;
+                    $fp = fopen(basePath."/inc/_logs/tinymce_compressor.log", "a+");
+                    fwrite($fp, $message); fclose($fp);
                 }
             }
 
             // Mark all themes, plugins and languages as done
             $buffer .= 'tinymce.each("' . implode(',', $files) . '".split(","),function(f){tinymce.ScriptLoader.markDone(tinyMCE.baseURL+"/"+f+".js");});';
-            $cache->set($cacheHash, $buffer, $expiresOffset);
+           
+            if($this->settings["disk_cache"]) {
+                $cache->set($cacheHash, $buffer, $expiresOffset);
+            }
         } else {
             $buffer = $cache->get($cacheHash);
         }
 
+        if($this->settings["debug"]) {
+            echo '<p>########################<br>Buffer Loaded:<br>########################<p>';
+            echo 'Buffer has "'.strlen($buffer).'" total characters!<br>';
+            echo '<br>Buffer content:<br>'.$buffer.'<br>';
+        }
+        
         // Check if it supports gzip
         $zlibOn = ini_get('zlib.output_compression') || (ini_set('zlib.output_compression', 0) === false);
         $encodings = (isset($_SERVER['HTTP_ACCEPT_ENCODING'])) ? strtolower($_SERVER['HTTP_ACCEPT_ENCODING']) : "";
         $encoding = preg_match( '/\b(x-gzip|gzip)\b/', $encodings, $match) ? $match[1] : "";
-
+        
         // Is northon antivirus header
         if (isset($_SERVER['---------------'])) {
             $encoding = "x-gzip";
         }
-
-        $supportsGzip = $this->settings['compress'] && !empty($encoding) && !$zlibOn && function_exists('gzencode');
-
+        
+        $supportsGzip = !empty($encoding) && !$zlibOn && function_exists('gzencode');
+        
         // Set headers
-        header("Content-type: text/javascript");
-        header("Vary: Accept-Encoding");  // Handle proxies
-        header("Expires: " . gmdate("D, d M Y H:i:s", time() + $expiresOffset) . " GMT");
-        header("Cache-Control: public, max-age=" . $expiresOffset);
+        if(!$this->settings["debug"] && $this->settings['headers']) {
+            header("Content-type: text/javascript");
+            if($this->settings['cc']) {
+                header("Vary: Accept-Encoding");  // Handle proxies
+                header("Expires: " . gmdate("D, d M Y H:i:s", time() + $expiresOffset) . " GMT");
+                header("Cache-Control: public, max-age=" . $expiresOffset);
+            } else {
+                header("Expires: " . gmdate("D, d M Y H:i:s") . " GMT");
+                header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+                header("Cache-Control: no-store, no-cache, must-revalidate");
+                header("Cache-Control: post-check=0, pre-check=0", false);
+                header("Pragma: no-cache");
+            }
+        } else {
+            if($this->settings['headers']) {
+                echo '<p>########################<br>Headers:<br>########################<p>';
+                echo "Content-type: text/javascript";
+                if($this->settings['cc']) {
+                    echo "<br>Vary: Accept-Encoding";
+                    echo "<br>Expires: " . gmdate("D, d M Y H:i:s", time() + $expiresOffset) . " GMT";
+                    echo "<br>Cache-Control: public, max-age=" . $expiresOffset;
+                } else {
+                    echo "<br>Expires: " . gmdate("D, d M Y H:i:s") . " GMT";
+                    echo "<br>Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT";
+                    echo "<br>Cache-Control: no-store, no-cache, must-revalidate";
+                    echo "<br>Cache-Control: post-check=0, pre-check=0";
+                    echo "<br>Pragma: no-cache";
+                }
 
-        if ($supportsGzip) {
-            header("Content-Encoding: " . $encoding);
-            $buffer = gzencode($buffer, 9, FORCE_GZIP);
+                if ($supportsGzip && $this->settings['compress']) {
+                    echo "<br>Content-Encoding: " . $encoding;
+                }
+            }
         }
         
-        exit($buffer);
-    }
-
-    /**
-     * Renders a script tag that loads the TinyMCE script.
-     *
-     * @param Array $settings Name/value array with settings for the script tag.
-     * @param Bool  $return   The script tag is return instead of being output if true
-     * @return String the tag is returned if $return is true
-     */
-    public static function renderTag($tagSettings, $return = false) {
-        $settings = array_merge(self::$defaultSettings, $tagSettings);
-
-        if (empty($settings["cache_dir"])) {
-            $settings["cache_dir"] = dirname(__FILE__);
+        if($this->settings["debug"]) {
+            echo '<p>########################<br>GZIP Compression:<br>########################<p>';
+            echo 'Send Northon Antivirus Header: '.(isset($_SERVER['---------------']) ? 'yes' : 'no');
+            echo '<br>GZIP Compression Support: '.($supportsGzip ? 'yes' : 'no');
+            echo '<br>GZIP Compression Support by Webbrowser: '.($encoding ? 'yes' : 'no');
         }
-
-        $scriptSrc = $settings["url"] . "?js=1";
-
-        // Add plugins
-        if (isset($settings["plugins"])) {
-            $scriptSrc .= "&plugins=" . (is_array($settings["plugins"]) ? implode(',', $settings["plugins"]) : $settings["plugins"]);
+        
+        if ($supportsGzip && $this->settings['compress'] && $this->settings['headers']) {
+            if(!$this->settings["debug"]) {
+                header("Content-Encoding: " . $encoding);
+            }
+            
+            $buffer = gzencode($buffer, 9, FORCE_GZIP);
+            if($this->settings["debug"]) {
+                echo '<br>GZIP Content:<br>'.$buffer;
+            }
         }
-
-        // Add themes
-        if (isset($settings["themes"])) {
-            $scriptSrc .= "&themes=" . (is_array($settings["themes"]) ? implode(',', $settings["themes"]) : $settings["themes"]);
-        }
-
-        // Add languages
-        if (isset($settings["languages"])) {
-            $scriptSrc .= "&languages=" . (is_array($settings["languages"]) ? implode(',', $settings["languages"]) : $settings["languages"]);
-        }
-
-        // Add disk_cache
-        if (isset($settings["disk_cache"])) {
-            $scriptSrc .= "&diskcache=" . ($settings["disk_cache"] === true ? "true" : "false");
-        }
-
-        // Add any explicitly specified files if the default settings have been overriden by the tag ones
-        /*
-         * Specifying tag files will override (rather than merge with) any site-specific ones set in the
-         * TinyMCE_Compressor object creation.  Note that since the parameter parser limits content to alphanumeric
-         * only base filenames can be specified.  The file extension is assumed to be ".js" and the directory is
-         * the TinyMCE root directory.  A typical use of this is to include a script which initiates the TinyMCE object.
-         */
-        if (isset($tagSettings["files"])) {
-            $scriptSrc .= "&files=" . (is_array($settings["files"]) ? implode(',', $settings["files"]) : $settings["files"]);
-        }
-
-        // Add src flag
-        if (isset($settings["source"])) {
-            $scriptSrc .= "&src=" . ($settings["source"] === true ? "true" : "false");
-        }
-
-        $scriptTag = '<script type="text/javascript" src="' . htmlspecialchars($scriptSrc) . '"></script>';
-
-        if ($return) {
-            return $scriptTag;
+        
+        if($this->settings["debug"]) {
+            exit('</pre>');
         } else {
-            echo $scriptTag;
+            exit($buffer);
         }
     }
 
@@ -263,11 +320,32 @@ class TinyMCE_Compressor {
      * @return String Sanitized query string parameter value.
      */
     public static function getParam($name, $default = "") {
-        if (!isset($_GET[$name])) {
-            return $default;
+        if(!array_key_exists($name, self::$opt_params)) {
+            if(empty($default) && !array_key_exists($name, self::$defaultSettings)) {
+               return $default;
+            }
+            
+            return self::$defaultSettings[$name];
         }
 
-        return preg_replace("/[^0-9a-z\-_,]+/i", "", $_GET[$name]); // Sanatize for security, remove anything but 0-9,a-z,-_,
+        return self::$opt_params[$name];
+    }
+    
+    public static function getParams() { //Load Params
+        $bolean_index = array('js','diskcache','core','compress','src','debug','headers','cc');
+        foreach($_GET as $key => $param) {
+            if(in_array($key, $bolean_index)) {
+                self::$opt_params[$key] = ((trim($_GET[$key]) == 'true' || trim($_GET[$key]) == '1' || trim($_GET[$key]) == 1) ? true : false);
+            } else {
+                self::$opt_params[$key] = preg_replace("/[^0-9a-z\-_,]+/i", "", $param); // Sanatize for security, remove anything but 0-9,a-z,-_,
+            }
+        }
+        
+        if(self::$opt_params["debug"]) {
+            echo '<pre>';
+            echo '########################<br>Params:<br>########################<p>';
+            var_dump($_GET);
+        }
     }
 
     /**

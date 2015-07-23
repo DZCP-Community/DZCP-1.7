@@ -271,7 +271,7 @@ if(defined('_Artikel') && isset($_GET['id']) && !empty($_GET['id'])) {
                                                    "id" => $get_artikel['id'],
                                                    "comments" => "",
                                                    "display" => "inline",
-                                                   "notification_page" => (!empty($notification_p) ? notification::get($notification_p) : ''),
+                                                   "notification_page" => notification::get($notification_p),
                                                    "kat" => $artikelimage,
                                                    "showmore" => $showmore,
                                                    "icq" => "",

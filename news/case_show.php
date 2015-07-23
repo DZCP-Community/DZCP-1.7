@@ -275,7 +275,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                                                         "id" => $get_news['id'],
                                                         "comments" => "",
                                                         "dp" => "compact",
-                                                        "notification_page" => (!empty($notification_p) ? notification::get($notification_p) : ''),
+                                                        "notification_page" => notification::get($notification_p),
                                                         "dir" => $designpath,
                                                         "rel" => $rel,
                                                         "sticky" => "",

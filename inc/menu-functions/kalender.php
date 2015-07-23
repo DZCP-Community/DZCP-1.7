@@ -6,7 +6,7 @@
  */
 
 function kalender($month="",$year="",$js=false) {
-    global $db;
+    global $sql;
     
     header('Content-Type: text/html; charset=iso-8859-1');
     if(!$js) {
@@ -55,8 +55,8 @@ function kalender($month="",$year="",$js=false) {
                     $data .= "<td class=\"navKalEmpty\"></td>";
                 } else {
                     $titlebd = ''; $bdays = '';
-                    $qry = db("SELECT id,bday FROM ".$db['users']." WHERE bday != 0");
-                    while($get = _fetch($qry)) {
+                    $qry = $sql->select("SELECT `id`,`bday` FROM `{prefix_users}` WHERE bday != 0;");
+                    foreach($qry as $get) {
                         if(date("d.m",$get['bday']) == cal($i).".".$monat) {
                             $bdays = "set";
                             $titlebd .= '&lt;img src=../inc/images/bday.gif class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_birthday.rawautor($get['id'])).'&lt;br />';
@@ -64,21 +64,19 @@ function kalender($month="",$year="",$js=false) {
                     }
 
                     $cws = ""; $titlecw = "";
-                    $qry = db("SELECT datum,gegner FROM ".$db['cw']." WHERE DATE_FORMAT(FROM_UNIXTIME(datum), '%d.%m.%Y') = '".cal($i).".".$monat.".".$jahr."'");
-                    if(_rows($qry)) {
-                        while($get = _fetch($qry)) {
-                            $cws = "set";
-                            $titlecw .='&lt;img src=../inc/images/cw.gif class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_cw.re($get['gegner'])).'&lt;br />';
-                        }
+                    $qry = $sql->select("SELECT `datum`,`gegner` FROM `{prefix_clanwars}` WHERE DATE_FORMAT(FROM_UNIXTIME(datum), '%d.%m.%Y') = ?;",
+                            array(cal($i).".".$monat.".".$jahr));
+                    foreach($qry as $get) {
+                        $cws = "set";
+                        $titlecw .='&lt;img src=../inc/images/cw.gif class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_cw.re($get['gegner'])).'&lt;br />';
                     }
 
                     $event = ""; $titleev = "";
-                    $qry = db("SELECT datum,title FROM ".$db['events']." WHERE DATE_FORMAT(FROM_UNIXTIME(datum), '%d.%m.%Y') = '".cal($i).".".$monat.".".$jahr."'");
-                    if(_rows($qry)) {
-                        while($get = _fetch($qry)) {
-                            $event = "set";
-                            $titleev .= '&lt;img src=../inc/images/event.png class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_event.re($get['title'])).'&lt;br />';
-                        }
+                    $qry = $sql->select("SELECT `datum`,`title` FROM `{prefix_events}` WHERE DATE_FORMAT(FROM_UNIXTIME(datum), '%d.%m.%Y') = ?;",
+                            array(cal($i).".".$monat.".".$jahr));
+                    foreach($qry as $get) {
+                        $event = "set";
+                        $titleev .= '&lt;img src=../inc/images/event.png class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_event.re($get['title'])).'&lt;br />';
                     }
 
                     $info = 'onmouseover="DZCP.showInfo(\''.cal($i).'.'.$monat.'.'.$jahr.'\', \''.$titlebd.$titlecw.$titleev.'\')" onmouseout="DZCP.hideInfo()"';

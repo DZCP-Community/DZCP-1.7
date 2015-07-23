@@ -197,6 +197,7 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
 
             if (defined(substr($pholder[$i], 4))) {
                 $array[$pholder[$i]] = (count($array_lang_constant) >= 1 ? show(constant(substr($pholder[$i], 4)), $array_lang_constant) : constant(substr($pholder[$i], 4)));
+                continue;
             }
 
             if (function_exists(substr($pholder[$i], 5))) {

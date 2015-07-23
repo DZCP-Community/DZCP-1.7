@@ -15,6 +15,12 @@ $where = _site_forum;
 $dir = "forum";
 define('_Forum', true);
 
+//-> Prueft sicherheitsrelevante Gegebenheiten im Forum
+function forumcheck($tid, $what) {
+    global $sql;
+    return $sql->rows("SELECT `".$what."` FROM `{prefix_forumthreads}` WHERE `id` = ? AND ".$what." = 1;",array(intval($tid))) ? true : false;
+}
+
 ## SECTIONS
 $action = empty($action) ? 'default' : $action;
 if (file_exists(basePath . "/forum/case_" . $action . ".php")) {

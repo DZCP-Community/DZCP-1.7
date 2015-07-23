@@ -5,16 +5,16 @@
     <script language="javascript" type="text/javascript">
       var prevURL = '../gb/?action=preview[ed]';
     </script>
-    <form id="gbForm" name="gbForm" action="?action=do&amp;what=[whaturl]" method="post" onsubmit="return(DZCP.submitButton())">
+    <form id="gbForm" name="gbForm" action="?[whaturl]" method="post" onsubmit="return(DZCP.submitButton())">
     <input type="hidden" name="reg" value="[reg]" />
       <table class="mainContent" cellspacing="1">
       <tr>
         <td class="contentHead" colspan="2"><span class="fontBold">[eintraghead]</span><a name="eintragen"></a></td>
       </tr>
-      [error]
       [form]
         <tr>
           <td class="contentMainFirst" align="center" colspan="2">
+            [notification_page]
             <textarea id="eintrag" name="eintrag" cols="0" rows="0" class="editorStyle">[posteintrag]</textarea>
           </td>
         </tr>

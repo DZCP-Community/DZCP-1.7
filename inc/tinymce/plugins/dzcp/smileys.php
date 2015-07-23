@@ -16,7 +16,7 @@ include(basePath."/inc/common.php");
 <head>
     <title>{#dzcp.title}</title>
     <script language="javascript" type="text/javascript" src="../../tiny_mce_popup.js"></script>
-    <script language="javascript" type="text/javascript" src="jscripts/smileys.js"></script>
+    <script language="javascript" type="text/javascript" src="js/smileys.js"></script>
     <base target="_self" />
   <script language="javascript" type="text/javascript">
     function resizeMe()

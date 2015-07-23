@@ -5,77 +5,139 @@
  */
 
 if (!defined('_GB')) exit();
+switch($do) {
+    case 'addcomment':
+        $get = $sql->selectSingle("SELECT * FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        if(($chkMe != 'unlogged' && $get['reg'] == userid()) || permission("gb")) {
+            if(isset($_GET['save'])) {
+                if(empty($_POST['eintrag'])) {
+                    if(empty($_POST['eintrag'])) {
+                        javascript::set('AnchorMove', 'comForm');
+                        notification::add_error(_empty_eintrag);
+                    }
+                } else {
+                    $sql->insert("INSERT INTO `{prefix_gbcomments}` SET `gbe` = ?, `datum` = ?, `reg` = ?,`comment` = ?,`ip` = ?;",
+                        array($get['id'],time(),$userid,up($_POST['eintrag']),up(visitorIp())));
+                    $index = info(_gb_comment_added, "../gb/");
+                }
+            }
 
-  if(!permission("gb"))
-  {
-    $index = error(_error_wrong_permissions, 1);
-  } else {
-    if($do == "addcomment")
-    {
-      $qry = db("SELECT * FROM ".$db['gb']." WHERE id = '".intval($_GET['id'])."'");
-      $get = _fetch($qry);
+            if(empty($index)) {
+                $where = $where.': '._gb_addcomment_new;
+                $gbhp = (!empty($get['hp']) ? show(_hpicon, array("hp" => re($get['hp']))) : '');
+                $gbemail = (!empty($get['email']) ? CryptMailto(re($get['email'])) : '');
+                $gbtitel = show(_gb_titel, array("postid" => "?",
+                                                 "nick" => data($get['reg'], "nick"),
+                                                 "edit" => "",
+                                                 "public" => "",
+                                                 "delete" => "",
+                                                 "comment" => "",
+                                                 "id" => $get['reg'],
+                                                 "email" => $gbemail,
+                                                 "datum" => date("d.m.Y", $get['datum']),
+                                                 "zeit" => date("H:i", $get['datum']),
+                                                 "hp" => $gbhp));
 
-      if($get['hp']) $gbhp = show(_hpicon, array("hp" => $get['hp']));
-      else $gbhp = "";
+                $entry = show($dir."/gb_show", array("comments" => '', "gbtitel" => $gbtitel, "nachricht" => show(re($get['nachricht']),array(),array('gb_addcomment_from' => _gb_addcomment_from)), "editby" => re($get['editby']), "ip" => $get['ip']));
+                $index = show($dir."/gb_addcomment", array("notification_page" => notification::get(), "entry" => $entry, "id" => $_GET['id'], "ed" => ""));
+            }
+        } else
+            $index = error(_error_edit_post);
+    break;
+    case 'set':
+        if(permission('gb')) {
+            $sql->update("UPDATE `{prefix_gb}` SET `public` = 1 WHERE `id` = ?;",array(intval($_GET['id'])));
+            header("Location: ../gb/");
+        } else
+            $index = error(_error_edit_post);
+    break;
+    case 'unset':
+        if(permission('gb')) {
+            $sql->update("UPDATE `{prefix_gb}` SET `public` = 0 WHERE `id` = ?;",array(intval($_GET['id'])));
+            header("Location: ../gb/");
+        } else
+            $index = error(_error_edit_post);
+    break;
+    case 'delete':
+        $get = $sql->selectSingle("SELECT `reg` FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        if($get['reg'] == userid() && checkme() != "unlogged" || permission('gb')) {
+            $sql->delete("DELETE FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
+            $sql->delete("DELETE FROM `{prefix_gbcomments}` WHERE `gbe` = ?;",array(intval($_GET['id'])));
+            $index = info(_gb_delete_successful, "../gb/");
+        } else
+            $index = error(_error_edit_post);
+    break;
+    case 'cdelete':
+        $get = $sql->selectSingle("SELECT `reg` FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        if($get['reg'] == userid() && checkme() != "unlogged" || permission('gb')) {
+            $sql->delete("DELETE FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['id'])));
+            $index = info(_comment_deleted, "../gb/");
+        } else
+            $index = error(_error_edit_post);
+    break;
+    case 'cedit':
+        $get = $sql->selectSingle("SELECT * FROM `{prefix_gbcomments}`  WHERE `id` = ?;",array(intval($_GET['id'])));
+        if($get['reg'] == userid() && checkme() != "unlogged" || permission('gb')) {
+            if($get['reg'] != 0) {
+                $form = show("page/editor_regged", array("nick" => autor($get['reg'])));
+            } else {
+                $form = show("page/editor_notregged", array("postemail" => $get['email'], "posthp" => re($get['hp']), "postnick" => re($get['nick'])));
+            }
+            
+            $where = $where.': '._gb_addcomment_edit;
+            $index = show($dir."/edit_com", array("whaturl" => "editgbc&amp;id=".$get['id'],
+                                                 "ed" => "&edit=".$get['id']."&postid=".$_GET['postid'],
+                                                 "id" => $get['id'],
+                                                 "form" => $form,
+                                                 "posteintrag" => re($get['comment'])));
+        } else
+            $index = error(_error_edit_post);
+    break;
+    case 'edit':
+        $get = $sql->selectSingle("SELECT * FROM `{prefix_gb}` WHERE `id` = ?;",array($_GET['id']));
+        if($get['reg'] == userid() && checkme() != "unlogged" || permission('gb')) {
+            if($get['reg'] != 0) {
+                $form = show("page/editor_regged", array("nick" => autor($get['reg'])));
+            } else {
+                $form = show("page/editor_notregged", array("postemail" => re($get['email']), "posthp" => re($get['hp']), "postnick" => re($get['nick'])));
+            }
+            
+            $where = $where.': '._gb_edit_head;
+            $index = show($dir."/add", array("what" => _button_value_edit,
+                                             "reg" => $get['reg'],
+                                             "whaturl" => "action=admin&amp;do=editgb&amp;id=".$get['id'],
+                                             "ed" => "&edit=".$get['id']."&id=".$_GET['postid'],
+                                             "id" => $get['id'],
+                                             "form" => $form,
+                                             "posteintrag" => re($get['nachricht']),
+                                             "notification_page" => ""));
+        } else
+            $index = error(_error_edit_post);
+    break;
+    case 'editgb':
+        if(intval($_POST['reg']) == userid() || permission('gb')) {
+            $addme = ''; $params = array();
+            if(!intval($_POST['reg'])) {
+                $params = array(up($_POST['nick']),up($_POST['email']),up($_POST['hp']));
+                $addme = "`nick` = ?, `email` = ?, `hp` = ?,";
+            }
 
-      if($get_email) $gbemail = CryptMailto(re($get['email']));
-      else $gbemail = "";
-
-      if(permission("gb")) $comment = show(_gb_commenticon, array("id" => $get['id']));
-      else $comment = "";
-
-          if($get['reg'] == "0")
-          {
-              $gbtitel = show(_gb_titel_noreg, array("postid" => "?",
-                                                                                           "nick" => re($get['nick']),
-                                               "edit" => "",
-                                               "delete" => "",
-                                               "comment" => "",
-                                               "public" => "",
-                                               "uhr" => _uhr,
-                                                                                           "email" => $gbemail,
-                                                                                           "datum" => date("d.m.Y", $get['datum']),
-                                                                                           "zeit" => date("H:i", $get['datum']),
-                                                                                           "hp" => $gbhp));
-          } else {
-              $gbtitel = show(_gb_titel, array("postid" => "?",
-                                                                               "nick" => data("nick",$get['reg']),
-                                         "edit" => "",
-                                         "public" => "",
-                                         "delete" => "",
-                                         "uhr" => _uhr,
-                                         "comment" => "",
-                                                                               "id" => $get['reg'],
-                                                                                 "email" => $gbemail,
-                                                                                 "datum" => date("d.m.Y", $get['datum']),
-                                                                                 "zeit" => date("H:i", $get['datum']),
-                                                                                "hp" => $gbhp));
-          }
-
-          $entry = show($dir."/gb_show", array("gbtitel" => $gbtitel,
-                                                                             "nachricht" => bbcode($get['nachricht']),
-                                           "editby" => bbcode($get['editby']),
-                                           "ip" => $get['ip']));
-
-      $index = show($dir."/gb_addcomment", array("head" => _gb_addcomment_head,
-                                                 "entry" => $entry,
-                                                 "what" => _button_value_add,
-                                                 "id" => $_GET['id'],
-                                                 "head_gb" => _gb_addcomment_headgb));
-    } elseif($do == "postcomment") {
-      $qry = db("SELECT * FROM ".$db['gb']."
-                 WHERE id = '".intval($_GET['id'])."'");
-      $get = _fetch($qry);
-
-      $comment = show($dir."/commentlayout", array("nick" => autor($userid),
-                                                   "datum" => date("d.m.Y H:i", time())._uhr,
-                                                   "comment" => up($_POST['comment']),
-                                                   "nachricht" => $get['nachricht']));
-
-      $upd = db("UPDATE ".$db['gb']."
-                 SET `nachricht` = '".$comment."'
-                 WHERE id = '".intval($_GET['id'])."'");
-
-      $index = info(_gb_comment_added, "../gb/");
-    }
-  }
+            $editedby = show(_edited_by, array("autor" => autor(), "time" => date("d.m.Y H:i", time())._uhr));
+            array_merge($params,array(up($_POST['eintrag']),intval($_POST['reg']),up(addslashes($editedby)),intval($_GET['id'])));
+            $sql->update("UPDATE `{prefix_gb}` SET ".$addme." `nachricht`  = ?, `reg` = ?, `editby` = ? WHERE `id` = ?;",$params);
+            $index = info(_gb_edited, "../gb/");
+        } else
+            $index = error(_error_edit_post);
+    break;
+    case 'editgbc':
+        $get = $sql->selectSingle("SELECT `reg` FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        if($get['reg'] == userid() || permission('gb')) {
+            $editedby = show(_edited_by, array("autor" => autor(), "time" => date("d.m.Y H:i", time())._uhr));
+            $sql->update("UPDATE `{prefix_gbcomments}` SET `nick` = ?, `email` = ?, `hp` = ?, `comment` = ?, `editby` = ? WHERE `id` = ?;",
+                array(up($_POST['nick']),up($_POST['email']),up($_POST['hp']),up($_POST['eintrag']),up(addslashes($editedby)),intval($_GET['id'])));
+            
+            $index = info(_gb_comment_edited, "../gb/");
+        } else
+            $index = error(_error_edit_post);
+    break;
+}

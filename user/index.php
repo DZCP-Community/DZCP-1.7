@@ -68,6 +68,13 @@ function msg_truncate() {
     }
 }
 
+//-> Prueft ob ein User schon in der Buddyliste vorhanden ist
+function check_buddy($buddy) {
+    global $sql,$userid;
+    return !$sql->rows("SELECT `buddy` FROM `{prefix_userbuddys}` WHERE `user` = ? AND `buddy` = ?;",
+            array(intval($userid),intval($buddy))) ? true : false;
+}
+
 //Load Index
 if (file_exists(basePath . "/user/case_" . $action . ".php")) {
     require_once(basePath . "/user/case_" . $action . ".php");

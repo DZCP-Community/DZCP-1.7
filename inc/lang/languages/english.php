@@ -8,6 +8,7 @@ $charset = 'iso-8859-1';
 header("Content-type: text/html; charset=".$charset);
 
 ## ADDED / REDEFINED FOR 1.7.0
+define('_gameserver', 'Gameserver');
 define('_iban', 'IBAN');
 define('_bic', 'BIC');
 define('_gb_addcomment_from', 'Comment from');

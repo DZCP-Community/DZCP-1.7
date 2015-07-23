@@ -83,7 +83,7 @@ while($i <= 31 && checkdate($monat, $i, $jahr)) {
 
             //Clanwars
             $cws = "";
-            $qry = db("SELECT `datum`,`gegner` FROM `{prefix_clanwars}` WHERE DATE_FORMAT(FROM_UNIXTIME(datum), '%d.%m.%Y') = ?;",array(cal($i).".".$monat.".".$jahr));
+            $qry = $sql->select("SELECT `datum`,`gegner` FROM `{prefix_clanwars}` WHERE DATE_FORMAT(FROM_UNIXTIME(datum), '%d.%m.%Y') = ?;",array(cal($i).".".$monat.".".$jahr));
             if($sql->rowCount()) {
                 $infoCW = '';
                 foreach($qry as $get) {
@@ -96,7 +96,7 @@ while($i <= 31 && checkdate($monat, $i, $jahr)) {
 
             //Events
             $event = "";
-            $qry = db("SELECT `datum`,`title` FROM `{prefix_events}` WHERE DATE_FORMAT(FROM_UNIXTIME(datum), '%d.%m.%Y') = ?;",array(cal($i).".".$monat.".".$jahr));
+            $qry = $sql->select("SELECT `datum`,`title` FROM `{prefix_events}` WHERE DATE_FORMAT(FROM_UNIXTIME(datum), '%d.%m.%Y') = ?;",array(cal($i).".".$monat.".".$jahr));
             if($sql->rowCount()) {
                 $infoEvent = '';
                 foreach($qry as $get) {
