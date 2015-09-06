@@ -22,7 +22,7 @@ $amenu = array();
 $use_glossar = false;
 
 ## SECTIONS ##
-if (!admin_perms($_SESSION['id'])) {
+if (!isset($_SESSION['id']) || empty($_SESSION['id']) || !admin_perms($_SESSION['id'])) {
     $index = error(_error_wrong_permissions, 1);
 } else {
     if (isset($_GET['admin']) && file_exists(basePath . '/admin/menu/' . strtolower($_GET['admin']) . '.php') &&
@@ -183,7 +183,8 @@ if (!admin_perms($_SESSION['id'])) {
             }
         }
 
-        $show = show($dir . "/dashboard", array('news' => show($dir . "/dzcp_news", array('news' => $show_news))));
+        if(!notification::is_success())
+            $show = show($dir . "/dashboard", array('news' => show($dir . "/dzcp_news", array('news' => $show_news))));
     }
 
     if (@file_exists(basePath . "/_installer") && $chkMe == 4 && !view_error_reporting && _edition != 'dev') {

@@ -86,6 +86,7 @@ $support .= "GD-Version: ".$PhpInfo['gd']['GD Version']."\r\n";
 $support .= "PHP-Memory Limit: ".$PhpInfo['Core']['memory_limit'][0]."\r\n";
 $support .= "imagettftext(): ".(function_exists('imagettftext')==true? 'existiert' : 'existiert nicht')."\r\n";
 $support .= "HTTP_ACCEPT_ENCODING: ".$_SERVER["HTTP_ACCEPT_ENCODING"]."\r\n";
+$support .= "PHP OPcache: ".(function_exists('opcache_get_status') ? 'On' : 'Off')."\r\n";
 
 //Removed in PHP 5.4.x +
 if(!is_php('5.4.0'))

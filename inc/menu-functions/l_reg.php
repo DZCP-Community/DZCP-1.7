@@ -10,12 +10,12 @@ function l_reg() {
     
     $qry = $sql->select("SELECT `id`,`nick`,`country`,`regdatum` "
                       . "FROM `{prefix_users}` "
-                      . "ORDER BY `regdatum` DESC LIMIT ".config('m_lreg').";");
+                      . "ORDER BY `regdatum` DESC LIMIT ".settings('m_lreg').";");
     
     $lreg = '';
     if($sql->rowCount()) {
         foreach($qry as $get) {
-            $lreg .= show("menu/last_reg", array("nick" => cut(re($get['nick']), config('l_lreg')),
+            $lreg .= show("menu/last_reg", array("nick" => cut(re($get['nick']), settings('l_lreg')),
                                                  "country" => flag($get['country']),
                                                  "reg" => date("d.m.", $get['regdatum']),
                                                  "id" => $get['id']));

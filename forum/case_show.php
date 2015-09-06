@@ -21,7 +21,7 @@ if(defined('_Forum')) {
                  WHERE kid ='".intval($_GET['id'])."'
                  OR global = 1
                  ORDER BY global DESC, sticky DESC, lp DESC, t_date DESC
-                 LIMIT ".($page - 1)*config('m_fthreads').",".config('m_fthreads')."");
+                 LIMIT ".($page - 1)*settings('m_fthreads').",".settings('m_fthreads')."");
     } else {
       $qry = db("SELECT s1.global,s1.topic,s1.subtopic,s1.t_text,s1.t_email,s1.hits,s1.t_reg,s1.t_date,s1.closed,s1.sticky,s1.id
                  FROM ".$db['f_threads']." AS s1
@@ -32,7 +32,7 @@ if(defined('_Forum')) {
                  OR s1.t_text LIKE '%".$_POST['suche']."%'
                  AND s1.kid = '".intval($_GET['id'])."'
                  ORDER BY s1.global DESC, s1.sticky DESC, s1.lp DESC, s1.t_date DESC
-                 LIMIT ".($page - 1)*config('m_fthreads').",".config('m_fthreads')."");
+                 LIMIT ".($page - 1)*settings('m_fthreads').",".settings('m_fthreads')."");
     }
 
     $entrys = cnt($db['f_threads'], " WHERE kid = ".intval($_GET['id']));
@@ -53,14 +53,14 @@ if(defined('_Forum')) {
       $cntpage = cnt($db['f_posts'], " WHERE sid = ".$get['id']);
 
       if($cntpage == "0") $pagenr = "1";
-      else $pagenr = ceil($cntpage/config('m_fposts'));
+      else $pagenr = ceil($cntpage/settings('m_fposts'));
 
       if(empty($_POST['suche']))
       {
         $gets = db("SELECT id FROM ".$db['f_skats']."
                     WHERE id = '".intval($_GET['id'])."'",false,true);
 
-        $threadlink = show(_forum_thread_link, array("topic" => re(cut($get['topic'],config('l_forumtopic'))),
+        $threadlink = show(_forum_thread_link, array("topic" => re(cut($get['topic'],settings('l_forumtopic'))),
                                                      "id" => $get['id'],
                                                      "kid" => $gets['id'],
                                                      "sticky" => $sticky,
@@ -69,7 +69,7 @@ if(defined('_Forum')) {
                                                      "lpid" => $cntpage+1,
                                                      "page" => $pagenr));
       } else {
-        $threadlink = show(_forum_thread_search_link, array("topic" => re(cut($get['topic'],config('l_forumtopic'))),
+        $threadlink = show(_forum_thread_search_link, array("topic" => re(cut($get['topic'],settings('l_forumtopic'))),
                                                             "id" => $get['id'],
                                                             "sticky" => $sticky,
                                                             "hl" => $_POST['suche'],
@@ -95,7 +95,7 @@ if(defined('_Forum')) {
       $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
       $threads .= show($dir."/forum_show_threads", array("new" => check_new($get['lp']),
                                                          "topic" => $threadlink,
-                                                         "subtopic" => re(cut($get['subtopic'],config('l_forumsubtopic'))),
+                                                         "subtopic" => re(cut($get['subtopic'],settings('l_forumsubtopic'))),
                                                          "hits" => $get['hits'],
                                                          "replys" => cnt($db['f_posts'], " WHERE sid = '".$get['id']."'"),
                                                          "class" => $class,
@@ -110,7 +110,7 @@ if(defined('_Forum')) {
     $search = show($dir."/forum_skat_search", array("head_search" => _forum_head_skat_search,
                                                     "id" => $_GET['id'],
                                                     "suchwort" => isset($_POST['suche']) ? re($_POST['suche']) : ''));
-    $nav = nav($entrys,config('m_fthreads'),"?action=show&amp;id=".$_GET['id']."");
+    $nav = nav($entrys,settings('m_fthreads'),"?action=show&amp;id=".$_GET['id']."");
 
     if(!empty($_POST['suche']))
     {

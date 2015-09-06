@@ -188,8 +188,8 @@ if(defined('_Forum')) {
     }
 
     $index = show($dir."/forum_posts_show", array("nick" => cleanautor($pUId, '', $_POST['nick'], $_POST['email']),
-                                                  "postnr" => "#".($i+($page-1)*config('m_fposts')),
-                                                  "p" => ($i+($page-1)*config('m_fposts')),
+                                                  "postnr" => "#".($i+($page-1)*settings('m_fposts')),
+                                                  "p" => ($i+($page-1)*settings('m_fposts')),
                                                   "class" => 'class="commentsRight"',
                                                   "text" => bbcode(re($_POST['eintrag']),true).$editedby,
                                                   "pn" => $pn,

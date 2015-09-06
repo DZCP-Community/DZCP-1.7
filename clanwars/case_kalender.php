@@ -11,9 +11,9 @@ if(defined('_Clanwars')) {
              LEFT JOIN ".$db['squads']." AS s2 ON s1.squad_id = s2.id
              WHERE DATE_FORMAT(FROM_UNIXTIME(s1.datum), '%d.%m.%Y') = '".date("d.m.Y",intval($_GET['time']))."'
              ORDER BY s1.datum DESC
-             LIMIT ".($page - 1)*config('m_clanwars').",".config('m_clanwars')."");
+             LIMIT ".($page - 1)*settings('m_clanwars').",".settings('m_clanwars')."");
 
-  $i = $entrys-($page - 1)*config('m_clanwars');
+  $i = $entrys-($page - 1)*settings('m_clanwars');
   $entrys = cnt($db['cw'], " WHERE DATE_FORMAT(FROM_UNIXTIME('".$get['datum']."'), '%d.%m.%Y') = '".date("d.m.Y",intval($_GET['time']))."'");
 
   if(_rows($qry))
@@ -23,7 +23,7 @@ if(defined('_Clanwars')) {
     {
       $img = squad($get['icon']);
       $flagge = flag($get['gcountry']);
-      $gegner = show(_cw_details_gegner, array("gegner" => re(cut($get['clantag']." - ".$get['gegner'], config('l_clanwars'))),
+      $gegner = show(_cw_details_gegner, array("gegner" => re(cut($get['clantag']." - ".$get['gegner'], settings('l_clanwars'))),
                                                "url" => '?action=details&amp;id='.$get['id']));
 
       $details = show(_cw_show_details, array("id" => $get['id']));
@@ -91,18 +91,10 @@ if(defined('_Clanwars')) {
                                            "dr_wars" => $anz_dr_wars,
                                            "dr_percent" => $dr_percent,
                                            "lo_percent" => $lo_percent,
-                                           "ges_punkte" => _cw_gespunkte,
                                            "wo_percent" => $wo_percent,
-                                                           "won_icon" => _cw_stats_won_icon,
-                                                           "lost_icon" => _cw_stats_lost_icon,
-                                                       "draw_icon" => _cw_stats_draw_icon,
                                                        "won_balken" => $wo_balken,
                                                          "lost_balken" => $lo_balken,
                                                          "draw_balken" => $dr_balken,
-                                                         "head_stat" => _cw_head_statstik,
-                                                         "won_stat" => _cw_stats_won_head,
-                                                         "lost_stat" => _cw_stats_lost_head,
-                                                         "draw_stat" => _cw_stats_draw_head,
                                                            "ges_wars" => $anz_ges_wars,
                                                            "ges_points" => $anz_ges_points,
                                                            "anz_spiele_squads" => $anz_spiele_squads));
@@ -127,7 +119,7 @@ if(defined('_Clanwars')) {
       $show = show($dir."/clanwars_no_show", array("clanwars_no_show" => _clanwars_no_show));
     }
 
-    $nav = nav($entrys,config('m_clanwars'),"?action=nav");
+    $nav = nav($entrys,settings('m_clanwars'),"?action=nav");
     $index = show($dir."/clanwars", array("head" => _cw_head_clanwars,
                                                             "game" => _cw_head_game,
                                           "datum" => _cw_head_datum,

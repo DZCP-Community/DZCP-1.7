@@ -26,7 +26,7 @@ function top_match() {
                     $squad = $get['squad_id'].'_logo.'.$end;
             }
 
-            if(config('allowhover') == 1 || config('allowhover') == 2)
+            if(settings('allowhover') == 1 || settings('allowhover') == 2)
                 $hover = 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['name'])).' vs. '.
                     jsconvert(re($get['gegner'])).'\', \''._played_at.';'._cw_xonx.';'._result.';'._comments_head.'\', \''.
                     date("d.m.Y H:i", $get['datum'])._uhr.';'.jsconvert(re($get['xonx'])).';'.
@@ -34,8 +34,8 @@ function top_match() {
                     cnt('{prefix_cw_comments}', "WHERE `cw` = ?","id",array($get['id'])).'\')" onmouseout="DZCP.hideInfo()"';
 
             $topmatch .= show("menu/top_match", array("id" => $get['id'],
-                                                      "clantag" => cut(re($get['clantag']),config('l_lwars')),
-                                                      "team" => cut(re($get['name']),config('l_lwars')),
+                                                      "clantag" => cut(re($get['clantag']),settings('l_lwars')),
+                                                      "team" => cut(re($get['name']),settings('l_lwars')),
                                                       "game" => substr(strtoupper(str_replace('.'.re($get['icon']), '', re($get['icon']))), 0, 5),
                                                       "id" => $get['id'],
                                                       "gegner" => $gegner,

@@ -2020,9 +2020,6 @@ function update_mysql_1_7() {
             if(!session_start())
                 die('PHP-Sessions not started!');
         }
-
-        if(!isset($_SESSION['PHPSESSID']))
-            $_SESSION['PHPSESSID'] = true;
     }
 
     cookie::init('dzcp_'.$prev);

@@ -47,11 +47,11 @@ if(defined('_UserMenu')) {
                                 $post = "";
                             } elseif ($count == 1) {
                                 $cnt = 1;
-                                $pagenr = ceil($lp / config('m_fposts'));
+                                $pagenr = ceil($lp / settings('m_fposts'));
                                 $post = _new_post_1;
                             } else {
                                 $cnt = $count;
-                                $pagenr = ceil($lp / config('m_fposts'));
+                                $pagenr = ceil($lp / settings('m_fposts'));
                                 $post = _new_post_2;
                             }
 
@@ -470,7 +470,7 @@ if(defined('_UserMenu')) {
             foreach($qryft as $getft) {
                 if (fintern($getft['kid'])) {
                     $lp = cnt('{prefix_forumposts}', " WHERE `sid` = ?",'id',array($getft['id']));
-                    $pagenr = ceil($lp / config('m_fposts'));
+                    $pagenr = ceil($lp / settings('m_fposts'));
                     $page = (!$pagenr ? 1 : $pagenr);
                     $getp = $sql->selectSingle("SELECT `text` "
                                              . "FROM `{prefix_forumposts}` "

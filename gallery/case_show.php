@@ -19,7 +19,7 @@ if(!permission('galleryintern') && $get['intern']) {
                 $tr1 = "<tr>";
             }
 
-            if($t == config('gallery')) {
+            if($t == settings('gallery')) {
                 $tr2 = "</tr>";
                 $t = 0;
             }
@@ -34,8 +34,8 @@ if(!permission('galleryintern') && $get['intern']) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/show_gallery", array("img" => gallery_size($file),
                                                       "tr1" => $tr1,
-                                                      "max" => config('gallery'),
-                                                      "width" => intval(round(100/config('gallery'))),
+                                                      "max" => settings('gallery'),
+                                                      "width" => intval(round(100/settings('gallery'))),
                                                       "del" => $del,
                                                       "tr2" => $tr2));
             $t++; $cnt++;
@@ -43,8 +43,8 @@ if(!permission('galleryintern') && $get['intern']) {
     }
 
     $end = '';
-    if(is_float($cnt/config('gallery'))) {
-        for($e=$t; $e<=config('gallery'); $e++) {
+    if(is_float($cnt/settings('gallery'))) {
+        for($e=$t; $e<=settings('gallery'); $e++) {
             $end .= '<td class="contentMainFirst"></td>';
         }
 

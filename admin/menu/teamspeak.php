@@ -5,43 +5,39 @@
  */
 
 if(_adminMenu != 'true') exit();
-$where = $where.': '._server_admin_head;
+$where = $where.': '._teamspekadmin_head;
 
 switch ($do) {
     case 'default_server':
-        $qry = db("SELECT `id` FROM `".$db['ts']."` WHERE `default_server` = 1;");
-        if(_rows($qry)) {
-            while($get = _fetch($qry)) { 
-                db("UPDATE `".$db['ts']."` SET `default_server` = 0 WHERE `id` = ".$get['id'].";"); 
-            }
+        $qry = $sql->select("SELECT `id` FROM `{prefix_teamspeak}` WHERE `default_server` = 1;");
+        foreach($qry as $get) {
+            $sql->update("UPDATE `{prefix_teamspeak}` SET `default_server` = 0 WHERE `id` = ?;",array($get['id'])); 
         }
 
-        db("UPDATE `".$db['ts']."` SET `default_server` = 1 WHERE `id` = ".intval($_GET['id']).";");
+        $sql->update("UPDATE `{prefix_teamspeak}` SET `default_server` = 1 WHERE `id` = ?;",array(intval($_GET['id'])));
         header("Location: ?admin=teamspeak");
     break;
     case 'menu':
-        $ts3_menu = db("SELECT id FROM ".$db['ts']." WHERE `show_navi` = 1",false,true);
-        $qry = db("SELECT id FROM ".$db['ts']." WHERE `show_navi` = 1");
-        if(_rows($qry)) {
-            while($get = _fetch($qry)) { 
-                db("UPDATE `".$db['ts']."` SET `show_navi` = 0 WHERE `id` = ".$get['id'].";"); 
-            }
+        $ts3_menu = $sql->selectSingle("SELECT `id` FROM `{prefix_teamspeak}` WHERE `show_navi` = 1;");
+        $qry = $sql->select("SELECT id FROM {prefix_teamspeak} WHERE `show_navi` = 1;");
+        foreach($qry as $get) {
+            $sql->update("UPDATE `{prefix_teamspeak}` SET `show_navi` = 0 WHERE `id` = ?;",array($get['id'])); 
         }
         
         if($ts3_menu['id'] != intval($_GET['id'])) {
-            db("UPDATE `".$db['ts']."` SET `show_navi` = 1 WHERE `id` = ".intval($_GET['id']).";");
+            $sql->update("UPDATE `{prefix_teamspeak}` SET `show_navi` = 1 WHERE `id` = ?;",array(intval($_GET['id'])));
         }
 
         header("Location: ?admin=teamspeak");
     break;
     case 'delete':
-        $get = db("SELECT `host_ip_dns`,`server_port` FROM `".$db['ts']."` WHERE `id` = ".intval($_GET['id'])." LIMIT 1",false,true);
+        $get = $sql->selectSingle("SELECT `host_ip_dns`,`server_port` FROM `{prefix_teamspeak}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
         $ip_port = TS3Renderer::tsdns(re($get['host_ip_dns']));
         $host = ($ip_port != false && is_array($ip_port) ? $ip_port['ip'] : $get['host_ip_dns']);
         $port = ($ip_port != false && is_array($ip_port) ? $ip_port['port'] : $get['server_port']);
         $cache->delete('teamspeak_'.md5($host.':'.$port));
 
-        db("DELETE FROM `".$db['ts']."` WHERE `id` = ".intval($_GET['id']).";");
+        $sql->delete("DELETE FROM `{prefix_teamspeak}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $show = info(show(_server_admin_deleted,array('host'=>$host.':'.$port)), "?admin=teamspeak");
     break;
     case 'edit':
@@ -56,20 +52,16 @@ switch ($do) {
 
             if(empty($error)) {
                 if(isset($_POST['defaults'])) {
-                    $qry = db("SELECT id FROM ".$db['ts']." WHERE `default_server` = 1");
-                    if(_rows($qry)) {
-                        while($get = _fetch($qry))
-                        { db("UPDATE ".$db['ts']." SET `default_server` = '0' WHERE `id` = ".$get['id'].";"); }
+                    $qry = $sql->select("SELECT `id` FROM `{prefix_teamspeak}` WHERE `default_server` = 1;");
+                    foreach($qry as $get) {
+                        $sql->update("UPDATE `{prefix_teamspeak}` SET `default_server` = 0 WHERE `id` = ?;",array($get['id'])); 
                     }
                 }
 
-                db("UPDATE ".$db['ts']." SET `host_ip_dns` = '".up($_POST['ip'])."',
-                                                  `server_port` = '".intval($_POST['port'])."',
-                                                  `query_port` = '".intval($_POST['sport'])."',
-                                                  `customicon` = '".intval($_POST['customicon'])."',
-                                                  `showchannel` = '".intval($_POST['showchannel'])."',
-                                                  `default_server` = ".(isset($_POST['defaults']) ? '1' : '0')."
-                                                  WHERE `id` = ".intval($_GET['id']).";");
+                $sql->update("UPDATE `{prefix_teamspeak}` SET `host_ip_dns` = ?,`server_port` = ?,"
+                    . "`query_port` = ?,`customicon` = ?,`showchannel` = ?,`default_server` = ? WHERE `id` = ?;",
+                    array(up($_POST['ip']),intval($_POST['port']),intval($_POST['sport']),intval($_POST['customicon']),
+                    intval($_POST['showchannel']),(isset($_POST['defaults']) ? '1' : '0'),intval($_GET['id'])));
 
                 $ip_port = TS3Renderer::tsdns(up($_POST['ip']));
                 $host = ($ip_port != false && is_array($ip_port) ? $ip_port['ip'] : up($_POST['ip']));
@@ -80,7 +72,7 @@ switch ($do) {
         }
 
         if(empty($show)) {
-            $get = db("SELECT * FROM ".$db['ts']." WHERE `id` = ".intval($_GET['id']).";",false,true);
+            $get = $sql->selectSingle("SELECT * FROM `{prefix_teamspeak}` WHERE `id` = ?;",array(intval($_GET['id'])));
             $show = show($dir."/teamspeak_edit", array('id' => intval($_GET['id']),
                                                        'error' => (!empty($error) ? show("errors/errortable", array("error" => $error)) : ""),
                                                        'ip' => (isset($_POST['ip']) ? $_POST['ip'] : $get['host_ip_dns']),
@@ -104,22 +96,18 @@ switch ($do) {
 
             if(empty($error)) {
                 if(isset($_POST['defaults'])) {
-                    $qry = db("SELECT id FROM ".$db['ts']." WHERE `default_server` = 1");
-                    if(_rows($qry)) {
-                        while($get = _fetch($qry))
-                        { db("UPDATE ".$db['ts']." SET `default_server` = '0' WHERE `id` = ".$get['id'].";"); }
+                    $qry = $sql->select("SELECT `id` FROM `{prefix_teamspeak}` WHERE `default_server` = 1;");
+                    foreach($qry as $get) {
+                        $sql->update("UPDATE `{prefix_teamspeak}` SET `default_server` = 0 WHERE `id` = ?;",array($get['id'])); 
                     }
                 }
 
                 $_POST['sport'] = (empty($_POST['sport']) ? 10011 : $_POST['sport']);
                 $_POST['port'] = (empty($_POST['port']) ? 9987 : $_POST['port']);
-                db("INSERT INTO ".$db['ts']." SET `host_ip_dns` = '".up($_POST['ip'])."',
-                                                       `server_port` = '".intval($_POST['port'])."',
-                                                       `query_port` = '".intval($_POST['sport'])."',
-                                                       `customicon` = '".intval($_POST['customicon'])."',
-                                                       `showchannel` = '".intval($_POST['showchannel'])."',
-                                                       `default_server` = ".(isset($_POST['defaults']) ? '1' : '0').",
-                                                       `show_navi` = 0");
+                $sql->insert("INSERT INTO `{prefix_teamspeak}` SET `host_ip_dns` = ?,`server_port` = ?,`query_port` = ?,"
+                    . "`customicon` = ?,`showchannel` = ?,`default_server` = ?,`show_navi` = 0;",
+                    array(up($_POST['ip']),intval($_POST['port']),intval($_POST['sport']),intval($_POST['customicon']),
+                        intval($_POST['showchannel']),(isset($_POST['defaults']) ? '1' : '0')));
 
                 $show = info(_config_ts_added,"?admin=teamspeak");
             }
@@ -135,8 +123,8 @@ switch ($do) {
                                                       'selected_customicon' => (isset($_POST['customicon']) ? $_POST['customicon'] == '1' ? 'selected="selected"' : '' : '')));
     break;
     default:
-        $qry = db("SELECT * FROM ".$db['ts']." ORDER BY id"); $color = 1;
-        while($get = _fetch($qry)) {
+        $qry = $sql->select("SELECT * FROM `{prefix_teamspeak}` ORDER BY id;"); $color = 1;
+        foreach($qry as $get) {
             $edit = show("page/button_edit_single", array("id" => $get['id'],"action" => "admin=teamspeak&amp;do=edit","title" => _button_title_edit));
             $delete = show("page/button_delete_single", array("id" => $get['id'],"action" => "admin=teamspeak&amp;do=delete","title" => _button_title_del,"del" => _confirm_del_server));
 

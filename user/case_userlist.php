@@ -8,7 +8,7 @@ if(defined('_UserMenu')) {
     $where = _site_ulist;
     $entrys = cnt('{prefix_users}'," WHERE level != 0");
     $show_sql = isset($_GET['show']) ? $_GET['show'] : '';
-    $limit_sql = ($page - 1)*config('m_userlist').",".config('m_userlist');
+    $limit_sql = ($page - 1)*settings('m_userlist').",".settings('m_userlist');
     $select_sql = "`id`,`nick`,`level`,`email`,`hp`,`steamid`,`hlswid`,`skypename`,"
                 . "`xboxid`,`psnid`,`originid`,`battlenetid`,`bday`,`sex`,`icq`,`status`,"
                 . "`position`,`regdatum`";
@@ -142,7 +142,7 @@ if(defined('_UserMenu')) {
     }
     
     $userliste = (empty($userliste) ? show(_no_entrys_found, array("colspan" => "13")) : $userliste);
-    $seiten = nav($entrys,config('m_userlist'),"?action=userlist".(!empty($show_sql) ? "&show=".$show_sql : "").orderby_nav());
+    $seiten = nav($entrys,settings('m_userlist'),"?action=userlist".(!empty($show_sql) ? "&show=".$show_sql : "").orderby_nav());
     $edel = permission("editusers") ? '<td class="contentMainTop" colspan="2">&nbsp;</td>' : "";
     $search = isset($_GET['search']) && !empty($_GET['search']) ? $_GET['search'] : _nick;
     $index = show($dir."/userliste", array("cnt" => $entrys." "._user,

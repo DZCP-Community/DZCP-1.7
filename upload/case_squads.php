@@ -7,7 +7,7 @@
 if(defined('_Upload')) {
     if(permission("editsquads")) {
         $set_action = isset($_GET['id']) ? "&amp;edit=1&amp;id=".$_GET['id'] : "";
-        $infos = show(_upload_usergallery_info, array("userpicsize" => config('upicsize')));
+        $infos = show(_upload_usergallery_info, array("userpicsize" => settings('upicsize')));
         $index = show($dir."/upload", array("uploadhead" => _upload_icons_head,
                                             "name" => "file",
                                             "action" => "?action=squads&amp;do=upload".$set_action,
@@ -21,7 +21,7 @@ if(defined('_Upload')) {
 
             if(!$tmpname)
                 $index = error(_upload_no_data, 1);
-            else if($size > config('upicsize')."000")
+            else if($size > settings('upicsize')."000")
                 $index = error(_upload_wrong_size, 1);
             else {
                 if(move_uploaded_file($tmpname, basePath."/inc/images/gameicons/custom/".$_FILES['file']['name'])) {

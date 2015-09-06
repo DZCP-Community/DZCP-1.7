@@ -11,7 +11,7 @@ function events() {
     $qry = $sql->select("SELECT `id`,`datum`,`title`,`event` "
                       . "FROM `{prefix_events}` "
                       . "WHERE `datum` > ? "
-                      . "ORDER BY `datum` LIMIT ".config('m_events').";",array(time()));
+                      . "ORDER BY `datum` LIMIT ".settings('m_events').";",array(time()));
     $eventbox = '';
     if($sql->rowCount()) {
         foreach($qry as $get) {

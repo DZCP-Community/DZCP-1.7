@@ -72,9 +72,8 @@ if(empty($_GET['sort']) || $_GET['sort'] == 'clan') {
         <td>&nbsp;</td>
       </tr>
     <?php
-        $qry = db("SELECT id,nick,country FROM ".$db['users']." ".$order." ORDER BY nick");
-        while($get = _fetch($qry))
-        {
+        $qry = $sql->select("SELECT `id`,`nick`,`country` FROM `{prefix_users}` ".$order." ORDER BY `nick`;");
+        foreach($qry as $get) {
             echo "<tr>\n";
             echo "  <td>".flag_tinymce($get['country'])." ".$get['nick']."</td>\n";
             echo "  <td style=\"text-align:right\"><a href=\"javascript:insertUser(".$get['id'].",'".addslashes($get['nick'])."','".rawflag_tinymce($get['country'])."')\"><img src=\"images/insert.gif\" alt=\"insert\" title=\"{#dzcp.users_add_en}".$get['nick']."{#dzcp.users_add_de}\" border=\"0\"></a></td>\n";

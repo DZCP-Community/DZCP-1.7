@@ -6,13 +6,11 @@
  */
 
 class phpfastcache_files extends  phpFastCache implements phpfastcache_driver  {
-
     function checkdriver() {
         if(is_writable($this->getPath())) {
             return true;
-        } else {
-
         }
+        
         return false;
     }
 
@@ -25,7 +23,6 @@ class phpfastcache_files extends  phpFastCache implements phpfastcache_driver  {
         if(!$this->checkdriver() && !isset($option['skipError'])) {
             throw new Exception("Can't use this driver for your website!");
         }
-
     }
 
     /*
@@ -50,43 +47,52 @@ class phpfastcache_files extends  phpFastCache implements phpfastcache_driver  {
             }
         }
 
-        $file_path = $path."/".$code.".txt";
-        return $file_path;
+        return $path."/".$code.".bin";
     }
 
     function driver_set($keyword, $value = "", $time = 300, $option = array() ) {
-        $file_path = $this->getFilePath($keyword);
-      //  echo "<br>DEBUG SET: ".$keyword." - ".$value." - ".$time."<br>";
-        $data = $this->encode($value);
-        $toWrite = true;
-        
-        /*
-         * Skip if Existing Caching in Options
-         */
-        if(isset($option['skipExisting']) && $option['skipExisting'] == true && file_exists($file_path)) {
-            $content = file_get_contents($file_path);
-            $old = $this->decode($content);
-            $toWrite = false;
-            if($this->isExpired($old)) {
-                $toWrite = true;
-            }
-        }
+        if(!empty($value) && !empty($keyword)) {
+            $file_path = $this->getFilePath($keyword);
+            $data = $this->encode($value);
+            $toWrite = true;
 
-        if($toWrite == true) {
-                $f = fopen($file_path,"w+");
-                fwrite($f,$data);
-                fclose($f);
+            /*
+             * Skip if Existing Caching in Options
+             */
+            if(isset($option['skipExisting']) && $option['skipExisting'] == true && file_exists($file_path)) {
+                $content = file_get_contents($file_path);
+                if(function_exists('gzdeflate')) {
+                    $content = gzdeflate($content);
+                }
+                $old = $this->decode($content);
+                $toWrite = false;
+                if($this->isExpired($old)) {
+                    $toWrite = true;
+                }
+            }
+
+            if($toWrite == true) {
+                if(function_exists('gzdeflate')) {
+                    $data = gzdeflate($data);
+                }
+
+                if(!empty($data)) {
+                    file_put_contents($file_path, $data);
+                }
+            }
         }
     }
 
     function driver_get($keyword, $option = array()) {
-
         $file_path = $this->getFilePath($keyword);
         if(!file_exists($file_path)) {
             return null;
         }
 
         $content = file_get_contents($file_path);
+        if(function_exists('gzinflate')) {
+            $content = gzinflate($content);
+        }
         $object = $this->decode($content);
         if($this->isExpired($object)) {
             @unlink($file_path);
@@ -150,11 +156,9 @@ class phpfastcache_files extends  phpFastCache implements phpfastcache_driver  {
        } // end while
 
        $res['size']  = $total - $removed;
-       $res['info'] = array(
-                "Total" => $total,
+       $res['info'] = array("Total" => $total,
                 "Removed"   => $removed,
-                "Current"   => $res['size'],
-       );
+                "Current"   => $res['size']);
        return $res;
     }
 
@@ -167,7 +171,6 @@ class phpfastcache_files extends  phpFastCache implements phpfastcache_driver  {
     }
 
     function driver_clean($option = array()) {
-
         $path = $this->getPath();
         $dir = @opendir($path);
         if(!$dir) {

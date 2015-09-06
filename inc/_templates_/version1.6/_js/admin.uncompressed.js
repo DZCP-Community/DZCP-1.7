@@ -47,8 +47,7 @@ function checkEditor()
 }
 DZCP.addEvent(window, 'load', checkEditor);
   
-function menu (a_items, a_tpl) 
-{
+function menu (a_items, a_tpl) {
 	if (!doc.body || !doc.body.style)
 		return;
 	this.a_config = a_items;

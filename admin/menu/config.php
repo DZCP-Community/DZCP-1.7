@@ -37,15 +37,9 @@ if($_POST) {
     up($_POST['eml_fabo_npost_subj']),up($_POST['eml_reg']),up($_POST['eml_pwd']),up($_POST['eml_nletter']),up($_POST['eml_pn']),up($_POST['eml_fabo_npost']),up($_POST['eml_fabo_tedit']), 
     up($_POST['eml_fabo_pedit']),up($_POST['mailfrom']),up($_POST['tmpdir']),intval($_POST['persinfo']),intval($_POST['wmodus']),up($_POST['urls_linked']), up($_POST['steam_apikey'])));
     
-    //-> Settingstabelle auslesen * Use function settings('xxxxxx');
-    $get_settings = $sql->selectSingle("SELECT * FROM `{prefix_settings}`;");
+    $get_settings = $sql->selectSingle("SELECT * FROM `{prefix_settings}` AS `settings` LEFT JOIN `{prefix_config}` AS `config` ON settings.`id` = config.`id` GROUP BY settings.id;");
     dbc_index::setIndex('settings', $get_settings);
     unset($get_settings);
-
-    //-> Configtabelle auslesen * Use function config('xxxxxx');
-    $get_config = $sql->selectSingle("SELECT * FROM `{prefix_config}`;");
-    dbc_index::setIndex('config', $get_config);
-    unset($get_config);
 
     notification::add_success(_config_set);
 }

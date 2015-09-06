@@ -18,7 +18,7 @@ if(defined('_Upload')) {
 
                 if(!$tmpname)
                     $index = error(_upload_no_data, 1);
-                else if($size > config('upicsize')."000")
+                else if($size > settings('upicsize')."000")
                     $index = error(_upload_wrong_size, 1);
                 else  {
                     foreach($picformat as $tmpendung) {
@@ -41,7 +41,7 @@ if(defined('_Upload')) {
                 $index = info(_delete_pic_successful, "../user/?action=editprofile");
             break;
             default:
-                $infos = show(_upload_userava_info, array("userpicsize" => config('upicsize')));
+                $infos = show(_upload_userava_info, array("userpicsize" => settings('upicsize')));
                 $index = show($dir."/upload", array("uploadhead" => _upload_ava_head,
                                                     "name" => "file",
                                                     "action" => "?action=avatar&amp;do=upload",

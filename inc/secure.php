@@ -15,9 +15,6 @@ if(!headers_sent()) {
         if(!session_start())
             die('PHP-Sessions not started!');
     }
-
-    if(!isset($_SESSION['PHPSESSID']))
-        $_SESSION['PHPSESSID'] = true;
 }
 
 function mtime() {

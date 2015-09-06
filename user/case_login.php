@@ -13,7 +13,7 @@ if(defined('_UserMenu')) {
             default: $securimage->namespace = 'default'; break;
         }
 
-        if (config('securelogin') && (!isset($_POST['secure']) || !$securimage->check($_POST['secure']))) {
+        if (settings('securelogin') && (!isset($_POST['secure']) || !$securimage->check($_POST['secure']))) {
             $index = error(captcha_mathematic ? _error_invalid_regcode_mathematic : _error_invalid_regcode);
         } else {
             if($sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user` = ? AND `pwd` = ? AND `level` != 0;",array(up($_POST['user']),md5($_POST['pwd'])))) {
@@ -92,7 +92,7 @@ if(defined('_UserMenu')) {
         }
     } else {
         if (!$chkMe) {
-            $index = show($dir . "/login", array("secure" => (config('securelogin') ? show($dir . "/secure") : '')));
+            $index = show($dir . "/login", array("secure" => (settings('securelogin') ? show($dir . "/secure") : '')));
         } else {
             $index = error(_error_user_already_in, 1);
         }

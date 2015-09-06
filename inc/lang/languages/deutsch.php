@@ -1310,7 +1310,6 @@ define('_server_no_connection', '
   <td class="contentMainFirst" align="center" colspan="2">Konnte keine Verbindung zum Server herstellen</td>
 </tr>');
 define('_server_splayerstats', 'Spielerstatistiken');
-define('_generated_time', 'Die Seite wurde in [time] Sekunden generiert');
 define('_slist_head', 'Serverliste');
 define('_slist_serverip', 'ServerIP');
 define('_slist_slots', 'Slots');

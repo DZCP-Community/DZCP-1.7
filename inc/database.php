@@ -40,7 +40,7 @@ define('pdo_disable_delete_statement', false);
 	$sql->query();
 */
 
-class database {
+final class database {
     protected $dbConf = array();
     protected $instances = array();
 
@@ -256,7 +256,12 @@ class database {
                 die("PDO: Driver is missing!");
             }
 
-            $db = new PDO($dsn, $dbConf['db_user'], $dbConf['db_pw']);
+            if($dbConf['persistent']) {
+                $db = new PDO($dsn, $dbConf['db_user'], $dbConf['db_pw'], array(PDO::ATTR_PERSISTENT => true));
+            } else {
+               $db = new PDO($dsn, $dbConf['db_user'], $dbConf['db_pw']); 
+            }
+
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $db->query("set character set utf8");
             $db->query("set names utf8");

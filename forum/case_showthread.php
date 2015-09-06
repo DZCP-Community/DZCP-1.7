@@ -28,13 +28,13 @@ if(defined('_Forum')) {
       $qryp = db("SELECT * FROM ".$db['f_posts']."
                   WHERE sid = '".intval($_GET['id'])."'
                   ORDER BY id
-                  LIMIT ".($page - 1)*config('m_fposts').",".config('m_fposts')."");
+                  LIMIT ".($page - 1)*settings('m_fposts').",".settings('m_fposts')."");
 
       $entrys = cnt($db['f_posts'], " WHERE sid = ".intval($_GET['id']));
       $i = 2;
 
       if($entrys == 0) $pagenr = "1";
-      else $pagenr = ceil($entrys/config('m_fposts'));
+      else $pagenr = ceil($entrys/settings('m_fposts'));
 
       if(!empty($_GET['hl'])) $hL = '&amp;hl='.$_GET['hl'];
       else                    $hL = '';
@@ -80,10 +80,10 @@ if(defined('_Forum')) {
         if($chkMe == 4 || permission('ipban')) $posted_ip = $getp['ip'];
         else $posted_ip = _logged;
 
-        $titel = show(_eintrag_titel_forum, array("postid" => $i+($page-1)*config('m_fposts'),
+        $titel = show(_eintrag_titel_forum, array("postid" => $i+($page-1)*settings('m_fposts'),
                                                                                     "datum" => date("d.m.Y", $getp['date']),
                                                                                     "zeit" => date("H:i", $getp['date'])._uhr,
-                                            "url" => '?action=showthread&amp;id='.intval($_GET['id']).'&amp;page='.$page.'#p'.($i+($page-1)*config('m_fposts')),
+                                            "url" => '?action=showthread&amp;id='.intval($_GET['id']).'&amp;page='.$page.'#p'.($i+($page-1)*settings('m_fposts')),
                                             "edit" => $edit,
                                             "delete" => $delete));
 
@@ -118,8 +118,8 @@ if(defined('_Forum')) {
         }
 
         $show .= show($dir."/forum_posts_show", array("nick" => $nick,
-                                                      "postnr" => "#".($i+($page-1)*config('m_fposts')),
-                                                      "p" => ($i+($page-1)*config('m_fposts')),
+                                                      "postnr" => "#".($i+($page-1)*settings('m_fposts')),
+                                                      "p" => ($i+($page-1)*settings('m_fposts')),
                                                       "text" => $text,
                                                       "pn" => $pn,
                                                       "class" => $ftxt['class'],
@@ -177,7 +177,7 @@ if(defined('_Forum')) {
                                           "kid" => $getw['kid']));
       }
 
-      $nav = nav($entrys,config('m_fposts'),"?action=showthread&amp;id=".$_GET['id'].$hL);
+      $nav = nav($entrys,settings('m_fposts'),"?action=showthread&amp;id=".$_GET['id'].$hL);
 
       if(data("signatur",$get['t_reg'])) $sig = _sig.bbcode(data("signatur",$get['t_reg']));
       else $sig = "";

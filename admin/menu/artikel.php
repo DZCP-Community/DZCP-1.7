@@ -37,23 +37,19 @@ switch($do) {
             if(empty($_POST['titel']))
                 $error = _empty_artikel_title;
 
-            $qryk = db("SELECT id,kategorie FROM ".$db['newskat'].""); $kat = '';
-            while($getk = _fetch($qryk)) {
+            $qryk = $sql->select("SELECT `id`,`kategorie` FROM `{prefix_newskat}`;"); $kat = '';
+            foreach($getk as $getk) {
                 $sel = ($_POST['kat'] == $getk['id'] ? 'selected="selected"' : '');
                 $kat .= show(_select_field, array("value" => $getk['id'],
                                                   "sel" => $sel,
-                                                  "what" => $getk['kategorie']));
+                                                  "what" => re($getk['kategorie'])));
             }
 
             $error = show("errors/errortable", array("error" => $error));
             $show = show($dir."/artikel_form", array("head" => _artikel_add,
-                                                     "nautor" => _autor,
                                                      "autor" => autor($userid),
-                                                     "nkat" => _news_admin_kat,
                                                      "kat" => $kat,
-                                                     "preview" => _preview,
                                                      "do" => "insert",
-                                                     "ntitel" => _titel,
                                                      "titel" => re($_POST['titel']),
                                                      "artikeltext" => re($_POST['artikel']),
                                                      "link1" => re($_POST['link1']),
@@ -62,28 +58,16 @@ switch($do) {
                                                      "url1" => $_POST['url1'],
                                                      "url2" => $_POST['url2'],
                                                      "url3" => $_POST['url3'],
-                                                     "ntext" => _eintrag,
                                                      "button" => _button_value_add,
                                                      "error" => $error,
-                                                     "nmore" => _news_admin_more,
-                                                     "linkname" => _linkname,
-                                                     "aimage" => _artikel_userimage,
                                                      "n_artikelpic" => '',
-                                                     "delartikelpic" => '',
-                                                     "nurl" => _url));
+                                                     "delartikelpic" => ''));
         } else {
             if(isset($_POST)) {
-                db("INSERT INTO ".$db['artikel']."
-                    SET `autor`  = '".intval($userid)."',
-                        `kat`    = '".intval($_POST['kat'])."',
-                        `titel`  = '".up($_POST['titel'])."',
-                        `text`   = '".up($_POST['artikel'])."',
-                        `link1`  = '".up($_POST['link1'])."',
-                        `link2`  = '".up($_POST['link2'])."',
-                        `link3`  = '".up($_POST['link3'])."',
-                        `url1`   = '".links($_POST['url1'])."',
-                        `url2`   = '".links($_POST['url2'])."',
-                        `url3`   = '".links($_POST['url3'])."'");
+                $sql->insert("INSERT INTO `{prefix_artikel}` SET `autor` = ?, `kat` = ?, `titel` = ?, `text` = ?, "
+                            ."`link1`  = ?, `link2`  = ?, `link3`  = ?, `url1`   = ?, `url2`   = ?, `url3`   = ?;",
+                array(intval($userid),intval($_POST['kat']),up($_POST['titel']),up($_POST['artikel']),up($_POST['link1']),
+                        up($_POST['link2']),up($_POST['link3']),up(links($_POST['url1'])),up(links($_POST['url2'])),up(links($_POST['url3']))));
 
                 if(isset($_FILES['artikelpic']['tmp_name']) && !empty($_FILES['artikelpic']['tmp_name'])) {
                     $endung = explode(".", $_FILES['artikelpic']['name']);
@@ -91,13 +75,14 @@ switch($do) {
                     move_uploaded_file($_FILES['artikelpic']['tmp_name'], basePath."/inc/images/uploads/artikel/"._insert_id().".".strtolower($endung));
                 }
             }
+            
             $show = info(_artikel_added, "?admin=artikel");
         }
     break;
     case 'edit':
-        $get = db("SELECT * FROM ".$db['artikel']." WHERE id = '".intval($_GET['id'])."'",false,true);
-        $qryk = db("SELECT id,kategorie FROM ".$db['newskat'].""); $kat = '';
-        while($getk = _fetch($qryk)) {
+        $get = $sql->selectSingle("SELECT * FROM `{prefix_artikel}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $qryk = $sql->select("SELECT `id`,`kategorie` FROM `{prefix_newskat}`;"); $kat = '';
+        foreach($qryk as $getk) {
             $sel = ($get['kat'] == $getk['id'] ? 'selected="selected"' : '');
             $kat .= show(_select_field, array("value" => $getk['id'], "sel" => $sel, "what" => re($getk['kategorie'])));
         }
@@ -124,9 +109,9 @@ switch($do) {
                                                  "link1" => re($get['link1']),
                                                  "link2" => re($get['link2']),
                                                  "link3" => re($get['link3']),
-                                                 "url1" => $get['url1'],
-                                                 "url2" => $get['url2'],
-                                                 "url3" => $get['url3'],
+                                                 "url1" => re($get['url1']),
+                                                 "url2" => re($get['url2']),
+                                                 "url3" => re($get['url3']),
                                                  "ntext" => _eintrag,
                                                  "error" => "",
                                                  "button" => _button_value_edit,
@@ -224,7 +209,7 @@ switch($do) {
         header("Location: ?admin=artikel");
     break;
     default:
-        $qry = $sql->select("SELECT * FROM `{prefix_artikel}` ".orderby_sql(array("titel","datum","autor"),'ORDER BY `public` ASC, `datum` DESC')." LIMIT ".($page - 1)*config('m_adminartikel').",".config('m_adminartikel').";");
+        $qry = $sql->select("SELECT * FROM `{prefix_artikel}` ".orderby_sql(array("titel","datum","autor"),'ORDER BY `public` ASC, `datum` DESC')." LIMIT ".($page - 1)*settings('m_adminartikel').",".settings('m_adminartikel').";");
         foreach($qry as $get) {
             $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                           "action" => "admin=artikel&amp;do=edit",
@@ -235,7 +220,7 @@ switch($do) {
                                                               "title" => _button_title_del,
                                                               "del" => convSpace(_confirm_del_artikel)));
 
-            $titel = show(_artikel_show_link, array("titel" => cut(re($get['titel']),config('l_newsadmin')), "id" => $get['id']));
+            $titel = show(_artikel_show_link, array("titel" => cut(re($get['titel']),settings('l_newsadmin')), "id" => $get['id']));
             $public = ($get['public'] ? '<a href="?admin=artikel&amp;do=public&amp;id='.$get['id'].'&amp;what=unset"><img src="../inc/images/public.gif" alt="" title="'._non_public.'" /></a>'
                     : '<a href="?admin=artikel&amp;do=public&amp;id='.$get['id'].'&amp;what=set"><img src="../inc/images/nonpublic.gif" alt="" title="'._public.'" /></a>');
 
@@ -256,7 +241,7 @@ switch($do) {
             $show = '<tr><td colspan="6" class="contentMainSecond">'._no_entrys.'</td></tr>';
 
         $entrys = cnt('{prefix_artikel}');
-        $nav = nav($entrys,config('m_adminnews'),"?admin=artikel".(isset($_GET['show']) ? $_GET['show'] : '').orderby_nav());
+        $nav = nav($entrys,settings('m_adminnews'),"?admin=artikel".(isset($_GET['show']) ? $_GET['show'] : '').orderby_nav());
         $show = show($dir."/admin_news", array("head" => _artikel,
                                                "nav" => $nav,
                                                "order_autor" => orderby('autor'),

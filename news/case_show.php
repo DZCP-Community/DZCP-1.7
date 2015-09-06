@@ -19,7 +19,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                         if (settings("reg_newscomments") && !$chkMe) {
                             $index = error(_error_have_to_be_logged, 1);
                         } else {
-                            if (!ipcheck("ncid(" . $_GET['id'] . ")", config('f_newscom'))) {
+                            if (!ipcheck("ncid(" . $_GET['id'] . ")", settings('f_newscom'))) {
                                 if ($userid >= 1) {
                                     $toCheck = empty($_POST['comment']);
                                 } else {
@@ -63,7 +63,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                                     notification::set_global(true);
                                 }
                             } else {
-                                notification::add_error(show(_error_flood_post, array("sek" => config('f_newscom'))));
+                                notification::add_error(show(_error_flood_post, array("sek" => settings('f_newscom'))));
                             }
                         }
                     } else {
@@ -178,11 +178,11 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
 
             //News Comments
             $qryc = $sql->select("SELECT * FROM `{prefix_newscomments}` WHERE `news` = ? "
-                                ."ORDER BY `datum` DESC LIMIT ".($page - 1)*config('m_comments').",".config('m_comments').";",
+                                ."ORDER BY `datum` DESC LIMIT ".($page - 1)*settings('m_comments').",".settings('m_comments').";",
                                 array($news_id));
             
             $entrys = cnt('{prefix_newscomments}', " WHERE `news` = ".$news_id);
-            $i = ($entrys - ($page - 1) * config('m_comments')); $comments = '';
+            $i = ($entrys - ($page - 1) * settings('m_comments')); $comments = '';
             foreach($qryc as $getc) {
                 $edit = ""; $delete = "";
                 if (($chkMe >= 1 && $getc['reg'] == $userid) || permission("news")) {
@@ -243,7 +243,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                     }
                 }
 
-                if (!ipcheck("ncid(".$_GET['id'].")", config('f_newscom')) && empty($add)) {
+                if (!ipcheck("ncid(".$_GET['id'].")", settings('f_newscom')) && empty($add)) {
                     $add = show("page/comments_add", array("titel" => _news_comments_write_head,
                                                            "form" => $form,
                                                            "what" => _button_value_add,
@@ -254,7 +254,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                 }
             }
 
-            $seiten = nav($entrys, config('m_comments'), "?action=show&amp;id=" . $_GET['id'] . "");
+            $seiten = nav($entrys, settings('m_comments'), "?action=show&amp;id=" . $_GET['id'] . "");
             $showmore = show($dir . "/comments", array("head" => _comments_head,
                                                        "show" => $comments,
                                                        "seiten" => $seiten,

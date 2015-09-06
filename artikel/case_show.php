@@ -19,7 +19,7 @@ if(defined('_Artikel') && isset($_GET['id']) && !empty($_GET['id'])) {
                         if (settings("reg_artikel") && !$chkMe) {
                             $index = error(_error_have_to_be_logged, 1);
                         } else {
-                            if (!ipcheck("artid(" . $_GET['id'] . ")", config('f_artikelcom'))) {
+                            if (!ipcheck("artid(" . $_GET['id'] . ")", settings('f_artikelcom'))) {
                                 if ($userid >= 1) {
                                     $toCheck = empty($_POST['comment']);
                                 } else {
@@ -27,7 +27,7 @@ if(defined('_Artikel') && isset($_GET['id']) && !empty($_GET['id'])) {
                                 }
 
                                 if ($toCheck) {
-                                    javascript::set('AnchorMove', 'comForm');
+                                    javascript::set('AnchorMove', 'startpage');
                                     if ($userid >= 1) {
                                         if (empty($_POST['eintrag'])) {
                                             notification::add_error(_empty_eintrag);
@@ -63,7 +63,7 @@ if(defined('_Artikel') && isset($_GET['id']) && !empty($_GET['id'])) {
                                     notification::set_global(true);
                                 }
                             } else {
-                                notification::add_error(show(_error_flood_post, array("sek" => config('f_newscom'))));
+                                notification::add_error(show(_error_flood_post, array("sek" => settings('f_newscom'))));
                             }
                         }
                     } else {
@@ -175,11 +175,11 @@ if(defined('_Artikel') && isset($_GET['id']) && !empty($_GET['id'])) {
 
             //Artikel Comments
             $qryc = $sql->select("SELECT * FROM `{prefix_acomments}` WHERE `artikel` = ? "
-                                ."ORDER BY `datum` DESC LIMIT ".($page - 1)*config('m_comments').",".config('m_comments').";",
+                                ."ORDER BY `datum` DESC LIMIT ".($page - 1)*settings('m_comments').",".settings('m_comments').";",
                                 array($artikel_id));
 
             $entrys = cnt('{prefix_acomments}', " WHERE `artikel` = ".$artikel_id);
-            $i = ($entrys - ($page - 1) * config('m_comments')); $comments = '';
+            $i = ($entrys - ($page - 1) * settings('m_comments')); $comments = '';
             foreach($qryc as $getc) {
                 $edit = ""; $delete = "";
                 if (($chkMe >= 1 && $getc['reg'] == $userid) || permission("artikel")) {
@@ -241,7 +241,7 @@ if(defined('_Artikel') && isset($_GET['id']) && !empty($_GET['id'])) {
                     }
                 }
 
-                if (!ipcheck("artid(".$_GET['id'].")", config('f_artikelcom')) && empty($add)) {
+                if (!ipcheck("artid(".$_GET['id'].")", settings('f_artikelcom')) && empty($add)) {
                     $add = show("page/comments_add", array("titel" => _artikel_comments_write_head,
                                                            "form" => $form,
                                                            "what" => _button_value_add,
@@ -252,7 +252,7 @@ if(defined('_Artikel') && isset($_GET['id']) && !empty($_GET['id'])) {
                 }
             }
 
-            $seiten = nav($entrys, config('m_comments'), "?action=show&amp;id=" . $_GET['id'] . "");
+            $seiten = nav($entrys, settings('m_comments'), "?action=show&amp;id=" . $_GET['id'] . "");
             $showmore = show($dir . "/comments", array("head" => _comments_head,
                                                        "show" => $comments,
                                                        "seiten" => $seiten,

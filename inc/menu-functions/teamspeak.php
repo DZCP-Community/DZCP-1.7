@@ -35,7 +35,7 @@ function teamspeak($js = 0) {
                 GameQ::setOption('timeout', 6);
                 $results = GameQ::requestData();
                 if(!empty($results) && $results) {
-                    $cache->set('teamspeak_'.$cache_hash, $results, config('cache_teamspeak'));
+                    $cache->set('teamspeak_'.$cache_hash, $results, settings('cache_teamspeak'));
                 }
             }
             else

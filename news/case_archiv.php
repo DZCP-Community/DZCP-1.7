@@ -29,7 +29,7 @@ if(defined('_News')) {
     if(($search = isset($_GET['search']) && !empty($_GET['search']) ? $_GET['search'] : false)) {
         $qry = $sql->select("SELECT `id`,`titel`,`autor`,`datum`,`kat`,`text` FROM `{prefix_news}` WHERE `text` LIKE '%?%' ".$intern." AND `datum` <= ? "
                             . "OR `klapptext` LIKE '%?%' ".$intern." AND `datum` <= ? "
-                            . "ORDER BY `datum` DESC LIMIT ".($page - 1)*config('m_archivnews').",".config('m_archivnews').";",
+                            . "ORDER BY `datum` DESC LIMIT ".($page - 1)*settings('m_archivnews').",".settings('m_archivnews').";",
                             array($search,($time=time()),$search,$time));
         $entrys = cnt('{prefix_news}', " WHERE `text` LIKE '%?%' OR `klapptext` LIKE '%?%' ".$intern,'id',array($search,$search));
 
@@ -41,7 +41,7 @@ if(defined('_News')) {
                    WHERE `datum` BETWEEN ".$from ." AND ".$til."
                    ".$intern."
                    ORDER BY `datum` DESC
-                   LIMIT ".($page - 1)*config('m_archivnews').",".config('m_archivnews').";");
+                   LIMIT ".($page - 1)*settings('m_archivnews').",".settings('m_archivnews').";");
         $entrys = cnt('{prefix_news}', " WHERE `datum` BETWEEN ".$from." AND ".$til." ".$intern."");
     } else {
         $qry = $sql->select("SELECT `id`,`titel`,`autor`,`datum`,`kat`,`text`
@@ -49,14 +49,14 @@ if(defined('_News')) {
                    ".$intern2."
                    ".$n_kat."
                    ".orderby_sql(array("datum","autor","titel","kat"), 'ORDER BY datum DESC')."
-                   LIMIT ".($page - 1)*config('m_archivnews').",".config('m_archivnews').";");
+                   LIMIT ".($page - 1)*settings('m_archivnews').",".settings('m_archivnews').";");
         $entrys = cnt('{prefix_news}', " ".$intern2." ".$n_kat);
     }
 
     foreach($qry as $get) {
         $getk = $sql->selectSingle("SELECT `kategorie` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']));
         $comments = cnt('{prefix_newscomments}'," WHERE `news` = ".$get['id']);
-        $titel = show(_news_show_link, array("titel" => cut(re($get['titel']),config('l_newsarchiv')), "id" => $get['id']));
+        $titel = show(_news_show_link, array("titel" => cut(re($get['titel']),settings('l_newsarchiv')), "id" => $get['id']));
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
         $show .= show($dir."/archiv_show", array("autor" => autor($get['autor']),
                                                  "date" => date("d.m.y", $get['datum']),
@@ -102,7 +102,7 @@ if(defined('_News')) {
         }
     }
 
-    $nav = nav($entrys,config('m_archivnews'),"?action=archiv&year=".$pyear."&month=".$pmonth."&search=".$psearch.orderby_nav());
+    $nav = nav($entrys,settings('m_archivnews'),"?action=archiv&year=".$pyear."&month=".$pmonth."&search=".$psearch.orderby_nav());
     $index = show($dir."/archiv", array("head" => _news_archiv_head,
                                         "head_sort" => _news_archiv_sort,
                                         "date" => _datum,

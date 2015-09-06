@@ -387,7 +387,7 @@ switch ($do) {
     default:
         $entrys = cnt($db['news']); $show_ = '';
         $qry = db("SELECT * FROM ".$db['news']." ".orderby_sql(array("titel","datum","autor"), 'ORDER BY `public` ASC, `datum` DESC')."
-                   LIMIT ".($page - 1)*config('m_adminnews').",".config('m_adminnews')."");
+                   LIMIT ".($page - 1)*settings('m_adminnews').",".settings('m_adminnews')."");
         while($get = _fetch($qry)) {
             $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                           "action" => "admin=newsadmin&amp;do=edit",
@@ -398,7 +398,7 @@ switch ($do) {
                                                               "title" => _button_title_del,
                                                               "del" => convSpace(_confirm_del_news)));
 
-            $titel = show(_news_show_link, array("titel" => re(cut($get['titel'],config('l_newsadmin'))), "id" => $get['id']));
+            $titel = show(_news_show_link, array("titel" => re(cut($get['titel'],settings('l_newsadmin'))), "id" => $get['id']));
             $intern = ($get['intern'] ? _votes_intern : '');
             $sticky = ($get['sticky'] ? _news_sticky : '');
             $datum = empty($get['datum']) ? _no_public : date("d.m.y H:i", $get['datum'])._uhr;
@@ -420,7 +420,7 @@ switch ($do) {
         if(empty($show))
             $show = '<tr><td colspan="3" class="contentMainSecond">'._no_entrys.'</td></tr>';
 
-        $nav = nav($entrys,config('m_adminnews'),"?admin=newsadmin".(isset($_GET['show']) ? $_GET['show'].orderby_nav() : orderby_nav()));
+        $nav = nav($entrys,settings('m_adminnews'),"?admin=newsadmin".(isset($_GET['show']) ? $_GET['show'].orderby_nav() : orderby_nav()));
         $show = show($dir."/admin_news", array("head" => _news_admin_head,
                                                "nav" => $nav,
                                                "autor" => _autor,

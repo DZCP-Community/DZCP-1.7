@@ -18,7 +18,7 @@ if(defined('_News')) {
     //Sticky News
     $qry = $sql->select("SELECT * FROM `{prefix_news}` WHERE `sticky` >= ? AND `datum` <= ? AND "
             . "`public` = 1 ".(permission("intnews") ? "" : "AND `intern` = 0")." ".$n_kat." "
-            . "ORDER BY `datum` DESC LIMIT ".(($page - 1)*config('m_news')).",".config('m_news').";",
+            . "ORDER BY `datum` DESC LIMIT ".(($page - 1)*settings('m_news')).",".settings('m_news').";",
             array(($time=time()),$time));
 
     $show_sticky = '';
@@ -104,7 +104,7 @@ if(defined('_News')) {
     //News
     $qry = $sql->select("SELECT * FROM `{prefix_news}` WHERE `sticky` < ? AND `datum` <= ? "
             . "AND `public` = 1 ".(permission("intnews") ? "" : "AND `intern` = 0")." ".$n_kat." "
-            . "ORDER BY `datum` DESC LIMIT ".($page - 1)*config('m_news').",".config('m_news').";",
+            . "ORDER BY `datum` DESC LIMIT ".($page - 1)*settings('m_news').",".settings('m_news').";",
             array(($time=time()),$time));
     if($sql->rowCount()) {
         foreach($qry as $get) {
@@ -195,7 +195,7 @@ if(defined('_News')) {
 
     $index = show($dir."/news", array("show" => $show,
                                       "show_sticky" => $show_sticky,
-                                      "nav" => nav(cnt('{prefix_news}',$navWhere),config('m_news'),"?kat=".$navKat),
+                                      "nav" => nav(cnt('{prefix_news}',$navWhere),settings('m_news'),"?kat=".$navKat),
                                       "kategorien" => $kategorien,
                                       "choose" => _news_kat_choose,
                                       "archiv" => _news_archiv));

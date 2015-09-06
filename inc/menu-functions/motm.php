@@ -30,7 +30,7 @@ function motm() {
             $get = $sql->selectSingle("SELECT `id`,`level`,`status`,`bday` FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
             if(!empty($get) && !empty($temparr)) {
                 $status = ($get['status'] == 1 || $get['level'] == 1) ? "aktiv" : "inaktiv";
-                if(config('allowhover') == 1)
+                if(settings('allowhover') == 1)
                     $info = 'onmouseover="DZCP.showInfo(\''.fabo_autor($get['id']).'\', \''._posi.';'._status.';'._age.'\', \''.
                         getrank($get['id']).';'.$status.';'.getAge($get['bday']).'\', \''.hoveruserpic($get['id']).'\')" onmouseout="DZCP.hideInfo()"';
 

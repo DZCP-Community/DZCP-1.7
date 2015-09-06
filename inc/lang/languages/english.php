@@ -1312,7 +1312,6 @@ define('_server_no_connection' , '
   <td class="contentMainFirst" align="center" colspan="2">Could not connect to the server</td>
 </tr>');
 define('_server_splayerstats' , 'Player statistics');
-define('_generated_time' , 'This site was generated in [time] seconds');
 define('_slist_head' , 'Serverlist');
 define('_slist_serverip' , 'Serverip');
 define('_slist_slots' , 'Slots');

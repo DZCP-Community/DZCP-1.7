@@ -6,15 +6,12 @@
 
 if(defined('_Forum')) {
     update_online($where); //Update Stats
-    $qry = db("SELECT * FROM ".$db['f_kats']." ORDER BY kid");
-    while($get = _fetch($qry)) 
-    {
+    $qry = $sql->select("SELECT * FROM `{prefix_forumkats}` ORDER BY kid ASC;");
+    foreach($qry as $get) {
         $showt = "";
-        $qrys = db("SELECT * FROM ".$db['f_skats']." WHERE sid = '".$get['id']."' ORDER BY pos");
-        while($gets = _fetch($qrys))
-        {
-            if($get['intern'] == 0 || ($get['intern'] == 1 && fintern($gets['id'])))
-            {
+        $qrys = $sql->select("SELECT * FROM `{prefix_forumsubkats}` WHERE `sid` = ? ORDER BY pos;",array($get['id']));
+        foreach($qrys as $gets) {
+            if($get['intern'] == 0 || ($get['intern'] == 1 && fintern($gets['id']))) {
                 unset($lpost);
 		$getlt = db("SELECT id,kid,t_date,t_nick,t_email,t_reg,lp,first,topic FROM ".$db['f_threads']." WHERE kid = '".$gets['id']."' ORDER BY lp DESC",false,true);
 		$getlp = db("SELECT s1.kid,s1.id,s1.date,s1.nick,s1.reg,s1.email,s2.kid,s2.id,s2.t_date,s2.lp,s2.first FROM ".$db['f_posts']." AS s1 "
@@ -45,7 +42,6 @@ if(defined('_Forum')) {
                 $threads = cnt($db['f_threads'], " WHERE kid = '".$gets['id']."'");
                 $posts = cnt($db['f_posts'], " WHERE kid = '".$gets['id']."'");
                 $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-
                 $showt .= show($dir."/kats_show", array("topic" => re($gets['kattopic']),
                                                         "subtopic" => re($gets['subtopic']),
                                                         "lpost" => $lpost,
@@ -63,8 +59,7 @@ if(defined('_Forum')) {
         if($get['intern'] == 1) $katname =  show(_forum_katname_intern, array("katname" => re($get['name'])));
         else $katname = re($get['name']);
 
-        if(!empty($showt))
-        {
+        if(!empty($showt)) {
             $show .= show($dir."/kats", array("katname" => $katname, "showt" => $showt));
         }
     }
@@ -75,8 +70,7 @@ if(defined('_Forum')) {
     $qrytp = db("SELECT id,user,forumposts FROM ".$db['userstats']." ORDER BY forumposts DESC, id LIMIT 5");
 
     $show_top = '';
-    while($gettp = _fetch($qrytp))
-    {
+    while($gettp = _fetch($qrytp)) {
         if($gettp['forumposts'] >= 1) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show_top .= show($dir."/top_posts_show", array("nick" => autor($gettp['user']),
@@ -94,20 +88,16 @@ if(defined('_Forum')) {
                 WHERE whereami = 'Forum'
                 AND time+'".$useronline."'>'".time()."'");
     
-    if(_rows($qryo))
-    {
+    if(_rows($qryo)) {
         $i=0;
         $check = 1; $nick = '';
         $cnto = cnt($db['users'], " WHERE time+'".$useronline."'>'".time()."' AND whereami = 'Forum'");
         while($geto = _fetch($qryo))
         {
-            if($i == 5)
-            {
+            if($i == 5) {
                 $end = "<br />";
                 $i=0;
-            } 
-            else 
-            {
+            }  else  {
                 $end = ($cnto == $check ? "" : ", ");
             }
             
@@ -118,7 +108,11 @@ if(defined('_Forum')) {
         $nick = _forum_nobody_is_online;
     }
 
-    $stats = show($dir."/forum_stats", array());
+    if(!($total_topics = sum("{prefix_forumposts}"))) { $total_topics = "0"; }
+    if(!($total_posts = sum("{prefix_forumthreads}"))) { $total_posts = "0"; }
+    
+    $stats = show($dir."/forum_stats", array("total_posts" => $total_posts, "total_topics" => $total_topics, 
+        "total_members" => 0, "newest_member" => "teasttt"));
 
     /* Wer ist online */
     $qry = db('SELECT `position`,`color` FROM '.$db['pos']); $team_groups = '';

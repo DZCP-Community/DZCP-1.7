@@ -31,7 +31,7 @@ function server_show($sID = 0, $showID = 0) {
             $server = $server['gs'];
 
             if(!empty($server) && $server && $server['game_online'])
-                $cache->set('server_'.$cache_hash,$server,config('cache_server'));
+                $cache->set('server_'.$cache_hash,$server,settings('cache_server'));
         } else {
             $get['ip'] = str_replace(' ', '', $get['ip']);
             

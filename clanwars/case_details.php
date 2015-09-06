@@ -145,10 +145,10 @@ if(defined('_Clanwars')) {
         $qryc = db("SELECT * FROM ".$db['cw_comments']."
                     WHERE cw = ".intval($_GET['id'])."
                     ORDER BY datum DESC
-                    LIMIT ".($page - 1)*config('m_cwcomments').",".config('m_cwcomments')."");
+                    LIMIT ".($page - 1)*settings('m_cwcomments').",".settings('m_cwcomments')."");
 
         $entrys = cnt($db['cw_comments'], " WHERE cw = ".intval($_GET['id']));
-        $i = $entrys-($page - 1)*config('m_cwcomments'); $comments = '';
+        $i = $entrys-($page - 1)*settings('m_cwcomments'); $comments = '';
         while($getc = _fetch($qryc)) {
             $edit = ""; $delete = "";
             if(($chkMe >= 1 && $getc['reg'] == $userid) || permission("clanwars")) {
@@ -196,7 +196,7 @@ if(defined('_Clanwars')) {
             $add = _error_unregistered_nc;
         else {
             $add = "";
-            if(!ipcheck("cwid(".$_GET['id'].")", config('f_cwcom'))) {
+            if(!ipcheck("cwid(".$_GET['id'].")", settings('f_cwcom'))) {
                 if($userid >= 1)
                     $form = show("page/editor_regged", array("nick" => autor($userid), "von" => _autor));
                 else {
@@ -230,7 +230,7 @@ if(defined('_Clanwars')) {
             }
         }
 
-        $seiten = nav($entrys,config('m_cwcomments'),"?action=details&amp;id=".$_GET['id']."");
+        $seiten = nav($entrys,settings('m_cwcomments'),"?action=details&amp;id=".$_GET['id']."");
         $comments = show($dir."/comments",array("head" => _cw_comments_head,
                                                 "show" => $comments,
                                                 "seiten" => $seiten,
@@ -298,7 +298,7 @@ if(defined('_Clanwars')) {
                 if(settings("reg_cwcomments") && !$chkMe )
                     $index = error(_error_have_to_be_logged, 1);
                 else {
-                    if(!ipcheck("cwid(".$_GET['id'].")", config('f_cwcom'))) {
+                    if(!ipcheck("cwid(".$_GET['id'].")", settings('f_cwcom'))) {
                         if($userid >= 1)
                             $toCheck = empty($_POST['comment']);
                         else
@@ -363,7 +363,7 @@ if(defined('_Clanwars')) {
                         }
                     }
                     else
-                        $index = error(show(_error_flood_post, array("sek" => config('f_cwcom'))), 1);
+                        $index = error(show(_error_flood_post, array("sek" => settings('f_cwcom'))), 1);
                 }
             }
             else

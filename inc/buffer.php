@@ -8,22 +8,17 @@ ob_start();
 ob_implicit_flush(false);
 define('basePath', dirname(dirname(__FILE__).'../'));
 
-function getmicrotime() {
-    list($usec,$sec) = explode(" ",microtime());
-    return((float)$usec+(float)$sec);
-}
-
-$time_start=getmicrotime();
-
 function gz_output($output='') {
+    global $time_start;
     $gzip_compress_level = (!defined('buffer_gzip_compress_level') ? 4 : buffer_gzip_compress_level);
     if(function_exists('ini_set')) {
         ini_set('zlib.output_compression_level', $gzip_compress_level);
     }
 
+    $time = round(generatetime() - $time_start,4);
     if(buffer_show_licence_bar) {
         switch (_edition) {
-            case 'dev': $dev_info = ' - Development Edition'; break;
+            case 'dev': $dev_info = ' - Development Edition [ Runtime: '.$time.' ]'; break;
             case 'society': $dev_info = ' - Society Edition'; break;
             default: $dev_info = ''; break;
         }

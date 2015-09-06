@@ -8,7 +8,7 @@ if(defined('_Artikel')) {
     $qry = $sql->select("SELECT `id`,`kat`,`titel`,`datum`,`autor`,`text` "
             . "FROM `{prefix_artikel}` "
             . "WHERE `public` = 1 ".orderby_sql(array("artikel","titel","datum","kat"), 'ORDER BY `datum` DESC')." "
-            . "LIMIT ".($page - 1)*config('m_artikel').",".config('m_artikel').";");
+            . "LIMIT ".($page - 1)*settings('m_artikel').",".settings('m_artikel').";");
 
     if($sql->rowCount()) {
         foreach($qry as $get) {
@@ -28,7 +28,7 @@ if(defined('_Artikel')) {
         $show = show(_no_entrys_yet, array("colspan" => "4"));
     }
 
-    $seiten = nav(cnt("{prefix_artikel}"),config('m_artikel'),"?page".(isset($_GET['show']) ? $_GET['show'] : 0).orderby_nav());
+    $seiten = nav(cnt("{prefix_artikel}"),settings('m_artikel'),"?page".(isset($_GET['show']) ? $_GET['show'] : 0).orderby_nav());
     $index = show($dir."/artikel", array("show" => $show,
                                          "nav" => $seiten,
                                          "order_autor" => orderby('autor'),

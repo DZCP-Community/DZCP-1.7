@@ -4,15 +4,24 @@
  * http://www.dzcp.de
  */
 
+//-> Ladezeit berechen
+function getmicrotime() {
+    list($usec,$sec) = explode(" ",microtime());
+    return((float)$usec+(float)$sec);
+}
+
+function generatetime() {
+    list($usec, $sec) = explode(" ",microtime());
+    return ((float)$usec + (float)$sec);
+}
+
+$time_start=getmicrotime();
+
 ## Check PHP Version ##
 /* Minimum PHP Version */
 if (version_compare(PHP_VERSION, '5.3.0', 'lt')) {
     die('DZCP required PHP 5.2.0 or newer!<p> Found PHP ' . PHP_VERSION);
 }
-
-## Check MySQLi ##
-if(!function_exists('mysqli_connect'))
-    die('<b>DZCP required ( MySQLi )* MySQL Improved Extension *!</b>');
 
 #########################################
 //-> Debug Console Settings Start
@@ -30,7 +39,7 @@ define('show_pdo_delete_debug', false);
 define('show_pdo_update_debug', false);
 define('show_pdo_insert_debug', false);
 define('show_pdo_select_debug', false);
-define('show_mail_debug', true);
+define('show_mail_debug', false);
 
 #############################################
 ############### Debug Console ###############

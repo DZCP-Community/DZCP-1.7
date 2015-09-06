@@ -7,8 +7,8 @@
 #########################################
 //-> DZCP Settings Start
 #########################################
-define('view_error_reporting', false); // Zeigt alle Fehler und Notices etc.
-define('view_javascript_debug', false); // Zeigt JavaScript Aufrufe und Infos.
+define('view_error_reporting', true); // Zeigt alle Fehler und Notices etc.
+define('view_javascript_debug', true); // Zeigt JavaScript Aufrufe und Infos.
 define('debug_all_sql_querys', false); // Speichert alle ausgefuehrten SQL-Querys in einer Datei.
 define('debug_save_to_file', false); // Schreibt die die Ausgaben der Debug Console in eine Datei.
 define('debug_dzcp_handler', true); // Verwende feur Notices, etc. die Debug Console.
@@ -23,7 +23,7 @@ define('show_empty_paginator', false); //Die Paginatoren sind immer sichtbar.
 define('thumbgen_cache', true); // Sollen die verkleinerten Bilder der Thumbgen gespeichert werden.
 define('thumbgen_cache_time', 60*60); // Wie lange sollen die verkleinerten Bilder der Thumbgen im Cache verbleiben.
 
-define('template_cache', true); // Sollen das HTML-Template in den Memory Cache geladen werden * nur memcache,wincache,xcache oder apc *
+define('template_cache', false); // Sollen das HTML-Template in den Memory Cache geladen werden * nur memcache,wincache,xcache oder apc *
 define('template_cache_time', 120); // Wie lange soll das HTML-Template im Memory Cache verbleiben in Sekunden.
 
 define('feed_update_time', 10*60); // Wann soll der Newsfeed aktualisiert werden.
@@ -82,15 +82,15 @@ define('phpmailer_smtp_password', '');//Password to use for SMTP authentication
 #########################################
 //-> Sessions Settings Start * Expert *
 #########################################
-define('sessions_backend', 'mysql'); //Das zu verwendendes Backend: php,mysql,memcache,apc
+define('sessions_backend', 'memcache'); //Das zu verwendendes Backend: php,mysql,memcache,apc
 define('sessions_encode_type', 'sha1'); //Verwende die sha1 codierung fuer session ids
 define('sessions_encode', true); //Inhalt der Sessions zusatzlich verschlusseln
 define('sessions_ttl_maxtime', (2*60*60)); //Live-Time der Sessions * 2h
-define('sessions_memcache_host', 'localhost'); //Server Adresse fur das Sessions Backend: memcache
+define('sessions_memcache_host', '127.0.0.1'); //Server Adresse fur das Sessions Backend: memcache
 define('sessions_memcache_port', 11311); //Server Port fur das Sessions Backend: memcache
 
 define('sessions_sql_sethost', false); //Verwende eine externe Datenbank fur die Sessions
-define('sessions_sql_driver', 'mysql'); //Welche Datenbank Driver wird verwendet
+define('sessions_sql_driver', 'mysql'); //Welcher Datenbank Driver sokk verwendet werden
 define('sessions_sql_host', 'localhost'); //SQL Host
 define('sessions_sql_user', 'user'); //SQL Username
 define('sessions_sql_pass', 'xxxx'); //SQL Passwort
@@ -114,10 +114,10 @@ define('sessions_sql_db', 'test'); //SQL Database
 
 $config_cache = array();
 $config_cache['use_cache'] = true; // verwende einen Cache, um abfragen zwischenzuspeichern
-$config_cache['storage'] = "files"; // welcher Cache: auto,memcache,files,sqlite,wincache,xcache oder apc
+$config_cache['storage'] = "memcache"; // welcher Cache: auto,memcache,files,sqlite,wincache,xcache oder apc
 $config_cache['server'] = array(array("127.0.0.1",11311,1)); //adressen fur die memcache server
 $config_cache['dbc'] = true; //verwende database query caching * nur mit memory cache
-$config_cache['dbc_auto_memcache'] = false; //automatische memcache verfugbarkeisprufung
+$config_cache['dbc_auto_memcache'] = true; //automatische memcache verfugbarkeisprufung
 
 //-> Legt die UserID des Rootadmins fest
 //-> (dieser darf bestimmte Dinge, den normale Admins nicht duerfen, z.B. andere Admins editieren)

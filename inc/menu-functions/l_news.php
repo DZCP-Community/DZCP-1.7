@@ -11,19 +11,19 @@ function l_news() {
     $qry = $sql->select("SELECT `id`,`titel`,`autor`,`datum`,`kat`,`public`,`timeshift` "
                       . "FROM `{prefix_news}` "
                       . "WHERE `public` = 1 AND `datum` <= ? ".(permission("intnews") ? "" : "AND `intern` = 0")." "
-                      . "ORDER BY `id` DESC LIMIT ".config('m_lnews').";",array(time()));
+                      . "ORDER BY `id` DESC LIMIT ".settings('m_lnews').";",array(time()));
 
     $l_news = '';
     if($sql->rowCount()) {
         foreach($qry as $get) {
             $getkat = $sql->selectSingle("SELECT `kategorie` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']));
-            $info = !config('allowhover') == 1 ? '' : 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['titel'])).'\', \''.
+            $info = !settings('allowhover') == 1 ? '' : 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['titel'])).'\', \''.
                   _datum.';'._autor.';'._news_admin_kat.';'._comments_head.'\', \''.date("d.m.Y H:i", $get['datum'])._uhr.';'.
                   fabo_autor($get['autor']).';'.jsconvert(re($getkat['kategorie'])).';'.
                   cnt('{prefix_newscomments}',"WHERE `news` = ?","id",array($get['id'])).'\')" onmouseout="DZCP.hideInfo()"';
 
             $l_news .= show("menu/last_news", array("id" => $get['id'],
-                                                    "titel" => cut(re($get['titel']),config('l_lnews')),
+                                                    "titel" => cut(re($get['titel']),settings('l_lnews')),
                                                     "datum" => date("d.m.Y", $get['datum']),
                                                     "info" => $info));
         }

@@ -134,10 +134,10 @@ if(defined('_UserMenu')) {
                 $qrygb = $sql->select("SELECT * FROM `{prefix_usergb}` "
                                     . "WHERE `user` = ? "
                                     . "ORDER BY `datum` DESC "
-                                    . "LIMIT ".($page - 1) * config('m_usergb').",".config('m_usergb').";",array($get['id']));
+                                    . "LIMIT ".($page - 1) * settings('m_usergb').",".settings('m_usergb').";",array($get['id']));
 
                 $entrys = cnt('{prefix_usergb}', " WHERE `user` = ".$get['id']);
-                $i = $entrys - ($page - 1) * config('m_usergb');
+                $i = $entrys - ($page - 1) * settings('m_usergb');
 
                 $membergb = '';
                 foreach($qrygb as $getgb) {
@@ -195,7 +195,7 @@ if(defined('_UserMenu')) {
                 }
 
                 $add = "";
-                if (!ipcheck("mgbid(" . $_GET['id'] . ")", config('f_membergb'))) {
+                if (!ipcheck("mgbid(" . $_GET['id'] . ")", settings('f_membergb'))) {
                     if ($userid >= 1) {
                         $form = show("page/editor_regged", array("nick" => autor($userid),
                                                                  "von" => _autor));
@@ -215,7 +215,7 @@ if(defined('_UserMenu')) {
                                                             "error" => ""));
                 }
                 
-                $seiten = nav($entrys, config('m_usergb'), "?action=user&amp;id=" . $_GET['id'] . "&show=gb");
+                $seiten = nav($entrys, settings('m_usergb'), "?action=user&amp;id=" . $_GET['id'] . "&show=gb");
                 $qryperm = $sql->selectSingle("SELECT `perm_gb` FROM `{prefix_users}` WHERE id = ?;", array(intval($_GET['id'])));
                 $add = $qryperm['perm_gb'] != 1 ? "" : $add;
                 $show = show($dir . "/profil_gb", array("gbhead" => _membergb,

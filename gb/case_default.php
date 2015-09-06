@@ -49,8 +49,8 @@ if($do == 'addgb') {
 
 if(empty($index)) {
     $activ = (!permission("gb") && settings('gb_activ')) ? " WHERE `public` = 1" : "";
-    $qry = $sql->select("SELECT * FROM `{prefix_gb}`".$activ." ORDER BY `datum` DESC LIMIT ".($page - 1)*config('m_gb').",".config('m_gb').";");
-    $entrys = cnt("{prefix_gb}"); $i = $entrys-($page - 1)*config('m_gb');
+    $qry = $sql->select("SELECT * FROM `{prefix_gb}`".$activ." ORDER BY `datum` DESC LIMIT ".($page - 1)*settings('m_gb').",".settings('m_gb').";");
+    $entrys = cnt("{prefix_gb}"); $i = $entrys-($page - 1)*settings('m_gb');
     if($sql->rowCount()) { $show = '';
         foreach($qry as $get) {
             $gbhp = !empty($get['hp']) ? show(_hpicon, array("hp" => links(re($get['hp'])))) : "";
@@ -139,7 +139,7 @@ if(empty($index)) {
         $show = show(_no_entrys_yet, array("colspan" => "2"));
 
     $entry = "";
-    if(!ipcheck("gb", config('f_gb'))) {
+    if(!ipcheck("gb", settings('f_gb'))) {
         if($userid != 0) {
             $form = show("page/editor_regged", array("nick" => autor()));
         } else {
@@ -158,7 +158,7 @@ if(empty($index)) {
                                          "notification_page" => notification::get($notification_p)));
     }
 
-    $seiten = nav($entrys,config('m_gb'),"?&amp;action=nav");
+    $seiten = nav($entrys,settings('m_gb'),"?&amp;action=nav");
     $index = show($dir."/gb",array("show" => $show, 
                                    "add" => show(_gb_eintragen), 
                                    "entry" => $entry, 

@@ -12,7 +12,7 @@ if(defined('_Ck')) {
         $entrys = cnt("{prefix_clankasse}");
         $qry = $sql->select("SELECT `id`,`pm`,`betrag`,`member`,`transaktion`,`datum` FROM `{prefix_clankasse}`
                   ".orderby_sql(array("betrag","transaktion","datum","member"), 'ORDER BY `datum` DESC').
-                  " LIMIT ".($page - 1)*config('m_clankasse').",".config('m_clankasse').";");
+                  " LIMIT ".($page - 1)*settings('m_clankasse').",".settings('m_clankasse').";");
         foreach($qry as $get) {
             $betrag = str_replace(',', '.', $get['betrag']);
             $pm = show((!$get['pm'] ? _clankasse_plus : _clankasse_minus),
@@ -77,7 +77,7 @@ if(defined('_Ck')) {
                                                       "edit" => $edit));
         }
 
-        $seiten = nav($entrys,config('m_clankasse'),"?action=nav");
+        $seiten = nav($entrys,settings('m_clankasse'),"?action=nav");
         $new = permission("clankasse") ? _clankasse_new : '';
         $index = show($dir."/clankasse", array("show" => $show,
                                                "showstatus" => $showstatus,

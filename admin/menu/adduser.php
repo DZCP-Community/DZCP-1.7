@@ -5,96 +5,14 @@
  */
 
 if(_adminMenu != 'true') exit;
+$where = $where.': '._config_useradd_head;
 
-    $where = $where.': '._config_useradd_head;
-      $dropdown_age = show(_dropdown_date, array("day" => dropdown("day",$bdayday,1),
-                                                            "month" => dropdown("month",$bdaymonth,1),
-                                                   "year" => dropdown("year",$bdayyear,1)));
+if(isset($_POST['user'])) {
+        $check_user = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user`= ?;", array(up($_POST['user'])));
+        $check_nick = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `nick`= ?;", array(up($_POST['nick'])));
+        $check_email = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `email`= ?;", array(up($_POST['email'])));
 
-        $gmaps = show('membermap/geocoder', array('form' => 'adduser'));
-
-
-        $qrysq = db("SELECT id,name FROM ".$db['squads']."
-                     ORDER BY pos");
-        while($getsq = _fetch($qrysq))
-        {
-          $qrypos = db("SELECT id,position FROM ".$db['pos']."
-                        ORDER BY pid");
-          $posi = "";
-          while($getpos = _fetch($qrypos))
-          {
-            $check = db("SELECT * FROM ".$db['userpos']."
-                         WHERE posi = '".$getpos['id']."'
-                         AND squad = '".$getsq['id']."'
-                         AND user = '".intval($_GET['edit'])."'");
-            if(_rows($check)) $sel = 'selected="selected"';
-            else $sel = "";
-
-            $posi .= show(_select_field_posis, array("value" => $getpos['id'],
-                                                     "sel" => $sel,
-                                                     "what" => re($getpos['position'])));
-          }
-
-          $qrysquser = db("SELECT squad FROM ".$db['squaduser']."
-                           WHERE user = '".intval($_GET['edit'])."'
-                           AND squad = '".$getsq['id']."'");
-
-          if(_rows($qrysquser))$check = 'checked="checked"';
-          else $check = "";
-
-          $esquads .= show(_checkfield_squads, array("id" => $getsq['id'],
-                                                     "check" => $check,
-                                                     "eposi" => $posi,
-                                                     "squad" => re($getsq['name'])));
-        }
-
-      $show = show($dir."/register", array("registerhead" => _useradd_head,
-                                                                                     "pname" => _loginname,
-                                                                                     "pnick" => _nick,
-                                                                                     "pemail" => _email,
-                                                                                     "pbild" => _profil_ppic,
-                                                                                     "abild" => _profil_avatar,
-                                                                                     "ppwd" => _pwd,
-                                                                                     "squadhead" => _admin_user_squadhead,
-                                                                                     "squad" => _member_admin_squad,
-                                                                                     "posi" => _profil_position,
-                                                                                     "esquad" => $esquads,
-                                                                                     "about" => _useradd_about,
-                                                                                     "level_info" => _level_info,
-                                                                                     "rechte" => _config_positions_rights,
-                                                                                     "getpermissions" => getPermissions(),
-                                                                                     "getboardpermissions" => getBoardPermissions(),
-                                                                                     "forenrechte" => _config_positions_boardrights,
-                                                                                     "preal" => _profil_real,
-                                                                                     "psex" => _profil_sex,
-                                                                                     "sex" => _pedit_male,
-                                                                                     "pbday" => _profil_bday,
-                                                                                     "dropdown_age" => $dropdown_age,
-                                                                                     "pcity" => _profil_city,
-                                                                                     "pcountry" => _profil_country,
-                                                                                     "country" => show_countrys($get['country']),
-                                                                                     "gmaps" => $gmaps,
-                                                                                     "level" => _admin_user_level,
-                                                                                     "ruser" => _status_user,
-                                                                                     "trial" => _status_trial,
-                                                                                     "alvl" => "",
-                                           "member" => _status_member,
-                                                                                     "admin" => _status_admin,
-                                                                                     "banned" => _admin_level_banned,
-                                                                                     "value" => _button_value_reg));
-      if($do == "add")
-      {
-        $check_user = db_stmt("SELECT id FROM ".$db['users']." WHERE `user`= ?",
-                  array('s', up($_POST['user'])),true);
-
-        $check_nick = db_stmt("SELECT id FROM ".$db['users']." WHERE `nick`= ?",
-                  array('s', up($_POST['nick'])),true);
-
-        $check_email = db_stmt("SELECT id FROM ".$db['users']." WHERE `email`= ?",
-                  array('s', up($_POST['email'])),true);
-
-        if(empty($_POST['user']))
-        {
+        if(empty($_POST['user'])) {
             $show = error(_empty_user, 1);
         } elseif(empty($_POST['nick'])) {
             $show = error(_empty_nick, 1);
@@ -110,19 +28,10 @@ if(_adminMenu != 'true') exit;
             $show = error(_error_email_exists, 1);
         } else {
 
-        if(empty($_POST['pwd']))  $mkpwd = mkpwd();
-        else                      $mkpwd = $_POST['pwd'];
+        $mkpwd = empty($_POST['pwd']) ? mkpwd() : $_POST['pwd'];
         $pwd = md5($mkpwd);
-
         $bday = ($_POST['t'] && $_POST['m'] && $_POST['j'] ? cal($_POST['t']).".".cal($_POST['m']).".".$_POST['j'] : 0);
-        $qry = db("INSERT INTO ".$db['users']."
-                             SET `user`     = '".up($_POST['user'])."',
-                                 `nick`     = '".up($_POST['nick'])."',
-                                 `email`    = '".up($_POST['email'])."',
-                                 `pwd`      = '".up($pwd)."',
-                                 `rlname`   = '".up($_POST['rlname'])."',
-                                 `sex`      = '".intval($_POST['sex'])."',
-                                 `bday`     = '".(!$bday ? 0 : strtotime($bday))."',
+        $qry = db("INSERT INTO `{prefix_users}` SET `user` = '".up($_POST['user'])."',`nick` = '".up($_POST['nick'])."', `email` = '".up($_POST['email'])."',`pwd` = '".up($pwd)."', `rlname` = '".up($_POST['rlname'])."', `sex` = '".intval($_POST['sex'])."', `bday`     = '".(!$bday ? 0 : strtotime($bday))."',
                                  `city`     = '".up($_POST['city'])."',
                                  `country`  = '".up($_POST['land'])."',
                                  `regdatum` = '".time()."',
@@ -222,11 +131,42 @@ if(_adminMenu != 'true') exit;
         }
     }
 
-      $qry = db("INSERT INTO ".$db['userstats']."
+      db("INSERT INTO ".$db['userstats']."
                        SET `user`       = '".intval($insert_id)."',
                    `lastvisit`    = '".time()."'");
 
       $show = info(_uderadd_info, "../admin/");
 
       }
-    }
+}
+
+if(empty($show)) {
+    $dropdown_age = show(_dropdown_date, array("day" => dropdown("day",$bdayday,1),
+                                               "month" => dropdown("month",$bdaymonth,1),
+                                               "year" => dropdown("year",$bdayyear,1)));
+
+    $gmaps = show('membermap/geocoder', array('form' => 'adduser'));
+
+    $qrysq = $sql->select("SELECT `id`,`name` FROM `{prefix_squads}` ORDER BY `pos`;");
+    foreach($qrysq as $getsq) {
+            $qrypos = $sql->select("SELECT id,position FROM ".$db['pos']." ORDER BY pid"); $posi = "";
+            foreach($qrypos as $getpos) {
+                $check = $sql->rows("SELECT * FROM `{prefix_userposis}` WHERE `posi` = ? AND `squad` = ? AND `user` = ?;",
+                    array($getpos['id'],$getsq['id'],intval($_GET['edit'])));
+
+                $sel = $check ? 'selected="selected"' : "";
+                $posi .= show(_select_field_posis, array("value" => $getpos['id'], "sel" => $sel, "what" => re($getpos['position'])));
+            }
+
+            $check = $sql->rows("SELECT squad FROM `{prefix_userposis}` WHERE `user` = ? AND `squad` = ?;",array(intval($_GET['edit']),$getsq['id'])) ? 'checked="checked"' : '';
+            $esquads .= show(_checkfield_squads, array("id" => $getsq['id'], "check" => $check,"eposi" => $posi,"squad" => re($getsq['name'])));
+        }
+
+        $show = show($dir."/register", array("esquad" => $esquads,
+                                             "getpermissions" => getPermissions(),
+                                             "getboardpermissions" => getBoardPermissions(),
+                                             "dropdown_age" => $dropdown_age,
+                                             "country" => show_countrys($get['country']),
+                                             "gmaps" => $gmaps,
+                                             "alvl" => ""));
+}

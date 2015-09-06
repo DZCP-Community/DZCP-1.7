@@ -1,14 +1,13 @@
 /**
  * DZCP - deV!L`z ClanPortal 1.7.0
  * http://www.dzcp.de
- * DZCP - jQuery Class 1.7
  */
 
 // GLOBAL VARS
 var doc = document, ie4 = document.all, opera = window.opera;
 var innerLayer, layer, x, y, doWheel = false, offsetX = 15, offsetY = 5;
 var tickerc = 0, mTimer = new Array(), tickerTo = new Array(), tickerSpeed = new Array();
-var isIE = false, isWin = false, isOpera = false, jQueryV = "1.11.3", $ = jQuery; 
+var isIE = false, isWin = false, isOpera = false, jQueryV = "1.11.3", $ = jQuery;
 
 // DZCP JAVASCRIPT LIBARY FOR JQUERY >= V1.11.3
 var DZCP = {
@@ -30,7 +29,7 @@ var DZCP = {
         
         $('body').append('<div id="infoDiv"></div>');
         layer = $('#infoDiv')[0];
-        doc.body.onmousemove = DZCP.trackMouse;
+        doc.body.onmousemove = this.trackMouse;
        
         // init lightbox
         DZCP.initLightbox();
@@ -244,13 +243,12 @@ var DZCP = {
   // limit text lenthn
     maxlength: function(field, countfield, max) {
         if(field.value.length > max) field.value = field.value.substring(0, max);
-        else                         countfield.value = max - field.value.length;
+        else countfield.value = max - field.value.length;
     },
 
   // handle info layer
     showInfo: function(info, kats, text, img, width, height) {
-      if(typeof(layer) === 'object')
-      {
+      if(typeof(layer) === 'object') {
         var output = '';
         if(kats && text){
             var kat=kats.split(";");
@@ -351,13 +349,10 @@ var DZCP = {
     toggle: function(id) {
         if(!DZCP.jQueryCheck(false)) return false;
         if(id === 0) return;
-        if($('#more' + id).css('display') === 'none')
-        {
+        if($('#more' + id).css('display') === 'none') {
             $("#more" + id).fadeIn("normal");
             $('#img' + id).prop('src', '../inc/images/collapse.gif');
-        }
-        else
-        {
+        } else {
             $("#more" + id).fadeOut("normal");
             $('#img' + id).prop('src', '../inc/images/expand.gif');
         }
@@ -368,11 +363,11 @@ var DZCP = {
         if(!DZCP.jQueryCheck(false)) return false;
         if(id === 0) return;
         $("#more_"+id).fadeToggle("slow", "swing");
-
-        if($('#img_'+id).prop('alt') === "hidden")
+        if($('#img_'+id).prop('alt') === "hidden") {
             $('#img_'+id).prop({alt: 'normal', src: '../inc/images/toggle_normal.png'});
-        else
+        } else {
             $('#img_'+id).prop({alt: 'hidden', src: '../inc/images/toggle_hidden.png'});
+        }
     },
     
     // resize images
@@ -416,7 +411,6 @@ var DZCP = {
             if (node.nodeName === 'A') return true;
         }
         while(node.nodeName !== 'TD' && node.nodeName !== 'BODY');
-
         return false;
     },
 
@@ -429,14 +423,14 @@ var DZCP = {
 
   // ajax team switch
     teamSwitch: function(obj) {
-        if(!DZCP.jQueryCheck(false)) return false;
+      if(!DZCP.jQueryCheck(false)) return false;
       clearTimeout(mTimer[1]);
       $('#navTeam').load('../inc/ajax.php?i=teams&tID=' + obj, DZCP.initTicker('teams', 'h', 60));
     },
 
   // ajax vote
     ajaxVote: function(id) {
-        if(!DZCP.jQueryCheck(false)) return false;
+      if(!DZCP.jQueryCheck(false)) return false;
       DZCP.submitButton('contentSubmitVote');
       $.post('../votes/index.php?action=do&ajax=1&what=vote&id=' + id, $('#navAjaxVote').serialize(), function(req) {
         $('#navVote').html(req);
@@ -461,12 +455,10 @@ var DZCP = {
       if(!DZCP.jQueryCheck(false)) return false;
       DZCP.DebugLogger('Ajax Preview -> Tag: \'' + form + '\'');
       var tag=doc.getElementsByTagName("textarea");
-      for(var i=0;i<tag.length;i++)
-      {
+      for(var i=0;i<tag.length;i++) {
         var thisTag = tag[i].className;
         var thisID = tag[i].id;
-        if(thisTag === "editorStyle" || thisTag === "editorStyleWord" || thisTag === "editorStyleNewsletter")
-        {
+        if(thisTag === "editorStyle" || thisTag === "editorStyleWord" || thisTag === "editorStyleNewsletter") {
           var inst = tinyMCE.getInstanceById(thisID);
           $('#' + thisID).prop('value', inst.getBody().innerHTML);
         }
@@ -516,11 +508,9 @@ var DZCP = {
     submitButton: function(id) {
         if(!DZCP.jQueryCheck(false)) return false;
         submitID = (id) ? id : 'contentSubmit';
-
         $('#' + submitID).prop("disabled", true);
         $('#' + submitID).css('color', '#909090');
         $('#' + submitID).css('cursor', 'default');
-
         return true;
     },
 
@@ -545,6 +535,7 @@ var DZCP = {
              newData += '  </div>';
 
          $('#' + objID).html(newData);
+         
         // start ticker
          window.setTimeout("DZCP.startTickerDiv("+tickerc+");",1500);
          tickerc++;
@@ -592,6 +583,10 @@ var DZCP = {
         DZCP.DebugLogger('Change all Checkboxes with ID:'+tag+'_*');
         $('input:checkbox[id^="'+tag+'_"]').not(obj).prop('checked', obj.checked);
     },
+    
+    BooleanToString: function(boolean) {
+       return (boolean ? 'true' : 'false');
+    }
 };
 
 // load global events

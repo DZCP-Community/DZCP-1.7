@@ -8,25 +8,29 @@ if(_adminMenu != 'true') exit;
 
 switch ($do) {
     case 'delete':
-        db("DELETE FROM ".$db['startpage']." WHERE id = '".intval($_GET['id'])."'");
-        $show = info(_admin_startpage_deleted, "?index=admin&amp;admin=startpage");
+        $sql->delete("DELETE FROM `{prefix_startpage}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        notification::add_success(_admin_startpage_deleted, "?admin=startpage");
     break;
     case 'edit':
-        $get = db("SELECT * FROM `".$db['startpage']."` WHERE id = '".intval($_GET['id'])."'",false,true); $error = '';
-        if(isset($_POST['name']) && isset($_POST['url']) && isset($_POST['level']))
-        {
+        $get = $sql->selectSingle("SELECT * FROM `{prefix_startpage}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        if(isset($_POST['name']) && isset($_POST['url']) && isset($_POST['level'])) {
             if(empty($_POST['name']))
-                $error = _admin_startpage_no_name;
+                notification::add_error(_admin_startpage_no_name);
             else if(empty($_POST['url']))
-                $error = _admin_startpage_no_url;
-            else
-            {
-                db("UPDATE `".$db['startpage']."` SET `name` = '".up($_POST['name'])."', `url` = '".up($_POST['url'])."', `level` = '".intval($_POST['level'])."' WHERE id = '".intval($_GET['id'])."'");
-                $show = info(_admin_startpage_editd, "?index=admin&amp;admin=startpage");
+                notification::add_error(_admin_startpage_no_url);
+            else {
+                $sql->update("UPDATE `{prefix_startpage}` SET `name` = ?, `url` = ?, `level` = ? WHERE `id` = ?;",
+                        array(up($_POST['name']),up($_POST['url']),intval($_POST['level']),intval($_GET['id'])));
+                
+                notification::add_success(_admin_startpage_editd, "?admin=startpage");
             }
         }
 
-        if(empty($show)) {
+        if(!notification::is_success()) {
+            if(notification::has()) {
+                javascript::set('AnchorMove', 'notification-box');
+            }
+            
             $selu = $get['level'] == 1 ? 'selected="selected"' : '';
             $selt = $get['level'] == 2 ? 'selected="selected"' : '';
             $selm = $get['level'] == 3 ? 'selected="selected"' : '';
@@ -34,11 +38,7 @@ switch ($do) {
             $elevel = show(_elevel_startpage_select, array("selu" => $selu,
                                                            "selt" => $selt,
                                                            "selm" => $selm,
-                                                           "sela" => $sela,
-                                                           "ruser" => _status_user,
-                                                           "trial" => _status_trial,
-                                                           "member" => _status_member,
-                                                           "admin" => _status_admin));
+                                                           "sela" => $sela));
             
             $show = show($dir."/startpage_form", array("head" => _admin_startpage_edit,
                                                         "do" => "edit&amp;id=".$_GET['id'],
@@ -50,36 +50,36 @@ switch ($do) {
         }
     break;
     case 'new':
-        $error = '';
         if(isset($_POST['name']) && isset($_POST['url']) && isset($_POST['level'])) {
             if(empty($_POST['name']))
-                $error = _admin_startpage_no_name;
+                notification::add_error(_admin_startpage_no_name);
             else if(empty($_POST['url']))
-                $error = _admin_startpage_no_url;
+                notification::add_error(_admin_startpage_no_url);
             else {
-                db("INSERT INTO `".$db['startpage']."` SET `name` = '".up($_POST['name'])."', `url` = '".up($_POST['url'])."', `level` = '".intval($_POST['level'])."'");
-                $show = info(_admin_startpage_added, "?index=admin&amp;admin=startpage");
+                $sql->insert("INSERT INTO `{prefix_startpage}` SET `name` = ?, `url` = ?, `level` = ?;",
+                        array(up($_POST['name']),up($_POST['url']),intval($_POST['level'])));
+                
+                notification::add_success(_admin_startpage_added, "?admin=startpage");
             }
         }
 
-        if(empty($show)) {
+        if(!notification::is_success()) {
+            if(notification::has()) {
+                javascript::set('AnchorMove', 'notification-box');
+            }
+            
             $elevel = show(_elevel_startpage_select, array("selu" => '',
                                                            "selt" => '',
                                                            "selm" => '',
-                                                           "sela" => '',
-                                                           "ruser" => _status_user,
-                                                           "trial" => _status_trial,
-                                                           "member" => _status_member,
-                                                           "admin" => _status_admin));
+                                                           "sela" => ''));
             
             $show = show($dir."/startpage_form", array("head" => _admin_startpage_add_head, "do" => "new", "name" => (isset($_POST['name']) ? $_POST['name'] : ''),
             "url" => (isset($_POST['url']) ? $_POST['url'] : ''), "level" => $elevel, "what" => _button_value_add, "error" => (!empty($error) ? show("errors/errortable", array("error" => $error)) : "")));
         }
     break;
     default:
-        $qry = db("SELECT * FROM `".$db['startpage']."`;"); $color = 0; $show = '';
-        while($get = _fetch($qry))
-        {
+        $qry = $sql->select("SELECT * FROM `{prefix_startpage}`;"); $color = 0; $show = '';
+        foreach($qry as $get) {
             $edit = show("page/button_edit_single", array("id" => $get['id'], "action" => "admin=startpage&amp;do=edit", "title" => _button_title_edit));
             $delete = show("page/button_delete_single", array("id" => $get['id'], "action" => "admin=startpage&amp;do=delete", "title" => _button_title_del, "del" => _confirm_del_entry));
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
@@ -89,6 +89,6 @@ switch ($do) {
         if(empty($show))
             $show = show(_no_entrys_yet, array("colspan" => "4"));
 
-        $show = show($dir."/startpage", array("show" => $show, "add" => _dl_new_head, "edit" => _editicon_blank, "delete" => _deleteicon_blank));
+        $show = show($dir."/startpage", array("show" => $show));
     break;
 }

@@ -449,7 +449,7 @@ if(defined('_Forum')) {
     {
       $index = error(_error_unregistered,1);
     } else {
-      if(!ipcheck("fid(".$_GET['kid'].")", config('f_forum')))
+      if(!ipcheck("fid(".$_GET['kid'].")", settings('f_forum')))
       {
         if(permission("forum"))
         {
@@ -533,7 +533,7 @@ if(defined('_Forum')) {
                                             "vote" => $vote,
                                             "posteintrag" => ""));
       } else {
-        $index = error(show(_error_flood_post, array("sek" => config('f_forum'))), 1);
+        $index = error(show(_error_flood_post, array("sek" => settings('f_forum'))), 1);
       }
     }
   } elseif($do == "addthread") {

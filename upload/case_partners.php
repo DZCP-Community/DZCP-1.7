@@ -6,7 +6,7 @@
 
 if(defined('_Upload')) {
     if(permission('partners')) {
-        $infos = show(_upload_partners_info, array("userpicsize" => config('upicsize')));
+        $infos = show(_upload_partners_info, array("userpicsize" => settings('upicsize')));
         $index = show($dir."/upload", array("uploadhead" => _upload_partners_head,
                                             "name" => "file",
                                             "action" => "?action=partners&amp;do=upload",

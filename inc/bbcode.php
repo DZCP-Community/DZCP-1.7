@@ -43,25 +43,18 @@ dbc_index::init();
 //-> Automatische Datenbank Optimierung
 if(!$ajaxJob && auto_db_optimize && settings('db_optimize',false) < time() && !$installer && !$updater) {
     @ignore_user_abort(true);
-    $sql->update("UPDATE `{prefix_settings}` SET `db_optimize` = ? WHERE `id` = 1;",
-            array((time()+auto_db_optimize_interval)));
+    $sql->update("UPDATE `{prefix_settings}` SET `db_optimize` = ? WHERE `id` = 1;", array((time()+auto_db_optimize_interval)));
     db_optimize();
     $sql->insert("INSERT INTO `{prefix_ipcheck}` SET `ip` = ?, `user_id` = ?, `what` = 'db_optimize()', `time` = ?;",array('0.0.0.0',intval(userid()),time()));
     @ignore_user_abort(false);
 }
 
-//-> Settingstabelle auslesen * Use function settings('xxxxxx');
+//-> Settingstabelle und Configtabelle auslesen * Use function settings('xxxxxx');
 if(!dbc_index::issetIndex('settings')) {
-    $get_settings = $sql->selectSingle("SELECT * FROM `{prefix_settings}` WHERE `id` = 1 LIMIT 1;");
-    dbc_index::setIndex('settings', $get_settings);
+    $get_settings = $sql->selectSingle("SELECT * FROM `{prefix_settings}` AS `settings` LEFT JOIN `{prefix_config}` "
+                    . "AS `config` ON settings.`id` = config.`id` WHERE settings.`id` = 1 LIMIT 1;");
+    dbc_index::setIndex('settings', $get_settings, 4);
     unset($get_settings);
-}
-
-//-> Configtabelle auslesen * Use function config('xxxxxx');
-if(!dbc_index::issetIndex('config')) {
-    $get_config = $sql->selectSingle("SELECT * FROM `{prefix_config}` WHERE `id` = 1 LIMIT 1;");
-    dbc_index::setIndex('config', $get_config);
-    unset($get_config);
 }
 
 //-> Cookie initialisierung
@@ -162,6 +155,10 @@ function validateIpV4Range ($ip, $range) {
 // -> Pruft ob die IP gesperrt und gultig ist
 function check_ip() {
     global $sql,$userip,$UserAgent;
+    if(!dbc_index::issetIndex('ip_check')) {
+        dbc_index::setIndex('ip_check', array());
+    }
+    
     if(!isIP($userip, true)) {
         if((!isIP($userip) && !isIP($userip,true)) || $userip == false || empty($userip)) {
             dzcp_session_destroy();
@@ -174,33 +171,38 @@ function check_ip() {
         }
         
         //Banned IP
-        foreach($sql->select("SELECT `id`,`typ`,`data` FROM `{prefix_ipban}` WHERE `ip` = ? AND `enable` = 1;",array($userip)) as $banned_ip) {
-            if($banned_ip['typ'] == 2 || $banned_ip['typ'] == 3) {
-                dzcp_session_destroy();
-                $banned_ip['data'] = unserialize($banned_ip['data']);
-                die('Deine IP ist gesperrt!<p>Your IP is banned!<p>MSG: '.$banned_ip['data']['banned_msg']);
+        if(!dbc_index::getIndexKey('ip_check', md5($userip))) {
+            $ips = dbc_index::getIndex('ip_check');
+            foreach($sql->select("SELECT `id`,`typ`,`data` FROM `{prefix_ipban}` WHERE `ip` = ? AND `enable` = 1;",array($userip)) as $banned_ip) {
+                if($banned_ip['typ'] == 2 || $banned_ip['typ'] == 3) {
+                    dzcp_session_destroy();
+                    $banned_ip['data'] = unserialize($banned_ip['data']);
+                    die('Deine IP ist gesperrt!<p>Your IP is banned!<p>MSG: '.$banned_ip['data']['banned_msg']);
+                }
             }
-        }
-        unset($banned_ip);
-        
-        if(allow_url_fopen_support() && isIP($userip) && !validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && 
-        !validateIpV4Range($userip, '[127].[0].[0-255].[0-255]') && 
-        !validateIpV4Range($userip, '[10].[0-255].[0-255].[0-255]') && 
-        !validateIpV4Range($userip, '[172].[16-31].[0-255].[0-255]')) {
-            sfs::check(); //SFS Update
-            if(sfs::is_spammer()) {
-                $sql->delete("DELETE FROM `{prefix_iptodns}` WHERE `sessid` = ?;",
-                        array(session_id()));
-                dzcp_session_destroy();
-                die('Deine IP-Adresse ist auf <a href="http://www.stopforumspam.com/" target="_blank">http://www.stopforumspam.com/</a> gesperrt, die IP wurde zu oft für Spam Angriffe auf Webseiten verwendet.<p>
-                     Your IP address is known on <a href="http://www.stopforumspam.com/" target="_blank">http://www.stopforumspam.com/</a>, your IP has been used for spam attacks on websites.');
+            unset($banned_ip);
+
+            if(allow_url_fopen_support() && isIP($userip) && !validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && 
+            !validateIpV4Range($userip, '[127].[0].[0-255].[0-255]') && 
+            !validateIpV4Range($userip, '[10].[0-255].[0-255].[0-255]') && 
+            !validateIpV4Range($userip, '[172].[16-31].[0-255].[0-255]')) {
+                sfs::check(); //SFS Update
+                if(sfs::is_spammer()) {
+                    $sql->delete("DELETE FROM `{prefix_iptodns}` WHERE `sessid` = ?;",
+                            array(session_id()));
+                    dzcp_session_destroy();
+                    die('Deine IP-Adresse ist auf <a href="http://www.stopforumspam.com/" target="_blank">http://www.stopforumspam.com/</a> gesperrt, die IP wurde zu oft für Spam Angriffe auf Webseiten verwendet.<p>
+                         Your IP address is known on <a href="http://www.stopforumspam.com/" target="_blank">http://www.stopforumspam.com/</a>, your IP has been used for spam attacks on websites.');
+                }
             }
+            
+            $ips[md5($userip)] = true;
+            dbc_index::setIndex('ip_check', $ips, 30);
         }
     }
 }
 
 check_ip(); // IP Prufung * No IPV6 Support *
-
 function dzcp_session_destroy() {
     $_SESSION['id']        = '';
     $_SESSION['pwd']       = '';
@@ -493,7 +495,7 @@ function userid() {
     if(!dbc_index::issetIndex('user_'.intval($_SESSION['id']))) {
         $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ? AND `pwd` = ?;",array(intval($_SESSION['id']),$_SESSION['pwd']));
         if (!$sql->rowCount()) { return 0; }
-        dbc_index::setIndex('user_'.$get['id'], $get);
+        dbc_index::setIndex('user_'.$get['id'], $get, 2);
         return $get['id'];
     }
 
@@ -536,7 +538,7 @@ function lang($lng) {
         $files = get_files(basePath.'/inc/lang/languages/',false,true,array('php'));
         $lng = str_replace('.php','',$files[0]);
     }
-
+    
     include(basePath."/inc/lang/global.php");
     include(basePath."/inc/lang/languages/".$lng.".php");
 }
@@ -577,7 +579,8 @@ function settings($what,$use_dbc=true) {
         if ($use_dbc) {
             $dbd = dbc_index::getIndex('settings');
         } else {
-            $dbd = $sql->selectSingle("SELECT * FROM `{prefix_settings}` WHERE `id` = 1 LIMIT 1;");
+            $dbd = $sql->selectSingle("SELECT * FROM `{prefix_settings}` AS `settings` LEFT JOIN `{prefix_config}` "
+                    . "AS `config` ON settings.`id` = config.`id` WHERE settings.`id` = 1 LIMIT 1;");
         }
 
         $return = array();
@@ -595,43 +598,8 @@ function settings($what,$use_dbc=true) {
             return dbc_index::getIndexKey('settings', $what);
         }
 
-        return $sql->selectSingle("SELECT `".$what."` FROM `{prefix_settings}` WHERE `id` = 1 LIMIT 1;",array(),$what);
-    }
-}
-
-/**
- * DZCP V1.7.0
- * Werte aus der Config Tabelle auslesen
- *
- * @param string $what
- * @param boolean $use_dbc
- * @return string
- */
-function config($what,$use_dbc=true) {
-    global $sql;
-    if(is_array($what)) {
-        if ($use_dbc) {
-            $dbd = dbc_index::getIndex('config');
-        } else {
-            $dbd = $sql->selectSingle("SELECT * FROM `{prefix_config}` WHERE `id` = 1 LIMIT 1;");
-        }
-
-        $return = array();
-        foreach ($dbd as $key => $var) {
-            if (!in_array($key, $what)) {
-                continue;
-            }
-
-            $return[$key] =  $var;
-        }
-
-        return $return;
-    } else {
-        if ($use_dbc) {
-            return dbc_index::getIndexKey('config', $what);
-        }
-
-        return $sql->selectSingle("SELECT `".$what."` FROM `{prefix_config}` WHERE `id` = 1 LIMIT 1;",array(),$what);
+        return $sql->selectSingle("SELECT `".$what."` FROM `{prefix_settings}` AS `settings` LEFT JOIN `{prefix_config}` "
+                    . "AS `config` ON settings.`id` = config.`id` WHERE settings.`id` = 1 LIMIT 1;",array(),$what);
     }
 }
 
@@ -1261,7 +1229,7 @@ function array_var_exists($var,$search)
  * Funktion um eine Datei im Web auf Existenz zu prufen und abzurufen
  * @return String
  **/
-function fileExists($url,$timeout=file_get_contents_timeout) {
+function fileExists($url,$post=false,$timeout=file_get_contents_timeout) {
     if((!allow_url_fopen_support() && !use_curl || (use_curl && !extension_loaded('curl'))))
         return false;
     
@@ -1274,8 +1242,13 @@ function fileExists($url,$timeout=file_get_contents_timeout) {
    
     if(class_exists('Snoopy')) { //Use Snoopy HTTP Client
         $snoopy = new Snoopy;
-        if (!$snoopy->fetch($url)) {
-            return false;
+        if(count($post) >= 1 && $post != false) {
+            $snoopy->rawheaders["Pragma"] = "no-cache";
+            $snoopy->submit($url, $post);
+        } else {
+            if (!$snoopy->fetch($url)) {
+                return false;
+            }
         }
 
         return ((string)(trim($snoopy->results)));
@@ -1290,6 +1263,13 @@ function fileExists($url,$timeout=file_get_contents_timeout) {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT , $timeout);
         curl_setopt($curl, CURLOPT_TIMEOUT, $timeout * 2); // x 2
+        
+        //For POST
+        if(count($post) >= 1 && $post != false) {
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $post);
+            curl_setopt($curl, CURLOPT_VERBOSE , 0 );
+        }
         
         $gzip = false;
         if(function_exists('gzinflate')) {
@@ -1398,13 +1378,13 @@ function cnt($db, $where = "", $what = "id", $sql_std=array()) {
     return 0;
 }
 
-function cnt_multi($db, $where = "", $whats = array('id')) {
+function cnt_multi($db, $where = "", $whats = array('id'), $sql_std=array()) {
     global $sql; $cnt_sql = "";
     foreach ($whats as $what) {
         $cnt_sql .= "COUNT(".$what.") AS `cnt_".$what."`,";
     }
     $cnt_sql = substr($cnt_sql, 0, -1);
-    $cnt = $sql->selectSingle("SELECT ".$cnt_sql." FROM `".$db."` ".$where.";");
+    $cnt = $sql->selectSingle("SELECT ".$cnt_sql." FROM `".$db."` ".$where.";",$sql_std);
     if ($sql->rowCount()) {
         return $cnt;
     }
@@ -1424,13 +1404,13 @@ function sum($db, $where = "", $what = "id", $sql_std=array()) {
     return 0;
 }
 
-function sum_multi($db, $where = "", $whats = array('id')) {
+function sum_multi($db, $where = "", $whats = array('id'), $sql_std=array()) {
     global $sql; $sum_sql = "";
     foreach ($whats as $what) {
         $sum_sql .= "SUM(".$what.") AS `sum_".$what."`,";
     }
     $sum_sql = substr($sum_sql, 0, -1);
-    $sum = $sql->selectSingle("SELECT ".$sum_sql." FROM `".$db."` ".$where.";");
+    $sum = $sql->selectSingle("SELECT ".$sum_sql." FROM `".$db."` ".$where.";",$sql_std);
     if ($sql->rowCount()) {
         return $sum;
     }
@@ -1568,8 +1548,8 @@ function online_reg($where='') {
 //-> Prueft, ob der User eingeloggt ist und wenn ja welches Level besitzt er
 function checkme($userid_set=0) {
     global $sql;
-    if (!$userid = ($userid_set != 0 ? intval($userid_set) : userid())) { return 0; }
     if (empty($_SESSION['id']) || empty($_SESSION['pwd'])) { return 0; }
+    if (!$userid = ($userid_set != 0 ? intval($userid_set) : userid())) { return 0; }
     if (rootAdmin($userid)) { return 4; }
     if(!dbc_index::issetIndex('user_'.intval($userid))) {
         $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ? AND `pwd` = ? AND `ip` = ?;",array(intval($userid),$_SESSION['pwd'],$_SESSION['ip']));
@@ -1816,7 +1796,7 @@ function mkpwd($passwordLength=8,$specialcars=true) {
 
 //-> Infomeldung ausgeben
 function info($msg, $url="", $timeout = 5) {
-    if (config('direct_refresh')) {
+    if (settings('direct_refresh')) {
         return header('Location: ' . str_replace('&amp;', '&', $url));
     }
 
@@ -1943,12 +1923,15 @@ function nav($entrys, $perpage, $urlpart='', $recall = 0) {
 class notification {
     static private $notification_index = array();
     static private $notification_global = true;
+    static private $notification_success = false;
     
     public static function add_error($msg = '', $link = false, $time = 3) {
+        self::$notification_success = false;
         return self::import('error', $msg, $link, $time);
     }
     
     public static function add_success($msg = '', $link = false, $time = 3) {
+        self::$notification_success = true;
         return self::import('success', $msg, $link, $time);
     }
     
@@ -1988,6 +1971,14 @@ class notification {
         }
         
         return $notification;
+    }
+    
+    public static function has() {
+        return (count(self::$notification_index) >= 1);
+    }
+    
+    public static function is_success() {
+        return self::$notification_success;
     }
     
     public static function get_tr($input=false) {
@@ -2227,6 +2218,7 @@ function sendMail($mailto,$subject,$content) {
     return false;
 }
 
+check_msg_emal(); //CALL
 function check_msg_emal() {
     global $sql,$httphost,$ajaxJob,$isSpider;
     if(!$ajaxJob && !$isSpider && !$sql->rows("SELECT `id` FROM `{prefix_iptodns}` WHERE `sessid` = ? AND `bot` = 1;",array(session_id()))) {
@@ -2245,8 +2237,6 @@ function check_msg_emal() {
         }
     }
 }
-
-check_msg_emal(); //CALL
 
 //-> Checkt ob ein Ereignis neu ist
 function check_new($datum = 0, $output=false, $datum2 = 0) {
@@ -2324,12 +2314,6 @@ function dropdown($what, $wert, $age = 0) {
     }
 
     return $return;
-}
-
-//Umfrageantworten selektieren
-function voteanswer($what, $vid) {
-    global $sql;
-    return $sql->selectSingle("SELECT `sel` FROM `{prefix_vote_results}` WHERE `what` = ? AND `vid` = `?;",array(up($what),intval($vid)),'sel');
 }
 
 //Profilfelder konvertieren
@@ -2706,12 +2690,6 @@ function check_internal_url() {
     return false;
 }
 
-//-> Ladezeit
-function generatetime() {
-    list($usec, $sec) = explode(" ",microtime());
-    return ((float)$usec + (float)$sec);
-}
-
 //-> Rechte abfragen
 function getPermissions($checkID = 0, $pos = 0) {
     global $sql;
@@ -2911,7 +2889,7 @@ final class dbc_index {
         self::$is_mem = self::MemSetIndex();
     }
 
-    public static final function setIndex($index_key,$data) {
+    public static final function setIndex($index_key,$data,$time=1.2) {
         global $cache,$config_cache;
 
         if(self::MemSetIndex()) {
@@ -2920,7 +2898,7 @@ final class dbc_index {
             }
 
             if ($config_cache['use_cache']) {
-                $cache->set('dbc_' . $index_key, serialize($data), 1.2);
+                $cache->set('dbc_' . $index_key, serialize($data), $time);
             }
         }
 
@@ -3151,26 +3129,21 @@ class javascript {
 //-> Ausgabe des Indextemplates
 function page($index='',$title='',$where='',$index_templ='index') {
     global $userid,$userip,$tmpdir,$chkMe,$charset,$dir,$view_error;
-    global $designpath,$language,$time_start,$menu_index,$isSpider;
+    global $designpath,$language,$menu_index,$isSpider;
 
-    // Timer Stop
-    $time = round(generatetime() - $time_start,4);
     javascript::set('lng',($language=='deutsch'?'de':'en'));
-    javascript::set('maxW',config('maxwidth'));
+    javascript::set('maxW',settings('maxwidth'));
     javascript::set('shoutInterval',15000);  // refresh interval of the shoutbox in ms
     javascript::set('slideshowInterval',6000);  // refresh interval of the shoutbox in ms
     javascript::set('autoRefresh',1);  // Enable Auto-Refresh for Ajax
+    javascript::set('debug',1);  // Enable JS Debug
+    javascript::set('dir',$designpath);  // Designpath
 
     // JS-Dateine einbinden * json *
     $java_vars = '<script language="javascript" type="text/javascript">var json=\''.javascript::encode().'\',dzcp_config=JSON&&JSON.parse(json)||$.parseJSON(json);</script>'."\n";
-    
-    //TODO: Old Code, implement function is_mobile()
-    if(!strstr(GetServerVars('HTTP_USER_AGENT'),'Android') && !strstr(GetServerVars('HTTP_USER_AGENT'),'webOS')) {
-        $java_vars .= '<script language="javascript" type="text/javascript" src="'.$designpath.'/_js/wysiwyg.js"></script>'."\n";
-    }
 
     if(settings("wmodus") && $chkMe != 4) {
-        $login = show("errors/wmodus_login", array("secure" => config('securelogin') ? show("user/secure") : ''));
+        $login = show("errors/wmodus_login", array("secure" => settings('securelogin') ? show("user/secure") : ''));
         cookie::save(); //Save Cookie
         echo show("errors/wmodus", array("tmpdir" => $tmpdir,
                                          "java_vars" => $java_vars,
@@ -3185,7 +3158,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
         //check permissions
         if(!$chkMe) {
-            $secure = config('securelogin') ? show("menu/secure") : '';
+            $secure = settings('securelogin') ? show("menu/secure") : '';
             $login = show("menu/login", array("secure" => $secure));
             $check_msg = '';
         } else {
@@ -3205,7 +3178,6 @@ function page($index='',$title='',$where='',$index_templ='index') {
         $lang = $language;
         $template_switch = show("menu/tmp_switch", array("templates" => $tmpldir));
         $clanname = re(settings("clanname"));
-        $time = show(_generated_time, array("time" => $time));
         $headtitle = show(_index_headtitle, array("clanname" => $clanname));
         $rss = $clanname;
         $title = re(strip_tags($title));
@@ -3229,7 +3201,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
         //filter placeholders
         $dir = $designpath; //after template index autodetect!!!
         $blArr = array("[clanname]","[title]","[java_vars]","[template_switch]","[headtitle]","[login]",
-        "[index]","[time]","[rss]","[dir]","[charset]","[where]","[lang]","[notification]","[notification_tr]");
+        "[index]","[rss]","[dir]","[charset]","[where]","[lang]","[notification]","[notification_tr]");
         $pholdervars = '';
         for($i=0;$i<=count($blArr)-1;$i++) {
             if (preg_match("#" . $blArr[$i] . "#", $pholder)) {

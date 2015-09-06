@@ -31,7 +31,7 @@ function team($tID = '') {
     foreach($qrym as $getm) {
         $tr1 = ''; $tr2 = '';
         if($i == 0 || $i == 1) $tr1 = "<tr>";
-        if($i == config('teamrow')) {
+        if($i == settings('teamrow')) {
             $tr2 = "</tr>";
             $i = 0;
         }
@@ -47,14 +47,14 @@ function team($tID = '') {
                                                 "squad" => $get['id'],
                                                 "info" => $info,
                                                 "id" => $getm['id'],
-                                                "width" => round(100/config('teamrow'),0)));
+                                                "width" => round(100/settings('teamrow'),0)));
         $i++;
         $cnt++;
     }
 
     $end = '';
-    if(is_float($cnt/config('teamrow'))) {
-        for($e=$i;$e<=config('teamrow');$e++) {
+    if(is_float($cnt/settings('teamrow'))) {
+        for($e=$i;$e<=settings('teamrow');$e++) {
             $end .= '<td></td>';
         }
 
@@ -70,8 +70,8 @@ function team($tID = '') {
 
     //Output
     $all = cnt("{prefix_squads}", "WHERE `navi` = 1");
-    $team = show("menu/team", array("row" => config('teamrow'),
-                                    "team" => cut(re($get['name']),config('l_team')),
+    $team = show("menu/team", array("row" => settings('teamrow'),
+                                    "team" => cut(re($get['name']),settings('l_team')),
                                     "id" => $get['id'],
                                     "next" => $next['id'],
                                     "last" => $last['id'],
