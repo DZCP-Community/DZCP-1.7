@@ -204,12 +204,15 @@ var tinyMCE_GZ = {
     }
 };
 
-$(document).ready(function() { 
-    tinyMCE_GZ.init({ 
-        plugins : 'contextmenu,dzcp,advimage,paste,table,fullscreen,inlinepopups,spellchecker,searchreplace,insertdatetime,media', 
-        themes : 'advanced', 
-        languages : (dzcp_config.lng == 'de' ? dzcp_config.lng : 'en'), 
-        disk_cache : true, 
-        debug : false, 
-        compress : true });
+$(document).ready(function() {
+    if ( $('textarea[class="editorStyle"]').length || $('textarea[class="editorStyleMini"]').length || 
+            $('textarea[class="editorStyleNewsletter"]').length || $('textarea[class="editorStyleWord"]').length) {
+        tinyMCE_GZ.init({ 
+            plugins : 'contextmenu,dzcp,advimage,paste,table,fullscreen,inlinepopups,spellchecker,searchreplace,insertdatetime,media', 
+            themes : 'advanced', 
+            languages : (dzcp_config.lng == 'de' ? dzcp_config.lng : 'en'), 
+            disk_cache : true, 
+            debug : false, 
+            compress : true });
+    }
 });

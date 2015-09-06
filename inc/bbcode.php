@@ -3136,7 +3136,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
     javascript::set('shoutInterval',15000);  // refresh interval of the shoutbox in ms
     javascript::set('slideshowInterval',6000);  // refresh interval of the shoutbox in ms
     javascript::set('autoRefresh',1);  // Enable Auto-Refresh for Ajax
-    javascript::set('debug',1);  // Enable JS Debug
+    javascript::set('debug',view_javascript_debug);  // Enable JS Debug
     javascript::set('dir',$designpath);  // Designpath
 
     // JS-Dateine einbinden * json *
