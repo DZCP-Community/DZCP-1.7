@@ -5,8 +5,8 @@
  */
 
 if(defined('_Clanwars')) {
-	if(permission("clanwars"))
-		db("DELETE FROM ".$db['cw_player']." WHERE `cwid` = '".intval($_GET['id'])."'");
-
-	$index = info(_cw_players_reset, '?action=details&id='.intval($_GET['id']));
+    if(permission("clanwars")) {
+        $sql->delete("DELETE FROM `{prefix_clanwar_players}` WHERE `cwid` = ?;",array(intval($_GET['id'])));
+        $index = info(_cw_players_reset, '?action=details&id='.intval($_GET['id']));
+    }
 }

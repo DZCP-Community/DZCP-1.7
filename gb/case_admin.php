@@ -44,19 +44,14 @@ switch($do) {
         } else
             $index = error(_error_edit_post);
     break;
-    case 'set':
+    case 'public':
         if(permission('gb')) {
-            $sql->update("UPDATE `{prefix_gb}` SET `public` = 1 WHERE `id` = ?;",array(intval($_GET['id'])));
+            $get = $sql->selectSingle("SELECT `id`,`public` FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
+            $sql->update("UPDATE `{prefix_gb}` SET `public` = ? WHERE `id` = ?;",array(($get['public'] ? 0 : 1),$get['id']));
             header("Location: ../gb/");
-        } else
-            $index = error(_error_edit_post);
-    break;
-    case 'unset':
-        if(permission('gb')) {
-            $sql->update("UPDATE `{prefix_gb}` SET `public` = 0 WHERE `id` = ?;",array(intval($_GET['id'])));
-            header("Location: ../gb/");
-        } else
-            $index = error(_error_edit_post);
+        } else {
+            $index = error(_error_edit_post,1);
+        }
     break;
     case 'delete':
         $get = $sql->selectSingle("SELECT `reg` FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
@@ -109,6 +104,7 @@ switch($do) {
                                              "ed" => "&edit=".$get['id']."&id=".$_GET['postid'],
                                              "id" => $get['id'],
                                              "form" => $form,
+                                             "eintraghead" => _gb_edit_head,
                                              "posteintrag" => re($get['nachricht']),
                                              "notification_page" => ""));
         } else

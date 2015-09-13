@@ -34,6 +34,20 @@ if (!is_dir($config_cache['path'])) { //Check cache dir
     mkdir($config_cache['path'], 0777, true);
 }
 
+//Auto Update Detect
+if(file_exists(basePath."/_installer/index.php") && !view_error_reporting 
+        && !$installation && !$thumbgen && !$ajaxJob) {
+    $sqlqry = $sql->select('SHOW TABLE STATUS'); $table_data = array();
+    foreach($sqlqry as $table) { 
+        $table_data[$table['Name']] = true; 
+    }
+
+    if(!array_key_exists($db['autologin'],$table_data) && !$installer)
+        $global_index ? header('Location: _installer/update.php') :
+        header('Location: ../_installer/update.php');
+    unset($user_check);
+}
+
 $config_cache['securityKey'] = settings('prev',false);
 phpFastCache::setup($config_cache);
 $cache = new phpFastCache();
@@ -1438,14 +1452,16 @@ function orderby($sort) {
     return $url."orderby=".$sort."&order=ASC";
 }
 
-function orderby_sql($sort_by=array(), $default_order='',$join='', $order_by = array('ASC','DESC')) {
-    if(!isset($_GET['order']) || empty($_GET['order']) || !in_array($_GET['order'],$order_by)) return $default_order;
-    if(!isset($_GET['orderby']) || empty($_GET['orderby']) || !in_array($_GET['orderby'],$sort_by)) return $default_order;
-    $orderby_real = _real_escape_string($_GET['orderby']);
-    $order_real = _real_escape_string($_GET['order']);
-    if(empty($orderby_real) || empty($order_real)) return $default_order;
-    $join = !empty($join) ? $join.'.' : '';
-    return 'ORDER BY '.$join.$orderby_real." ".$order_real;
+function orderby_sql($order_by=array(), $default_order='',$join='', $order = array('ASC','DESC')) {
+    if (!isset($_GET['order']) || empty($_GET['order']) || !in_array($_GET['order'], $order) || 
+        !isset($_GET['orderby']) || empty($_GET['orderby']) || !in_array($_GET['orderby'], $order_by) || 
+        empty($_GET['orderby']) || empty($_GET['order'])) {
+        return $default_order;
+    }
+    $key = array_search($_GET['orderby'], $order_by);   // $key = 1;
+    $order_by = (in_array($_GET['orderby'], $order_by) ? '`'.$order_by[$key].'` ' : '`id` ');
+    $order = (in_array(strtoupper($_GET['order']), $order) ? (strtoupper($_GET['order']) == 'DESC' ? 'DESC ' : 'ASC ') : 'DESC ');
+    return 'ORDER BY '.(!empty($join) ? $join.'.' : '').$order_by.$order;
 }
 
 function orderby_nav() {
@@ -2847,18 +2863,17 @@ function db_optimize() {
     }
 
     $securimage->clearOldCodesFromDatabase();
-    $sql->query("TRUNCATE {prefix_iptodns};");
+    $sql->query("TRUNCATE `{prefix_iptodns}`;");
     if(sessions_backend == 'mysql') {
         $sql->query("TRUNCATE `{prefix_sessions}`;");
     }
 
-    $qry = $sql->show("SHOW TABLES FROM `".$sql->getConfig('db')."`");
+    $qry = $sql->show("SHOW TABLES FROM `".$sql->getConfig('db')."`"); $qry_string = "";
     foreach($qry as $tb) {
-        $qry .= '`'.$tb.'`, ';
+        $qry_string .= '`'.$tb['Tables_in_'.$sql->getConfig('db')].'`, ';
     }
 
-    $qry = substr($qry, 0, -2);
-    $sql->query('OPTIMIZE TABLE '.$qry.';');
+    $sql->optimize('OPTIMIZE TABLE '.substr($qry_string, 0, -2).';');
 }
 
 //-> Codiert Text zur Speicherung

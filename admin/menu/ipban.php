@@ -22,7 +22,7 @@ switch ($do) {
             $data_array = array();
             $data_array['confidence'] = ''; $data_array['frequency'] = ''; $data_array['lastseen'] = '';
             $data_array['banned_msg'] = $info;
-            db("INSERT INTO ".$db['ipban']." SET `time` = ".time().", `ip` = '"._real_escape_string($_POST['ip'])."', `data` = '".serialize($data_array)."', `typ` = 3;");
+            db("INSERT INTO ".$db['ipban']." SET `time` = ".time().", `ip` = '".$_POST['ip']."', `data` = '".serialize($data_array)."', `typ` = 3;");
             $show = info(_ipban_admin_added, "?admin=ipban");
         }
     break;
@@ -42,7 +42,7 @@ switch ($do) {
             $get = db("SELECT id,data FROM ".$db['ipban']." WHERE id = '".intval($_GET['id'])."'",false,true);
             $data_array = unserialize($get['data']);
             $data_array['banned_msg'] = re($_POST['info']);
-            db("UPDATE ".$db['ipban']." SET `ip` = '"._real_escape_string($_POST['ip'])."', `time` = '".time()."', `data` = '".serialize($data_array)."' WHERE id = '".intval($get['id'])."'");
+            db("UPDATE ".$db['ipban']." SET `ip` = '".$_POST['ip']."', `time` = '".time()."', `data` = '".serialize($data_array)."' WHERE id = '".intval($get['id'])."'");
             $show = info(_ipban_admin_edited, "?admin=ipban");
         }
     break;
@@ -55,7 +55,7 @@ switch ($do) {
         $show = show($dir."/ipban_form", array("newhead" => _ipban_new_head, "do" => "add", "ip_set" => '', "info" => '', "what" => _button_value_add));
     break;
     case 'search':
-        $qry_search = db("SELECT * FROM ".$db['ipban']." WHERE ip LIKE '%"._real_escape_string($_POST['ip'])."%' ORDER BY ip ASC"); //Suche
+        $qry_search = db("SELECT * FROM ".$db['ipban']." WHERE ip LIKE '%".$_POST['ip']."%' ORDER BY ip ASC"); //Suche
         $color = 1; $show_search = '';
         while($get = _fetch($qry_search)) {
             $data_array = unserialize($get['data']);

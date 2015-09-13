@@ -74,6 +74,7 @@ define("_forum_sind", 'sind');
 
 // Security Center
 define('_config_security', 'Security Center');
+define('_perm_security', 'Security Center verwalten');
 define('_security_center_head', 'DZCP - Security Center');
 
 //TS

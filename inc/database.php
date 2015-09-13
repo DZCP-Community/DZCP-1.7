@@ -38,6 +38,9 @@ define('pdo_disable_delete_statement', false);
 	$sql->rowCount();
 	$sql->lastInsertId();
 	$sql->query();
+        $sql->show();
+        $sql->getConfig();
+        $sql->optimize();
 */
 
 final class database {
@@ -218,8 +221,20 @@ final class database {
             return array();
         }
     }
+    
+    public function optimize($qry) {
+        if (($type = $this->getQueryType($qry)) !== "optimize") {
+            DebugConsole::sql_error_Exception("Incorrect Optimize Query",$qry,array());
+            DebugConsole::insert_error('database::select','Incorrect Optimize Query!');
+            DebugConsole::insert_sql_info('database::optimize',$qry,array());
+            return array();
+        }
+
+        $this->run_query($qry, array(), $type);
+    }
 
     public final function query($qry) {
+        $qry = $this->rep_prefix($qry); // replace sql prefix
         $this->lastInsertId = false;
         $this->rowCount = false;
         $this->rowCount = $this->dbHandle->exec($qry);
@@ -232,6 +247,11 @@ final class database {
 
     public function quote($str) {
         return $this->dbHandle->quote($str);
+    }
+    
+    public function getConfig($key='host',$active='default') {
+        $dbConf = $this->dbConf[$active];
+        return $dbConf[$key];
     }
 
     /************************
@@ -259,7 +279,7 @@ final class database {
             if($dbConf['persistent']) {
                 $db = new PDO($dsn, $dbConf['db_user'], $dbConf['db_pw'], array(PDO::ATTR_PERSISTENT => true));
             } else {
-               $db = new PDO($dsn, $dbConf['db_user'], $dbConf['db_pw']); 
+                $db = new PDO($dsn, $dbConf['db_user'], $dbConf['db_pw']); 
             }
 
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -273,18 +293,24 @@ final class database {
         }
     }
     
-    protected final function run_query($qry, array $params, $type) {
-        if (in_array($type, array("insert", "select", "update", "delete","show")) === false) {
-            die("PDO: Unsupported Query Type!<p>".$qry);
-        }
-
+    protected final function rep_prefix($qry){
         // replace sql prefix
         if(strpos($qry,"{prefix_")!==false) {
             $qry = preg_replace_callback("#\{prefix_(.*?)\}#",function($tb) { 
-                global $db; 
-                return str_ireplace($tb[0],$db['prefix'].$tb[1],$tb[0]); 
+                global $sql_prefix; 
+                return str_ireplace($tb[0],$sql_prefix.$tb[1],$tb[0]); 
             },$qry);
         }
+
+        return $qry;
+    }
+
+    protected final function run_query($qry, array $params, $type) {
+        if (in_array($type, array("insert", "select", "update", "delete","show","optimize")) === false) {
+           die("PDO: Unsupported Query Type!<p>".$qry);
+        }
+
+        $qry = $this->rep_prefix($qry); // replace sql prefix
 
         //Debug
         if(show_pdo_delete_debug || show_pdo_delete_debug || show_pdo_delete_debug || show_pdo_delete_debug) {
@@ -295,8 +321,7 @@ final class database {
         $this->rowCount = false;
         $stmnt = $this->active_driver == 'mysql' ? $this->dbHandle->prepare($qry, array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => $this->mysql_buffered_query)) : $this->dbHandle->prepare($qry);
 
-        try
-        {
+        try {
             $success = (count($params) !== 0) ? $stmnt->execute($params) : $stmnt->execute();
             $this->queryCounter++;
 
@@ -309,7 +334,6 @@ final class database {
             }
 
             $this->rowCount = $stmnt->rowCount();
-
             return ($type === "select" || $type === "show") ? $stmnt : true;
         } catch (PDOException $ex) {
             die("PDO: Exception: " . $ex->getMessage());
@@ -352,11 +376,6 @@ final class database {
         }
 
         return $dsn;
-    }
-    
-    public function getConfig($key='host',$active='default') {
-        $dbConf = $this->dbConf[$active];
-        return $dbConf[$key];
     }
 
     protected function getQueryType($qry) {

@@ -72,8 +72,8 @@ if(empty($index)) {
             $public = "";
             if(permission("gb") && settings('gb_activ')) {
                 $public = ($get['public'])
-                ? '<a href="?action=admin&amp;do=unset&amp;id='.$get['id'].'"><img src="../inc/images/public.gif" alt="" title="nicht ver&ouml;ffentlichen" align="top" style="padding-top:1px"/></a>'
-                : '<a href="?action=admin&amp;do=set&amp;id='.$get['id'].'"><img src="../inc/images/nonpublic.gif" alt="" title="ver&ouml;ffentlichen" align="top" style="padding-top:1px"/></a>';
+                ? '<a href="?action=admin&amp;do=public&amp;id='.$get['id'].'"><img src="../inc/images/public.gif" alt="" title="nicht ver&ouml;ffentlichen" align="top" style="padding-top:1px"/></a>'
+                : '<a href="?action=admin&amp;do=public&amp;id='.$get['id'].'"><img src="../inc/images/nonpublic.gif" alt="" title="ver&ouml;ffentlichen" align="top" style="padding-top:1px"/></a>';
             }
 
             if(!$get['reg']) {

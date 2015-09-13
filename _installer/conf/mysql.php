@@ -1794,11 +1794,6 @@ function update_mysql_1_7() {
         @fwrite($fp,"<?php \$cryptkey = '".makeCryptkey()."';");
         @fclose($fp);
     }
-    
-    if($updater) {
-        db("UPDATE `".$db['settings']."` SET `db_optimize` = '".(time()+auto_db_optimize_interval)."' WHERE `id` = 1;");
-        db_optimize();
-    }
 
     //BotListe
     db("DROP TABLE IF EXISTS `".$db['botlist']."`;",false,false,true);
@@ -1968,12 +1963,32 @@ function update_mysql_1_7() {
     db("ALTER TABLE `dzcp_permissions` DROP `edittactics`;",false,false,true);
     db("ALTER TABLE `dzcp_userstats` ADD INDEX(`user`);",false,false,true);
     db("ALTER TABLE `dzcp_artikel` ADD `viewed` INT(11) NOT NULL DEFAULT '0' AFTER `public`;",false,false,true);
+    db("ALTER TABLE `dzcp_positions` ADD INDEX(`pid`);",false,false,true);
         
     // Check group Permissions is exists
     $sql = db('SELECT `id` FROM `'.$db['pos'].'`;');
     while($get = _fetch($sql)) {
         if(!db('SELECT id FROM `'.$db['permissions'].'` WHERE `pos` = '.$get['id'].' LIMIT 1;',true)) {
             db("INSERT INTO `".$db['permissions']."` SET `pos` = ".$get['id'].";",false,false,true);
+        }
+    }
+    
+    // Check User Permissions is exists
+    $sql = db('SELECT `id` FROM `'.$db['users'].'`;');
+    while($get = _fetch($sql)) {
+        if(!db('SELECT id FROM `'.$db['permissions'].'` WHERE `user` = '.$get['id'].' LIMIT 1;',true)) {
+            db("INSERT INTO `".$db['permissions']."` SET `pos` = ".$get['id'].";",false,false,true);
+        }
+    }
+    
+    // ReCheck Permissions is User exists
+    $sql = db('SELECT `id`,`user` FROM `'.$db['permissions'].'` WHERE `pos` = 0;');
+    while($get = _fetch($sql)) {
+        if(!db('SELECT id FROM `'.$db['users'].'` WHERE `id` = '.$get['user'].' LIMIT 1;',true)) {
+            db("DELETE FROM `".$db['permissions']."` WHERE `id` = ".$get['id']);
+        } else if(db('SELECT id FROM `'.$db['users'].'` WHERE `id` = '.$get['user'].' AND `level` = 4 LIMIT 1;',true)) {
+            db("DELETE FROM `".$db['permissions']."` WHERE `user` = ".$get['user']);
+            db("INSERT INTO `".$db['permissions']."` SET `user` = ".$get['user'].";",false,false,true);
         }
     }
     
@@ -2022,6 +2037,11 @@ function update_mysql_1_7() {
         }
     }
 
+    if($updater) {
+        db("UPDATE `".$db['settings']."` SET `db_optimize` = '".(time()+auto_db_optimize_interval)."' WHERE `id` = 1;");
+        db_optimize();
+    }
+    
     cookie::init('dzcp_'.$prev);
     cookie::put('id', 1);
     $permanent_key = md5(makeCryptkey(8,false));
