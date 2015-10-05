@@ -13,7 +13,7 @@ class sfs {
     private static $autoblock = true;
     private static $blockuser = false;
     public static function check() {
-        global $db,$userip;
+        global $userip;
         ## http://de.wikipedia.org/wiki/Private_IP-Adresse ##
         if(!validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && !validateIpV4Range($userip, '[127].[0].[0-255].[0-255]') && !validateIpV4Range($userip, '[10].[0-255].[0-255].[0-255]') && !validateIpV4Range($userip, '[172].[16-31].[0-255].[0-255]')) {
             $get = $sql->selectSingle("SELECT * FROM `{prefix_ipban}` WHERE `ip` = ? LIMIT 1;",array($userip));

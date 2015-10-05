@@ -249,7 +249,7 @@ final class database {
         return $this->dbHandle->quote($str);
     }
     
-    public function getConfig($key='host',$active='default') {
+    public function getConfig($key='db_host',$active='default') {
         $dbConf = $this->dbConf[$active];
         return $dbConf[$key];
     }
@@ -319,10 +319,17 @@ final class database {
 
         $this->lastInsertId = false;
         $this->rowCount = false;
-        $stmnt = $this->active_driver == 'mysql' ? $this->dbHandle->prepare($qry, array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => $this->mysql_buffered_query)) : $this->dbHandle->prepare($qry);
+        
+        if(count($params)) {
+            $stmnt = $this->active_driver == 'mysql' ? 
+                    $this->dbHandle->prepare($qry, array(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => $this->mysql_buffered_query)) : 
+                    $this->dbHandle->prepare($qry);
+        }
 
         try {
-            $success = (count($params) !== 0) ? $stmnt->execute($params) : $stmnt->execute();
+            $success = (count($params) !== 0) ? 
+                $stmnt->execute($params) : 
+               ($stmnt = $this->dbHandle->query($qry));
             $this->queryCounter++;
 
             if (!$success) {

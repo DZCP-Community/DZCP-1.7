@@ -221,5 +221,6 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
 }
 
 if(!$installation) {
-    require_once(basePath."/inc/bbcode.php");
+    require_once(basePath."/inc/bbcode.".
+        (file_exists(basePath."/inc/bbcode.phar") ? 'phar' : 'php'));
 }

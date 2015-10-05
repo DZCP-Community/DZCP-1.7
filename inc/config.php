@@ -8,7 +8,7 @@
 //-> DZCP Settings Start
 #########################################
 define('view_error_reporting', true); // Zeigt alle Fehler und Notices etc.
-define('view_javascript_debug', true); // Zeigt JavaScript Aufrufe und Infos.
+define('view_javascript_debug', false); // Zeigt JavaScript Aufrufe und Infos.
 define('debug_all_sql_querys', false); // Speichert alle ausgefuehrten SQL-Querys in einer Datei.
 define('debug_save_to_file', false); // Schreibt die die Ausgaben der Debug Console in eine Datei.
 define('debug_dzcp_handler', true); // Verwende feur Notices, etc. die Debug Console.
@@ -114,8 +114,19 @@ define('sessions_sql_db', 'test'); //SQL Database
 
 $config_cache = array();
 $config_cache['use_cache'] = true; // verwende einen Cache, um abfragen zwischenzuspeichern
-$config_cache['storage'] = "memcache"; // welcher Cache: auto,memcache,files,sqlite,wincache,xcache oder apc
-$config_cache['server'] = array(array("127.0.0.1",11311,1)); //adressen fur die memcache server
+$config_cache['storage'] = "auto"; // welcher Cache: auto,memcache,files,sqlite,wincache,xcache,predis,redis,ssdb oder apc
+$config_cache['memcache'] = array(array("127.0.0.1",11211,1)); //Adressen fur die memcache server
+// --- Only Cache Version >= 3.0.0 --- //
+$config_cache['redis'] = array("host"  => "127.0.0.1",
+                               "port"  =>  "",
+                               "password"  =>  "",
+                               "database"  =>  "",
+                               "timeout"   =>  "");
+$config_cache['ssdb'] = array("host"  => "127.0.0.1",
+                               "port"  =>  8888,
+                               "password"  =>  "",
+                               "timeout"  =>  "");
+
 $config_cache['dbc'] = true; //verwende database query caching * nur mit memory cache
 $config_cache['dbc_auto_memcache'] = true; //automatische memcache verfugbarkeisprufung
 

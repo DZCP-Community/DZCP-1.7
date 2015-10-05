@@ -33,8 +33,14 @@ $support .= "DZCP Einstellungen \r\n";
 $support .= "#####################\r\n";
 $support .= "Session Backend: ".sessions_backend."\r\n";
 $support .= "Session Encode: ".(sessions_encode ? 'On' : 'Off')."\r\n";
-$support .= "Cache: ".($config_cache['use_cache'] ? 'On' : 'Off')."\r\n";
-$support .= "Cache Storage: ".$config_cache['storage']."\r\n";
+if(phpFastCache::$version >= '3.1.0') {
+    $support .= "Cache Storage: ".phpFastCache::$storage."\r\n";
+    $support .= "Cache Fallback Storage: ".phpFastCache::$storage_fallback."\r\n";
+    $support .= "Cache Fallback Enabled: ".(phpFastCache::$use_fallback ? 'On' : 'Off')."\r\n";
+} else {
+    $support .= "Cache: ".($config_cache['use_cache'] ? 'On' : 'Off')."\r\n";
+    $support .= "Cache Storage: ".$config_cache['storage']."\r\n";
+}
 $support .= "Cookie Domain: ".cookie_domain."\r\n";
 $support .= "Cookie Dir: ".cookie_dir."\r\n";
 $support .= "\r\n";
@@ -50,6 +56,7 @@ $support .= "#####################\r\n";
 $support .= "Server Versionen\r\n";
 $support .= "#####################\r\n";
 $support .= "GameQ: ".GameQ::VERSION."\r\n";
+$support .= "PhpFastCache: ".phpFastCache::$version."\r\n";
 $support .= "Server OS: ".@php_uname()."\r\n";
 $support .= "Webserver: ".(array_key_exists('apache2handler', $PhpInfo) ? (array_key_exists('Apache Version', $PhpInfo['apache2handler']) ? $PhpInfo['apache2handler']['Apache Version'] : 'PHP l&auml;uft als CGI <Keine Info>' ) : 'PHP l&auml;uft als CGI <Keine Info>')."\r\n";
 $support .= "PHP-Version: ".phpversion()." (".php_sapi_type().")"."\r\n";

@@ -5,21 +5,21 @@
  */
 
 if(defined('_Clanwars')) {
+    $i = $entrys-($page - 1)*settings('m_clanwars');
+    $entrys = cnt("`{prefix_clanwars}`", "  WHERE datum < ".time()." AND squad_id = ".intval($_GET['id'])."");
+    
     $qry = db("SELECT s1.id,s1.datum,s1.clantag,s1.gegner,s1.url,s1.xonx,s1.liga,s1.punkte,s1.gpunkte,s1.maps,s1.serverip,
                     s1.servername,s1.serverpwd,s1.bericht,s1.squad_id,s1.gametype,s1.gcountry,s2.icon,s2.name
-             FROM ".$db['cw']." AS s1
-             LEFT JOIN ".$db['squads']." AS s2 ON s1.squad_id = s2.id
+             FROM `{prefix_clanwars}` AS s1
+             LEFT JOIN `{prefix_squads}` AS s2 ON s1.squad_id = s2.id
              WHERE s1.datum < ".time()." AND s1.squad_id = ".intval($_GET['id'])."
              ORDER BY s1.datum DESC
              LIMIT ".($page - 1)*settings('m_clanwars').",".settings('m_clanwars')."");
 
-  $i = $entrys-($page - 1)*settings('m_clanwars');
-  $entrys = cnt($db['cw'], "  WHERE datum < ".time()." AND squad_id = ".intval($_GET['id'])."");
-  if(_rows($qry))
+  if(($count_rows=$sql->rowCount()))
   {
       $show = "";
-    while($get = _fetch($qry))
-    {
+foreach($qry as $get) {
       $img = squad($get['icon']);
       $flagge = flag($get['gcountry']);
       $gegner = show(_cw_details_gegner, array("gegner" => re(cut($get['clantag']." - ".$get['gegner'], settings('l_clanwars'))),
@@ -42,12 +42,12 @@ if(defined('_Clanwars')) {
                                                  "result" => cw_result_nopic($get['punkte'], $get['gpunkte']),
                                                                        "details" => $details));
     }
-    if(_rows($qry))
+    if($count_rows)
     {
-      $anz_wo_wars = cnt($db['cw'], " WHERE punkte > gpunkte AND squad_id = ".intval($_GET['id'])."");
-      $anz_lo_wars = cnt($db['cw'], " WHERE punkte < gpunkte AND squad_id = ".intval($_GET['id'])."");
-      $anz_dr_wars = cnt($db['cw'], " WHERE datum < ".time()." && punkte = gpunkte AND squad_id = ".intval($_GET['id'])."");
-      $anz_ge_wars = cnt($db['cw'], "  WHERE datum < ".time()." AND squad_id = ".intval($_GET['id'])."");
+      $anz_wo_wars = cnt("`{prefix_clanwars}`", " WHERE punkte > gpunkte AND squad_id = ".intval($_GET['id'])."");
+      $anz_lo_wars = cnt("`{prefix_clanwars}`", " WHERE punkte < gpunkte AND squad_id = ".intval($_GET['id'])."");
+      $anz_dr_wars = cnt("`{prefix_clanwars}`", " WHERE datum < ".time()." && punkte = gpunkte AND squad_id = ".intval($_GET['id'])."");
+      $anz_ge_wars = cnt("`{prefix_clanwars}`", "  WHERE datum < ".time()." AND squad_id = ".intval($_GET['id'])."");
 
       if(!$_GET['time'])
       {
@@ -61,26 +61,20 @@ if(defined('_Clanwars')) {
       }
 
       $anz_ges_wars = show(_cw_stats_ges_wars, array("ge_wars" => $anz_ge_wars));
-
-      $cnt = db("SELECT SUM(punkte) AS num FROM ".$db['cw']."
-                   WHERE squad_id = ".intval($_GET['id'])."");
-      $cnt = _fetch($cnt);
+      $cnt = $sql->selectSingle("SELECT SUM(punkte) AS num FROM `{prefix_clanwars}` WHERE squad_id = ".intval($_GET['id'])."");
       $sum_punkte = $cnt['num'];
-
-      $cnt = db("SELECT SUM(gpunkte) AS num FROM ".$db['cw']."
-                   WHERE squad_id = ".intval($_GET['id'])."");
-      $cnt = _fetch($cnt);
+      
+      $cnt = $sql->selectSingle("SELECT SUM(gpunkte) AS num FROM `{prefix_clanwars}` WHERE squad_id = ".intval($_GET['id'])."");
       $sum_gpunkte = $cnt['num'];
 
-      $anz_ges_points = show(_cw_stats_ges_points, array("ges_won" => $sum_punkte,
-                                                                     "ges_lost" => $sum_gpunkte));
+      $anz_ges_points = show(_cw_stats_ges_points, array("ges_won" => $sum_punkte, "ges_lost" => $sum_gpunkte));
 
-      $anz_squads = cnt($db['squads'], " WHERE status = '1'");
+      $anz_squads = cnt(`{prefix_squads}`, " WHERE status = '1'");
 
-      $qry = db("SELECT game FROM ".$db['squads']."");
-      while($row = mysqli_fetch_object($qry))
-      {
-        $cwid = $row->id; }
+      $qry = $sql->select("SELECT game FROM `{prefix_squads}`");
+      foreach($qry as $row) {
+        $cwid = $row['id']; 
+      }
         $results = _rows($qry);
         $anz_games= $results;
 
@@ -132,12 +126,8 @@ if(defined('_Clanwars')) {
                                          "show" => $show,
                                                          "details" => _cw_head_details_show));
 
-      $qry = db("SELECT game,icon FROM ".$db['squads']."
-               WHERE status = '1'
-               GROUP BY game
-               ORDER BY game ASC");
-      while($get = _fetch($qry))
-    {
+      $qry = $sql->select("SELECT game,icon FROM `{prefix_squads}` WHERE status = '1' GROUP BY game ORDER BY game ASC");
+    foreach($qry as $get) {
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
           $img = squad($get['icon']);
           $legende .= show(_awards_legende, array("game" => re($get['game']),

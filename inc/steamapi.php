@@ -13,7 +13,6 @@ class SteamAPI {
     static private $user_data = array();
     static private $api_data = array();
     static private $community_data = array();
-    static private $games_data = array();
 
     /**
      * Setzt einige Einstellungen fur die Steam API

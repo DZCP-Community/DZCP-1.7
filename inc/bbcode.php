@@ -26,12 +26,13 @@ require_once(basePath.'/inc/securimage/securimage.php');
 $ajaxJob = (!isset($ajaxJob) ? false : $ajaxJob);
 
 //Cache
+$config_cache['default_chmod'] = 0777; 
 $config_cache['htaccess'] = true;
-$config_cache['fallback'] = array( "memcache" => "apc", "memcached" =>  "apc", "apc" =>  "sqlite", "sqlite" => "files");
 $config_cache['path'] = basePath."/inc/_cache_";
-
+$config_cache['securityKey'] = "auto";
+$config_cache['fallback'] = "files";
 if (!is_dir($config_cache['path'])) { //Check cache dir
-    mkdir($config_cache['path'], 0777, true);
+    mkdir($config_cache['path'], $config_cache['default_chmod'], true);
 }
 
 //Auto Update Detect
@@ -51,6 +52,7 @@ if(file_exists(basePath."/_installer/index.php") && !view_error_reporting
 $config_cache['securityKey'] = settings('prev',false);
 phpFastCache::setup($config_cache);
 $cache = new phpFastCache();
+phpFastCache::$disabled = !$config_cache['use_cache'];
 $securimage = new Securimage();
 dbc_index::init();
 
@@ -111,8 +113,9 @@ $index = ''; $show = ''; $color = 0;
 
 //-> Neue Kernel Funktionen einbinden, sofern vorhanden
 if($functions_files = get_files(basePath.'/inc/additional-kernel/',false,true,array('php'))) {
-    foreach($functions_files AS $func)
-    { include(basePath.'/inc/additional-kernel/'.$func); }
+    foreach($functions_files AS $func) { 
+        include(basePath.'/inc/additional-kernel/'.$func); 
+    }
     unset($functions_files,$func);
 }
 
@@ -2892,7 +2895,7 @@ final class string {
      * @param utf8 string $txt
      */
     public static function decode($txt='')
-    { global $charset; return trim(stripslashes(spChars(html_entity_decode(utf8_decode($txt), ENT_COMPAT, $charset),true))); }
+    { global $charset; return trim(stripslashes(spChars(@html_entity_decode(utf8_decode($txt), ENT_COMPAT, $charset),true))); }
 }
 
 //-> Speichert Ruckgaben der MySQL Datenbank zwischen um SQL-Queries einzusparen

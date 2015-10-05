@@ -5,10 +5,8 @@
  */
 
 if(defined('_Forum')) {
-  if($do == "edit")
-  {
-    $get = db("SELECT * FROM ".$db['f_threads']."
-               WHERE id = '".intval($_GET['id'])."'",false,true);
+    if($do == "edit") {
+    $get = $sql->selectSingle("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
     if($get['t_reg'] == $userid || permission("forum"))
     {
       if(permission("forum"))
@@ -33,10 +31,10 @@ if(defined('_Forum')) {
                                                     "hphead" => _hp));
       }
 
-        $getv = db("SELECT * FROM ".$db['votes']." WHERE id = '".$get['vote']."'",false,true);
-        $fget = db("SELECT s1.intern,s2.id FROM ".$db['f_kats']." AS s1
-                    LEFT JOIN ".$db['f_skats']." AS s2 ON s2.`sid` = s1.id
-                    WHERE s2.`id` = '".intval($get['kid'])."'",false,true);
+        $getv = $sql->selectSingle("SELECT * FROM `{prefix_votes}` WHERE id = '".$get['vote']."'");
+        $fget = $sql->selectSingle("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
+                    LEFT JOIN `{prefix_forumsubkats}` AS s2 ON s2.`sid` = s1.id
+                    WHERE s2.`id` = '".intval($get['kid'])."'");
 
         $intern = ''; $intern_kat = ''; $isclosed = ''; $display = ''; $toggle = 'collapse';
         $internVisible = '';
@@ -140,9 +138,7 @@ if(defined('_Forum')) {
       $index = error(_error_wrong_permissions, 1);
     }
   } elseif($do == "editthread") {
-    $qry = db("SELECT * FROM ".$db['f_threads']."
-               WHERE id = '".intval($_GET['id'])."'");
-    $get = _fetch($qry);
+    $get = $sql->selectSingle("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
 
     if($get['t_reg'] == $userid || permission("forum"))
     {
@@ -187,13 +183,11 @@ if(defined('_Forum')) {
                                                   "addglobal" => _forum_admin_addglobal,
                                                   "global" => $global));
         }
-          $qryv = db("SELECT * FROM ".$db['votes']."
-                    WHERE id = '".$get['vote']."'");
-      $getv = _fetch($qryv);
+          $getv = $sql->selectSingle("SELECT * FROM ".$db['votes']." WHERE id = '".$get['vote']."'");
 
-            $fget = _fetch(db("SELECT s1.intern,s2.id FROM ".$db['f_kats']." AS s1
+            $fget = $sql->selectSingle("SELECT s1.intern,s2.id FROM ".$db['f_kats']." AS s1
                          LEFT JOIN ".$db['f_skats']." AS s2 ON s2.`sid` = s1.id
-                         WHERE s2.`id` = '".intval($_GET['kid'])."'"));
+                         WHERE s2.`id` = '".intval($_GET['kid'])."'");
 
             if($_POST['intern']) $intern = 'checked="checked"';
           $intern = ''; $intern_kat = ''; $internVisible = '';
@@ -256,29 +250,25 @@ if(defined('_Forum')) {
                                                 "vote" => $vote,
                                             "eintraghead" => _eintrag));
       } else {
-        $qryt = db("SELECT * FROM ".$db['f_threads']."
-                    WHERE id = '".intval($_GET['id'])."'");
-        $gett = _fetch($qryt);
+        $gett = $sql->selectSingle("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
           if(!empty($gett['vote']))
       {
-       $qryv = db("SELECT * FROM ".$db['vote_results']."
-                   WHERE vid = '".$gett['vote']."'");
-     $getv = _fetch($qryv);
+       $getv = $sql->selectSingle("SELECT * FROM `{prefix_vote_results}` WHERE vid = '".$gett['vote']."'");
 
        $vid = $gett['vote'];
 
-        $upd = db("UPDATE ".$db['votes']."
+        $sql->update("UPDATE `{prefix_votes}`
                    SET `titel`  = '".up($_POST['question'])."',
                        `intern` = '".intval($_POST['intern'])."',
                        `closed` = '".intval($_POST['closed'])."'
                    WHERE id = '".$gett['vote']."'");
 
-        $upd1 = db("UPDATE ".$db['vote_results']."
+        $sql->update("UPDATE `{prefix_vote_results}`
                     SET `sel` = '".up($_POST['a1'])."'
                     WHERE what = 'a1'
                     AND vid = '".$gett['vote']."'");
 
-        $upd2 = db("UPDATE ".$db['vote_results']."
+        $sql->update("UPDATE `{prefix_vote_results}`
                     SET `sel` = '".up($_POST['a2'])."'
                     WHERE what = 'a2'
                     AND vid = '".$gett['vote']."'");
@@ -287,29 +277,29 @@ if(defined('_Forum')) {
         {
           if(!empty($_POST['a'.$i.'']))
           {
-            if(cnt($db['vote_results'], " WHERE vid = '".$gett['vote']."' AND what = 'a".$i."'") != 0)
+            if(cnt(`{prefix_vote_results}`, " WHERE vid = '".$gett['vote']."' AND what = 'a".$i."'") != 0)
             {
-              $upd = db("UPDATE ".$db['vote_results']."
+              $sql->update("UPDATE `{prefix_vote_results}`
                          SET `sel` = '".up($_POST['a'.$i.''])."'
                          WHERE what = 'a".$i."'
                          AND vid = '".$gett['vote']."'");
             } else {
-              $ins = db("INSERT INTO ".$db['vote_results']."
+              $sql->insert("INSERT INTO `{prefix_vote_results}`
                          SET `vid` = '".$gett['vote']."',
                              `what` = 'a".$i."',
                              `sel` = '".up($_POST['a'.$i.''])."'");
             }
           }
 
-          if(cnt($db['vote_results'], " WHERE vid = '".$gett['vote']."' AND what = 'a".$i."'") != 0 && empty($_POST['a'.$i.'']))
+          if(cnt("`{prefix_vote_results}`", " WHERE vid = '".$gett['vote']."' AND what = 'a".$i."'") != 0 && empty($_POST['a'.$i.'']))
           {
-            $del = db("DELETE FROM ".$db['vote_results']."
+            $sql->delete("DELETE FROM `{prefix_vote_results}`
                        WHERE vid = '".$gett['vote']."'
                        AND what = 'a".$i."'");
           }
         }
         } elseif(empty($gett['vote']) && !empty($_POST['question'])) {
-          $qry = db("INSERT INTO ".$db['votes']."
+          $sql->insert("INSERT INTO `{prefix_votes}`
                      SET `datum`  = '".time()."',
                          `titel`  = '".up($_POST['question'])."',
                          `intern` = '".intval($_POST['intern'])."',
@@ -318,68 +308,68 @@ if(defined('_Forum')) {
 
           $vid = _insert_id();
 
-          $qry = db("INSERT INTO ".$db['vote_results']."
+          $sql->insert("INSERT INTO `{prefix_vote_results}`
                     SET `vid`   = '".intval($vid)."',
                         `what`  = 'a1',
                         `sel`   = '".up($_POST['a1'])."'");
 
-          $qry = db("INSERT INTO ".$db['vote_results']."
+          $sql->insert("INSERT INTO `{prefix_vote_results}`
                      SET `vid`  = '".intval($vid)."',
                          `what` = 'a2',
                          `sel`  = '".up($_POST['a2'])."'");
 
           if(!empty($_POST['a3']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a3',
                            `sel`  = '".up($_POST['a3'])."'");
           }
           if(!empty($_POST['a4']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a4',
                            `sel`  = '".up($_POST['a4'])."'");
           }
           if(!empty($_POST['a5']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a5',
                            `sel`  = '".up($_POST['a5'])."'");
           }
           if(!empty($_POST['a6']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a6',
                            `sel`  = '".up($_POST['a6'])."'");
           }
           if(!empty($_POST['a7']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a7',
                            `sel`  = '".up($_POST['a7'])."'");
           }
           if(!empty($_POST['a8']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a8',
                            `sel`  = '".up($_POST['a8'])."'");
           }
           if(!empty($_POST['a9']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a9',
                            `sel`  = '".up($_POST['a9'])."'");
           }
           if(!empty($_POST['a10']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a10',
                            `sel`  = '".up($_POST['a10'])."'");
@@ -387,11 +377,8 @@ if(defined('_Forum')) {
         } else { $vid = ""; }
 
         if($_POST['vote_del'] == 1) {
-        $qry = db("DELETE FROM ".$db['votes']."
-                   WHERE id = '".$gett['vote']."'");
-
-        $qry = db("DELETE FROM ".$db['vote_results']."
-                   WHERE vid = '".$gett['vote']."'");
+        $sql->delete("DELETE FROM `{prefix_votes}` WHERE id = '".$gett['vote']."'");
+        $sql->delete("DELETE FROM `{prefix_vote_results}` WHERE vid = '".$gett['vote']."'");
 
         setIpcheck("vid_".$gett['vote']);
         $vid = "";
@@ -400,7 +387,7 @@ if(defined('_Forum')) {
         $editedby = show(_edited_by, array("autor" => autor($userid),
                                            "time" => date("d.m.Y H:i", time())._uhr));
 
-          $qry = db("UPDATE ".$db['f_threads']."
+        $sql->update("UPDATE `{prefix_forumthreads}`
                              SET `topic`    = '".up($_POST['topic'])."',
                        `subtopic` = '".up($_POST['subtopic'])."',
                        `t_nick`   = '".up($_POST['nick'])."',
@@ -413,15 +400,13 @@ if(defined('_Forum')) {
                        `edited`   = '".up($editedby)."'
                    WHERE id = '".intval($_GET['id'])."'");
 
-      $checkabo = db("SELECT s1.user,s1.fid,s2.nick,s2.id,s2.email FROM ".$db['f_abo']." AS s1
-                        LEFT JOIN ".$db['users']." AS s2 ON s2.id = s1.user
+      $checkabo = $sql->select("SELECT s1.user,s1.fid,s2.nick,s2.id,s2.email FROM `{prefix_f_abo}` AS s1
+                        LEFT JOIN `{prefix_users}` AS s2 ON s2.id = s1.user
                       WHERE s1.fid = '".intval($_GET['id'])."'");
-        while($getabo = _fetch($checkabo))
-        {
+      foreach($checkabo as $getabo) {
         if($userid != $getabo['user'])
         {
-          $topic = db("SELECT topic FROM ".$db['f_threads']." WHERE id = '".intval($_GET['id'])."'");
-          $gettopic = _fetch($topic);
+          $gettopic = $sql->selectSingle("SELECT topic FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
 
           $subj = show(re(settings('eml_fabo_tedit_subj')), array("titel" => $title));
 
@@ -463,9 +448,9 @@ if(defined('_Forum')) {
         }
 
         $internVisible = '';
-        $fget = _fetch(db("SELECT s1.intern,s2.id FROM ".$db['f_kats']." AS s1
-                       LEFT JOIN ".$db['f_skats']." AS s2 ON s2.`sid` = s1.id
-                       WHERE s2.`id` = '".intval($_GET['kid'])."'"));
+        $fget = $sql->selectSingle("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
+                       LEFT JOIN `{prefix_forumsubkats}` AS s2 ON s2.`sid` = s1.id
+                       WHERE s2.`id` = '".intval($_GET['kid'])."'");
                 $intern = ''; $intern_kat = ''; $internVisible = '';
                 if($fget['intern'] == "1") { $intern = 'checked="checked"'; $internVisible = 'style="display:none"'; };
 
@@ -537,7 +522,7 @@ if(defined('_Forum')) {
       }
     }
   } elseif($do == "addthread") {
-      if(_rows(db("SELECT id FROM ".$db['f_skats']." WHERE id = '".intval($_GET['kid'])."'")) == 0) {
+      if($sql->rows("SELECT id FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['kid'])."'") == 0) {
           $index = error(_id_dont_exist, 1);
       } else {
         if(settings("reg_forum") && !$chkMe)
@@ -548,10 +533,8 @@ if(defined('_Forum')) {
                 $toCheck = empty($_POST['eintrag']) || empty($_POST['topic']);
             else
                 $toCheck = empty($_POST['topic']) || empty($_POST['nick']) || empty($_POST['email']) || empty($_POST['eintrag']) || !check_email($_POST['email']) || !$securimage->check($_POST['secure']);
-            if($toCheck)
-            {
-                if($userid >= 1)
-                {
+            if($toCheck) {
+                if($userid >= 1) {
                     if(empty($_POST['eintrag'])) $error = _empty_eintrag;
                     elseif(empty($_POST['topic'])) $error = _empty_topic;
                 } else {
@@ -565,8 +548,7 @@ if(defined('_Forum')) {
 
                 $error = show("errors/errortable", array("error" => $error));
 
-                if(permission("forum"))
-                {
+                if(permission("forum")) {
                     if(isset($_POST['sticky'])) $sticky = "checked";
                     if(isset($_POST['global'])) $global = "checked";
 
@@ -589,9 +571,9 @@ if(defined('_Forum')) {
                                                                                                             "hphead" => _hp));
                 }
 
-            $fget = _fetch(db("SELECT s1.intern,s2.id FROM ".$db['f_kats']." AS s1
-                                                 LEFT JOIN ".$db['f_skats']." AS s2 ON s2.`sid` = s1.id
-                                                 WHERE s2.`id` = '".intval($_GET['kid'])."'"));
+            $fget = $sql->selectSingle("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
+                                                 LEFT JOIN `{prefix_forumsubkats}` AS s2 ON s2.`sid` = s1.id
+                                                 WHERE s2.`id` = '".intval($_GET['kid'])."'");
 
             if($_POST['intern']) $intern = 'checked="checked"';
             $intern = ''; $intern_kat = ''; $internVisible = '';
@@ -656,14 +638,16 @@ if(defined('_Forum')) {
             } else {
                 if(!empty($_POST['question']))
                 {
-                        $fgetvote = _fetch(db("SELECT s1.intern,s2.id FROM ".$db['f_kats']." AS s1
-                                                                     LEFT JOIN ".$db['f_skats']." AS s2 ON s2.`sid` = s1.id
-                                                                     WHERE s2.`id` = '".intval($_GET['kid'])."'"));
+                        $fgetvote = $sql->selectSingle("SELECT s1.intern,s2.id "
+                                . "FROM `{prefix_forumkats}` AS s1 "
+                                . "LEFT JOIN `{prefix_forumsubkats}` AS s2 "
+                                . "ON s2.`sid` = s1.id "
+                                . "WHERE s2.`id` = '".intval($_GET['kid'])."'");
 
                         if($fgetvote['intern'] == 1) $ivote = "`intern` = '1',";
                         else $ivote = "`intern` = '".intval($_POST['intern'])."',";
 
-                        $qry = db("INSERT INTO ".$db['votes']."
+                        $sql->insert("INSERT INTO `{prefix_votes}`
                                              SET `datum`  = '".time()."',
                                                      `titel`  = '".up($_POST['question'])."',
                                                      ".$ivote."
@@ -672,75 +656,75 @@ if(defined('_Forum')) {
 
                         $vid = _insert_id();
 
-                        $qry = db("INSERT INTO ".$db['vote_results']."
+                        $sql->insert("INSERT INTO `{prefix_vote_results}`
                                             SET `vid`   = '".intval($vid)."',
                                                     `what`  = 'a1',
                                                     `sel`   = '".up($_POST['a1'])."'");
 
-                        $qry = db("INSERT INTO ".$db['vote_results']."
+                        $sql->insert("INSERT INTO `{prefix_vote_results}`
                                              SET `vid`  = '".intval($vid)."',
                                                      `what` = 'a2',
                                                      `sel`  = '".up($_POST['a2'])."'");
 
                         if(!empty($_POST['a3']))
                         {
-                            $qry = db("INSERT INTO ".$db['vote_results']."
+                            $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a3',
                                                          `sel`  = '".up($_POST['a3'])."'");
                         }
                         if(!empty($_POST['a4']))
                         {
-                            $qry = db("INSERT INTO ".$db['vote_results']."
+                            $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a4',
                                                          `sel`  = '".up($_POST['a4'])."'");
                         }
                         if(!empty($_POST['a5']))
                         {
-                            $qry = db("INSERT INTO ".$db['vote_results']."
+                            $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a5',
                                                          `sel`  = '".up($_POST['a5'])."'");
                         }
                         if(!empty($_POST['a6']))
                         {
-                            $qry = db("INSERT INTO ".$db['vote_results']."
+                            $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a6',
                                                          `sel`  = '".up($_POST['a6'])."'");
                         }
                         if(!empty($_POST['a7']))
                         {
-                            $qry = db("INSERT INTO ".$db['vote_results']."
+                            $qry = $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a7',
                                                          `sel`  = '".up($_POST['a7'])."'");
                         }
                         if(!empty($_POST['a8']))
                         {
-                            $qry = db("INSERT INTO ".$db['vote_results']."
+                            $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a8',
                                                          `sel`  = '".up($_POST['a8'])."'");
                         }
                         if(!empty($_POST['a9']))
                         {
-                            $qry = db("INSERT INTO ".$db['vote_results']."
+                            $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a9',
                                                          `sel`  = '".up($_POST['a9'])."'");
                         }
                         if(!empty($_POST['a10']))
                         {
-                            $qry = db("INSERT INTO ".$db['vote_results']."
+                            $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a10',
                                                          `sel`  = '".up($_POST['a10'])."'");
                         }
             } else { $vid = ""; }
 
-            $qry = db("INSERT INTO ".$db['f_threads']."
+            $sql->insert("INSERT INTO `{prefix_forumthreads}`
                                  SET     `kid`      = '".intval($_GET['kid'])."',
                                                 `t_date`   = '".time()."',
                                                 `topic`    = '".up($_POST['topic'])."',
@@ -759,9 +743,7 @@ if(defined('_Forum')) {
                 $thisFID = _insert_id();
                 setIpcheck("fid(".$_GET['kid'].")");
 
-                $update = db("UPDATE ".$db['userstats']."
-                                            SET `forumposts` = forumposts+1
-                                            WHERE `user`       = '".$userid."'");
+                $sql->update("UPDATE `{prefix_userstats}` SET `forumposts` = forumposts+1 WHERE `user` = '".$userid."'");
 
                 $index = info(_forum_newthread_successful, "?action=showthread&amp;id=".$thisFID."#p1");
             }
