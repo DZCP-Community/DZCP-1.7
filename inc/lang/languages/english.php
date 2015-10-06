@@ -8,6 +8,7 @@ $charset = 'iso-8859-1';
 header("Content-type: text/html; charset=".$charset);
 
 ## ADDED / REDEFINED FOR 1.7.0
+define('_admin_glossar_edit' , 'Edit term');
 define('_gameserver', 'Gameserver');
 define('_iban', 'IBAN');
 define('_bic', 'BIC');
@@ -497,7 +498,7 @@ define('_config_config' , 'Global Settings');
 define('_config_dladmin' , 'Downloads');
 define('_config_editor' , 'Sites');
 define('_config_konto' , 'Clancash');
-define('_config_dl' , 'Download Categories');
+define('_config_dlkats' , 'Download Categories');
 define('_config_nletter' , 'Newsletter');
 define('_config_protocol' , 'Adminprotocoll');
 define('_config_serverlist' , 'Serverlist');

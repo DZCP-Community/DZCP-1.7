@@ -5,12 +5,12 @@
  */
 
 if(_adminMenu != 'true') exit;
+$where = $where.': '._dl;
 
-    $where = $where.': '._dl;
+
       if($do == "new")
       {
-        $qry = db("SELECT * FROM ".$db['dl_kat']."
-                   ORDER BY name");
+        $qry = db("SELECT * FROM ".$db['dl_kat']." ORDER BY name");
         while($get = _fetch($qry))
         {
           $kats .= show(_select_field, array("value" => $get['id'],
@@ -65,12 +65,10 @@ if(_adminMenu != 'true') exit;
           $show = info(_downloads_added, "?admin=dladmin");
         }
       } elseif($do == "edit") {
-        $qry  = db("SELECT * FROM ".$db['downloads']."
-                    WHERE id = '".intval($_GET['id'])."'");
+        $qry  = db("SELECT * FROM ".$db['downloads']." WHERE id = '".intval($_GET['id'])."'");
         $get = _fetch($qry);
 
-        $qryk = db("SELECT * FROM ".$db['dl_kat']."
-                    ORDER BY name");
+        $qryk = db("SELECT * FROM ".$db['dl_kat']." ORDER BY name");
         while($getk = _fetch($qryk))
         {
           if($getk['id'] == $get['kat']) $sel = 'selected="selected"';
@@ -119,13 +117,11 @@ if(_adminMenu != 'true') exit;
           $show = info(_downloads_edited, "?admin=dladmin");
         }
       } elseif($do == "delete") {
-        $qry = db("DELETE FROM ".$db['downloads']."
-                   WHERE id = '".intval($_GET['id'])."'");
+        $qry = db("DELETE FROM ".$db['downloads']." WHERE id = '".intval($_GET['id'])."'");
 
         $show = info(_downloads_deleted, "?admin=dladmin");
       } else {
-        $qry = db("SELECT * FROM ".$db['downloads']."
-                   ORDER BY id");
+        $qry = db("SELECT * FROM ".$db['downloads']." ORDER BY id");
         while($get = _fetch($qry))
         {
           $edit = show("page/button_edit_single", array("id" => $get['id'],
@@ -137,7 +133,7 @@ if(_adminMenu != 'true') exit;
                                                             "del" => convSpace(_confirm_del_dl)));
 
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-          $show_ .= show($dir."/downloads_show", array("id" => $get['id'],
+          $show .= show($dir."/downloads_show", array("id" => $get['id'],
                                                        "dl" => re($get['download']),
                                                        "class" => $class,
                                                        "edit" => $edit,
@@ -145,13 +141,13 @@ if(_adminMenu != 'true') exit;
                                                        ));
         }
 
-        if(empty($show_))
-            $show_ = '<tr><td colspan="3" class="contentMainSecond">'._no_entrys.'</td></tr>';
+        if(empty($show))
+            $show = '<tr><td colspan="3" class="contentMainSecond">'._no_entrys.'</td></tr>';
 
         $show = show($dir."/downloads", array("head" => _dl,
                                               "date" => _datum,
                                               "titel" => _dl_file,
                                               "add" => _downloads_admin_head,
-                                              "show" => $show_
+                                              "show" => $show
                                               ));
       }

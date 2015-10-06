@@ -27,6 +27,11 @@ class phpfastcache_files extends  BasePhpFastCache implements phpfastcache_drive
         if(!$this->checkdriver() && !isset($config['skipError'])) {
             throw new Exception("Can't use this driver for your website!");
         }
+        
+        if(!is_dir(basePath.'/inc/_cache_') || 
+                !file_exists(basePath.'/_cache_')) {
+            @mkdir(basePath.'/_cache_', 0777, true);
+        }
     }
 
     /*

@@ -275,7 +275,11 @@ class TS3Renderer {
         global $cache;
         if($id == 0) return ''; $image = '';
         if($id < 0) $id = $id+4294967296;
-
+        if(!is_dir(basePath.'/inc/images/tsviewer/custom_icons') || 
+                !file_exists(basePath.'/inc/images/tsviewer/custom_icons')) {
+            @mkdir(basePath.'/inc/images/tsviewer/custom_icons', 0777, true);
+        }
+        
         if(array_key_exists('GROUP_'.$id, self::$skin_pholder)) {
             $image = "../inc/images/tsviewer/".self::$skin_pholder['GROUP_'.$id];
         } else if(self::$AllowDownloadIcons) {

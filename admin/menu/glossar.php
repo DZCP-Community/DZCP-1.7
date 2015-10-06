@@ -5,98 +5,87 @@
  */
 
 if(_adminMenu != 'true') exit;
+$where = $where.': '._server_admin_head;
 
-    $where = $where.': '._server_admin_head;
-      if($do == 'add')
-      {
+switch ($do) {
+    case 'add':
         $show = show($dir."/form_glossar", array("head" => _admin_glossar_add,
-                                                 "link" => _glossar_bez,
-                                                 "beschreibung" => _glossar_erkl,
                                                  "llink" => "",
                                                  "lbeschreibung" => "",
                                                  "do" => "insert",
-                                                 "value" => _button_value_add
-                                                 ));
-      } elseif($do == 'insert') {
-        if(empty($_POST['link']) || empty($_POST['beschreibung']) || preg_match("#[[:punct:]]]#is",$_POST['link']))
-        {
-          if(empty($_POST['link']))       $show = error(_admin_error_glossar_word);
-          elseif($_POST['beschreibung'])  $show = error(_admin_error_glossar_desc);
-          elseif(preg_match("#[[:punct:]]#is",$_POST['link'])) $show = error(_glossar_specialchar);
+                                                 "value" => _button_value_add));
+    break;
+    case 'insert':
+        if(empty($_POST['link']) || empty($_POST['beschreibung']) || preg_match("#[[:punct:]]]#is",$_POST['link'])) {
+            if (empty($_POST['link'])) {
+                $show = error(_admin_error_glossar_word);
+            } else if($_POST['beschreibung']) {
+                $show = error(_admin_error_glossar_desc);
+            } else if(preg_match("#[[:punct:]]#is", $_POST['link'])) {
+                $show = error(_glossar_specialchar);
+            }
         } else {
-          $ins = db("INSERT INTO ".$db['glossar']."
-                     SET `word`    = '".up($_POST['link'])."',
-                         `glossar` = '".up($_POST['beschreibung'])."'");
-
-          $show = info(_admin_glossar_added,'?admin=glossar');
+            $sql->insert("INSERT INTO `{prefix_glossar}` SET `word` = ?, `glossar` = ?;",
+                    array(up($_POST['link']),up($_POST['beschreibung'])));
+            $show = info(_admin_glossar_added,'?admin=glossar');
         }
-      } elseif($do == 'edit') {
-        $qry = db("SELECT * FROM ".$db['glossar']."
-                   WHERE id = '".intval($_GET['id'])."'");
-        $get = _fetch($qry);
-
-        $show = show($dir."/form_glossar", array("head" => _admin_glossar_add,
-                                                 "link" => _glossar_bez,
-                                                 "beschreibung" => _glossar_erkl,
+    break;
+    case 'edit':
+        $get = $sql->selectSingle("SELECT `id`,`word`,`glossar` FROM `{prefix_glossar}` WHERE `id` = ?;",
+                array(intval($_GET['id'])));
+        $show = show($dir."/form_glossar", array("head" => _admin_glossar_edit,
                                                  "llink" => re($get['word']),
                                                  "lbeschreibung" => re($get['glossar']),
-                                                 "do" => "update&amp;id=".$_GET['id'],
-                                                 "value" => _button_value_edit
-                                                 ));
-      } elseif($do == 'update') {
-        if(empty($_POST['link']) || empty($_POST['beschreibung']) || preg_match("#[[:punct:]]]#is",$_POST['link']))
-        {
-          if(empty($_POST['link']))       $show = error(_admin_error_glossar_word);
-          elseif($_POST['beschreibung'])  $show = error(_admin_error_glossar_desc);
-          elseif(preg_match("#[[:punct:]]#is",$_POST['link'])) $show = error(_glossar_specialchar);
+                                                 "do" => "update&amp;id=".$get['id'],
+                                                 "value" => _button_value_edit));
+    break;
+    case 'update':
+        if(empty($_POST['link']) || empty($_POST['beschreibung']) || preg_match("#[[:punct:]]]#is",$_POST['link'])) {
+            if(empty($_POST['link'])) {
+                $show = error(_admin_error_glossar_word);
+            } else if($_POST['beschreibung']) {
+                $show = error(_admin_error_glossar_desc);
+            } else if(preg_match("#[[:punct:]]#is", $_POST['link'])) {
+                $show = error(_glossar_specialchar);
+            }
         } else {
-          $ins = db("UPDATE ".$db['glossar']."
-                     SET `word`    = '".up($_POST['link'])."',
-                         `glossar` = '".up($_POST['beschreibung'])."'
-                     WHERE id = '".intval($_GET['id'])."'");
-
+          $sql->update("UPDATE `{prefix_glossar}` SET `word` = ?, `glossar` = ? WHERE `id` = ?;",
+                  array(up($_POST['link']),up($_POST['beschreibung']),intval($_GET['id'])));
           $show = info(_admin_glossar_edited,'?admin=glossar');
         }
-      } elseif($do == 'delete') {
-        $del = db("DELETE FROM ".$db['glossar']."
-                   WHERE id = '".intval($_GET['id'])."'");
-
+    break;
+    case 'delete':
+        $sql->delete("DELETE FROM `{prefix_glossar}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $show = info(_admin_glossar_deleted,'?admin=glossar');
-      } else {
-        $maxglossar = 20;
-        $entrys = cnt($db['glossar']);
+    break;
+    default:
+        $maxglossar = 20; $entrys = cnt('{prefix_glossar}');
+        $qry = $sql->select("SELECT `id`,`word`,`glossar` FROM `{prefix_glossar}` ORDER BY `word` LIMIT ".
+                ($page - 1)*$maxglossar.",".$maxglossar.";");
+        foreach($qry as $get) {
+            $edit = show("page/button_edit_single", array("id" => $get['id'],
+                                                          "action" => "admin=glossar&amp;do=edit",
+                                                          "title" => _button_title_edit));
+            
+            $delete = show("page/button_delete_single", array("id" => $get['id'],
+                                                              "action" => "admin=glossar&amp;do=delete",
+                                                              "title" => _button_title_del,
+                                                              "del" => convSpace(_confirm_del_entry)));
 
-        $qry = db("SELECT * FROM ".$db['glossar']."
-                   ORDER BY word
-                   LIMIT ".($page - 1)*$maxglossar.",".$maxglossar."");
-        while($get = _fetch($qry))
-        {
-          $edit = show("page/button_edit_single", array("id" => $get['id'],
-                                                        "action" => "admin=glossar&amp;do=edit",
-                                                        "title" => _button_title_edit));
-          $delete = show("page/button_delete_single", array("id" => $get['id'],
-                                                            "action" => "admin=glossar&amp;do=delete",
-                                                            "title" => _button_title_del,
-                                                            "del" => convSpace(_confirm_del_entry)));
-
-          $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-
-          $show_ .= show($dir."/glossar_show", array("word" => re($get['word']),
-                                                     "class" => $class,
-                                                     "edit" => $edit,
-                                                     "delete" => $delete,
-                                                     "glossar" => bbcode($get['glossar'])));
+            $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
+            $show .= show($dir."/glossar_show", array("word" => re($get['word']),
+                                                       "class" => $class,
+                                                       "edit" => $edit,
+                                                       "delete" => $delete,
+                                                       "glossar" => bbcode(re($get['glossar']))));
         }
 
-        if(empty($show_))
-            $show_ = '<tr><td colspan="5" class="contentMainSecond">'._no_entrys.'</td></tr>';
+        if (empty($show)) {
+            $show = '<tr><td colspan="5" class="contentMainSecond">'._no_entrys.'</td></tr>';
+        }
 
-        $show = show($dir."/glossar", array("head" => _glossar_head,
-                                            "word" => _glossar_bez,
-                                            "bez" => _glossar_erkl,
-                                            "show" => $show_,
+        $show = show($dir."/glossar", array("show" => $show,
                                             "cnt" => $entrys,
-                                            "nav" => nav($entrys,$maxglossar,"?admin=glossar"),
-                                            "add" => _admin_glossar_add
-                                            ));
-      }
+                                            "nav" => nav($entrys,$maxglossar,"?admin=glossar")));
+    break;
+}

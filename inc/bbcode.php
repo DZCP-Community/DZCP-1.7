@@ -804,9 +804,14 @@ function replace($txt,$type=false,$no_vid_tag=false) {
 function parse_ts3($string='') {
     $string = (string)$string;
     if(empty($string)) return $string;
-
-    $string = preg_replace('/\[url\=([^(http)].+?)\](.*?)\[\/url\]/i', '[url=http://$1]$2[/url]', $string);
-    $string = preg_replace('/\[url\]([^(http)].+?)\[\/url\]/i', '[url=http://$1]$1[/url]', $string);
+    
+    $string=preg_replace("^\[b\](.*)\[/b\]^isU", "<b>$1</b>", $string);
+    $string=preg_replace("^\[i\](.*)\[/i\]^isU", "<i>$1</i>", $string);
+    $string=preg_replace("^\[u\](.*)\[/u\]^isU", "<u>$1</u>", $string);
+    $string=preg_replace("^\[url\](.*)\[/url\]^isU", "<a href=\"$1\">$1</a>", $string);
+    $string=preg_replace("^\[url=(.*)\](.*)\[/url\]^isU", "<a href=\"$1\">$2</a>", $string);
+    $string=preg_replace("^\[color=(.*)\](.*)\[/color\]^isU", "<font color=\"$1\">$2</font>", $string);
+    $string=preg_replace("^\[img\](.*)\[/img\]^isU", "<img src=\"$1\" alt=\"$1\" />", $string);
 
         // Remove the trash made by previous
       #  $string = preg_replace(self::$lineBreaks_search, self::$lineBreaks_replace, $string);
@@ -814,7 +819,7 @@ function parse_ts3($string='') {
         // Parse bbcode
       #  $string = preg_replace(self::$simple_search, self::$simple_replace, $string);
 
-        // Parse [list] tags
+    // Parse [list] tags
     $string = preg_replace('/\[list\](.*?)\[\/list\]/sie', '"<ul>\n".self::process_list_items("$1")."\n</ul>"', $string);
     return preg_replace('/\[list\=(disc|circle|square|decimal|decimal-leading-zero|lower-roman|upper-roman|lower-greek|lower-alpha|lower-latin|upper-alpha|upper-latin|hebrew|armenian|georgian|cjk-ideographic|hiragana|katakana|hiragana-iroha|katakana-iroha|none)\](.*?)\[\/list\]/sie',
            '"<ol style=\"list-style-type: $1;\">\n".self::process_list_items("$2")."\n</ol>"', $string);

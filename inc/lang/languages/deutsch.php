@@ -8,6 +8,7 @@ $charset = 'iso-8859-1';
 header("Content-type: text/html; charset=".$charset);
 
 ## ADDED / REDEFINED FOR 1.7.0
+define('_admin_glossar_edit', 'Begriff bearbeiten');
 define('_gameserver', 'Gameserver');
 define('_iban', 'IBAN');
 define('_bic', 'BIC');
@@ -495,7 +496,7 @@ define('_config_config', 'Allgemeine Einstellungen');
 define('_config_dladmin', 'Downloads');
 define('_config_editor', 'Seitenverwaltung');
 define('_config_konto', 'Clankasse');
-define('_config_dl', 'Downloadkategorien');
+define('_config_dlkats', 'Downloadkategorien');
 define('_config_nletter', 'Newsletter');
 define('_config_protocol', 'Adminprotokoll');
 define('_config_serverlist', 'Serverliste');
@@ -1990,7 +1991,7 @@ define('_clear_forum_info', 'Forumeintr&auml;ge, die als <span class="fontWichti
 define('_clear_misc', 'Sonstiges mit einbeziehen (empfohlen)?');
 define('_clear_days', 'Eintr&auml;ge l&ouml;schen, die &auml;lter sind als');
 define('_clear_what', 'Tage');
-define('_clear_deleted', 'Die Datenbank wurde erfolgreich aufger&auml;umt!');
+define('_clear_deleted', 'Es wurden [deleted] Eintr&auml;ge gel&ouml;scht!');
 define('_clear_error_days', 'Du musst die Tage angeben, ab wann etwas gel&ouml;scht werden soll!');
 define('_admin_status', 'Live-Status');
 define('_error_unregistered', 'Du musst registriert sein um diese Funktion Nutzen zu k&ouml;nnen!');

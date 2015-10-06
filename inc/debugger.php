@@ -51,8 +51,14 @@ class DebugConsole {
     private static $file_data = '';
     private static $warning_enable = false;
 
-    public static final function initCon()
-    { self::$log_array=array(array()); self::$file_data=''; }
+    public static final function initCon() { 
+        self::$log_array=array(array()); 
+        self::$file_data=''; 
+        if(!is_dir(basePath.'/inc/_logs') || 
+            !file_exists(basePath.'/inc/_logs')) {
+            @mkdir(basePath.'/inc/_logs', 0777, true);
+        }
+    }
 
     public static final function insert_log($file,$msg,$back=false,$func="",$line=0)
     { if(view_error_reporting) self::$log_array[$file][] = ($line != 0 ? 'Line:"'.$line.'" => ' : "").($back ? $msg.$func : $func.$msg); }
@@ -87,7 +93,6 @@ class DebugConsole {
         'Query   = '.$query.EOL.
         'Params   = '.json_encode($params).EOL.       
         '#####################################################################'.EOL.EOL;
-
         $fp = fopen(basePath."/inc/_logs/sql_error.log", "a+");
         fwrite($fp, $message); fclose($fp);
     }
@@ -116,7 +121,7 @@ class DebugConsole {
         '.$data.'</table></td></tr></table><table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td width="100%" bgcolor="#999999">&nbsp;</td></tr></table>';
     }
 
-    public static final function wire_log($input_level, $input_maxlevel=9, $input_file_name='', $input_content = "",$input_customlevel = "") {
+    public static final function wire_log($input_level, $input_maxlevel=9, $input_file_name='', $input_content = "",$input_customlevel = "") { 
         $file = basePath."/inc/_logs/".date("Y-m-d",time(TRUE))."_".$input_file_name.".log";
         if ($input_maxlevel > 0) {
             $string =
