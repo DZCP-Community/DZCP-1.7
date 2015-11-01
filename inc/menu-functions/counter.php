@@ -14,7 +14,7 @@ function counter($js=false) {
     } else {
         if(!$isSpider) {
             $v_today = 0;
-            $get2day = $sql->selectSingle("SELECT `visitors` FROM `{prefix_counter}` WHERE `today` = ?;",array(date("j.n.Y")));
+            $get2day = $sql->fetch("SELECT `visitors` FROM `{prefix_counter}` WHERE `today` = ?;",array(date("j.n.Y")));
             if($sql->rowCount()) {
                 $v_today = $get2day['visitors'];
             }
@@ -26,12 +26,12 @@ function counter($js=false) {
             $yesterday = $tag.".".$monat.".".$jahr;
 
             $yDay = 0;
-            $getyday = $sql->selectSingle("SELECT `visitors` FROM `{prefix_counter}` WHERE `today` = ?;",array($yesterday));
+            $getyday = $sql->fetch("SELECT `visitors` FROM `{prefix_counter}` WHERE `today` = ?;",array($yesterday));
             if($sql->rowCount()) {
                 $yDay = $getyday['visitors'];
             }
 
-            $getstats = $sql->selectSingle("SELECT SUM(visitors) AS `allvisitors`, "
+            $getstats = $sql->fetch("SELECT SUM(visitors) AS `allvisitors`, "
                                          . "MAX(visitors) AS `maxvisitors`, "
                                          . "MAX(maxonline) AS `maxonline`, "
                                          . "AVG(visitors) AS `avgvisitors`, "
@@ -54,7 +54,7 @@ function counter($js=false) {
 
             $counter = show("menu/counter", array("v_today" => $v_today,
                                                   "v_yesterday" => $yDay,
-                                                  "v_all" => ($getstats['allvisitors']+settings('counter_start')),
+                                                  "v_all" => ($getstats['allvisitors']),
                                                   "v_perday" => round($getstats['avgvisitors'], 2),
                                                   "v_max" => $getstats['maxvisitors'],
                                                   "g_online" => abs(online_guests($where)),

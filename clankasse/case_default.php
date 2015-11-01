@@ -8,11 +8,11 @@ if(defined('_Ck')) {
     if(!$chkMe || $chkMe < 2)
         $index = error(_error_wrong_permissions, 1);
     else {
-        $get_settings = settings(array('k_inhaber','k_nr','k_blz','k_bank','iban','bic','k_waehrung','k_vwz'));
+        $get_settings = settings::get(array('k_inhaber','k_nr','k_blz','k_bank','iban','bic','k_waehrung','k_vwz'));
         $entrys = cnt("{prefix_clankasse}");
         $qry = $sql->select("SELECT `id`,`pm`,`betrag`,`member`,`transaktion`,`datum` FROM `{prefix_clankasse}`
                   ".orderby_sql(array("betrag","transaktion","datum","member"), 'ORDER BY `datum` DESC').
-                  " LIMIT ".($page - 1)*settings('m_clankasse').",".settings('m_clankasse').";");
+                  " LIMIT ".($page - 1)*settings::get('m_clankasse').",".settings::get('m_clankasse').";");
         foreach($qry as $get) {
             $betrag = str_replace(',', '.', $get['betrag']);
             $pm = show((!$get['pm'] ? _clankasse_plus : _clankasse_minus),
@@ -77,7 +77,7 @@ if(defined('_Ck')) {
                                                       "edit" => $edit));
         }
 
-        $seiten = nav($entrys,settings('m_clankasse'),"?action=nav");
+        $seiten = nav($entrys,settings::get('m_clankasse'),"?action=nav");
         $new = permission("clankasse") ? _clankasse_new : '';
         $index = show($dir."/clankasse", array("show" => $show,
                                                "showstatus" => $showstatus,

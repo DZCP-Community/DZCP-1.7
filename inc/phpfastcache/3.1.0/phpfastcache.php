@@ -42,7 +42,7 @@ class phpFastCache {
         "storage"       =>  "", // blank for auto
         "default_chmod" =>  0777, // 0777 , 0666, 0644
         "fallback"      => "files",
-        "securityKey"   =>  "auto",
+        "securityKey"   => "auto",
         "htaccess"      => true,
         "path"          =>  "",
         "memcache"      =>  array(
@@ -71,20 +71,16 @@ class phpFastCache {
     public static $storage = '';
     var $instance,$fallback;
 
-    function __construct($storage = "", $config = array()) {
-        $config__ = phpFastCache::$config;
-        if(!empty($config)) {
-            $config__['storage'] = $storage;
-        }
-        
-        if($storage == "" || strtolower($storage) == "auto") {
-            $storage = self::getAutoClass();
+    function __construct() {
+        $config = phpFastCache::$config;
+        if($config['storage'] == "" || strtolower($config['storage']) == "auto") {
+            $config['storage'] = self::getAutoClass();
         }
 
         self::$storage_fallback = phpFastCache::$config['fallback'];
-        self::$storage = $storage;
+        self::$storage = $config['storage'];
         $this->fallback = phpFastCache(phpFastCache::$config['fallback'],$config);
-        $this->instance = phpFastCache($storage,$config);
+        $this->instance = phpFastCache($config['storage'],$config);
     }
 
     public function __call($name, $args) {

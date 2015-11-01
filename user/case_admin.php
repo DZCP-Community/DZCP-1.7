@@ -180,7 +180,7 @@ if(defined('_UserMenu')) {
                 }
             }
         } else {
-            $get = $sql->selectSingle("SELECT `id`,`user`,`nick`,`pwd`,`email`,`level`,`position`,`listck` "
+            $get = $sql->fetch("SELECT `id`,`user`,`nick`,`pwd`,`email`,`level`,`position`,`listck` "
                                     . "FROM `{prefix_users}` "
                                     . "WHERE `id` = ?;",array(intval($_GET['edit'])));
             if ($sql->rowCount()) {

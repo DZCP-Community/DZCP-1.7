@@ -17,7 +17,7 @@ foreach($qry as $get) {
 }
 $kats = substr($kats, 0, -2);
 
-$get = $sql->selectSingle("SELECT `datum` FROM `{prefix_news}` ORDER BY `datum` ASC;");
+$get = $sql->fetch("SELECT `datum` FROM `{prefix_news}` ORDER BY `datum` ASC;");
 $time = (time()-$get['datum']);
 $days = @round($time/86400);
 $cpern = @round($allcomments/$allnews,2);

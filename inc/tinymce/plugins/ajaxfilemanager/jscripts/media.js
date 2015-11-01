@@ -45,7 +45,7 @@ $.fn.media = function(options, f1, f2) {
             f1 = options;
             options = {};
         }
-        var o = getSettings(this, options);
+        var o = getsettings::get(this, options);
         // pre-conversion callback, passes original element and fully populated options
         if (typeof f1 == 'function') f1(this, o);
         
@@ -274,7 +274,7 @@ function isDigit(c) {
 };
 
 // flatten all possible options: global defaults, meta, option obj
-function getSettings(el, options) {
+function getsettings::get(el, options) {
     options = options || {};
     var $el = $(el);
     

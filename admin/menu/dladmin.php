@@ -6,148 +6,120 @@
 
 if(_adminMenu != 'true') exit;
 $where = $where.': '._dl;
-
-
-      if($do == "new")
-      {
-        $qry = db("SELECT * FROM ".$db['dl_kat']." ORDER BY name");
-        while($get = _fetch($qry))
-        {
-          $kats .= show(_select_field, array("value" => $get['id'],
-                                             "what" => re($get['name']),
-                                             "sel" => ""));
+switch ($do) {
+    case 'new':
+        $qry = $sql->select("SELECT `id`,`name` FROM `{prefix_download_kat}` ORDER BY `name`;"); $kats = '';
+        foreach($qry as $get) {
+            $kats .= show(_select_field, array("value" => $get['id'],
+                                               "what" => re($get['name']),
+                                               "sel" => ""));
         }
 
-        $files = get_files(basePath.'/downloads/files/',false,true);
-        for($i=0; $i<count($files); $i++)
-        {
-          $dl .= show(_downloads_files_exists, array("dl" => $files[$i],
-                                                     "sel" => ""));
+        $files = get_files(basePath.'/downloads/files/',false,true); $dl = '';
+        foreach ($files as $file) {
+            $dl .= show(_downloads_files_exists, array("dl" => $file, "sel" => ""));
         }
 
         $show = show($dir."/form_dl", array("admin_head" => _downloads_admin_head,
                                             "ddownload" => "",
                                             "dintern" => "",
-                                             "durl" => "",
-                                             "oder" => _or,
-                                             "file" => $dl,
-                                             "nothing" => "",
-                                             "nofile" => _downloads_nofile,
-                                             "lokal" => _downloads_lokal,
-                                             "what" => _button_value_add,
-                                             "do" => "add",
-                                             "exist" => _downloads_exist,
-                                             "dbeschreibung" => "",
-                                             "kat" => _downloads_kat,
-                                             "kats" => $kats,
-                                             "url" => _downloads_url,
-                                             "beschreibung" => _beschreibung,
-                                             "download" => _downloads_name,
-                                             "intern" => _internal));
-      } elseif($do == "add") {
-        if(empty($_POST['download']) || empty($_POST['url']))
-        {
-          if(empty($_POST['download'])) $show = error(_downloads_empty_download, 1);
-          elseif(empty($_POST['url']))  $show = error(_downloads_empty_url, 1);
+                                            "durl" => "",
+                                            "file" => $dl,
+                                            "nothing" => "",
+                                            "what" => _button_value_add,
+                                            "do" => "add",
+                                            "dbeschreibung" => "",
+                                            "kats" => $kats));
+    break;
+    case 'add':
+        if(empty($_POST['download']) || empty($_POST['url'])) {
+            if (empty($_POST['download'])) {
+                $show = error(_downloads_empty_download, 1);
+            } else if (empty($_POST['url'])) {
+                $show = error(_downloads_empty_url, 1);
+            }
         } else {
+            $dl = (preg_match("#^www#i",$_POST['url']) ? links($_POST['url']) : up($_POST['url']));
+            $sql->insert("INSERT INTO `{prefix_downloads}` SET `download` = ?, "
+                    . "`url` = ?, "
+                    . "`date` = ?, "
+                    . "`beschreibung` = ?, "
+                    . "`kat` = ?, "
+                    . "`intern` = ?;",
+                    array(up($_POST['download']),$dl,time(),up($_POST['beschreibung']),
+                        intval($_POST['kat']),intval($_POST['intern']),intval($_POST['intern'])));
 
-          if(preg_match("#^www#i",$_POST['url'])) $dl = links($_POST['url']);
-          else                                    $dl = up($_POST['url']);
-
-          $qry = db("INSERT INTO ".$db['downloads']."
-                     SET `download`     = '".up($_POST['download'])."',
-                         `url`          = '".$dl."',
-                         `date`         = '".time()."',
-                         `beschreibung` = '".up($_POST['beschreibung'])."',
-                         `kat`          = '".intval($_POST['kat'])."',
-                         `intern`          = '".intval($_POST['intern'])."'");
-
-          $show = info(_downloads_added, "?admin=dladmin");
+            $show = info(_downloads_added, "?admin=dladmin");
         }
-      } elseif($do == "edit") {
-        $qry  = db("SELECT * FROM ".$db['downloads']." WHERE id = '".intval($_GET['id'])."'");
-        $get = _fetch($qry);
-
-        $qryk = db("SELECT * FROM ".$db['dl_kat']." ORDER BY name");
-        while($getk = _fetch($qryk))
-        {
-          if($getk['id'] == $get['kat']) $sel = 'selected="selected"';
-          else $sel = "";
-
-          $kats .= show(_select_field, array("value" => $getk['id'],
-                                             "what" => re($getk['name']),
-                                             "sel" => $sel));
+    break;
+    case 'edit':
+        $get  = $sql->fetch("SELECT `download`,`intern`,`url`,`kat`,`beschreibung` FROM `{prefix_downloads}` WHERE `id` = ?;",
+                array(intval($_GET['id'])));
+        $qryk = $sql->select("SELECT `id`,`name` FROM `{prefix_download_kat}` ORDER BY `name`;"); $kats = '';
+        foreach($qryk as $getk) {
+            $sel = ($getk['id'] == $get['kat'] ? 'selected="selected"' : '');
+            $kats .= show(_select_field, array("value" => $getk['id'],
+                                               "what" => re($getk['name']),
+                                               "sel" => $sel));
         }
 
         $show = show($dir."/form_dl", array("admin_head" => _downloads_admin_head_edit,
                                             "ddownload" => re($get['download']),
                                             "dintern" => $get['intern'] ? 'checked="checked"' : '',
                                             "durl" => re($get['url']),
-                                            "file" => $dl,
-                                            "lokal" => _downloads_lokal,
-                                            "exist" => _downloads_exist,
-                                            "nofile" => _downloads_nofile,
-                                            "oder" => _or,
                                             "dbeschreibung" => re($get['beschreibung']),
-                                            "kat" => _downloads_kat,
                                             "what" => _button_value_edit,
                                             "do" => "editdl&amp;id=".$_GET['id']."",
-                                            "kats" => $kats,
-                                            "url" => _downloads_url,
-                                            "beschreibung" => _beschreibung,
-                                            "download" => _downloads_name,
-                                            "intern" => _internal));
-      } elseif($do == "editdl") {
-        if(empty($_POST['download']) || empty($_POST['url']))
-        {
-          if(empty($_POST['download'])) $show = error(_downloads_empty_download, 1);
-          elseif(empty($_POST['url']))  $show = error(_downloads_empty_url, 1);
+                                            "kats" => $kats));
+    break;
+    case 'editdl':
+        if(empty($_POST['download']) || empty($_POST['url'])) {
+            if(empty($_POST['download'])) 
+                $show = error(_downloads_empty_download, 1);
+            elseif(empty($_POST['url']))  
+                $show = error(_downloads_empty_url, 1);
         } else {
-          if(preg_match("#^www#i",$_POST['url'])) $dl = links($_POST['url']);
-          else                                    $dl = up($_POST['url']);
+            $dl = preg_match("#^www#i",$_POST['url']) ? up(links($_POST['url'])) : up($_POST['url']);
+            $sql->update("UPDATE `{prefix_downloads}` SET `download` = ?, "
+                    . "`url` = ?, "
+                    . "`beschreibung` = ?, "
+                    . "`kat` = ?, "
+                    . "`intern` = ? "
+                    . "WHERE id = ?;",
+                array(up($_POST['download']),$dl,up($_POST['beschreibung']),intval($_POST['kat']),
+                    intval($_POST['intern']),intval($_GET['id'])));
 
-          $qry = db("UPDATE ".$db['downloads']."
-                     SET `download`     = '".up($_POST['download'])."',
-                         `url`          = '".$dl."',
-                         `beschreibung` = '".up($_POST['beschreibung'])."',
-                         `kat`          = '".intval($_POST['kat'])."',
-                         `intern`          = '".intval($_POST['intern'])."'
-                     WHERE id = '".intval($_GET['id'])."'");
-
-          $show = info(_downloads_edited, "?admin=dladmin");
+            $show = info(_downloads_edited, "?admin=dladmin");
         }
-      } elseif($do == "delete") {
-        $qry = db("DELETE FROM ".$db['downloads']." WHERE id = '".intval($_GET['id'])."'");
-
+    break;
+    case 'delete':
+        $sql->delete("DELETE FROM `{prefix_downloads}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $show = info(_downloads_deleted, "?admin=dladmin");
-      } else {
-        $qry = db("SELECT * FROM ".$db['downloads']." ORDER BY id");
-        while($get = _fetch($qry))
-        {
-          $edit = show("page/button_edit_single", array("id" => $get['id'],
-                                                        "action" => "admin=dladmin&amp;do=edit",
-                                                        "title" => _button_title_edit));
-          $delete = show("page/button_delete_single", array("id" => $get['id'],
-                                                            "action" => "admin=dladmin&amp;do=delete",
-                                                            "title" => _button_title_del,
-                                                            "del" => convSpace(_confirm_del_dl)));
+    break;
+    default:
+        $qry = $sql->select("SELECT `id`,`download` FROM `{prefix_downloads}` ORDER BY id");
+        foreach($qry as $get) {
+            $edit = show("page/button_edit_single", array("id" => $get['id'],
+                                                          "action" => "admin=dladmin&amp;do=edit",
+                                                          "title" => _button_title_edit));
+          
+            $delete = show("page/button_delete_single", array("id" => $get['id'],
+                                                              "action" => "admin=dladmin&amp;do=delete",
+                                                              "title" => _button_title_del,
+                                                              "del" => convSpace(_confirm_del_dl)));
 
-          $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-          $show .= show($dir."/downloads_show", array("id" => $get['id'],
-                                                       "dl" => re($get['download']),
-                                                       "class" => $class,
-                                                       "edit" => $edit,
-                                                       "delete" => $delete
-                                                       ));
+            $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
+            $show .= show($dir."/downloads_show", array("id" => $get['id'],
+                                                        "dl" => re($get['download']),
+                                                        "class" => $class,
+                                                        "edit" => $edit,
+                                                        "delete" => $delete));
         }
 
-        if(empty($show))
+        if (empty($show)) {
             $show = '<tr><td colspan="3" class="contentMainSecond">'._no_entrys.'</td></tr>';
+        }
 
-        $show = show($dir."/downloads", array("head" => _dl,
-                                              "date" => _datum,
-                                              "titel" => _dl_file,
-                                              "add" => _downloads_admin_head,
-                                              "show" => $show
-                                              ));
-      }
+        $show = show($dir."/downloads", array("show" => $show));
+    break;
+}

@@ -6,7 +6,7 @@
 
 if (!defined('_Sponsors')) exit();
 
-$get = $sql->selectSingle("SELECT `link`,`id` FROM `{prefix_sponsoren}` WHERE `id` = ?;",array(intval($_GET['id'])));
+$get = $sql->fetch("SELECT `link`,`id` FROM `{prefix_sponsoren}` WHERE `id` = ?;",array(intval($_GET['id'])));
 if(count_clicks('sponsoren',$get['id']))
     $sql->update("UPDATE `{prefix_sponsoren}` SET `hits` = (hits+1) WHERE `id` = ?;",array($get['id']));
 

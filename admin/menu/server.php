@@ -9,16 +9,16 @@ $where = $where.': '._server_admin_head;
 
 switch ($do) {
     case 'menu':
-        $get = db("SELECT `navi`,`game`,`id` FROM `".$db['server']."` WHERE `id` = ".intval($_GET['id']).";",false,true);
+        $get = $sql->fetch("SELECT `navi`,`game`,`id` FROM `{prefix_server}` WHERE `id` = ?;",array(intval($_GET['id'])));
         if($get['game'] != 'nope') {
-            db("UPDATE `".$db['server']."` SET `navi` = ".($get['navi'] ? 0 : 1)." WHERE `id` = ".$get['id'].";");
+            $sql->update("UPDATE `{prefix_server}` SET `navi` = ? WHERE `id` = ?;",array(($get['navi'] ? 0 : 1),$get['id']));
             header("Location: ?admin=server");
         } else {
             $show = error(_server_isnt_live);
         }
     break;
     case 'edit':
-        $get = db("SELECT * FROM `".$db['server']."` WHERE `id` = ".intval($_GET['id']).";",false,true);
+        $get = $sql->fetch("SELECT * FROM `{prefix_server}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $custom_icon = '<option value="">'._custom_game_icon_none.'</option>';
         $files = get_files(basePath.'/inc/images/gameicons/custom/',false,true,$picformat);
         if(count($files) >= 1) {
@@ -44,31 +44,22 @@ switch ($do) {
         } else if(empty($_POST['name'])) {
             $show = error(_empty_servername);
         } else {
-            if($_POST['status'] == "lazy") $game = "";
-            else $game = "`game` = '".up($_POST['status'])."',";
-            $get = db("SELECT `ip`,`port`,`game` FROM `".$db['server']."` WHERE `id` = ".intval($_GET['id']).";",false,true);
+            $get = $sql->fetch("SELECT `ip`,`port`,`game` FROM `{prefix_server}` WHERE `id` = ?;",array(intval($_GET['id'])));
             $cache_hash = md5($get['ip'].':'.$get['port'].'_'.$get['game']);
             $cache->delete('server_'.$cache_hash);
 
-            db("UPDATE `".$db['server']."`
-                     SET `ip`         = '".up($_POST['ip'])."',
-                         `port`       = ".intval($_POST['port']).",
-                         `qport`      = '".up($_POST['qport'])."',
-                         `name`       = '".up($_POST['name'])."',
-                         `custom_icon`= '".up($_POST['custom_game_icon'])."',
-                         `icon`       = '',
-                         ".$game."
-                         `pwd`        = '".up($_POST['pwd'])."'
-                     WHERE id = ".intval($_GET['id']).";");
+            $sql->update("UPDATE `{prefix_server}` SET `ip` = ?, `port` = ?, `qport` = ?, `name` = ?, `custom_icon`= ?, `icon` = '', `game` = ?, `pwd` = ? WHERE `id` = ?;",
+                    array(up($_POST['ip']),intval($_POST['port']),up($_POST['qport']),up($_POST['name']),up($_POST['custom_game_icon']),
+                         ($_POST['status'] != 'lazy' ? up($_POST['status']) : $get['game']),up($_POST['pwd']),intval($_GET['id'])));
 
             $show = info(_server_admin_edited, "?admin=server");
         }
     break;
     case 'delete':
-        $get = db("SELECT `ip`,`port`,`game`,`name` FROM `".$db['server']."` WHERE `id` = ".intval($_GET['id']).";",false,true);
+        $get = $sql->fetch("SELECT `ip`,`port`,`game`,`name` FROM `{prefix_server}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $cache_hash = md5($get['ip'].':'.$get['port'].'_'.$get['game']);
         $cache->delete('server_'.$cache_hash);
-        db("DELETE FROM `".$db['server']."` WHERE `id` = ".intval($_GET['id']).";");
+        $sql->delete("DELETE FROM `{prefix_server}` WHERE `id` = ?;",array(intval($_GET['id'])));
         
         $show = info(show(_server_admin_deleted,array('host' => $get['name'])), "?admin=server");
     break;
@@ -86,27 +77,21 @@ switch ($do) {
     case 'add':
         if(empty($_POST['ip']) || empty($_POST['port'])) {
             $show = error(_empty_ip);
-        } else if($_POST['game'] == "lazy") {
+        } else if($_POST['status'] == "lazy") {
             $show = error(_empty_game);
         } else if(empty($_POST['name'])) {
             $show = error(_empty_servername);
         } else {
-            db("INSERT INTO `".$db['server']."`
-                     SET `ip`         = '".up($_POST['ip'])."',
-                         `port`       = ".intval($_POST['port']).",
-                         `qport`      = '".up($_POST['qport'])."',
-                         `name`       = '".up($_POST['name'])."',
-                         `pwd`        = '".up($_POST['pwd'])."',
-                         `custom_icon`= '".up($_POST['custom_game_icon'])."',
-                         `game`       = '".up($_POST['status'])."'");
+            $sql->insert("INSERT INTO `{prefix_server}` SET `ip` = ?, `port` = ?, `qport` = ?, `name` = ?, `pwd` = ?, `custom_icon`= ?, `game` = ?;",
+                array(up($_POST['ip']),intval($_POST['port']),up($_POST['qport']),up($_POST['name']),up($_POST['pwd']),up($_POST['custom_game_icon']),up($_POST['status'])));
 
             $show = info(_server_admin_added, "?admin=server");
         }
     break;
     default:
         $color = 0; $show_servers = '';
-        $qry = db("SELECT * FROM `".$db['server']."` ORDER BY id;");
-        while($get = _fetch($qry)) {
+        $qry = $sql->select("SELECT * FROM `{prefix_server}` ORDER BY id;");
+        foreach($qry as $get) {
             $gameicon = show(_gameicon, array("icon" => 'unknown.gif')); $icon = false;
             if(!empty($get['custom_icon'])) {
                 if(file_exists(basePath.'/inc/images/gameicons/custom/'.$get['custom_icon'])) {

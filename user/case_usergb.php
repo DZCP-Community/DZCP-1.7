@@ -6,7 +6,7 @@
 
 if(defined('_UserMenu')) {
     $where = _site_user_profil;
-    $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($_GET['id'])));
+    $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($_GET['id'])));
     if (!$sql->rowCount()) {
         $index = error(_user_dont_exist, 1);
     } else {
@@ -53,7 +53,7 @@ if(defined('_UserMenu')) {
                                                             "posteintrag" => $_POST['eintrag'],
                                                             "error" => $error));
                 } else {
-                    $getperm = $sql->selectSingle("SELECT `perm_gb`,`id` FROM `{prefix_users}` WHERE `id` = ?;",array(intval($_GET['id'])));
+                    $getperm = $sql->fetch("SELECT `perm_gb`,`id` FROM `{prefix_users}` WHERE `id` = ?;",array(intval($_GET['id'])));
                     if ($getperm['perm_gb']) {
                         $nick = !isset($_POST['nick']) && $userid >= 1 ? data('nick',$userid) : up($_POST['nick']);
                         $email = !isset($_POST['email']) && $userid >= 1 ? data('email',$userid) : up($_POST['email']);

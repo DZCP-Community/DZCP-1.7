@@ -12,7 +12,7 @@ switch ($do) {
         notification::add_success(_admin_startpage_deleted, "?admin=startpage");
     break;
     case 'edit':
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_startpage}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT * FROM `{prefix_startpage}` WHERE `id` = ?;",array(intval($_GET['id'])));
         if(isset($_POST['name']) && isset($_POST['url']) && isset($_POST['level'])) {
             if(empty($_POST['name']))
                 notification::add_error(_admin_startpage_no_name);

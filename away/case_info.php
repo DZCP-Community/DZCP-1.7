@@ -9,7 +9,7 @@ if(defined('_Away')) {
     if(!$chkMe || $chkMe < 2) {
         $index = error(_error_wrong_permissions, 1);
     } else {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_away}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT * FROM `{prefix_away}` WHERE `id` = ?;",array(intval($_GET['id'])));
         if($get['start'] > time()) 
             $status = _away_status_new;
 

@@ -11,10 +11,10 @@ include("../inc/buffer.php");
 include(basePath."/inc/common.php");
 
 ## SECTIONS ##
-$uip       = settings('ts_ip');
-$tPort     = settings('ts_sport');
-$port      = settings('ts_port');
-$version   = settings('ts_version');
+$uip       = settings::get('ts_ip');
+$tPort     = settings::get('ts_sport');
+$port      = settings::get('ts_port');
+$version   = settings::get('ts_version');
 
     if($_POST) {
         $ok = false;

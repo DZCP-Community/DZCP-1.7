@@ -6,7 +6,7 @@
 
 if (!defined('_Links')) exit();
 
-$get = $sql->selectSingle("SELECT `url`,`id` FROM `{prefix_links}` WHERE `id` = ?;",array(intval($_GET['id'])));
+$get = $sql->fetch("SELECT `url`,`id` FROM `{prefix_links}` WHERE `id` = ?;",array(intval($_GET['id'])));
 if(count_clicks('link',$get['id']))
     $sql->update("UPDATE `{prefix_links}` SET `hits` = (hits+1) WHERE `id` = ?;",array($get['id']));
 

@@ -34,8 +34,11 @@ switch($size[2]) {
         if(!thumbgen_cache || !file_exists($file_cache) || time() - filemtime($file_cache) > thumbgen_cache_time) {
             $altesBild = imagecreatefromgif(basePath.'/'.$_GET['img']);
             $neuesBild = imagecreatetruecolor($neueBreite,$neueHoehe);
-            imagesavealpha($neuesBild,true);
-            imagealphablending($neuesBild, false);
+            $CT = imagecolortransparent($altesBild);
+            imagepalettecopy($neuesBild, $altesBild);
+            imagefill($neuesBild, 0, 0, $CT);
+            imagecolortransparent($neuesBild, $CT);
+            imageantialias($neuesBild, true);
             imagecopyresampled($neuesBild, $altesBild,0,0,0,0, $neueBreite, $neueHoehe, $breite, $hoehe);
             thumbgen_cache ? imagegif($neuesBild,$file_cache) : imagegif($neuesBild);
             $picture_build = true;
@@ -48,6 +51,7 @@ switch($size[2]) {
         if(!thumbgen_cache || !file_exists($file_cache) || time() - @filemtime($file_cache) > thumbgen_cache_time) {
             $altesBild = imagecreatefromjpeg(basePath.'/'.$_GET['img']);
             $neuesBild = imagecreatetruecolor($neueBreite,$neueHoehe);
+            imageantialias($neuesBild, true);
             imagecopyresampled($neuesBild, $altesBild,0,0,0,0, $neueBreite, $neueHoehe, $breite, $hoehe);
             thumbgen_cache ? imagejpeg($neuesBild, $file_cache, 100) : imagejpeg($neuesBild, null, 100);
             $picture_build = true;
@@ -60,8 +64,9 @@ switch($size[2]) {
             header("Content-Type: image/png");
             $altesBild = imagecreatefrompng(basePath.'/'.$_GET['img']);
             $neuesBild = imagecreatetruecolor($neueBreite,$neueHoehe);
-            imagesavealpha($neuesBild,true);
             imagealphablending($neuesBild, false);
+            imagesavealpha($neuesBild,true); 
+            imageantialias($neuesBild, true);
             imagecopyresampled($neuesBild, $altesBild,0,0,0,0, $neueBreite, $neueHoehe, $breite, $hoehe);
             thumbgen_cache ? imagepng($neuesBild,$file_cache) : imagepng($neuesBild);
             $picture_build = true;

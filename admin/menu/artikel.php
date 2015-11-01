@@ -80,7 +80,7 @@ switch($do) {
         }
     break;
     case 'edit':
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_artikel}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT * FROM `{prefix_artikel}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $qryk = $sql->select("SELECT `id`,`kategorie` FROM `{prefix_newskat}`;"); $kat = '';
         foreach($qryk as $getk) {
             $sel = ($get['kat'] == $getk['id'] ? 'selected="selected"' : '');
@@ -209,7 +209,7 @@ switch($do) {
         header("Location: ?admin=artikel");
     break;
     default:
-        $qry = $sql->select("SELECT * FROM `{prefix_artikel}` ".orderby_sql(array("titel","datum","autor"),'ORDER BY `public` ASC, `datum` DESC')." LIMIT ".($page - 1)*settings('m_adminartikel').",".settings('m_adminartikel').";");
+        $qry = $sql->select("SELECT * FROM `{prefix_artikel}` ".orderby_sql(array("titel","datum","autor"),'ORDER BY `public` ASC, `datum` DESC')." LIMIT ".($page - 1)*settings::get('m_adminartikel').",".settings::get('m_adminartikel').";");
         foreach($qry as $get) {
             $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                           "action" => "admin=artikel&amp;do=edit",
@@ -220,7 +220,7 @@ switch($do) {
                                                               "title" => _button_title_del,
                                                               "del" => convSpace(_confirm_del_artikel)));
 
-            $titel = show(_artikel_show_link, array("titel" => cut(re($get['titel']),settings('l_newsadmin')), "id" => $get['id']));
+            $titel = show(_artikel_show_link, array("titel" => cut(re($get['titel']),settings::get('l_newsadmin')), "id" => $get['id']));
             $public = ($get['public'] ? '<a href="?admin=artikel&amp;do=public&amp;id='.$get['id'].'&amp;what=unset"><img src="../inc/images/public.gif" alt="" title="'._non_public.'" /></a>'
                     : '<a href="?admin=artikel&amp;do=public&amp;id='.$get['id'].'&amp;what=set"><img src="../inc/images/nonpublic.gif" alt="" title="'._public.'" /></a>');
 
@@ -241,7 +241,7 @@ switch($do) {
             $show = '<tr><td colspan="6" class="contentMainSecond">'._no_entrys.'</td></tr>';
 
         $entrys = cnt('{prefix_artikel}');
-        $nav = nav($entrys,settings('m_adminnews'),"?admin=artikel".(isset($_GET['show']) ? $_GET['show'] : '').orderby_nav());
+        $nav = nav($entrys,settings::get('m_adminnews'),"?admin=artikel".(isset($_GET['show']) ? $_GET['show'] : '').orderby_nav());
         $show = show($dir."/admin_news", array("head" => _artikel,
                                                "nav" => $nav,
                                                "order_autor" => orderby('autor'),

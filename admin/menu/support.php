@@ -23,7 +23,7 @@ $support .= "#####################\r\n";
 $support .= "DZCP Version: "._version."\r\n";
 $support .= "DZCP Release: "._release."\r\n";
 $support .= "DZCP Build: "._build."\r\n";
-$support .= "DZCP Datenbank: ".settings('dbversion')."\r\n";
+$support .= "DZCP Datenbank: ".settings::get('db_version')."\r\n";
 $support .= "DZCP Edition: ".$edition."\r\n";
 $support .= "DZCP Template: ".$tmpdir."\r\n";
 $support .= "\r\n";
@@ -62,7 +62,7 @@ $support .= "Webserver: ".(array_key_exists('apache2handler', $PhpInfo) ? (array
 $support .= "PHP-Version: ".phpversion()." (".php_sapi_type().")"."\r\n";
 $support .= "PHP-Alternative PHP Cache (APC) : ".(extension_loaded('apc') ? 'On' : 'Off')."\r\n";
 $support .= "PHP-Memcache: ".(extension_loaded('memcache') ? 'On' : 'Off')."\r\n";
-$support .= "MySQL-Server Version: ".$sql->selectSingle("SELECT VERSION() as mysql_version",array(),'mysql_version')."\r\n";
+$support .= "MySQL-Server Version: ".$sql->fetch("SELECT VERSION() as mysql_version",array(),'mysql_version')."\r\n";
 $support .= "\r\n";
 
 $support .= "#####################\r\n";

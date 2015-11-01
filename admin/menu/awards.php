@@ -32,7 +32,7 @@ switch ($do) {
                                                 "award_prize" => ""));
     break;
     case 'edit':
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_awards}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT * FROM `{prefix_awards}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $qrym = $sql->select("SELECT `id`,`name`,`game`,`icon` FROM `{prefix_squads}` ORDER BY game"); $squads = "";
         foreach($qrym as $gets) {
             $sel = $get['squad'] == $gets['id'] ? 'selected="selected"' : '';

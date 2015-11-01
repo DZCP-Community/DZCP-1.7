@@ -17,7 +17,7 @@ ob_implicit_flush(false);
     $dir = "sites";
     addNoCacheHeaders(); //No Browser-Cache
     $is_debug = isset($_GET['debug']);
-    
+
     ## SECTIONS ##
     //-> Steam Status
     function steamIMG($steamID='') {
@@ -75,7 +75,7 @@ ob_implicit_flush(false);
             require_once(basePath."/inc/menu-functions/team.php");
             echo team($_GET['tID']); 
         break;
-        case 'server':    
+        case 'server':
             require_once(basePath."/inc/menu-functions/server.php"); 
             echo '<table class="hperc" cellspacing="0">'.server($_GET['serverID']).'</table>'; 
         break;

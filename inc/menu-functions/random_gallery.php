@@ -11,7 +11,7 @@ function random_gallery() {
     $gallery = '';
     $files = get_files(basePath.'/gallery/images/',false,true,$picformat,false,array(),'minimize');
     if(count($files) >= 1) {
-        $get = $sql->selectSingle("SELECT `id`,`kat` FROM `{prefix_gallery}` ORDER BY RAND();");
+        $get = $sql->fetch("SELECT `id`,`kat` FROM `{prefix_gallery}` ORDER BY RAND();");
         $imgArr = array();
         foreach($files AS $file) {
             if(intval($file) == $get['id'])

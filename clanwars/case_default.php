@@ -58,14 +58,14 @@ if(defined('_Clanwars')) {
                            . "LEFT JOIN `{prefix_squads}` AS `s2` "
                            . "ON s1.`squad_id` = s2.`id` "
                            . "WHERE s1.`squad_id` = ? AND s1.`datum` < ? "
-                           . "ORDER BY s1.`datum` DESC LIMIT ".settings('m_clanwars').";",array($get['id'],time()));
+                           . "ORDER BY s1.`datum` DESC LIMIT ".settings::get('m_clanwars').";",array($get['id'],time()));
 
         $wars = "";
         foreach($qrym as $getm) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $game = squad($getm['icon']);
             $flagge = flag($getm['gcountry']);
-            $gegner = show(_cw_details_gegner, array("gegner" => re(cut($getm['clantag']." - ".$getm['gegner'], settings('l_clanwars'))),
+            $gegner = show(_cw_details_gegner, array("gegner" => re(cut($getm['clantag']." - ".$getm['gegner'], settings::get('l_clanwars'))),
                                                      "url" => '?action=details&amp;id='.$getm['id']));
 
             $details = show(_cw_show_details, array("id" => $getm['id']));
@@ -123,7 +123,7 @@ if(defined('_Clanwars')) {
         }
 
         $more = "";
-        if($cnt_wars > settings('m_clanwars')) {
+        if($cnt_wars > settings::get('m_clanwars')) {
             $more = show(_cw_show_all, array("id" => $get['id']));
         }
 

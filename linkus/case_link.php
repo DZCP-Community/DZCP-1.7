@@ -6,5 +6,5 @@
 
 if (!defined('_LinkUS')) exit();
 
-$get = $sql->selectSingle("SELECT `url` FROM `{prefix_linkus}` WHERE `id` = ?;",array(intval($_GET['id'])));
+$get = $sql->fetch("SELECT `url` FROM `{prefix_linkus}` WHERE `id` = ?;",array(intval($_GET['id'])));
 header("Location: ".re($get['url']));

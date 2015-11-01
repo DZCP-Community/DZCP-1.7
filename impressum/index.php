@@ -15,8 +15,8 @@ $dir = "impressum";
 $where = _site_impressum;
 
 ## SECTIONS ##
-$index = show($dir."/impressum", array("show_domain" => re(settings('i_domain')), 
-                                       "show_autor" => bbcode(re(settings('i_autor')))));
+$index = show($dir."/impressum", array("show_domain" => re(settings::get('i_domain')), 
+                                       "show_autor" => bbcode(re(settings::get('i_autor')))));
 
 ## INDEX OUTPUT ##
 $title = $pagetitle." - ".$where;

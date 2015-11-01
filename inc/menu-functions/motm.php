@@ -27,10 +27,10 @@ function motm() {
             $arrayID = mt_rand(0, count($temparr) - 1);
             $uid = $temparr[$arrayID];
 
-            $get = $sql->selectSingle("SELECT `id`,`level`,`status`,`bday` FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
+            $get = $sql->fetch("SELECT `id`,`level`,`status`,`bday` FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
             if(!empty($get) && !empty($temparr)) {
                 $status = ($get['status'] == 1 || $get['level'] == 1) ? "aktiv" : "inaktiv";
-                if(settings('allowhover') == 1)
+                if(settings::get('allowhover') == 1)
                     $info = 'onmouseover="DZCP.showInfo(\''.fabo_autor($get['id']).'\', \''._posi.';'._status.';'._age.'\', \''.
                         getrank($get['id']).';'.$status.';'.getAge($get['bday']).'\', \''.hoveruserpic($get['id']).'\')" onmouseout="DZCP.hideInfo()"';
 

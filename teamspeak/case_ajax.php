@@ -14,7 +14,7 @@ function teamspeak_show($sID = 0, $showID = 0) {
 
     $sID = (!empty($_GET['sID']) && $sID == 0 ? intval($_GET['sID']) : $sID);
     $Show_sID = (!empty($_GET['show']) && $showID == 0 ? intval($_GET['show']) : $showID);
-    $get = $sql->selectSingle("SELECT * FROM `{prefix_teamspeak}` WHERE `id` = ? LIMIT 1;",array(intval($sID)));
+    $get = $sql->fetch("SELECT * FROM `{prefix_teamspeak}` WHERE `id` = ? LIMIT 1;",array(intval($sID)));
     $ip_port = TS3Renderer::tsdns($get['host_ip_dns']);
 
     $host = ($ip_port != false && is_array($ip_port) ? $ip_port['ip'] : $get['host_ip_dns']);
@@ -33,7 +33,7 @@ function teamspeak_show($sID = 0, $showID = 0) {
         GameQ::setOption('timeout', 6);
         $results = GameQ::requestData();
         if(!empty($results) && $results)
-            $cache->set('teamspeak_'.$cache_hash,$results,settings('cache_teamspeak'));
+            $cache->set('teamspeak_'.$cache_hash,$results,settings::get('cache_teamspeak'));
     } else
         $results = $cache->get('teamspeak_'.$cache_hash);
     

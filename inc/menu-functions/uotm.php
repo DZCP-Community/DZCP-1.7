@@ -12,9 +12,9 @@ function uotm() {
     if(count($files) >= 1 && $files) {
         shuffle($files);
         $userid = intval($files[mt_rand(0, count($files) - 1)]);
-        $get = $sql->selectSingle("SELECT `id`,`bday` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
+        $get = $sql->fetch("SELECT `id`,`bday` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
         if($sql->rowCount()) {
-            if(settings('allowhover') == 1)
+            if(settings::get('allowhover') == 1)
                 $info = 'onmouseover="DZCP.showInfo(\''.fabo_autor($get['id']).'\', \''._age.'\', \''.getAge($get['bday']).'\', \''.
                     hoveruserpic($get['id']).'\')" onmouseout="DZCP.hideInfo()"';
 

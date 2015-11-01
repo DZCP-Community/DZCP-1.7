@@ -11,7 +11,7 @@ if(defined('_Upload')) {
         else
             $action = "?action=newskats&amp;do=upload";
 
-        $infos = show(_upload_usergallery_info, array("userpicsize" => settings('upicsize')));
+        $infos = show(_upload_usergallery_info, array("userpicsize" => settings::get('upicsize')));
         $index = show($dir."/upload", array("uploadhead" => _upload_newskats_head,
                                             "name" => "file",
                                             "action" => $action,
@@ -25,7 +25,7 @@ if(defined('_Upload')) {
 
             if(!$tmpname)
                 $index = error(_upload_no_data, 1);
-            else if($size > settings('upicsize')."000")
+            else if($size > settings::get('upicsize')."000")
                 $index = error(_upload_wrong_size, 1);
             else {
                 if(move_uploaded_file($tmpname, basePath."/inc/images/newskat/".$_FILES['file']['name'])) {

@@ -16,7 +16,7 @@ $dir = "sites";
 ## SECTIONS ##
 switch ($action):
 default:
-    $qry = $sql->selectSingle("SELECT s1.*,s2.`internal` "
+    $qry = $sql->fetch("SELECT s1.*,s2.`internal` "
                             . "FROM `{prefix_sites}` AS `s1` "
                             . "LEFT JOIN `{prefix_navi}` AS `s2` "
                             . "ON s1.`id` = s2.`editor` "

@@ -18,7 +18,7 @@ if(defined('_News')) {
     //Sticky News
     $qry = $sql->select("SELECT * FROM `{prefix_news}` WHERE `sticky` >= ? AND `datum` <= ? AND "
             . "`public` = 1 ".(permission("intnews") ? "" : "AND `intern` = 0")." ".$n_kat." "
-            . "ORDER BY `datum` DESC LIMIT ".(($page - 1)*settings('m_news')).",".settings('m_news').";",
+            . "ORDER BY `datum` DESC LIMIT ".(($page - 1)*settings::get('m_news')).",".settings::get('m_news').";",
             array(($time=time()),$time));
 
     $show_sticky = '';
@@ -71,7 +71,7 @@ if(defined('_News')) {
             }
 
             $intern = $get['intern'] ? _votes_intern : "";
-            $newsimage = '../inc/images/newskat/'.re($sql->selectSingle("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']),'katimg'));
+            $newsimage = '../inc/images/newskat/'.re($sql->fetch("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']),'katimg'));
             foreach($picformat as $tmpendung) {
                 if(file_exists(basePath."/inc/images/uploads/news/".$get['id'].".".$tmpendung)) {
                     $newsimage = '../inc/images/uploads/news/'.$get['id'].'.'.$tmpendung;
@@ -104,7 +104,7 @@ if(defined('_News')) {
     //News
     $qry = $sql->select("SELECT * FROM `{prefix_news}` WHERE `sticky` < ? AND `datum` <= ? "
             . "AND `public` = 1 ".(permission("intnews") ? "" : "AND `intern` = 0")." ".$n_kat." "
-            . "ORDER BY `datum` DESC LIMIT ".($page - 1)*settings('m_news').",".settings('m_news').";",
+            . "ORDER BY `datum` DESC LIMIT ".($page - 1)*settings::get('m_news').",".settings::get('m_news').";",
             array(($time=time()),$time));
     if($sql->rowCount()) {
         foreach($qry as $get) {
@@ -154,7 +154,7 @@ if(defined('_News')) {
             }
 
             $intern = $get['intern'] ? _votes_intern : "";
-            $newsimage = '../inc/images/newskat/'.re($sql->selectSingle("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']),'katimg'));
+            $newsimage = '../inc/images/newskat/'.re($sql->fetch("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']),'katimg'));
             foreach($picformat as $tmpendung) {
                 if(file_exists(basePath."/inc/images/uploads/news/".$get['id'].".".$tmpendung)) {
                     $newsimage = '../inc/images/uploads/news/'.$get['id'].'.'.$tmpendung;
@@ -195,7 +195,7 @@ if(defined('_News')) {
 
     $index = show($dir."/news", array("show" => $show,
                                       "show_sticky" => $show_sticky,
-                                      "nav" => nav(cnt('{prefix_news}',$navWhere),settings('m_news'),"?kat=".$navKat),
+                                      "nav" => nav(cnt('{prefix_news}',$navWhere),settings::get('m_news'),"?kat=".$navKat),
                                       "kategorien" => $kategorien,
                                       "choose" => _news_kat_choose,
                                       "archiv" => _news_archiv));

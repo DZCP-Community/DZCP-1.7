@@ -59,8 +59,8 @@ if(_adminMenu != 'true') exit;
           } else {
         if($_POST['to'] == "reg")
         {
-                  $message = show(bbcode_email(settings('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
-                  $subject = re(settings('eml_nletter_subj'));
+                  $message = show(bbcode_email(settings::get('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
+                  $subject = re(settings::get('eml_nletter_subj'));
 
           $qry = db("SELECT email FROM ".$db['users']."
                      WHERE nletter = 1");
@@ -76,8 +76,8 @@ if(_adminMenu != 'true') exit;
               $show = info(_msg_reg_answer_done, "?admin=nletter");
 
         } elseif($_POST['to'] == "member") {
-          $message = show(bbcode_email(settings('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
-                  $subject = re(settings('eml_nletter_subj'));
+          $message = show(bbcode_email(settings::get('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
+                  $subject = re(settings::get('eml_nletter_subj'));
 
           $qry = db("SELECT email FROM ".$db['users']."
                      WHERE level >= 2");
@@ -92,8 +92,8 @@ if(_adminMenu != 'true') exit;
 
               $show = info(_msg_member_answer_done, "?admin=nletter");
         } else {
-          $message = show(bbcode_email(settings('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
-                  $subject = re(settings('eml_nletter_subj'));
+          $message = show(bbcode_email(settings::get('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
+                  $subject = re(settings::get('eml_nletter_subj'));
 
           $qry = db("SELECT s2.email FROM ".$db['squaduser']." AS s1
                      LEFT JOIN ".$db['users']." AS s2

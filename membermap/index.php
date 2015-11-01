@@ -15,7 +15,7 @@ $where = _side_membermap;
 $dir = "membermap";
 
 ## SECTIONS ##
-$level = settings('gmaps_who');
+$level = settings::get('gmaps_who');
 if(!($level == 0 || $level == 1)) {
     $level = 0;
 }
@@ -58,7 +58,7 @@ foreach($mm_qry as $mm_get) {
 $mm_qry = $sql->select('SELECT user.`id`, user.`nick`, user.`city` '
         . 'FROM `{prefix_users}` as `user` '
         . 'WHERE user.`gmaps_koord` != "" AND user.`level` > ? '
-        . 'ORDER BY user.`gmaps_koord`, user.`id` LIMIT '.($page - 1)*settings('m_membermap').','.settings('m_membermap').';',array($level));
+        . 'ORDER BY user.`gmaps_koord`, user.`id` LIMIT '.($page - 1)*settings::get('m_membermap').','.settings::get('m_membermap').';',array($level));
 foreach($mm_qry as $mm_user_get) {
     $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
     $mm_users .= show($dir.'/membermap_users',array('id' => $mm_user_get['id'],
@@ -70,7 +70,7 @@ foreach($mm_qry as $mm_user_get) {
 }
 
 $mm_infos .= "</tr>'";
-$seiten = nav($entrys,settings('m_membermap'));
+$seiten = nav($entrys,settings::get('m_membermap'));
 $index = show($dir."/membermap", array('mm_coords' => $mm_coords,
                                        'mm_infos' => $mm_infos,
                                        'membermapusers' => $mm_users,

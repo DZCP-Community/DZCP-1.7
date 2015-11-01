@@ -9,7 +9,7 @@ function navi($kat) {
     global $sql,$chkMe,$userid,$designpath;
     
     $navi="";
-    if($k = $sql->selectSingle("SELECT `level` FROM `{prefix_navi_kats}` WHERE `placeholder` = ?;",array(up($kat)))) {
+    if($k = $sql->fetch("SELECT `level` FROM `{prefix_navi_kats}` WHERE `placeholder` = ?;",array(up($kat)))) {
         $permissions = ($kat == 'nav_admin' && admin_perms($userid)) ? "" : ($chkMe >= 2 ? '' : " AND s1.`internal` = 0")." AND ".intval($chkMe)." >= ".intval($k['level']);
         $qry = $sql->select("SELECT s1.* FROM `{prefix_navi}` AS `s1` "
                 . "LEFT JOIN `{prefix_navi_kats}` AS `s2` ON s1.`kat` = s2.`placeholder` "

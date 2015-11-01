@@ -183,6 +183,19 @@ abstract class BasePhpFastCache {
     protected function isPHPModule() {
        return phpFastCache::isPHPModule();
     }
+    
+    public function isMemModule() {
+        switch ($this->cacheType) {
+            case 'apc': return true;
+            case 'memcache': return true;
+            case 'wincache': return true;
+            case 'xcache': return true;
+            case 'predis': return true;
+            case 'redis': return true;
+            case 'ssdb': return true;
+            default: return false;
+        }
+    }
 
     protected function isExistingDriver($class) {
         if(file_exists(dirname(__FILE__)."/drivers/".$class.".php")) {

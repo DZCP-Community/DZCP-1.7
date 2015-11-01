@@ -8,7 +8,7 @@ if(defined('_Away')) {
     if(!$chkMe || $chkMe < 2) {
         $index = error(_error_wrong_permissions, 1);
     } else {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_away}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT * FROM `{prefix_away}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $date1 = show(_dropdown_date, array("day" => dropdown("day",date("d",$get['start'])),
                                             "month" => dropdown("month",date("m",$get['start'])),
                                             "year" => dropdown("year",date("Y",$get['start']))));

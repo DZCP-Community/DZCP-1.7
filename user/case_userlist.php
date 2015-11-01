@@ -8,7 +8,7 @@ if(defined('_UserMenu')) {
     $where = _site_ulist;
     $entrys = cnt('{prefix_users}'," WHERE level != 0");
     $show_sql = isset($_GET['show']) ? $_GET['show'] : '';
-    $limit_sql = ($page - 1)*settings('m_userlist').",".settings('m_userlist');
+    $limit_sql = ($page - 1)*settings::get('m_userlist').",".settings::get('m_userlist');
     $select_sql = "`id`,`nick`,`level`,`email`,`hp`,`steamid`,`hlswid`,`skypename`,"
                 . "`xboxid`,`psnid`,`originid`,`battlenetid`,`bday`,`sex`,`icq`,`status`,"
                 . "`position`,`regdatum`";
@@ -98,7 +98,7 @@ if(defined('_UserMenu')) {
         }
 
         $getstatus = $get['status'] ? _aktiv_icon : _inaktiv_icon;
-        $sql->selectSingle("SELECT `id` FROM `{prefix_squaduser}` WHERE `user` = 1;");
+        $sql->fetch("SELECT `id` FROM `{prefix_squaduser}` WHERE `user` = 1;");
         $status = data("level",$get['id']) > 1 && $sql->rowCount() ? $getstatus : "-";
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
 
@@ -142,7 +142,7 @@ if(defined('_UserMenu')) {
     }
     
     $userliste = (empty($userliste) ? show(_no_entrys_found, array("colspan" => "13")) : $userliste);
-    $seiten = nav($entrys,settings('m_userlist'),"?action=userlist".(!empty($show_sql) ? "&show=".$show_sql : "").orderby_nav());
+    $seiten = nav($entrys,settings::get('m_userlist'),"?action=userlist".(!empty($show_sql) ? "&show=".$show_sql : "").orderby_nav());
     $edel = permission("editusers") ? '<td class="contentMainTop" colspan="2">&nbsp;</td>' : "";
     $search = isset($_GET['search']) && !empty($_GET['search']) ? $_GET['search'] : _nick;
     $index = show($dir."/userliste", array("cnt" => $entrys." "._user,

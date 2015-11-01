@@ -47,11 +47,11 @@ if(defined('_UserMenu')) {
                                 $post = "";
                             } elseif ($count == 1) {
                                 $cnt = 1;
-                                $pagenr = ceil($lp / settings('m_fposts'));
+                                $pagenr = ceil($lp / settings::get('m_fposts'));
                                 $post = _new_post_1;
                             } else {
                                 $cnt = $count;
-                                $pagenr = ceil($lp / settings('m_fposts'));
+                                $pagenr = ceil($lp / settings::get('m_fposts'));
                                 $post = _new_post_2;
                             }
 
@@ -110,7 +110,7 @@ if(defined('_UserMenu')) {
         }
 
         /** Neue Registrierte User anzeigen */
-        $getu = $sql->selectSingle("SELECT `id`,`regdatum` "
+        $getu = $sql->fetch("SELECT `id`,`regdatum` "
                                  . "FROM `{prefix_users}` "
                                  . "ORDER BY `id` DESC;");
         $user = '';
@@ -130,12 +130,12 @@ if(defined('_UserMenu')) {
 
         /** Neue Eintruage im Guastebuch anzeigen */
         $permission_gb = permission("gb");
-        $activ = (!$permission_gb && settings('gb_activ')) ? " WHERE `public` = 1" : ""; $gb = '';
-        $getgb = $sql->selectSingle("SELECT `id`,`datum` "
+        $activ = (!$permission_gb && settings::get('gb_activ')) ? " WHERE `public` = 1" : ""; $gb = '';
+        $getgb = $sql->fetch("SELECT `id`,`datum` "
                                   . "FROM `{prefix_gb}`".$activ." "
                                   . "ORDER BY `id` DESC;");
         if (!empty($getgb) && check_new($getgb['datum'])) {
-            $cntgb = (!$permission_gb && settings('gb_activ')) ? " AND `public` = 1" : "";
+            $cntgb = (!$permission_gb && settings::get('gb_activ')) ? " AND `public` = 1" : "";
             $check = cnt('{prefix_gb}', " WHERE `datum` > ?".$cntgb,'id',array($lastvisit));
             if ($check == 1) {
                 $cnt = 1;
@@ -150,7 +150,7 @@ if(defined('_UserMenu')) {
         }
 
         /** Neue Eintruage im User Guastebuch anzeigen */
-        $getmember = $sql->selectSingle("SELECT `id`,`datum` "
+        $getmember = $sql->fetch("SELECT `id`,`datum` "
                                       . "FROM `{prefix_usergb}` "
                                       . "WHERE `user` = ? "
                                       . "ORDER BY `datum` DESC;",
@@ -171,7 +171,7 @@ if(defined('_UserMenu')) {
         }
 
         /** Neue Private Nachrichten anzeigen */
-        $getmsg = $sql->selectSingle("SELECT `id`,`an`,`datum` "
+        $getmsg = $sql->fetch("SELECT `id`,`an`,`datum` "
                                    . "FROM `{prefix_messages}` "
                                    . "WHERE `an` = ? AND `readed` = 0 AND `see_u` = 0 "
                                    . "ORDER BY `datum` DESC;",
@@ -206,7 +206,7 @@ if(defined('_UserMenu')) {
         $newsc = '';
         if ($sql->rowCount()) {
             foreach($qrycheckn as $getcheckn) {
-                $getnewsc = $sql->selectSingle("SELECT `id`,`news`,`datum` "
+                $getnewsc = $sql->fetch("SELECT `id`,`news`,`datum` "
                                              . "FROM `{prefix_newscomments}` "
                                              . "WHERE `news` = ? "
                                              . "ORDER BY `datum` DESC;",
@@ -239,7 +239,7 @@ if(defined('_UserMenu')) {
         $cwcom = '';
         if ($sql->rowCount()) {
             foreach($qrycheckcw as $getcheckcw) {
-                $getcwc = $sql->selectSingle("SELECT `id`,`cw`,`datum` "
+                $getcwc = $sql->fetch("SELECT `id`,`cw`,`datum` "
                                            . "FROM `{prefix_cw_comments}` "
                                            . "WHERE `cw` = ? "
                                            . "ORDER BY `datum` DESC;",
@@ -263,7 +263,7 @@ if(defined('_UserMenu')) {
         }
 
         /** Neue Votes anzeigen */
-        $getnewv = $sql->selectSingle("SELECT `datum` FROM `{prefix_votes}` "
+        $getnewv = $sql->fetch("SELECT `datum` FROM `{prefix_votes}` "
                                     . "WHERE `forum` = 0 ".(permission("votes") ? '' : 'AND `intern` = 0 ').""
                                     . "ORDER BY `datum` DESC;");
         $newv = '';
@@ -282,7 +282,7 @@ if(defined('_UserMenu')) {
         }
 
         /** Kalender Events anzeigen */
-        $getkal = $sql->selectSingle("SELECT `id`,`datum`,`title` "
+        $getkal = $sql->fetch("SELECT `id`,`datum`,`title` "
                                    . "FROM `{prefix_events}` "
                                    . "WHERE `datum` > ".time()." "
                                    . "ORDER BY `datum`;");
@@ -299,7 +299,7 @@ if(defined('_UserMenu')) {
         }
 
         /** Neue Awards anzeigen */
-        $getaw = $sql->selectSingle("SELECT `id`,`postdate` "
+        $getaw = $sql->fetch("SELECT `id`,`postdate` "
                                   . "FROM `{prefix_awards}` "
                                   . "ORDER BY `id` DESC;");
         $awards = '';
@@ -318,7 +318,7 @@ if(defined('_UserMenu')) {
         }
 
         /** Neue Rankings anzeigen */
-        $getra = $sql->selectSingle("SELECT `id`,`postdate` "
+        $getra = $sql->fetch("SELECT `id`,`postdate` "
                                   . "FROM `{prefix_rankings}` "
                                   . "ORDER BY `id` DESC;");
         $rankings = '';
@@ -367,7 +367,7 @@ if(defined('_UserMenu')) {
         $artc = '';
         if ($sql->rowCount()) {
             foreach($qrychecka as $getchecka) {
-                $getartc = $sql->selectSingle("SELECT `id`,`artikel`,`datum` "
+                $getartc = $sql->fetch("SELECT `id`,`artikel`,`datum` "
                                             . "FROM `{prefix_acomments}` "
                                             . "WHERE `artikel` = ? "
                                             . "ORDER BY `datum` DESC;",
@@ -391,7 +391,7 @@ if(defined('_UserMenu')) {
         }
 
         /** Neue Bilder in der Gallery anzeigen */
-        $getgal = $sql->selectSingle("SELECT `id`,`datum` "
+        $getgal = $sql->fetch("SELECT `id`,`datum` "
                                    . "FROM `{prefix_gallery}` "
                                    . "ORDER BY `id` DESC;");
         $gal = '';
@@ -470,9 +470,9 @@ if(defined('_UserMenu')) {
             foreach($qryft as $getft) {
                 if (fintern($getft['kid'])) {
                     $lp = cnt('{prefix_forumposts}', " WHERE `sid` = ?",'id',array($getft['id']));
-                    $pagenr = ceil($lp / settings('m_fposts'));
+                    $pagenr = ceil($lp / settings::get('m_fposts'));
                     $page = (!$pagenr ? 1 : $pagenr);
-                    $getp = $sql->selectSingle("SELECT `text` "
+                    $getp = $sql->fetch("SELECT `text` "
                                              . "FROM `{prefix_forumposts}` "
                                              . "WHERE `kid` = ? AND `sid` = ? "
                                              . "ORDER BY `date` DESC LIMIT 1;",

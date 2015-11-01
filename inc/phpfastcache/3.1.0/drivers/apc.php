@@ -20,7 +20,7 @@ class phpfastcache_apc extends BasePhpFastCache implements phpfastcache_driver {
         
         //Save Test
         if(!apc_exists('apc_test')) {
-            apc_store('apc_test', 'test', 1);
+            apc_store('apc_test', 'test', 0.2);
             $apc_test = apc_fetch('apc_test');
             if($apc_test == 'test') {
                 apc_delete('apc_test');

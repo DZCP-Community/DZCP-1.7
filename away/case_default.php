@@ -12,7 +12,7 @@ if(defined('_Away')) {
         $show = "";
         $entrys = cnt('{prefix_away}');
         $qry = $sql->select("SELECT * FROM `{prefix_away}` ".orderby_sql(array("userid","start","end"), 'ORDER BY `id` DESC')." "
-                . "LIMIT ".($page - 1)*settings('m_away').",".settings('m_away').";");
+                . "LIMIT ".($page - 1)*settings::get('m_away').",".settings::get('m_away').";");
         foreach($qry as $get) {
             if($get['start'] > time()) 
                 $status = _away_status_new;
@@ -59,7 +59,7 @@ if(defined('_Away')) {
         if(empty($show)) 
             $show = _away_no_entry;
         
-        $nav= nav($entrys,settings('m_away'),"?".(isset($_GET['show']) ? $_GET['show'] : "").orderby_nav());
+        $nav= nav($entrys,settings::get('m_away'),"?".(isset($_GET['show']) ? $_GET['show'] : "").orderby_nav());
         $index = show($dir."/away", array("order_user" => orderby('userid'),
                                           "order_status" => orderby('end'),
                                           "order_from" => orderby('start'),

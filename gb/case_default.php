@@ -48,9 +48,9 @@ if($do == 'addgb') {
 }
 
 if(empty($index)) {
-    $activ = (!permission("gb") && settings('gb_activ')) ? " WHERE `public` = 1" : "";
-    $qry = $sql->select("SELECT * FROM `{prefix_gb}`".$activ." ORDER BY `datum` DESC LIMIT ".($page - 1)*settings('m_gb').",".settings('m_gb').";");
-    $entrys = cnt("{prefix_gb}"); $i = $entrys-($page - 1)*settings('m_gb');
+    $activ = (!permission("gb") && settings::get('gb_activ')) ? " WHERE `public` = 1" : "";
+    $qry = $sql->select("SELECT * FROM `{prefix_gb}`".$activ." ORDER BY `datum` DESC LIMIT ".($page - 1)*settings::get('m_gb').",".settings::get('m_gb').";");
+    $entrys = cnt("{prefix_gb}"); $i = $entrys-($page - 1)*settings::get('m_gb');
     if($sql->rowCount()) { $show = '';
         foreach($qry as $get) {
             $gbhp = !empty($get['hp']) ? show(_hpicon, array("hp" => links(re($get['hp'])))) : "";
@@ -70,7 +70,7 @@ if(empty($index)) {
             }
 
             $public = "";
-            if(permission("gb") && settings('gb_activ')) {
+            if(permission("gb") && settings::get('gb_activ')) {
                 $public = ($get['public'])
                 ? '<a href="?action=admin&amp;do=public&amp;id='.$get['id'].'"><img src="../inc/images/public.gif" alt="" title="nicht ver&ouml;ffentlichen" align="top" style="padding-top:1px"/></a>'
                 : '<a href="?action=admin&amp;do=public&amp;id='.$get['id'].'"><img src="../inc/images/nonpublic.gif" alt="" title="ver&ouml;ffentlichen" align="top" style="padding-top:1px"/></a>';
@@ -139,7 +139,7 @@ if(empty($index)) {
         $show = show(_no_entrys_yet, array("colspan" => "2"));
 
     $entry = "";
-    if(!ipcheck("gb", settings('f_gb'))) {
+    if(!ipcheck("gb", settings::get('f_gb'))) {
         if($userid != 0) {
             $form = show("page/editor_regged", array("nick" => autor()));
         } else {
@@ -158,7 +158,7 @@ if(empty($index)) {
                                          "notification_page" => notification::get($notification_p)));
     }
 
-    $seiten = nav($entrys,settings('m_gb'),"?&amp;action=nav");
+    $seiten = nav($entrys,settings::get('m_gb'),"?&amp;action=nav");
     $index = show($dir."/gb",array("show" => $show, 
                                    "add" => show(_gb_eintragen), 
                                    "entry" => $entry, 

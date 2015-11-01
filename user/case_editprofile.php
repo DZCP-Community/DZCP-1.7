@@ -10,7 +10,7 @@ if(defined('_UserMenu')) {
         $index = error(_error_have_to_be_logged, 1);
     } else {
         if (isset($_GET['gallery']) && $_GET['gallery'] == "delete") {
-            $getgl = $sql->selectSingle("SELECT `pic` FROM `{prefix_usergallery}` WHERE `user` = ? AND `id` = ?;",array($userid,intval($_GET['gid'])));
+            $getgl = $sql->fetch("SELECT `pic` FROM `{prefix_usergallery}` WHERE `user` = ? AND `id` = ?;",array($userid,intval($_GET['gid'])));
             if($sql->rowCount()) {
                 $files = get_files(basePath."/inc/images/uploads/usergallery/",false,true,$picformat);
                 foreach ($files as $file) {
@@ -84,13 +84,13 @@ if(defined('_UserMenu')) {
                                 up(trim($_POST['psnid'])),up(trim($_POST['originid'])),up(trim($_POST['battlenetid'])),up(trim($_POST['steamid'])),up(trim($_POST['skypename'])),
                                 up($_POST['sig']),up($_POST['ich']),up($_POST['visibility_gb']),up($_POST['visibility_gallery']),intval($_POST['startpage']),intval($_POST['visibility_profile']),$userid));
                         
-                        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($userid)));
+                        $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($userid)));
                         dbc_index::setIndex('user_' . $get['id'], $get); //Update Cache
                     }
                 break;
                 case 'delete':
                     if(!rootAdmin($userid)) {
-                        $getdel = $sql->selectSingle("SELECT `id`,`nick`,`email`,`hp` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
+                        $getdel = $sql->fetch("SELECT `id`,`nick`,`email`,`hp` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
                         $sql->update("UPDATE `{prefix_forumthreads}` SET `t_nick` = ?, `t_email` = ?, `t_hp` = ?, `t_reg` = 0, WHERE t_reg = ?;",
                         array($getdel['nick'],$getdel['email'],up(links($getdel['hp'])),$getdel['id']));
                         $sql->update("UPDATE `{prefix_forumposts}` SET `nick` = ?, `email` = ?, `hp` = ?, WHERE `reg` = ?;",
@@ -167,7 +167,7 @@ if(defined('_UserMenu')) {
                     }
                 break;
                 default:
-                    $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
+                    $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
                     switch(isset($_GET['show']) ? $_GET['show'] : '') {
                         case 'gallery':
                             $qrygl = $sql->select("SELECT `id`,`pic`,`beschreibung` FROM `{prefix_usergallery}` WHERE `user` = ? ORDER BY `id` DESC;",array($userid)); 
@@ -245,7 +245,7 @@ if(defined('_UserMenu')) {
                                     }
                                 break;
                                 case 'almgr_edit':
-                                    $get = $sql->selectSingle("SELECT * FROM `{prefix_autologin}` WHERE `id` = ?;", array(intval($_GET['id'])));
+                                    $get = $sql->fetch("SELECT * FROM `{prefix_autologin}` WHERE `id` = ?;", array(intval($_GET['id'])));
                                     if($sql->rowCount()) {
                                         $show = show($dir . "/edit_almgr_from", array("name" => re($get['name']),
                                                                                       "id" => re($get['id']),
@@ -328,7 +328,7 @@ if(defined('_UserMenu')) {
                             } else {
                                 $qrycustom = $sql->select("SELECT `feldname`,`name` FROM `{prefix_profile}` WHERE `kid` = 2 AND `shown` = 1 ORDER BY `id` ASC;"); $custom_clan = "";
                                 foreach($qrycustom as $getcustom) {
-                                    $getcontent = $sql->selectSingle("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
+                                    $getcontent = $sql->fetch("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
                                     $custom_clan .= show(_profil_edit_custom, array("name" => pfields_name($getcustom['name']) . ":", 
                                                                                     "feldname" => $getcustom['feldname'],
                                                                                     "value" => re($getcontent[$getcustom['feldname']])));

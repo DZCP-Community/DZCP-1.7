@@ -15,9 +15,9 @@ if(defined('_Upload')) {
 
                 if(!$tmpname)
                     $index = error(_upload_no_data, 1);
-                elseif($size > settings('upicsize')."000")
+                elseif($size > settings::get('upicsize')."000")
                     $index = error(_upload_wrong_size, 1);
-                elseif(cnt($db['usergallery'], " WHERE user = ".$userid) == settings('m_gallerypics'))
+                elseif(cnt($db['usergallery'], " WHERE user = ".$userid) == settings::get('m_gallerypics'))
                     $index = error(_upload_over_limit, 2);
                 elseif(file_exists(basePath."/inc/images/uploads/usergallery/".$userid."_".$_FILES['file']['name']))
                     $index = error(_upload_file_exists, 1);
@@ -35,9 +35,9 @@ if(defined('_Upload')) {
                 }
             break;
             case 'edit':
-                $get = $sql->selectSingle("SELECT `id`,`user`,`pic`,`beschreibung` FROM `{prefix_usergallery}` WHERE `id` = ?;",array(intval($_GET['gid'])));
+                $get = $sql->fetch("SELECT `id`,`user`,`pic`,`beschreibung` FROM `{prefix_usergallery}` WHERE `id` = ?;",array(intval($_GET['gid'])));
                 if($get['user'] == $userid) {
-                    $infos = show(_upload_usergallery_info, array("userpicsize" => settings('upicsize')));
+                    $infos = show(_upload_usergallery_info, array("userpicsize" => settings::get('upicsize')));
                     $index = show($dir."/usergallery_edit", array("showpic" => img_size("inc/images/uploads/usergallery/".$get['user']."_".$get['pic']),
                                                                   "id" => $get['id'],
                                                                   "showbeschreibung" => re($get['beschreibung']),
@@ -56,7 +56,7 @@ if(defined('_Upload')) {
                 $endung = explode(".", $_FILES['file']['name']);
                 $endung = strtolower($endung[count($endung)-1]);
 
-                $get = $sql->selectSingle("SELECT `pic` FROM `{prefix_usergallery}` WHERE `id` = ?;",array(intval($_POST['id']))); $pic = '';
+                $get = $sql->fetch("SELECT `pic` FROM `{prefix_usergallery}` WHERE `id` = ?;",array(intval($_POST['id']))); $pic = '';
                 if(!empty($_FILES['file']['size'])) {
                     if(file_exists(basePath."/inc/images/uploads/usergallery/".$userid."_".$get['pic']))
                         @unlink(basePath."/inc/images/uploads/usergallery/".$userid."_".$get['pic']);
@@ -80,7 +80,7 @@ if(defined('_Upload')) {
                 }
             break;
             default:
-                $infos = show(_upload_usergallery_info, array("userpicsize" => settings('upicsize')));
+                $infos = show(_upload_usergallery_info, array("userpicsize" => settings::get('upicsize')));
                 $index = show($dir."/usergallery", array("infos" => $infos));
             break;
         }

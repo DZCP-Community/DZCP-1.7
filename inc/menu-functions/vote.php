@@ -8,7 +8,7 @@
 function vote($ajax = false) {
     global $sql,$chkMe;
     
-    $get = $sql->selectSingle("SELECT `id`,`closed`,`titel`,`intern` FROM `{prefix_votes}` WHERE `menu` = 1 AND `forum` = 0;"); $vote = '';
+    $get = $sql->fetch("SELECT `id`,`closed`,`titel`,`intern` FROM `{prefix_votes}` WHERE `menu` = 1 AND `forum` = 0;"); $vote = '';
     if($sql->rowCount()) {
         if(!$get['intern'] || $chkMe >= 1) {
             $qryv = $sql->select("SELECT `id`,`stimmen`,`sel` FROM `{prefix_vote_results}` WHERE `vid` = ? ORDER BY `what`;",array($get['id']));

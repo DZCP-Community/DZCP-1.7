@@ -6,7 +6,7 @@
 
 if(defined('_UserMenu')) {
     $where = _user_profile_of.'autor_'.$_GET['id'];
-    $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($_GET['id'])));
+    $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($_GET['id'])));
     if (!$sql->rowCount()) {
         $index = error(_user_dont_exist, 1);
     } else {
@@ -68,7 +68,7 @@ if(defined('_UserMenu')) {
                                         . "ORDER BY id ASC;");
                 $custom_clan = '';
                 foreach($qrycustom as $getcustom) {
-                    $getcontent = $sql->selectSingle("SELECT `".$getcustom['feldname']."` "
+                    $getcontent = $sql->fetch("SELECT `".$getcustom['feldname']."` "
                                                    . "FROM `{prefix_users}` "
                                                    . "WHERE `id` = ? "
                                                    . "LIMIT 1;", 
@@ -103,11 +103,11 @@ if(defined('_UserMenu')) {
                                     . "WHERE `user` = ? "
                                     . "ORDER BY `id` DESC;",
                                 array($get['id']));
-                $qryperm = $sql->selectSingle("SELECT `id`,`perm_gallery` "
+                $qryperm = $sql->fetch("SELECT `id`,`perm_gallery` "
                                             . "FROM `{prefix_users}` "
                                             . "WHERE `id` = ?;", 
                                 array($get['id']));
-                $qryuser = $sql->selectSingle("SELECT `level` "
+                $qryuser = $sql->fetch("SELECT `level` "
                                             . "FROM `{prefix_users}` "
                                             . "WHERE `id` = ?;", 
                                 array($userid)); 
@@ -134,10 +134,10 @@ if(defined('_UserMenu')) {
                 $qrygb = $sql->select("SELECT * FROM `{prefix_usergb}` "
                                     . "WHERE `user` = ? "
                                     . "ORDER BY `datum` DESC "
-                                    . "LIMIT ".($page - 1) * settings('m_usergb').",".settings('m_usergb').";",array($get['id']));
+                                    . "LIMIT ".($page - 1) * settings::get('m_usergb').",".settings::get('m_usergb').";",array($get['id']));
 
                 $entrys = cnt('{prefix_usergb}', " WHERE `user` = ".$get['id']);
-                $i = $entrys - ($page - 1) * settings('m_usergb');
+                $i = $entrys - ($page - 1) * settings::get('m_usergb');
 
                 $membergb = '';
                 foreach($qrygb as $getgb) {
@@ -195,7 +195,7 @@ if(defined('_UserMenu')) {
                 }
 
                 $add = "";
-                if (!ipcheck("mgbid(" . $_GET['id'] . ")", settings('f_membergb'))) {
+                if (!ipcheck("mgbid(" . $_GET['id'] . ")", settings::get('f_membergb'))) {
                     if ($userid >= 1) {
                         $form = show("page/editor_regged", array("nick" => autor($userid),
                                                                  "von" => _autor));
@@ -215,8 +215,8 @@ if(defined('_UserMenu')) {
                                                             "error" => ""));
                 }
                 
-                $seiten = nav($entrys, settings('m_usergb'), "?action=user&amp;id=" . $_GET['id'] . "&show=gb");
-                $qryperm = $sql->selectSingle("SELECT `perm_gb` FROM `{prefix_users}` WHERE id = ?;", array(intval($_GET['id'])));
+                $seiten = nav($entrys, settings::get('m_usergb'), "?action=user&amp;id=" . $_GET['id'] . "&show=gb");
+                $qryperm = $sql->fetch("SELECT `perm_gb` FROM `{prefix_users}` WHERE id = ?;", array(intval($_GET['id'])));
                 $add = $qryperm['perm_gb'] != 1 ? "" : $add;
                 $show = show($dir . "/profil_gb", array("gbhead" => _membergb,
                                                         "show" => $membergb,
@@ -316,7 +316,7 @@ if(defined('_UserMenu')) {
                     }
                 break;
                 case 'edit':
-                    $get = $sql->selectSingle("SELECT * FROM `{prefix_usergb}` "
+                    $get = $sql->fetch("SELECT * FROM `{prefix_usergb}` "
                                             . "WHERE `id` = ?;", array(intval($_GET['gbid'])));
 
                     if ($get['reg'] == $userid || permission('editusers')) {

@@ -11,10 +11,10 @@ $allposts = cnt($db['f_posts']);
 $pperd = 0; $ppert = 0; $topposter = '-';
 if($allthreads > 0 && $allposts >= 0) {
     $ppert = round($allposts/$allthreads,2);
-    $get = $sql->selectSingle("SELECT `id`,`forumposts` FROM `{prefix_userstats}` ORDER BY `forumposts` DESC;");
+    $get = $sql->fetch("SELECT `id`,`forumposts` FROM `{prefix_userstats}` ORDER BY `forumposts` DESC;");
     $topposter = autor($get['id'])." (".$get['forumposts']." Posts)";
 
-    $get = $sql->selectSingle("SELECT `t_date` FROM `{prefix_forumthreads}` ORDER BY `t_date` ASC;");
+    $get = $sql->fetch("SELECT `t_date` FROM `{prefix_forumthreads}` ORDER BY `t_date` ASC;");
     $time = time()-$get['t_date'];
     $days = @round($time/86400);
 

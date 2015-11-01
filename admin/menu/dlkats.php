@@ -9,7 +9,7 @@ $where = $where.': '._admin_dlkat;
 
 switch ($do) {
     case 'edit':
-        $get = $sql->selectSingle("SELECT `name` FROM `{prefix_download_kat}` WHERE `id` = ?;",
+        $get = $sql->fetch("SELECT `name` FROM `{prefix_download_kat}` WHERE `id` = ?;",
                 array(intval($_GET['id'])));
         $show = show($dir."/dlkats_form", array("newhead" => _dl_edit_head,
                                                 "do" => "editkat&amp;id=".$_GET['id']."",

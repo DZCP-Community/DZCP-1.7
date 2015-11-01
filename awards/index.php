@@ -42,10 +42,10 @@ switch ($action):
                                . "LEFT JOIN `{prefix_squads}` AS `s2` "
                                . "ON s1.`squad` = s2.`id` "
                                . "WHERE s1.`squad` = ? "
-                               . "ORDER BY s1.`date` DESC LIMIT ".settings('m_awards').";",array($get['id']));
+                               . "ORDER BY s1.`date` DESC LIMIT ".settings::get('m_awards').";",array($get['id']));
 
             $entrys = cnt('{prefix_awards}', " WHERE `squad` = ?",'id',array($get['id']));
-            $i = $entrys-($page - 1)*settings('m_awards'); $awards = "";
+            $i = $entrys-($page - 1)*settings::get('m_awards'); $awards = "";
             foreach($qrym as $getm) {
                 $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
                 if($getm['place'] == "1")
@@ -66,7 +66,7 @@ switch ($action):
             }
 
             $show_all = "";
-            if ($entrys > settings('m_awards')) {
+            if ($entrys > settings::get('m_awards')) {
                 $show_all = show(_list_all_link, array("id" => $get['id']));
             }
             $showawards = show($dir."/awards", array("awards" => $awards, "show_all" => $show_all));
@@ -153,10 +153,10 @@ switch ($action):
                                . "LEFT JOIN `{prefix_squads}` AS `s2` "
                                . "ON s1.`squad` = s2.`id` "
                                . "WHERE s1.`squad` = ? "
-                               . "ORDER BY s1.`date` DESC LIMIT ".($page - 1)*settings('m_awards').",".settings('m_awards').";",array($get['id']));
+                               . "ORDER BY s1.`date` DESC LIMIT ".($page - 1)*settings::get('m_awards').",".settings::get('m_awards').";",array($get['id']));
 
             $entrys = cnt('{prefix_awards}', "WHERE `squad` = ?","id",array($get['id']));
-            $i = $entrys-($page - 1)*settings('m_awards'); $awards = "";
+            $i = $entrys-($page - 1)*settings::get('m_awards'); $awards = "";
             foreach($qrym as $getm) {
                 if ($getm['place'] == 1) {
                     $replace = _awards_erster_img;
@@ -178,7 +178,7 @@ switch ($action):
 
             }
 
-            $nav = nav($entrys,settings('m_awards'),"?action=showall&amp;id=".$get['id']);
+            $nav = nav($entrys,settings::get('m_awards'),"?action=showall&amp;id=".$get['id']);
             $showawards = show($dir."/awards_show_all", array("squad" => _awards_head_squad,
                                                               "date" => _awards_head_date,
                                                               "place" => _awards_head_place,

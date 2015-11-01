@@ -6,7 +6,7 @@
 
 if (!defined('_Stats')) exit();
 
-$get = $sql->selectSingle("SELECT `email`,`reg`,`nick`,`datum` FROM `{prefix_gb}` ORDER BY `datum` ASC LIMIT 1;");
+$get = $sql->fetch("SELECT `email`,`reg`,`nick`,`datum` FROM `{prefix_gb}` ORDER BY `datum` ASC LIMIT 1;");
 $first = '-';
 if($sql->rowCount()) {
     if($get['reg']) 
@@ -15,7 +15,7 @@ if($sql->rowCount()) {
         $first = date("d.m.Y H:i", $get['datum'])."h "._from." ".autor($get['reg'],'',re($get['nick']),re($get['email']));
 }
 
-$get = $sql->selectSingle("SELECT `email`,`reg`,`nick`,`datum` FROM `{prefix_gb}` ORDER BY `datum` DESC LIMIT 1;");
+$get = $sql->fetch("SELECT `email`,`reg`,`nick`,`datum` FROM `{prefix_gb}` ORDER BY `datum` DESC LIMIT 1;");
 $last = '-';
 if($sql->rowCount()) {
     if($get['reg']) 

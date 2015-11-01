@@ -8,7 +8,7 @@
 function gallerie() {
     global $sql,$picformat;
     
-    $get = $sql->selectSingle("SELECT `id`,`kat` FROM `{prefix_gallery}` ".(permission('galleryintern') ? "" : " WHERE `intern` = 0")." ORDER BY RAND();");
+    $get = $sql->fetch("SELECT `id`,`kat` FROM `{prefix_gallery}` ".(permission('galleryintern') ? "" : " WHERE `intern` = 0")." ORDER BY RAND();");
     $files = get_files(basePath.'/gallery/images/',false,true,$picformat,"#^".$get['id']."_(.*)#",array(),'minimize');
     $cnt = count($files);
     $gallery = '';

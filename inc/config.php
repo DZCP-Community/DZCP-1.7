@@ -67,17 +67,11 @@ define('captcha_degrade_audio', false);
 define('captcha_sox_binary_path', 'sox');
 
 define('count_clicks_expires', (48*60*60)); // Wie Lange die IPs fur den Click-Counter gespeichert bleiben.
-
-/*
- * Use SMTP connection with authentication for Mailing
- */
-define('phpmailer_enable', true); //Aktiviert oder Deaktiviert das Senden der E-Mails.
-define('phpmailer_use_smtp', false); //Use SMTP for Mailing
-define('phpmailer_use_auth', true); //Use SMTP authentication
-define('phpmailer_smtp_host', 'localhost'); //Hostname of the mail server
-define('phpmailer_smtp_port', 25); //SMTP port number
-define('phpmailer_smtp_user', ''); //Username to use for SMTP authentication
-define('phpmailer_smtp_password', '');//Password to use for SMTP authentication
+//
+//
+// -> Zeichen fur den Passwort Generator
+// ->                       Alphabet:                       Alphabet klein:               Zahlen:        Sonderzeichen:
+$passwordComponents = array("ABCDEFGHIJKLMNOPQRSTUVWXYZ" , "abcdefghijklmnopqrstuvwxyz" , "0123456789" , "#$@!");
 
 #########################################
 //-> Sessions Settings Start * Expert *
@@ -111,30 +105,28 @@ define('sessions_sql_db', 'test'); //SQL Database
 #########################################
 //-> Cache Settings Start * Expert *
 #########################################
-
 $config_cache = array();
-$config_cache['use_cache'] = true; // verwende einen Cache, um abfragen zwischenzuspeichern
-$config_cache['storage'] = "auto"; // welcher Cache: auto,memcache,files,sqlite,wincache,xcache,predis,redis,ssdb oder apc
+$config_cache['use_cache'] = true; // Verwende einen Cache, um abfragen zwischen speichern
+$config_cache['dbc'] = true; //Verwende database query caching * nur mit memory cache
+
+/* !!! Cache Manual Overwrite !!! */
+$config_cache['storage'] = "auto"; // auto,memcache,files,sqlite,wincache,xcache,predis,redis,ssdb oder apc
 $config_cache['memcache'] = array(array("127.0.0.1",11211,1)); //Adressen fur die memcache server
-// --- Only Cache Version >= 3.0.0 --- //
 $config_cache['redis'] = array("host"  => "127.0.0.1",
                                "port"  =>  "",
                                "password"  =>  "",
                                "database"  =>  "",
                                "timeout"   =>  "");
 $config_cache['ssdb'] = array("host"  => "127.0.0.1",
-                               "port"  =>  8888,
-                               "password"  =>  "",
-                               "timeout"  =>  "");
+                              "port"  =>  8888,
+                              "password"  =>  "",
+                              "timeout"  =>  "");
 
-$config_cache['dbc'] = true; //verwende database query caching * nur mit memory cache
-$config_cache['dbc_auto_memcache'] = true; //automatische memcache verfugbarkeisprufung
+#########################################
+//-> Root Settings Start * RootAdmin *
+#########################################
 
 //-> Legt die UserID des Rootadmins fest
 //-> (dieser darf bestimmte Dinge, den normale Admins nicht duerfen, z.B. andere Admins editieren)
 $rootAdmins = array(1); // Die ID/s der User die Rootadmins sein sollen, bei mehreren mit "," trennen '1,4,2,6' usw.
 #$rootAdmins = array(1,2,4,9); // etc.
-
-// -> Zeichen fur den Passwort Generator
-// ->                       Alphabet:                       Alphabet klein:               Zahlen:        Sonderzeichen:
-$passwordComponents = array("ABCDEFGHIJKLMNOPQRSTUVWXYZ" , "abcdefghijklmnopqrstuvwxyz" , "0123456789" , "#$@!");

@@ -17,7 +17,7 @@ function teamspeak($js = 0) {
         <div style=\"width:100%;padding:10px 0;text-align:center\"><img src=\"../inc/images/ajax_loading.gif\" alt=\"\" /></div>
         <script language=\"javascript\" type=\"text/javascript\">DZCP.initDynLoader('navTeamspeakServer','teamspeak','',true);</script></div>";
     } else {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_teamspeak}` WHERE `show_navi` = 1 LIMIT 1;");
+        $get = $sql->fetch("SELECT * FROM `{prefix_teamspeak}` WHERE `show_navi` = 1 LIMIT 1;");
         if(!$sql->rowCount()) return '<br /><center>'._no_ts.'</center><br />';
 
         if(!empty($get['host_ip_dns']) && !empty($get['server_port']) && !empty($get['query_port'])) {
@@ -35,7 +35,7 @@ function teamspeak($js = 0) {
                 GameQ::setOption('timeout', 6);
                 $results = GameQ::requestData();
                 if(!empty($results) && $results) {
-                    $cache->set('teamspeak_'.$cache_hash, $results, settings('cache_teamspeak'));
+                    $cache->set('teamspeak_'.$cache_hash, $results, settings::get('cache_teamspeak'));
                 }
             }
             else

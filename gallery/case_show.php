@@ -6,7 +6,7 @@
 
 if (!defined('_Gallery')) exit();
 
-$get = $sql->selectSingle("SELECT `intern`,`kat`,`beschreibung` FROM `{prefix_gallery}` WHERE `id` = ?;",array(intval($_GET['id'])));
+$get = $sql->fetch("SELECT `intern`,`kat`,`beschreibung` FROM `{prefix_gallery}` WHERE `id` = ?;",array(intval($_GET['id'])));
 if(!permission('galleryintern') && $get['intern']) {
     $index = error(_error_no_access);
 } else {
@@ -19,7 +19,7 @@ if(!permission('galleryintern') && $get['intern']) {
                 $tr1 = "<tr>";
             }
 
-            if($t == settings('gallery')) {
+            if($t == settings::get('gallery')) {
                 $tr2 = "</tr>";
                 $t = 0;
             }
@@ -34,8 +34,8 @@ if(!permission('galleryintern') && $get['intern']) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/show_gallery", array("img" => gallery_size($file),
                                                       "tr1" => $tr1,
-                                                      "max" => settings('gallery'),
-                                                      "width" => intval(round(100/settings('gallery'))),
+                                                      "max" => settings::get('gallery'),
+                                                      "width" => intval(round(100/settings::get('gallery'))),
                                                       "del" => $del,
                                                       "tr2" => $tr2));
             $t++; $cnt++;
@@ -43,8 +43,8 @@ if(!permission('galleryintern') && $get['intern']) {
     }
 
     $end = '';
-    if(is_float($cnt/settings('gallery'))) {
-        for($e=$t; $e<=settings('gallery'); $e++) {
+    if(is_float($cnt/settings::get('gallery'))) {
+        for($e=$t; $e<=settings::get('gallery'); $e++) {
             $end .= '<td class="contentMainFirst"></td>';
         }
 

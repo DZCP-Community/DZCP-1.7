@@ -6,7 +6,7 @@
 
 if (!defined('_Squads')) exit();
 
-$get = $sql->selectSingle("SELECT `beschreibung`,`id`,`name` FROM `{prefix_squads}` WHERE `id` = ?;",array(intval($_GET['id'])));
+$get = $sql->fetch("SELECT `beschreibung`,`id`,`name` FROM `{prefix_squads}` WHERE `id` = ?;",array(intval($_GET['id'])));
 $qrym = $sql->select("SELECT s1.`user`,s1.`squad`,s2.`id`,s2.`nick`,s2.`icq`,s2.`email`,"
                    . "s2.`hlswid`,s2.`rlname`,s2.`steamid`,s2.`level`,s2.`bday`,s2.`hp`,s3.`posi`,s4.`pid` "
                    . "FROM `{prefix_squaduser}` AS `s1` "

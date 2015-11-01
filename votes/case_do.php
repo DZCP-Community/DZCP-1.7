@@ -9,7 +9,7 @@ if(defined('_Votes')) {
         if(empty($_POST['vote'])) {
             $index = error(_vote_no_answer);
         } else {
-            $get = $sql->selectSingle("SELECT `id`,`closed` FROM `{prefix_votes}` WHERE `id` = ?;",array(intval($_GET['id'])));
+            $get = $sql->fetch("SELECT `id`,`closed`,`intern` FROM `{prefix_votes}` WHERE `id` = ?;",array(intval($_GET['id'])));
             if($get['intern'] && $chkMe >= 1) {
                 if(!count_clicks('vote',$get['id'])) {
                     $index = error(_error_voted_again,1);
@@ -63,7 +63,7 @@ if(defined('_Votes')) {
         if(empty($_POST['vote'])) {
             $index = error(_vote_no_answer);
         } else {
-            $get = $sql->selectSingle("SELECT `id`,`closed` FROM `{prefix_votes}` WHERE `id` = ?;",array(intval($_GET['id'])));
+            $get = $sql->fetch("SELECT `id`,`closed` FROM `{prefix_votes}` WHERE `id` = ?;",array(intval($_GET['id'])));
             if(!count_clicks('vote',$get['id'])) {
                 $index = error(_error_voted_again,1);
             } else if($get['closed']) {

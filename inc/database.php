@@ -33,7 +33,7 @@ define('pdo_disable_delete_statement', false);
 	$sql->insert();
 	$sql->select();
 	$sql->rows();
-	$sql->selectSingle();
+	$sql->fetch();
 	$sql->delete();
 	$sql->rowCount();
 	$sql->lastInsertId();
@@ -191,7 +191,7 @@ final class database {
         }
     }
 
-    public function selectSingle($qry, array $params = array(), $field = false) {
+    public function fetch($qry, array $params = array(), $field = false) {
         if (($type = $this->getQueryType($qry)) !== "select") {
             DebugConsole::sql_error_Exception("Incorrect Select Query",$qry,$params);
             DebugConsole::insert_error('database::selectSingle','Incorrect Select Query!');
@@ -293,7 +293,7 @@ final class database {
         }
     }
     
-    protected final function rep_prefix($qry){
+    public final function rep_prefix($qry){
         // replace sql prefix
         if(strpos($qry,"{prefix_")!==false) {
             $qry = preg_replace_callback("#\{prefix_(.*?)\}#",function($tb) { 

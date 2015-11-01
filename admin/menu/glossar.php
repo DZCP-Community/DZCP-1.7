@@ -31,7 +31,7 @@ switch ($do) {
         }
     break;
     case 'edit':
-        $get = $sql->selectSingle("SELECT `id`,`word`,`glossar` FROM `{prefix_glossar}` WHERE `id` = ?;",
+        $get = $sql->fetch("SELECT `id`,`word`,`glossar` FROM `{prefix_glossar}` WHERE `id` = ?;",
                 array(intval($_GET['id'])));
         $show = show($dir."/form_glossar", array("head" => _admin_glossar_edit,
                                                  "llink" => re($get['word']),

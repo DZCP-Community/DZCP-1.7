@@ -132,11 +132,11 @@ if(defined('_Forum')) {
             $entrys = cnt($db['f_posts'], " WHERE `sid` = ".$getp['sid']);
 
             if($entrys == "0") $pagenr = "1";
-            else $pagenr = ceil($entrys/settings('m_fposts'));
+            else $pagenr = ceil($entrys/settings::get('m_fposts'));
 
-          $subj = show(re(settings('eml_fabo_pedit_subj')), array("titel" => $title));
+          $subj = show(re(settings::get('eml_fabo_pedit_subj')), array("titel" => $title));
 
-           $message = show(bbcode_email(settings('eml_fabo_pedit')), array("nick" => re($getabo['nick']),
+           $message = show(bbcode_email(settings::get('eml_fabo_pedit')), array("nick" => re($getabo['nick']),
                                                                "postuser" => fabo_autor($userid),
                                                             "topic" => $gettopic['topic'],
                                                             "titel" => $title,
@@ -145,7 +145,7 @@ if(defined('_Forum')) {
                                                             "entrys" => $entrys+1,
                                                             "page" => $pagenr,
                                                             "text" => bbcode($_POST['eintrag']),
-                                                            "clan" => settings('clanname')));
+                                                            "clan" => settings::get('clanname')));
 
           sendMail(re($getabo['email']),$subj,$message);
         }
@@ -153,7 +153,7 @@ if(defined('_Forum')) {
         $entrys = cnt($db['f_posts'], " WHERE `sid` = ".$getp['sid']);
 
         if($entrys == "0") $pagenr = "1";
-        else $pagenr = ceil($entrys/settings('m_fposts'));
+        else $pagenr = ceil($entrys/settings::get('m_fposts'));
 
         $lpost = show(_forum_add_lastpost, array("id" => $entrys+1,
                                                  "tid" => $getp['sid'],
@@ -165,11 +165,11 @@ if(defined('_Forum')) {
       $index = error(_error_wrong_permissions, 1);
     }
   } elseif($do == "add") {
-    if(settings("reg_forum") && !$chkMe)
+    if(settings::get("reg_forum") && !$chkMe)
     {
       $index = error(_error_unregistered,1);
     } else {
-      if(!ipcheck("fid(".$_GET['kid'].")", settings('f_forum')))
+      if(!ipcheck("fid(".$_GET['kid'].")", settings::get('f_forum')))
       {
         $check = db("SELECT s2.id,s1.intern FROM ".$db['f_kats']." AS s1
                      LEFT JOIN ".$db['f_skats']." AS s2
@@ -279,7 +279,7 @@ if(defined('_Forum')) {
                                                              "class" => 'class="commentsRight"',
                                                              "email" => $email,
                                                              "titel" => $titel,
-                                                             "p" => ($page-1*settings('m_fposts')),
+                                                             "p" => ($page-1*settings::get('m_fposts')),
                                                              "ip" => $posted_ip,
                                                              "edited" => $getl['edited'],
                                                              "posts" => $userposts,
@@ -356,7 +356,7 @@ if(defined('_Forum')) {
                                                              "email" => $email,
                                                              "titel" => $titel,
                                                              "ip" => $posted_ip,
-                                                             "p" => ($page-1*settings('m_fposts')),
+                                                             "p" => ($page-1*settings::get('m_fposts')),
                                                              "edited" => $gett['edited'],
                                                              "posts" => $userposts,
                                                              "date" => _posted_by.date("d.m.y H:i", $gett['t_date'])._uhr,
@@ -405,7 +405,7 @@ if(defined('_Forum')) {
                                             "posteintrag" => ""));
         }
       } else {
-        $index = error(show(_error_flood_post, array("sek" => settings('f_forum'))), 1);
+        $index = error(show(_error_flood_post, array("sek" => settings::get('f_forum'))), 1);
       }
     }
   } elseif($do == "addpost") {
@@ -414,7 +414,7 @@ if(defined('_Forum')) {
         {
             $index = error(_id_dont_exist,1);
         } else {
-            if(settings("reg_forum") && !$chkMe)
+            if(settings::get("reg_forum") && !$chkMe)
             {
                 $index = error(_error_unregistered,1);
             } else {
@@ -527,7 +527,7 @@ if(defined('_Forum')) {
                                                                                                                          "class" => $ftxt['class'],
                                                                                                                          "email" => $email,
                                                                                                                          "ip" => $posted_ip,
-                                                                                                                         "p" => ($i+($page-1)*settings('m_fposts')),
+                                                                                                                         "p" => ($i+($page-1)*settings::get('m_fposts')),
                                                                                                                          "edited" => $getl['edited'],
                                                                                                                          "posts" => $userposts,
                                                                                                                          "signatur" => $sig,
@@ -599,7 +599,7 @@ if(defined('_Forum')) {
                                                                                                                          "hp" => $hp,
                                                                                                                          "email" => $email,
                                                                                                                          "edit" => "",
-                                                                                                                         "p" => ($i+($page-1)*settings('m_fposts')),
+                                                                                                                         "p" => ($i+($page-1)*settings::get('m_fposts')),
                                                                                                                          "delete" => "",
                                                                                                                          "edited" => $gett['edited'],
                                                                                                                          "posts" => $userposts,
@@ -647,10 +647,10 @@ if(defined('_Forum')) {
 
                         if($userid >= 1)
                         {
-                            if($userid == $getdp['reg'] && settings('double_post')) $spam = 1;
+                            if($userid == $getdp['reg'] && settings::get('double_post')) $spam = 1;
                             else $spam = 0;
                         } else {
-                            if($_POST['nick'] == $getdp['nick'] && settings('double_post')) $spam = 1;
+                            if($_POST['nick'] == $getdp['nick'] && settings::get('double_post')) $spam = 1;
                             else $spam = 0;
                         }
                     } else {
@@ -662,10 +662,10 @@ if(defined('_Forum')) {
 
                         if($userid >= 1)
                         {
-                            if($userid == $gettdp['t_reg'] && settings('double_post')) $spam = 2;
+                            if($userid == $gettdp['t_reg'] && settings::get('double_post')) $spam = 2;
                             else $spam = 0;
                         } else {
-                            if($_POST['nick'] == $gettdp['t_nick'] && settings('double_post')) $spam = 2;
+                            if($_POST['nick'] == $gettdp['t_nick'] && settings::get('double_post')) $spam = 2;
                             else $spam = 0;
                         }
                     }
@@ -737,11 +737,11 @@ if(defined('_Forum')) {
                             $entrys = cnt($db['f_posts'], " WHERE `sid` = ".intval($_GET['id']));
 
                             if($entrys == "0") $pagenr = "1";
-                            else $pagenr = ceil($entrys/settings('m_fposts'));
+                            else $pagenr = ceil($entrys/settings::get('m_fposts'));
 
-                            $subj = show(settings('eml_fabo_npost_subj'), array("titel" => $title));
+                            $subj = show(settings::get('eml_fabo_npost_subj'), array("titel" => $title));
 
-                            $message = show(bbcode_email(settings('eml_fabo_npost')), array("nick" => re($getabo['nick']),
+                            $message = show(bbcode_email(settings::get('eml_fabo_npost')), array("nick" => re($getabo['nick']),
                                                                             "postuser" => fabo_autor($userid),
                                                                             "topic" => $gettopic['topic'],
                                                                             "titel" => $title,
@@ -750,7 +750,7 @@ if(defined('_Forum')) {
                                                                             "entrys" => $entrys+1,
                                                                             "page" => $pagenr,
                                                                             "text" => bbcode($_POST['eintrag']),
-                                                                            "clan" => settings('clanname')));
+                                                                            "clan" => settings::get('clanname')));
 
                             sendMail(re($getabo['email']),$subj,$message);
                         }
@@ -759,7 +759,7 @@ if(defined('_Forum')) {
                     $entrys = cnt($db['f_posts'], " WHERE `sid` = ".intval($_GET['id']));
 
                     if($entrys == "0") $pagenr = "1";
-                    else $pagenr = ceil($entrys/settings('m_fposts'));
+                    else $pagenr = ceil($entrys/settings::get('m_fposts'));
 
                     $lpost = show(_forum_add_lastpost, array("id" => $entrys+1,
                                                                                                      "tid" => $_GET['id'],
@@ -793,7 +793,7 @@ if(defined('_Forum')) {
                       SET `first` = '1'
                       WHERE kid = '".$get['kid']."'");
       } else {
-        $pagenr = ceil($entrys/settings('m_fposts'));
+        $pagenr = ceil($entrys/settings::get('m_fposts'));
       }
 
       $lpost = show(_forum_add_lastpost, array("id" => $entrys+1,

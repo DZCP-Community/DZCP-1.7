@@ -6,7 +6,7 @@
  * Modified by Godkiller_NT (Hammermaps.de) for DZCP - deV!L`z ClanPortal 1.7.0
  */
 
-class phpfastcache_files extends  BasePhpFastCache implements phpfastcache_driver  {
+class phpfastcache_files extends BasePhpFastCache implements phpfastcache_driver  {
     function checkdriver() {
         if(is_writable($this->getPath())) {
             $this->cacheEnabled = true;
@@ -30,7 +30,7 @@ class phpfastcache_files extends  BasePhpFastCache implements phpfastcache_drive
         
         if(!is_dir(basePath.'/inc/_cache_') || 
                 !file_exists(basePath.'/_cache_')) {
-            @mkdir(basePath.'/_cache_', 0777, true);
+            @mkdir(basePath.'/_cache_', $config['default_chmod'], true);
         }
     }
 

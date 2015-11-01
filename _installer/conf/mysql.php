@@ -247,7 +247,6 @@ function install_mysql($login, $nick, $pwd, $email) {
              `reg_newscomments` int(1) NOT NULL default '1',
              `tmpdir` varchar(100) NOT NULL default 'version1.6',
              `wmodus` int(1) NOT NULL default '0',
-             `persinfo` int(1) NOT NULL default '1',
              `iban` varchar(100) NOT NULL default '',
              `bic` varchar(100) NOT NULL default '',
              `badwords` text NOT NULL,

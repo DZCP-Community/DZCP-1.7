@@ -8,7 +8,7 @@
 function fvote($id, $ajax=false) {
     global $sql;
     
-    $get = $sql->selectSingle("SELECT `id`,`closed`,`titel` FROM `{prefix_votes}` WHERE `id` = ? ".(permission("votes") ? ";" : " AND `intern` = 0;"),array(intval($id)));
+    $get = $sql->fetch("SELECT `id`,`closed`,`titel` FROM `{prefix_votes}` WHERE `id` = ? ".(permission("votes") ? ";" : " AND `intern` = 0;"),array(intval($id)));
     if($sql->rowCount()) {
         $results = ''; $votebutton = '';
         $qryv = $sql->select("SELECT `id`,`stimmen`,`sel` FROM `{prefix_vote_results}` WHERE `vid` = ? ORDER BY `id` ASC;",array($get['id']));
@@ -37,7 +37,7 @@ function fvote($id, $ajax=false) {
             }
         }
 
-        $getf = $sql->selectSingle("SELECT `id`,`kid` FROM `{prefix_forumthreads}` WHERE `vote` = ?;",array($get['id']));
+        $getf = $sql->fetch("SELECT `id`,`kid` FROM `{prefix_forumthreads}` WHERE `vote` = ?;",array($get['id']));
         $vote = show("forum/vote", array("titel" => re($get['titel']),
                                          "vid" => $get['id'],
                                          "fid" => $getf['id'],

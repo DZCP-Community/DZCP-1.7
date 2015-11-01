@@ -11,7 +11,7 @@ if(defined('_Votes')) {
     }
 
     $fvote = '';
-    if(!settings('forum_vote'))
+    if(!settings::get('forum_vote'))
         $fvote = empty($whereIntern) ? ' AND `forum` = 0' : ' AND `forum` = 0';
 
     $qry = $sql->select('SELECT votes.*,sum(votes_result.`stimmen`) as `ges_stimmen` FROM `{prefix_votes}` as votes, `{prefix_vote_results}` as `votes_result`'

@@ -7,7 +7,7 @@
 if (!defined('_GB')) exit();
 switch($do) {
     case 'addcomment':
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT * FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
         if(($chkMe != 'unlogged' && $get['reg'] == userid()) || permission("gb")) {
             if(isset($_GET['save'])) {
                 if(empty($_POST['eintrag'])) {
@@ -46,7 +46,7 @@ switch($do) {
     break;
     case 'public':
         if(permission('gb')) {
-            $get = $sql->selectSingle("SELECT `id`,`public` FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
+            $get = $sql->fetch("SELECT `id`,`public` FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
             $sql->update("UPDATE `{prefix_gb}` SET `public` = ? WHERE `id` = ?;",array(($get['public'] ? 0 : 1),$get['id']));
             header("Location: ../gb/");
         } else {
@@ -54,7 +54,7 @@ switch($do) {
         }
     break;
     case 'delete':
-        $get = $sql->selectSingle("SELECT `reg` FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT `reg` FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
         if($get['reg'] == userid() && checkme() != "unlogged" || permission('gb')) {
             $sql->delete("DELETE FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['id'])));
             $sql->delete("DELETE FROM `{prefix_gbcomments}` WHERE `gbe` = ?;",array(intval($_GET['id'])));
@@ -63,7 +63,7 @@ switch($do) {
             $index = error(_error_edit_post);
     break;
     case 'cdelete':
-        $get = $sql->selectSingle("SELECT `reg` FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT `reg` FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['id'])));
         if($get['reg'] == userid() && checkme() != "unlogged" || permission('gb')) {
             $sql->delete("DELETE FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['id'])));
             $index = info(_comment_deleted, "../gb/");
@@ -71,7 +71,7 @@ switch($do) {
             $index = error(_error_edit_post);
     break;
     case 'cedit':
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_gbcomments}`  WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT * FROM `{prefix_gbcomments}`  WHERE `id` = ?;",array(intval($_GET['id'])));
         if($get['reg'] == userid() && checkme() != "unlogged" || permission('gb')) {
             if($get['reg'] != 0) {
                 $form = show("page/editor_regged", array("nick" => autor($get['reg'])));
@@ -89,7 +89,7 @@ switch($do) {
             $index = error(_error_edit_post);
     break;
     case 'edit':
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_gb}` WHERE `id` = ?;",array($_GET['id']));
+        $get = $sql->fetch("SELECT * FROM `{prefix_gb}` WHERE `id` = ?;",array($_GET['id']));
         if($get['reg'] == userid() && checkme() != "unlogged" || permission('gb')) {
             if($get['reg'] != 0) {
                 $form = show("page/editor_regged", array("nick" => autor($get['reg'])));
@@ -126,7 +126,7 @@ switch($do) {
             $index = error(_error_edit_post);
     break;
     case 'editgbc':
-        $get = $sql->selectSingle("SELECT `reg` FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT `reg` FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['id'])));
         if($get['reg'] == userid() || permission('gb')) {
             $editedby = show(_edited_by, array("autor" => autor(), "time" => date("d.m.Y H:i", time())._uhr));
             $sql->update("UPDATE `{prefix_gbcomments}` SET `nick` = ?, `email` = ?, `hp` = ?, `comment` = ?, `editby` = ? WHERE `id` = ?;",

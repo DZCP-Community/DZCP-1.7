@@ -33,11 +33,11 @@ function feed() {
         $feed .= "\r\n";
         $feed .= '  <link>http://'.$host.'</link>';
         $feed .= "\r\n";
-        $feed .= '  <description>Clannews von '.convert_feed(settings('clanname')).'</description>';
+        $feed .= '  <description>Clannews von '.convert_feed(settings::get('clanname')).'</description>';
         $feed .= "\r\n";
         $feed .= '  <language>de-de</language>';
         $feed .= "\r\n";
-        $feed .= '  <copyright>'.date("Y", time()).' '.convert_feed(settings('clanname')).'</copyright>';
+        $feed .= '  <copyright>'.date("Y", time()).' '.convert_feed(settings::get('clanname')).'</copyright>';
         $feed .= "\r\n";
         fwrite($data, $feed);
         
@@ -76,7 +76,7 @@ function feed() {
     }
 }
 
-if (!view_error_reporting || (feed_enable_on_debug && view_error_reporting)) { //NewsFeed
+if(intval(settings::get('news_feed')) && (!view_error_reporting || (feed_enable_on_debug && view_error_reporting))) { //NewsFeed
     feed();
 }
 

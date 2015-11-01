@@ -6,7 +6,7 @@
 
 if(defined('_Forum')) {
     if($do == "edit") {
-    $get = $sql->selectSingle("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
+    $get = $sql->fetch("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
     if($get['t_reg'] == $userid || permission("forum"))
     {
       if(permission("forum"))
@@ -31,8 +31,8 @@ if(defined('_Forum')) {
                                                     "hphead" => _hp));
       }
 
-        $getv = $sql->selectSingle("SELECT * FROM `{prefix_votes}` WHERE id = '".$get['vote']."'");
-        $fget = $sql->selectSingle("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
+        $getv = $sql->fetch("SELECT * FROM `{prefix_votes}` WHERE id = '".$get['vote']."'");
+        $fget = $sql->fetch("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
                     LEFT JOIN `{prefix_forumsubkats}` AS s2 ON s2.`sid` = s1.id
                     WHERE s2.`id` = '".intval($get['kid'])."'");
 
@@ -138,7 +138,7 @@ if(defined('_Forum')) {
       $index = error(_error_wrong_permissions, 1);
     }
   } elseif($do == "editthread") {
-    $get = $sql->selectSingle("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
+    $get = $sql->fetch("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
 
     if($get['t_reg'] == $userid || permission("forum"))
     {
@@ -183,9 +183,9 @@ if(defined('_Forum')) {
                                                   "addglobal" => _forum_admin_addglobal,
                                                   "global" => $global));
         }
-          $getv = $sql->selectSingle("SELECT * FROM ".$db['votes']." WHERE id = '".$get['vote']."'");
+          $getv = $sql->fetch("SELECT * FROM ".$db['votes']." WHERE id = '".$get['vote']."'");
 
-            $fget = $sql->selectSingle("SELECT s1.intern,s2.id FROM ".$db['f_kats']." AS s1
+            $fget = $sql->fetch("SELECT s1.intern,s2.id FROM ".$db['f_kats']." AS s1
                          LEFT JOIN ".$db['f_skats']." AS s2 ON s2.`sid` = s1.id
                          WHERE s2.`id` = '".intval($_GET['kid'])."'");
 
@@ -250,10 +250,10 @@ if(defined('_Forum')) {
                                                 "vote" => $vote,
                                             "eintraghead" => _eintrag));
       } else {
-        $gett = $sql->selectSingle("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
+        $gett = $sql->fetch("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
           if(!empty($gett['vote']))
       {
-       $getv = $sql->selectSingle("SELECT * FROM `{prefix_vote_results}` WHERE vid = '".$gett['vote']."'");
+       $getv = $sql->fetch("SELECT * FROM `{prefix_vote_results}` WHERE vid = '".$gett['vote']."'");
 
        $vid = $gett['vote'];
 
@@ -291,7 +291,7 @@ if(defined('_Forum')) {
             }
           }
 
-          if(cnt("`{prefix_vote_results}`", " WHERE vid = '".$gett['vote']."' AND what = 'a".$i."'") != 0 && empty($_POST['a'.$i.'']))
+          if(cnt("{prefix_vote_results}", " WHERE vid = '".$gett['vote']."' AND what = 'a".$i."'") != 0 && empty($_POST['a'.$i.'']))
           {
             $sql->delete("DELETE FROM `{prefix_vote_results}`
                        WHERE vid = '".$gett['vote']."'
@@ -406,11 +406,11 @@ if(defined('_Forum')) {
       foreach($checkabo as $getabo) {
         if($userid != $getabo['user'])
         {
-          $gettopic = $sql->selectSingle("SELECT topic FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
+          $gettopic = $sql->fetch("SELECT topic FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
 
-          $subj = show(re(settings('eml_fabo_tedit_subj')), array("titel" => $title));
+          $subj = show(re(settings::get('eml_fabo_tedit_subj')), array("titel" => $title));
 
-           $message = show(bbcode_email(settings('eml_fabo_tedit')), array("nick" => re($getabo['nick']),
+           $message = show(bbcode_email(settings::get('eml_fabo_tedit')), array("nick" => re($getabo['nick']),
                                                                 "postuser" => fabo_autor($userid),
                                                             "topic" => $gettopic['topic'],
                                                             "titel" => $title,
@@ -419,7 +419,7 @@ if(defined('_Forum')) {
                                                             "entrys" => "1",
                                                             "page" => "1",
                                                             "text" => bbcode($_POST['eintrag']),
-                                                            "clan" => settings('clanname')));
+                                                            "clan" => settings::get('clanname')));
 
           sendMail(re($getabo['email']),$subj,$message);
         }
@@ -430,11 +430,11 @@ if(defined('_Forum')) {
       }
     } else $index = error(_error_wrong_permissions, 1);
   } elseif($do == "add") {
-    if(settings("reg_forum") && !$chkMe)
+    if(settings::get("reg_forum") && !$chkMe)
     {
       $index = error(_error_unregistered,1);
     } else {
-      if(!ipcheck("fid(".$_GET['kid'].")", settings('f_forum')))
+      if(!ipcheck("fid(".$_GET['kid'].")", settings::get('f_forum')))
       {
         if(permission("forum"))
         {
@@ -448,7 +448,7 @@ if(defined('_Forum')) {
         }
 
         $internVisible = '';
-        $fget = $sql->selectSingle("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
+        $fget = $sql->fetch("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
                        LEFT JOIN `{prefix_forumsubkats}` AS s2 ON s2.`sid` = s1.id
                        WHERE s2.`id` = '".intval($_GET['kid'])."'");
                 $intern = ''; $intern_kat = ''; $internVisible = '';
@@ -518,14 +518,14 @@ if(defined('_Forum')) {
                                             "vote" => $vote,
                                             "posteintrag" => ""));
       } else {
-        $index = error(show(_error_flood_post, array("sek" => settings('f_forum'))), 1);
+        $index = error(show(_error_flood_post, array("sek" => settings::get('f_forum'))), 1);
       }
     }
   } elseif($do == "addthread") {
       if($sql->rows("SELECT id FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['kid'])."'") == 0) {
           $index = error(_id_dont_exist, 1);
       } else {
-        if(settings("reg_forum") && !$chkMe)
+        if(settings::get("reg_forum") && !$chkMe)
         {
             $index = error(_error_have_to_be_logged, 1);
         } else {
@@ -571,7 +571,7 @@ if(defined('_Forum')) {
                                                                                                             "hphead" => _hp));
                 }
 
-            $fget = $sql->selectSingle("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
+            $fget = $sql->fetch("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
                                                  LEFT JOIN `{prefix_forumsubkats}` AS s2 ON s2.`sid` = s1.id
                                                  WHERE s2.`id` = '".intval($_GET['kid'])."'");
 
@@ -638,7 +638,7 @@ if(defined('_Forum')) {
             } else {
                 if(!empty($_POST['question']))
                 {
-                        $fgetvote = $sql->selectSingle("SELECT s1.intern,s2.id "
+                        $fgetvote = $sql->fetch("SELECT s1.intern,s2.id "
                                 . "FROM `{prefix_forumkats}` AS s1 "
                                 . "LEFT JOIN `{prefix_forumsubkats}` AS s2 "
                                 . "ON s2.`sid` = s1.id "

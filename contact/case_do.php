@@ -78,7 +78,7 @@ switch($_GET['what']) {
             $index = error(_empty_nick, 1);
         else {
             if (intval($_POST['squad']) != 0) {
-                $qrysquads = $sql->selectSingle("SELECT `name` FROM `{prefix_squads}` WHERE `id` = ?;",array(intval($_POST['squad'])));
+                $qrysquads = $sql->fetch("SELECT `name` FROM `{prefix_squads}` WHERE `id` = ?;",array(intval($_POST['squad'])));
             } else {
                 $qrysquads = array('name' => up(_contact_joinus_no_squad_aviable));
             }
@@ -152,7 +152,7 @@ switch($_GET['what']) {
                 $date = $_POST['t'].".".$_POST['m'].".".$_POST['j']."&nbsp;".$_POST['h'].":".$_POST['min']._uhr;
             }
 
-            $get = $sql->selectSingle("SELECT `name` FROM `{prefix_squads}` WHERE `id` = ?;",array(intval($_POST['squad'])));
+            $get = $sql->fetch("SELECT `name` FROM `{prefix_squads}` WHERE `id` = ?;",array(intval($_POST['squad'])));
             $msg = show(_contact_text_fightus, array("icq" => $icq,
                                                      "skype" => $_POST['skype'],
                                                      "steam" => $_POST['steam'],

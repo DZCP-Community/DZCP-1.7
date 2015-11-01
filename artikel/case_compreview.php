@@ -6,7 +6,7 @@
 
 if(defined('_Artikel')) {
     if($do == 'edit') {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_acomments}` WHERE `id` = ?;",array(intval($_GET['cid'])));
+        $get = $sql->fetch("SELECT * FROM `{prefix_acomments}` WHERE `id` = ?;",array(intval($_GET['cid'])));
 
         $get_id = '?';
         $get_userid = $get['reg'];

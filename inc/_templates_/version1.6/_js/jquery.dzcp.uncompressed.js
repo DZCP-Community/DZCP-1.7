@@ -169,6 +169,7 @@ var DZCP = {
         if(!DZCP.jQueryCheck(false)) return false;
         DZCP.DebugLogger('PageDynLoader -> Tag: \'' + tag + '\' / URL: \'' + url + '\'');
         var request = $.ajax({ url: url, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
+        request = DZCP.lzw_decode(request);
         request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); DZCP.initLightbox(); });
     },
     
@@ -586,7 +587,33 @@ var DZCP = {
     
     BooleanToString: function(boolean) {
        return (boolean ? 'true' : 'false');
-    }
+    },
+    
+    lzw_decode: function(s) {
+        var dict = {};
+        var data = (s + "").split("");
+        var currChar = data[0];
+        var oldPhrase = currChar;
+        var out = [currChar];
+        var code = 256;
+        var phrase;
+        for (var i=1; i<data.length; i++) {
+            var currCode = data[i].charCodeAt(0);
+            if (currCode < 256) {
+                phrase = data[i];
+            }
+            else {
+               phrase = dict[currCode] ? dict[currCode] : (oldPhrase + currChar);
+            }
+            out.push(phrase);
+            currChar = phrase.charAt(0);
+            dict[code] = oldPhrase + currChar;
+            code++;
+            oldPhrase = phrase;
+        }
+        
+        return out.join("");
+    }    
 };
 
 // load global events

@@ -10,7 +10,7 @@ $regCheck = false;
 header("Content-type: application/x-www-form-urlencoded;charset=utf-8");
 if(isset($_GET['view']) ? ($_GET['view'] == 'comment' ? true : false) : false) {
     if(isset($_GET['edit']) && !empty($_GET['edit'])) {
-        $get = $sql->selectSingle("SELECT `reg`,`datum` FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['edit'])));
+        $get = $sql->fetch("SELECT `reg`,`datum` FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['edit'])));
         $get_id = (isset($_GET['postid']) ? $_GET['postid'] : '?');
         $get_userid = $get['reg']; $get_date = $get['datum'];
 
@@ -35,7 +35,7 @@ if(isset($_GET['view']) ? ($_GET['view'] == 'comment' ? true : false) : false) {
         $get_nick = autor();
 } else {
     if(isset($_GET['edit']) && !empty($_GET['edit'])) {
-        $get = $sql->selectSingle("SELECT `reg`,`datum` FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['edit'])));
+        $get = $sql->fetch("SELECT `reg`,`datum` FROM `{prefix_gb}` WHERE `id` = ?;",array(intval($_GET['edit'])));
         $get_id = '?';
         $get_userid = $get['reg'];
         $get_date = $get['datum'];

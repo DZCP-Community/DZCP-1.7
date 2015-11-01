@@ -208,7 +208,7 @@ default:
 
             $cntpage = cnt($db['f_posts'], " WHERE sid = ".$get['id']);
             if($cntpage == 0) $pagenr = 1;
-            else $pagenr = ceil($cntpage/settings('m_ftopics'));
+            else $pagenr = ceil($cntpage/settings::get('m_ftopics'));
 
 
             $qrylp = db("SELECT date,nick,reg,email FROM ".$db['f_posts']."
@@ -225,7 +225,7 @@ default:
               $lpdate = "";
             }
 
-            $threadlink = show(_forum_thread_search_link, array("topic" => cut(re($get['topic']),settings('l_forumtopic')),
+            $threadlink = show(_forum_thread_search_link, array("topic" => cut(re($get['topic']),settings::get('l_forumtopic')),
                                                                 "id" => $get['id'],
                                                                 "sticky" => $sticky,
                                                                 "hl" => $_GET['search'],
@@ -237,7 +237,7 @@ default:
 
             $results .= show($dir."/forum_search_results", array("new" => check_new($get['lp']),
                                                                  "topic" => $threadlink,
-                                                                 "subtopic" => cut(re($get['subtopic']),settings('l_forumsubtopic')),
+                                                                 "subtopic" => cut(re($get['subtopic']),settings::get('l_forumsubtopic')),
                                                                  "hits" => $get['hits'],
                                                                  "replys" => cnt($db['f_posts'], " WHERE sid = '".$get['id']."'"),
                                                                  "class" => $class,

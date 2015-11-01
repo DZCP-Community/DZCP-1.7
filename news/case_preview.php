@@ -51,7 +51,7 @@ if(defined('_News')) {
         $sticky = _news_sticky;
     }
 
-    $newsimage = '../inc/images/newskat/'.re($sql->selectSingle("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array(intval($_POST['kat'])),'katimg'));
+    $newsimage = '../inc/images/newskat/'.re($sql->fetch("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array(intval($_POST['kat'])),'katimg'));
     $viewed = show(_news_viewed, array("viewed" => '0'));
     $index = show($dir."/news_show_full", array("titel" => $_POST['titel'],
                                            "kat" => $newsimage,

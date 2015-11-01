@@ -155,7 +155,7 @@ function sql_backup() {
     $sql_backup .= "-- Build: "._release." * "._build."\r\n";
     $sql_backup .= "-- Host: ".$sql->getConfig('db_host','default')."\r\n";
     $sql_backup .= "-- Erstellt am: ".date("d.m.Y")." um ".date("H:i")."\r\n";
-    $sql_backup .= "-- MySQL-Version: ".$sql->selectSingle("SELECT VERSION() as mysql_version",array(),'mysql_version')."\r\n";
+    $sql_backup .= "-- MySQL-Version: ".$sql->fetch("SELECT VERSION() as mysql_version",array(),'mysql_version')."\r\n";
     $sql_backup .= "-- PHP Version: ".phpversion()."\r\n";
     $sql_backup .= "-- -------------------------------------------------------------------\r\n\r\n";
     $sql_backup .= "--\r\n-- Datenbank: `".$sql->getConfig('db','default')."`\r\n--\n\n";

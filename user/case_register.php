@@ -8,7 +8,7 @@ if(defined('_UserMenu')) {
     $where = _site_reg;
     if(!$chkMe) {
         $regcode = "";
-        if(settings("regcode")) {
+        if(settings::get("regcode")) {
             $regcode = show($dir."/register_regcode", array("confirm" => _register_confirm,
                                                             "confirm_add" => _register_confirm_add,));
         }
@@ -34,8 +34,8 @@ if(defined('_UserMenu')) {
 
         $_POST['user'] = trim($_POST['user']); $_POST['nick'] = trim($_POST['nick']);
 
-        if(empty($_POST['user']) || empty($_POST['nick']) || empty($_POST['email']) || ($_POST['pwd'] != $_POST['pwd2']) || (settings("regcode") && !$securimage->check($_POST['secure'])) || $check_user || $check_nick || $check_email) {
-            if (settings("regcode") && !$securimage->check($_POST['secure'])) {
+        if(empty($_POST['user']) || empty($_POST['nick']) || empty($_POST['email']) || ($_POST['pwd'] != $_POST['pwd2']) || (settings::get("regcode") && !$securimage->check($_POST['secure'])) || $check_user || $check_nick || $check_email) {
+            if (settings::get("regcode") && !$securimage->check($_POST['secure'])) {
                 $error = show("errors/errortable", array("error" => _error_invalid_regcode));
             }
 
@@ -71,7 +71,7 @@ if(defined('_UserMenu')) {
                 $error = show("errors/errortable", array("error" => _error_user_exists));
             }
 
-            $regcode = (settings("regcode") ? show($dir."/register_regcode", array()) : '');
+            $regcode = (settings::get("regcode") ? show($dir."/register_regcode", array()) : '');
             $index = show($dir."/register", array("error" => $error,
                                                   "r_name" => $_POST['user'],
                                                   "r_nick" => $_POST['nick'],
@@ -105,8 +105,8 @@ if(defined('_UserMenu')) {
             $sql->insert("INSERT INTO `{prefix_userstats}` SET `user` = ?, `lastvisit` = ".time().";",array($insert_id));
 
             setIpcheck("reg(".$insert_id.")");
-            $message = show(bbcode_email(re(settings('eml_reg'))), array("user" => trim($_POST['user']), "pwd" => $mkpwd));
-            sendMail(trim($_POST['email']),re(settings('eml_reg_subj')),$message);
+            $message = show(bbcode_email(re(settings::get('eml_reg'))), array("user" => trim($_POST['user']), "pwd" => $mkpwd));
+            sendMail(trim($_POST['email']),re(settings::get('eml_reg_subj')),$message);
             $index = info(show($msg, array("email" => $_POST['email'])), "../user/?action=login");
         }
     }

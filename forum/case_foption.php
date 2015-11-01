@@ -5,19 +5,13 @@
  */
 
 if(defined('_Forum')) {
-  if($do == "fabo")
-  {
-    if(isset($_POST['f_abo']))
-    {
-      $f_abo = db("INSERT INTO ".$db['f_abo']."
-                    SET `user` = '".intval($userid)."',
-                        `fid`  = '".intval($_GET['id'])."',
-                        `datum`  = '".time()."'");
-    } else {
-      $f_abo = db("DELETE FROM ".$db['f_abo']."
-                   WHERE user = '".intval($userid)."'
-                   AND fid = '".intval($_GET['id'])."'");
+    if($do == "fabo") {
+        if(isset($_POST['f_abo'])) {
+            $sql->insert("INSERT INTO `{prefix_f_abo}` SET `user` = ?, `fid` = ?, `datum` = ?",array(intval($userid),intval($_GET['id']),time()));
+        } else {
+            $sql->delete("DELETE FROM `{prefix_f_abo}` WHERE `user` = ? AND `fid` = ?",array(intval($userid),intval($_GET['id'])));
+        }
+        
+        $index = info(_forum_fabo_do, "?action=showthread&amp;id=".$_GET['id']."");
     }
-    $index = info(_forum_fabo_do, "?action=showthread&amp;id=".$_GET['id']."");
-  }
 }

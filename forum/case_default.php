@@ -13,13 +13,20 @@ if(defined('_Forum')) {
         foreach($qrys as $gets) {
             if($get['intern'] == 0 || ($get['intern'] == 1 && fintern($gets['id']))) {
                 unset($lpost);
-		$getlt = db("SELECT id,kid,t_date,t_nick,t_email,t_reg,lp,first,topic FROM ".$db['f_threads']." WHERE kid = '".$gets['id']."' ORDER BY lp DESC",false,true);
-		$getlp = db("SELECT s1.kid,s1.id,s1.date,s1.nick,s1.reg,s1.email,s2.kid,s2.id,s2.t_date,s2.lp,s2.first FROM ".$db['f_posts']." AS s1 "
-                . "LEFT JOIN ".$db['f_threads']." AS s2 ON s2.lp = s1.date WHERE s2.kid = '".$gets['id']."' ORDER BY s1.date DESC",false,true);
+		$getlt = $sql->fetch("SELECT `id`,`kid`,`t_date`,`t_nick`,`t_email`,`t_reg`,`lp`,`first`,`topic` "
+                        . "FROM `{prefix_forumthreads}` "
+                        . "WHERE `kid` = ? "
+                        . "ORDER BY `lp` DESC;",
+                        array($gets['id']));
+		$getlp = $sql->fetch("SELECT s1.`kid`,s1.`id`,s1.`date`,s1.`nick`,s1.`reg`,s1.`email`,s2.`kid`,s2.`id`,s2.`t_date`,s2.`lp`,s2.`first` "
+                        . "FROM `{prefix_forumposts}` AS `s1` "
+                        . "LEFT JOIN `{prefix_forumthreads}` AS `s2` "
+                        . "ON s2.`lp` = s1.`date` "
+                        . "WHERE s2.`kid` = ? "
+                        . "ORDER BY s1.`date` DESC;",array($gets['id']));
 
                 $lpost = "-"; $lpdate = "";
-                if(cnt($db['f_threads'], " WHERE kid = '".$gets['id']."'"))
-                {
+                if(cnt('{prefix_forumthreads}', " WHERE `kid` = ?","id",array($gets['id']))) {
                    $lpost = "";
                    if($getlt['first'] == 1) {
                         $lpost .= show(_forum_thread_lpost, array("nick" => _from.' '.autor($getlt['t_reg'], '', $getlt['t_nick'], $getlt['t_email']).' ',
@@ -39,8 +46,8 @@ if(defined('_Forum')) {
                     }
                 }
 
-                $threads = cnt($db['f_threads'], " WHERE kid = '".$gets['id']."'");
-                $posts = cnt($db['f_posts'], " WHERE kid = '".$gets['id']."'");
+                $threads = cnt('{prefix_forumthreads}', " WHERE `kid` = ?","id",array($gets['id']));
+                $posts = cnt('{prefix_forumposts}', " WHERE `kid` = ?","id",array($gets['id']));
                 $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
                 $showt .= show($dir."/kats_show", array("topic" => re($gets['kattopic']),
                                                         "subtopic" => re($gets['subtopic']),
@@ -67,10 +74,9 @@ if(defined('_Forum')) {
     $threads = show(_forum_cnt_threads, array("threads" => cnt($db['f_threads'])));
     $posts = show(_forum_cnt_posts, array("posts" => cnt($db['f_posts'])+cnt($db['f_threads'])));
 
-    $qrytp = db("SELECT id,user,forumposts FROM ".$db['userstats']." ORDER BY forumposts DESC, id LIMIT 5");
-
+    $qrytp = $sql->select("SELECT `id`,`user`,`forumposts` FROM `{prefix_userstats}` ORDER BY `forumposts` DESC LIMIT 5;");
     $show_top = '';
-    while($gettp = _fetch($qrytp)) {
+    foreach($qrytp as $gettp) {
         if($gettp['forumposts'] >= 1) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show_top .= show($dir."/top_posts_show", array("nick" => autor($gettp['user']),
@@ -84,16 +90,11 @@ if(defined('_Forum')) {
                                                "nick" => _nick,
                                                "posts" => _forum_posts));
 
-    $qryo = db("SELECT id FROM ".$db['users']."
-                WHERE whereami = 'Forum'
-                AND time+'".$useronline."'>'".time()."'");
-    
-    if(_rows($qryo)) {
-        $i=0;
-        $check = 1; $nick = '';
-        $cnto = cnt($db['users'], " WHERE time+'".$useronline."'>'".time()."' AND whereami = 'Forum'");
-        while($geto = _fetch($qryo))
-        {
+    $qryo = $sql->select("SELECT `id` FROM `{prefix_users}` WHERE `whereami` = 'Forum' AND (time+".intval($useronline).") > ".time().";");
+    if($sql->rowCount()) {
+        $i=0; $check = 1; $nick = '';
+        $cnto = cnt('{prefix_users}', " WHERE (time+".intval($useronline).") > ".time()." AND `whereami` = 'Forum'");
+        foreach($qryo as $geto) {
             if($i == 5) {
                 $end = "<br />";
                 $i=0;
@@ -115,8 +116,8 @@ if(defined('_Forum')) {
         "total_members" => 0, "newest_member" => "teasttt"));
 
     /* Wer ist online */
-    $qry = db('SELECT `position`,`color` FROM '.$db['pos']); $team_groups = '';
-    while ($get = _fetch($qry)) {
+    $qry = $sql->select('SELECT `position`,`color` FROM `{prefix_positions}`;'); $team_groups = '';
+    foreach($qry as $get) {
         $team_groups .= show(_forum_team_groups, array('color' => re($get['color']), 'group' => re($get['position'])));
     }
 

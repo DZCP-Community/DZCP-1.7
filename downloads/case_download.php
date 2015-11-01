@@ -6,10 +6,10 @@
 
 if (!defined('_Downloads')) exit();
 
-if(settings("reg_dl") && !$chkMe)
+if(settings::get("reg_dl") && !$chkMe)
     $index = error(_error_unregistered);
 else {
-    $get = $sql->selectSingle("SELECT * FROM `{prefix_downloads}` WHERE `id` = ?;",array(intval($_GET['id'])));
+    $get = $sql->fetch("SELECT * FROM `{prefix_downloads}` WHERE `id` = ?;",array(intval($_GET['id'])));
     if($sql->rowCount()) {
         if(!permission('dlintern') && $get['intern']) {
             $index = error(_error_no_access);

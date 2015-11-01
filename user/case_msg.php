@@ -11,7 +11,7 @@ if(defined('_UserMenu')) {
     } else {
         switch ($do) {
             case 'show':
-                $get = $sql->selectSingle("SELECT * FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
+                $get = $sql->fetch("SELECT * FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
                 if($get['von'] == $userid || $get['an'] == $userid) {
                     $sql->update("UPDATE `{prefix_messages}` SET `readed` = 1 WHERE `id` = ?;",array($get['id']));
                     $delete = show(_delete, array("id" => $get['id']));
@@ -41,7 +41,7 @@ if(defined('_UserMenu')) {
                 }
             break;
             case 'sendnewsdone':
-                $get = $sql->selectSingle("SELECT `id` FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
+                $get = $sql->fetch("SELECT `id` FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
                 if($sql->rowCount()) {
                     $sql->update("UPDATE `{prefix_messages}` "
                                . "SET `sendnews` = 3, `sendnewsuser` = ?, `readed`= 1 "
@@ -50,7 +50,7 @@ if(defined('_UserMenu')) {
                 }
             break;
             case 'showsended':
-                $get = $sql->selectSingle("SELECT `von`,`an`,`titel`,`nachricht` "
+                $get = $sql->fetch("SELECT `von`,`an`,`titel`,`nachricht` "
                                         . "FROM `{prefix_messages}` "
                                         . "WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
                 if($get['von'] == $userid || $get['an'] == $userid) {
@@ -65,7 +65,7 @@ if(defined('_UserMenu')) {
                 }
             break;
             case 'answer':
-                $get = $sql->selectSingle("SELECT * FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
+                $get = $sql->fetch("SELECT * FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
                 if($get['von'] == $userid || $get['an'] == $userid) {
                     $titel = (preg_match("#RE:#is",re($get['titel'])) ? re($get['titel']) : "RE: ".re($get['titel']));
                     $index = show($dir."/answer", array("von" => $userid,
@@ -114,7 +114,7 @@ if(defined('_UserMenu')) {
                 if(!empty($_POST)) {
                     foreach ($_POST as $key => $id) {
                         if(strpos($key, 'posteingang_') !== false) {
-                            $get = $sql->selectSingle("SELECT `id`,`see` FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($id)));
+                            $get = $sql->fetch("SELECT `id`,`see` FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($id)));
                             if(!$get['see']) {
                                 $sql->delete("DELETE FROM `{prefix_messages}` WHERE `id` = ?;",array($get['id']));
                             } else {
@@ -128,7 +128,7 @@ if(defined('_UserMenu')) {
                 header("Location: ?action=msg");
             break;
             case 'deletethis':
-                $get = $sql->selectSingle("SELECT `id`,`see` FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
+                $get = $sql->fetch("SELECT `id`,`see` FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
                 if($sql->rowCount()) {
                     if(!$get['see']) {
                         $sql->delete("DELETE FROM `{prefix_messages}` WHERE `id` = ?;",array($get['id']));

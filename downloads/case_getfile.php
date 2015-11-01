@@ -6,10 +6,10 @@
 
 if (!defined('_Downloads')) exit();
 
-if(settings("reg_dl") && !$chkMe)
+if(settings::get("reg_dl") && !$chkMe)
     $index = error(_error_unregistered,1);
 else {
-    $get = $sql->selectSingle("SELECT `url`,`id` FROM `{prefix_downloads}` WHERE `id` = ?;",array(intval($_GET['id'])));
+    $get = $sql->fetch("SELECT `url`,`id` FROM `{prefix_downloads}` WHERE `id` = ?;",array(intval($_GET['id'])));
     $file = preg_replace("#added...#Uis", "", re($get['url']));
     if(preg_match("=added...=Uis",re($get['url'])) != FALSE)
         $dlFile = "files/".$file;

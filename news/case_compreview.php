@@ -6,7 +6,7 @@
 
 if(defined('_News')) {
     if($do == 'edit') {
-        $get = $sql->selectSingle("SELECT `reg`,`datum` FROM `{prefix_newscomments}` WHERE `id` = ?;",array(intval($_GET['cid'])));
+        $get = $sql->fetch("SELECT `reg`,`datum` FROM `{prefix_newscomments}` WHERE `id` = ?;",array(intval($_GET['cid'])));
         $get_id = '?';
         $get_userid = $get['reg'];
         $get_date = $get['datum'];

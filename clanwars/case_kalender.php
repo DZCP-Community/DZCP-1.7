@@ -5,8 +5,8 @@
  */
 
 if(defined('_Clanwars')) {
-    $i = $entrys-($page - 1)*settings('m_clanwars');
-    $entrys = cnt("`{prefix_clanwars}`", " WHERE DATE_FORMAT(FROM_UNIXTIME('".$get['datum']."'), '%d.%m.%Y') = '".date("d.m.Y",intval($_GET['time']))."'");
+    $i = $entrys-($page - 1)*settings::get('m_clanwars');
+    $entrys = cnt("{prefix_clanwars}", " WHERE DATE_FORMAT(FROM_UNIXTIME('".$get['datum']."'), '%d.%m.%Y') = '".date("d.m.Y",intval($_GET['time']))."'");
 
     $qry = $sql->select("SELECT s1.id,s1.datum,s1.clantag,s1.gegner,s1.url,s1.xonx,s1.liga,s1.punkte,s1.gpunkte,s1.maps,s1.serverip,
                     s1.servername,s1.serverpwd,s1.bericht,s1.squad_id,s1.gametype,s1.gcountry,s2.icon,s2.name
@@ -14,14 +14,14 @@ if(defined('_Clanwars')) {
              LEFT JOIN `{prefix_squads}` AS s2 ON s1.squad_id = s2.id
              WHERE DATE_FORMAT(FROM_UNIXTIME(s1.datum), '%d.%m.%Y') = '".date("d.m.Y",intval($_GET['time']))."'
              ORDER BY s1.datum DESC
-             LIMIT ".($page - 1)*settings('m_clanwars').",".settings('m_clanwars')."");
+             LIMIT ".($page - 1)*settings::get('m_clanwars').",".settings::get('m_clanwars')."");
   if(($count_rows=$sql->rowCount())) {
       $show = "";
       
     foreach($qry as $get) {
       $img = squad($get['icon']);
       $flagge = flag($get['gcountry']);
-      $gegner = show(_cw_details_gegner, array("gegner" => re(cut($get['clantag']." - ".$get['gegner'], settings('l_clanwars'))),
+      $gegner = show(_cw_details_gegner, array("gegner" => re(cut($get['clantag']." - ".$get['gegner'], settings::get('l_clanwars'))),
                                                "url" => '?action=details&amp;id='.$get['id']));
 
       $details = show(_cw_show_details, array("id" => $get['id']));
@@ -41,10 +41,10 @@ if(defined('_Clanwars')) {
     
     if($count_rows)
     {
-      $anz_wo_wars = cnt("`{prefix_clanwars}`", " WHERE punkte > gpunkte");
-      $anz_lo_wars = cnt("`{prefix_clanwars}`", " WHERE punkte < gpunkte");
-      $anz_dr_wars = cnt("`{prefix_clanwars}`", " WHERE datum < ".time()." && punkte = gpunkte");
-      $anz_ge_wars = cnt("`{prefix_clanwars}`", "  WHERE datum < ".time()."");
+      $anz_wo_wars = cnt("{prefix_clanwars}", " WHERE punkte > gpunkte");
+      $anz_lo_wars = cnt("{prefix_clanwars}", " WHERE punkte < gpunkte");
+      $anz_dr_wars = cnt("{prefix_clanwars}", " WHERE datum < ".time()." && punkte = gpunkte");
+      $anz_ge_wars = cnt("{prefix_clanwars}", "  WHERE datum < ".time()."");
 
       if(!$_GET['time'])
       {
@@ -61,7 +61,7 @@ if(defined('_Clanwars')) {
       $anz_ges_points = show(_cw_stats_ges_points, array("ges_won" => sum($db['cw'],"","punkte"),
                                                                                   "ges_lost" => sum($db['cw'],"","gpunkte")));
 
-      $anz_squads = cnt("`{prefix_squads}`", " WHERE status = '1'");
+      $anz_squads = cnt("{prefix_squads}", " WHERE status = '1'");
 
       $qry = $sql->select("SELECT game FROM `{prefix_squads}` WHERE status = '1'");
       foreach($qry as $row) {
@@ -113,7 +113,7 @@ if(defined('_Clanwars')) {
       $show = show($dir."/clanwars_no_show", array("clanwars_no_show" => _clanwars_no_show));
     }
 
-    $nav = nav($entrys,settings('m_clanwars'),"?action=nav");
+    $nav = nav($entrys,settings::get('m_clanwars'),"?action=nav");
     $index = show($dir."/clanwars", array("head" => _cw_head_clanwars,
                                                             "game" => _cw_head_game,
                                           "datum" => _cw_head_datum,

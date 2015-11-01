@@ -21,11 +21,12 @@ require_once(basePath.'/inc/steamapi.php');
 require_once(basePath.'/inc/sfs.php');
 require_once(basePath.'/inc/securimage/securimage_color.php');
 require_once(basePath.'/inc/securimage/securimage.php');
+require_once(basePath.'/inc/settings.php');
 
 ## Is AjaxJob ##
 $ajaxJob = (!isset($ajaxJob) ? false : $ajaxJob);
 
-//Cache
+//Cache Config
 $config_cache['default_chmod'] = 0777; 
 $config_cache['htaccess'] = true;
 $config_cache['path'] = basePath."/inc/_cache_";
@@ -49,49 +50,50 @@ if(file_exists(basePath."/_installer/index.php") && !view_error_reporting
     unset($user_check);
 }
 
-$config_cache['securityKey'] = settings('prev',false);
+$config_cache['securityKey'] = settings::get('prev');
+if(empty($config_cache['storage']) || $config_cache['storage'] == 'auto') {
+    $config_cache['storage'] = settings::get('cache_engine');
+    if(settings::get('cache_engine') == 'memcache') {
+        $config_cache['memcache'] = array(array(string::decode(settings::get('memcache_host')),
+            intval(settings::get('memcache_port')),1));
+    }
+}
+
 phpFastCache::setup($config_cache);
 $cache = new phpFastCache();
 phpFastCache::$disabled = !$config_cache['use_cache'];
 $securimage = new Securimage();
 dbc_index::init();
+settings::load();
 
 //-> Automatische Datenbank Optimierung
-if(!$ajaxJob && auto_db_optimize && settings('db_optimize',false) < time() && !$installer && !$updater) {
+if(!$ajaxJob && auto_db_optimize && settings::get('db_optimize') < time() && !$installer && !$updater) {
     @ignore_user_abort(true);
-    $sql->update("UPDATE `{prefix_settings}` SET `db_optimize` = ? WHERE `id` = 1;", array((time()+auto_db_optimize_interval)));
+    settings::set('db_optimize', (time()+auto_db_optimize_interval));
     db_optimize();
     $sql->insert("INSERT INTO `{prefix_ipcheck}` SET `ip` = ?, `user_id` = ?, `what` = 'db_optimize()', `time` = ?;",array('0.0.0.0',intval(userid()),time()));
     @ignore_user_abort(false);
 }
 
-//-> Settingstabelle und Configtabelle auslesen * Use function settings('xxxxxx');
-if(!dbc_index::issetIndex('settings')) {
-    $get_settings = $sql->selectSingle("SELECT * FROM `{prefix_settings}` AS `settings` LEFT JOIN `{prefix_config}` "
-                    . "AS `config` ON settings.`id` = config.`id` WHERE settings.`id` = 1 LIMIT 1;");
-    dbc_index::setIndex('settings', $get_settings, 4);
-    unset($get_settings);
-}
-
 //-> Cookie initialisierung
-cookie::init('dzcp_'.settings('prev'));
+cookie::init('dzcp_'.settings::get('prev'));
 
 //-> SteamAPI
-SteamAPI::set('apikey',re(settings('steam_api_key')));
+SteamAPI::set('apikey',re(settings::get('steam_api_key')));
 
 //-> GameQ
 spl_autoload_register(array('GameQ', 'auto_load'));
 
 //-> Language auslesen
-$language = (cookie::get('language') != false ? (file_exists(basePath.'/inc/lang/languages/'.cookie::get('language').'.php') ? cookie::get('language') : re(settings('language'))) : re(settings('language')));
+$language = (cookie::get('language') != false ? (file_exists(basePath.'/inc/lang/languages/'.cookie::get('language').'.php') ? cookie::get('language') : re(settings::get('language'))) : re(settings::get('language')));
 
 //-> einzelne Definitionen
 $isSpider = isSpider();
 $subfolder = basename(dirname(dirname(GetServerVars('PHP_SELF')).'../'));
 $httphost = GetServerVars('HTTP_HOST').(empty($subfolder) ? '' : '/'.$subfolder);
 $domain = str_replace('www.','',$httphost);
-$pagetitle = re(settings('pagetitel'));
-$sdir = re(settings('tmpdir'));
+$pagetitle = re(settings::get('pagetitel'));
+$sdir = re(settings::get('tmpdir'));
 $useronline = 1800;
 $reload = 3600 * 24;
 $picformat = array("jpg", "gif", "png");
@@ -234,11 +236,11 @@ function dzcp_session_destroy() {
 //-> Auslesen der Cookies und automatisch anmelden
 if(cookie::get('id') != false && cookie::get('pkey') != false && empty($_SESSION['id']) && !checkme()) {
     //-> Permanent Key aus der Datenbank suchen
-    $get_almgr = $sql->selectSingle("SELECT `id`,`uid`,`update`,`expires` FROM `{prefix_autologin}` WHERE `pkey` = ? AND `uid` = ?;",array(cookie::get('pkey'), cookie::get('id')));
+    $get_almgr = $sql->fetch("SELECT `id`,`uid`,`update`,`expires` FROM `{prefix_autologin}` WHERE `pkey` = ? AND `uid` = ?;",array(cookie::get('pkey'), cookie::get('id')));
     if($sql->rowCount()) {
         if((!$get_almgr['update'] || (time() < ($get_almgr['update'] + $get_almgr['expires'])))) {
             //-> User aus der Datenbank suchen
-            $get = $sql->selectSingle("SELECT `id`,`user`,`nick`,`pwd`,`email`,`level`,`time` FROM `{prefix_users}` WHERE `id` = ? AND `level` != 0;",array(cookie::get('id')));
+            $get = $sql->fetch("SELECT `id`,`user`,`nick`,`pwd`,`email`,`level`,`time` FROM `{prefix_users}` WHERE `id` = ? AND `level` != 0;",array(cookie::get('id')));
             if($sql->rowCount()) {
                 //-> Generiere neuen permanent-key
                 $permanent_key = md5(mkpwd(8));
@@ -510,7 +512,7 @@ function userid() {
     global $sql;
     if (empty($_SESSION['id']) || empty($_SESSION['pwd'])) { return 0; }
     if(!dbc_index::issetIndex('user_'.intval($_SESSION['id']))) {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ? AND `pwd` = ?;",array(intval($_SESSION['id']),$_SESSION['pwd']));
+        $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ? AND `pwd` = ?;",array(intval($_SESSION['id']),$_SESSION['pwd']));
         if (!$sql->rowCount()) { return 0; }
         dbc_index::setIndex('user_'.$get['id'], $get, 2);
         return $get['id'];
@@ -580,44 +582,6 @@ function languages() {
 //-> User Hits und Lastvisit aktualisieren
 if($userid >= 1 && $ajaxJob != true && isset($_SESSION['lastvisit'])) {
     $sql->update("UPDATE `{prefix_userstats}` SET `hits` = (hits+1), `lastvisit` = ? WHERE `user` = ?;",array(intval($_SESSION['lastvisit']),intval($userid)));
-}
-
-/**
- * DZCP V1.7.0
- * Werte aus der Settings Tabelle auslesen
- *
- * @param string $what
- * @param boolean $use_dbc
- * @return string
- */
-function settings($what,$use_dbc=true) {
-    global $sql;
-    if(is_array($what)) {
-        if ($use_dbc) {
-            $dbd = dbc_index::getIndex('settings');
-        } else {
-            $dbd = $sql->selectSingle("SELECT * FROM `{prefix_settings}` AS `settings` LEFT JOIN `{prefix_config}` "
-                    . "AS `config` ON settings.`id` = config.`id` WHERE settings.`id` = 1 LIMIT 1;");
-        }
-
-        $return = array();
-        foreach ($dbd as $key => $var) {
-            if (!in_array($key, $what)) {
-                continue;
-            }
-
-            $return[$key] = $var;
-        }
-
-        return $return;
-    } else {
-        if ($use_dbc) {
-            return dbc_index::getIndexKey('settings', $what);
-        }
-
-        return $sql->selectSingle("SELECT `".$what."` FROM `{prefix_settings}` AS `settings` LEFT JOIN `{prefix_config}` "
-                    . "AS `config` ON settings.`id` = config.`id` WHERE settings.`id` = 1 LIMIT 1;",array(),$what);
-    }
 }
 
 //-> Prueft ob der User ein Rootadmin ist
@@ -827,7 +791,7 @@ function parse_ts3($string='') {
 
 //-> Badword Filter
 function BadwordFilter($txt) {
-    $words = explode(",",trim(re(settings('badwords'))));
+    $words = explode(",",trim(re(settings::get('badwords'))));
     foreach($words as $word)
     { $txt = preg_replace("#".$word."#i", str_repeat("*", strlen($word)), $txt); }
     return $txt;
@@ -917,7 +881,7 @@ function make_clickable($ret) {
 //Diverse BB-Codefunktionen
 function bbcode($txt, $tinymce=false, $no_vid=false, $ts=false, $nolink=false) {
     $txt = string::decode($txt);
-    if (!$no_vid && settings('urls_linked') && !$nolink) {
+    if (!$no_vid && settings::get('urls_linked') && !$nolink) {
         $txt = make_clickable($txt);
     }
 
@@ -1392,7 +1356,7 @@ function GetServerVars($var) {
 //-> Single & Multi Version
 function cnt($db, $where = "", $what = "id", $sql_std=array()) {
     global $sql;
-    $cnt = $sql->selectSingle("SELECT COUNT(".$what.") AS `cnt` FROM `".$db."` ".$where.";",$sql_std,'cnt');
+    $cnt = $sql->fetch("SELECT COUNT(".$what.") AS `cnt` FROM `".$db."` ".$where.";",$sql_std,'cnt');
     if($sql->rowCount()) {
         return $cnt;
     }
@@ -1406,7 +1370,7 @@ function cnt_multi($db, $where = "", $whats = array('id'), $sql_std=array()) {
         $cnt_sql .= "COUNT(".$what.") AS `cnt_".$what."`,";
     }
     $cnt_sql = substr($cnt_sql, 0, -1);
-    $cnt = $sql->selectSingle("SELECT ".$cnt_sql." FROM `".$db."` ".$where.";",$sql_std);
+    $cnt = $sql->fetch("SELECT ".$cnt_sql." FROM `".$db."` ".$where.";",$sql_std);
     if ($sql->rowCount()) {
         return $cnt;
     }
@@ -1418,7 +1382,7 @@ function cnt_multi($db, $where = "", $whats = array('id'), $sql_std=array()) {
 //-> Single & Multi Version
 function sum($db, $where = "", $what = "id", $sql_std=array()) {
     global $sql;
-    $sum = $sql->selectSingle("SELECT SUM(".$what.") AS `sum` FROM `".$db."` ".$where.";",$sql_std,'sum');
+    $sum = $sql->fetch("SELECT SUM(".$what.") AS `sum` FROM `".$db."` ".$where.";",$sql_std,'sum');
     if($sql->rowCount()) {
         return $sum;
     }
@@ -1432,7 +1396,7 @@ function sum_multi($db, $where = "", $whats = array('id'), $sql_std=array()) {
         $sum_sql .= "SUM(".$what.") AS `sum_".$what."`,";
     }
     $sum_sql = substr($sum_sql, 0, -1);
-    $sum = $sql->selectSingle("SELECT ".$sum_sql." FROM `".$db."` ".$where.";",$sql_std);
+    $sum = $sql->fetch("SELECT ".$sum_sql." FROM `".$db."` ".$where.";",$sql_std);
     if ($sql->rowCount()) {
         return $sum;
     }
@@ -1482,14 +1446,14 @@ function orderby_nav() {
 function updateCounter() {
     global $sql,$reload,$userip;
     $datum = time();
-    $get_agent = $sql->selectSingle("SELECT `id`,`agent`,`bot` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array(up($userip)));
+    $get_agent = $sql->fetch("SELECT `id`,`agent`,`bot` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array(up($userip)));
     if($sql->rowCount()) {
         if(!$get_agent['bot'] && !isSpider(re($get_agent['agent']))) {
             if($sql->rows("SELECT id FROM `{prefix_counter_ips}` WHERE datum+? <= ? OR FROM_UNIXTIME(datum,'%d.%m.%Y') != ?;",array($reload,time(),date("d.m.Y")))) {
                 $sql->delete("DELETE FROM `{prefix_counter_ips}` WHERE datum+? <= ? OR FROM_UNIXTIME(datum,'%d.%m.%Y') != ?;",array($reload,time(),date("d.m.Y")));
             }
 
-            $get = $sql->selectSingle("SELECT `datum` FROM `{prefix_counter_ips}` WHERE `ip` = ? AND FROM_UNIXTIME(datum,'%d.%m.%Y') = ?;",array(up($userip),date("d.m.Y")));
+            $get = $sql->fetch("SELECT `datum` FROM `{prefix_counter_ips}` WHERE `ip` = ? AND FROM_UNIXTIME(datum,'%d.%m.%Y') = ?;",array(up($userip),date("d.m.Y")));
             if($sql->rowCount()) {
                 $sperrzeit = $get['datum']+$reload;
                 if($sperrzeit <= time()) {
@@ -1518,7 +1482,7 @@ function updateCounter() {
 //-> Updatet die Maximalen User die gleichzeitig online sind
 function update_maxonline() {
     global $sql;
-    $maxonline = $sql->selectSingle("SELECT `maxonline` FROM `{prefix_counter}` WHERE `today` = ?;",array(date("j.n.Y")),'maxonline');
+    $maxonline = $sql->fetch("SELECT `maxonline` FROM `{prefix_counter}` WHERE `today` = ?;",array(date("j.n.Y")),'maxonline');
     if ($maxonline < ($count = cnt('{prefix_counter_whoison}'))) {
         $sql->update("UPDATE `{prefix_counter}` SET `maxonline` = ? WHERE `today` = ?;",array($count,date("j.n.Y")));
     }
@@ -1532,7 +1496,7 @@ function update_online($where='') {
             $sql->delete("DELETE FROM `{prefix_counter_whoison}` WHERE `online` < ?;",array(time()));
         }
 
-        $get = $sql->selectSingle("SELECT `id` FROM `{prefix_counter_whoison}` WHERE `ip` = ?;",array($userip));
+        $get = $sql->fetch("SELECT `id` FROM `{prefix_counter_whoison}` WHERE `ip` = ?;",array($userip));
         if($sql->rowCount()) {
             $sql->update("UPDATE `{prefix_counter_whoison}` SET `whereami` = ?, `online` = ?, `login` = ?  WHERE `id` = ?;",
             array(up($where),(time()+$useronline),(!$chkMe ? 0 : 1),$get['id']));
@@ -1576,7 +1540,7 @@ function checkme($userid_set=0) {
     if (!$userid = ($userid_set != 0 ? intval($userid_set) : userid())) { return 0; }
     if (rootAdmin($userid)) { return 4; }
     if(!dbc_index::issetIndex('user_'.intval($userid))) {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ? AND `pwd` = ? AND `ip` = ?;",array(intval($userid),$_SESSION['pwd'],$_SESSION['ip']));
+        $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ? AND `pwd` = ? AND `ip` = ?;",array(intval($userid),$_SESSION['pwd'],$_SESSION['ip']));
         if (!$sql->rowCount()) { return 0; }
         dbc_index::setIndex('user_'.$get['id'], $get);
         return $get['level'];
@@ -1590,7 +1554,7 @@ function isBanned($userid_set=0,$logout=true) {
     global $sql,$userid;
     $userid_set = $userid_set ? $userid_set : $userid;
     if(checkme($userid_set) >= 1 || $userid_set) {
-        $get = $sql->selectSingle("SELECT `banned` FROM `{prefix_users}` WHERE `id` = ? LIMIT 1;",array(intval($userid_set)));
+        $get = $sql->fetch("SELECT `banned` FROM `{prefix_users}` WHERE `id` = ? LIMIT 1;",array(intval($userid_set)));
         if($get['banned']) {
             if($logout) {
                 dzcp_session_destroy();
@@ -1619,7 +1583,7 @@ function permission($check,$uid=0) {
 
             // check user permission
             if (!dbc_index::issetIndex('user_permission_' . intval($uid))) {
-                $permissions = $sql->selectSingle("SELECT * FROM `{prefix_permissions}` WHERE `user` = ?;", array(intval($uid)));
+                $permissions = $sql->fetch("SELECT * FROM `{prefix_permissions}` WHERE `user` = ?;", array(intval($uid)));
                 dbc_index::setIndex('user_permission_' . intval($uid), $permissions);
             }
 
@@ -1637,7 +1601,7 @@ function permission($check,$uid=0) {
 function update_user_status_preview() {
     global $sql,$userip;
     ## User aus der Datenbank suchen ##
-    $get = $sql->selectSingle("SELECT `id`,`time` FROM `{prefix_users}` "
+    $get = $sql->fetch("SELECT `id`,`time` FROM `{prefix_users}` "
             . "WHERE `id` = ? AND `sessid` = ? AND `ip` = ? AND level != 0;",
             array(intval($_SESSION['id']),session_id(),up($userip)));
 
@@ -1820,7 +1784,7 @@ function mkpwd($passwordLength=8,$specialcars=true) {
 
 //-> Infomeldung ausgeben
 function info($msg, $url="", $timeout = 5) {
-    if (settings('direct_refresh')) {
+    if (settings::get('direct_refresh')) {
         return header('Location: ' . str_replace('&amp;', '&', $url));
     }
 
@@ -2030,7 +1994,7 @@ function startpage() {
     global $sql,$userid,$chkMe;
     $startpageID = ($userid >= 1 ? data('startpage') : 0);
     if(!$startpageID) { return 'user/?action=userlobby'; }
-    $get = $sql->selectSingle("SELECT `url`,`level` FROM `{prefix_startpage}` WHERE `id` = ? LIMIT 1",array($startpageID));
+    $get = $sql->fetch("SELECT `url`,`level` FROM `{prefix_startpage}` WHERE `id` = ? LIMIT 1",array($startpageID));
     if(!$sql->rowCount()) {
         $sql->update("UPDATE `{prefix_users}` SET `startpage` = 0 WHERE `id` = ?;",array($userid));
         return 'user/?action=userlobby';
@@ -2046,7 +2010,7 @@ function autor($uid=0, $class="", $nick="", $email="", $cut="", $add="") {
     $uid = (!$uid ? $userid : $uid);
     if(!$uid) return '* No UserID! *';
     if(!dbc_index::issetIndex('user_'.intval($uid))) {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
+        $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
         if($sql->rowCount()) {
             dbc_index::setIndex('user_'.$get['id'], $get);
         } else {
@@ -2067,14 +2031,14 @@ function autor($uid=0, $class="", $nick="", $email="", $cut="", $add="") {
 function autorcolerd($uid, $class="", $cut="") {
     global $sql;
     if(!dbc_index::issetIndex('user_'.intval($uid))) {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
+        $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
         if($sql->rowCount()) {
             dbc_index::setIndex('user_'.$get['id'], $get);
         }
     }
 
     $position = dbc_index::getIndexKey('user_'.intval($uid), 'position');
-    $get = $sql->selectSingle("SELECT `id`,`color` FROM `{prefix_positions}` WHERE `id` = ?;",array($position));
+    $get = $sql->fetch("SELECT `id`,`color` FROM `{prefix_positions}` WHERE `id` = ?;",array($position));
     if(!$position || !$sql->rowCount()) {
         return autor($uid,$class,'','',$cut);
     }
@@ -2090,7 +2054,7 @@ function autorcolerd($uid, $class="", $cut="") {
 function cleanautor($uid, $class="", $nick="", $email="") {
     global $sql;
     if(!dbc_index::issetIndex('user_'.intval($uid))) {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
+        $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
         if($sql->rowCount()) {
             dbc_index::setIndex('user_' . $get['id'], $get);
         } else {
@@ -2105,7 +2069,7 @@ function cleanautor($uid, $class="", $nick="", $email="") {
 function rawautor($uid) {
     global $sql;
     if(!dbc_index::issetIndex('user_'.intval($uid))) {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
+        $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
         if($sql->rowCount()) {
             dbc_index::setIndex('user_' . $get['id'], $get);
         } else {
@@ -2121,7 +2085,7 @@ function rawautor($uid) {
 function fabo_autor($uid,$tpl=_user_link_fabo) {
     global $sql;
     if(!dbc_index::issetIndex('user_'.intval($uid))) {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
+        $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
         if($sql->rowCount()) {
             dbc_index::setIndex('user_' . $get['id'], $get);
             return show($tpl, array("id" => $uid, "nick" => re($get['nick'])));
@@ -2145,7 +2109,7 @@ function jsconvert($txt)
 function fintern($id) {
     global $sql,$userid,$chkMe;
     if(!$chkMe) {
-        $fget = $sql->selectSingle("SELECT s1.`intern`,s2.`id` FROM `{prefix_forumkats}` AS `s1` LEFT JOIN `{prefix_forumsubkats}` AS `s2` ON s2.`sid` = s1.`id` WHERE s2.`id` = ?;",array(intval($id)));
+        $fget = $sql->fetch("SELECT s1.`intern`,s2.`id` FROM `{prefix_forumkats}` AS `s1` LEFT JOIN `{prefix_forumsubkats}` AS `s2` ON s2.`sid` = s1.`id` WHERE s2.`id` = ?;",array(intval($id)));
         return (!$fget['intern']);
     } else if($chkMe == 4) {
         return true;
@@ -2161,7 +2125,7 @@ function data($what='id',$tid=0) {
     global $sql,$userid;
     if (!$tid) { $tid = $userid; }
     if(!dbc_index::issetIndex('user_'.$tid)) {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($tid)));
+        $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($tid)));
         dbc_index::setIndex('user_'.$tid, $get);
     }
 
@@ -2208,7 +2172,7 @@ function userstats($what='id',$tid=0) {
     global $sql,$userid;
     if (!$tid) { $tid = $userid; }
     if(!dbc_index::issetIndex('userstats_'.$tid)) {
-        $get = $sql->selectSingle("SELECT * FROM `{prefix_userstats}` WHERE `user` = ?;",array(intval($tid)));
+        $get = $sql->fetch("SELECT * FROM `{prefix_userstats}` WHERE `user` = ?;",array(intval($tid)));
         dbc_index::setIndex('userstats_'.$tid, $get);
     }
 
@@ -2220,16 +2184,27 @@ function sendMail($mailto,$subject,$content) {
     global $language;
     if(phpmailer_enable) {
         $mail = new PHPMailer;
-        if(phpmailer_use_smtp) {
-            $mail->isSMTP();
-            $mail->Host = phpmailer_smtp_host;
-            $mail->Port = phpmailer_smtp_port;
-            $mail->SMTPAuth = phpmailer_use_auth;
-            $mail->Username = phpmailer_smtp_user;
-            $mail->Password = phpmailer_smtp_password;
+        switch (settings::get('mail_extension')) {
+            case 'smtp':
+                $mail->isSMTP();
+                $mail->Host = string::decode(settings::get('smtp_hostname'));
+                $mail->Port = intval(settings::get('smtp_port'));
+                switch (settings::get('smtp_tls_ssl')) {
+                    case 1: $mail->SMTPSecure = 'tls'; break;
+                    case 2: $mail->SMTPSecure = 'ssl'; break;
+                    default: $mail->SMTPSecure = ''; break;
+                }
+                $mail->SMTPAuth = (empty(settings::get('smtp_username')) && empty(settings::get('smtp_password')) ? false : true);
+                $mail->Username = string::decode(settings::get('smtp_username'));
+                $mail->Password = session::decode(settings::get('smtp_password'));
+            break;
+            case 'sendmail':
+                $mail->isSendmail();
+                $mail->Sendmail = string::decode(settings::get('sendmail_path'));
+            break;
         }
 
-        $mail->From = ($mailfrom =settings('mailfrom'));
+        $mail->From = ($mailfrom =string::decode(settings::get('mailfrom')));
         $mail->FromName = $mailfrom;
         $mail->AddAddress(preg_replace('/(\\n+|\\r+|%0A|%0D)/i', '',$mailto));
         $mail->Subject = $subject;
@@ -2253,8 +2228,8 @@ function check_msg_emal() {
             foreach($qry as $get) {
                 if($get['pnmail']) {
                     $sql->update("UPDATE `{prefix_messages}` SET `sendmail` = 1 WHERE `id` = ?;",array($get['mid']));
-                    $subj = show(settings('eml_pn_subj'), array("domain" => $httphost));
-                    $message = show(bbcode_email(settings('eml_pn')), array("nick" => re($get['nick']), "domain" => $httphost, "titel" => $get['titel'], "clan" => settings('clanname')));
+                    $subj = show(settings::get('eml_pn_subj'), array("domain" => $httphost));
+                    $message = show(bbcode_email(settings::get('eml_pn')), array("nick" => re($get['nick']), "domain" => $httphost, "titel" => $get['titel'], "clan" => settings::get('clanname')));
                     sendMail(re($get['email']), $subj, $message);
                 }
             }
@@ -2379,12 +2354,12 @@ function getrank($tid=0, $squad=0, $profil=false) {
 
         if($sql->rowCount()) {
             foreach($qry as $get) {
-                $position = $sql->selectSingle("SELECT `position` FROM `{prefix_positions}` WHERE `id` = ?;",array(intval($get['posi'])),'position');
+                $position = $sql->fetch("SELECT `position` FROM `{prefix_positions}` WHERE `id` = ?;",array(intval($get['posi'])),'position');
                 $squadname = (!empty($get['name']) ? '<b>' . $get['name'] . ':</b> ' : '');
                 return ($squadname.$position);
             }
         } else {
-            $get = $sql->selectSingle("SELECT `level`,`banned` FROM `{prefix_users}` WHERE `id` = ?;",array(intval($tid)));
+            $get = $sql->fetch("SELECT `level`,`banned` FROM `{prefix_users}` WHERE `id` = ?;",array(intval($tid)));
             if (!$get['level'] && !$get['banned']) {
                 return _status_unregged;
             } elseif ($get['level'] == 1) {
@@ -2402,12 +2377,12 @@ function getrank($tid=0, $squad=0, $profil=false) {
             }
         }
     } else {
-        $get = $sql->selectSingle("SELECT s1.*,s2.`position` FROM `{prefix_userposis}` AS `s1` LEFT JOIN `{prefix_positions}` AS `s2` "
+        $get = $sql->fetch("SELECT s1.*,s2.`position` FROM `{prefix_userposis}` AS `s1` LEFT JOIN `{prefix_positions}` AS `s2` "
         . "ON s1.`posi` = s2.`id` WHERE s1.`user` = ? AND s1.`posi` != 0 ORDER BY s2.pid ASC;",array(intval($tid)));
         if($sql->rowCount()) {
             return $get['position'];
         } else {
-            $get = $sql->selectSingle("SELECT `level`,`banned` FROM `{prefix_users}` WHERE `id` = ?;",array(intval($tid)));
+            $get = $sql->fetch("SELECT `level`,`banned` FROM `{prefix_users}` WHERE `id` = ?;",array(intval($tid)));
             if (!$get['level'] && !$get['banned']) {
                 return _status_unregged;
             } elseif ($get['level'] == 1) {
@@ -2474,7 +2449,7 @@ function pfields_name($name) {
 //-> Checkt versch. Dinge anhand der Hostmaske eines Users
 function ipcheck($what,$time = "") {
     global $sql,$userip;
-    $get = $sql->selectSingle("SELECT `time`,`what` FROM `{prefix_ipcheck}` WHERE `what` = ? AND `ip` = ? ORDER BY `time` DESC;",array($what,$userip));
+    $get = $sql->fetch("SELECT `time`,`what` FROM `{prefix_ipcheck}` WHERE `what` = ? AND `ip` = ? ORDER BY `time` DESC;",array($what,$userip));
     if($sql->rowCount()) {
         if (preg_match("#vid#", $get['what'])) {
             return true;
@@ -2587,7 +2562,7 @@ function admin_perms($userid) {
     $e = array('gb', 'shoutbox', 'editusers', 'votes', 'contact', 'joinus', 'intnews', 'forum', 
     'gs_showpw','dlintern','intforum','galleryintern');
     
-    $qry = $sql->selectSingle("SELECT * FROM `{prefix_permissions}` WHERE `user` = ?;",array(intval($userid)));
+    $qry = $sql->fetch("SELECT * FROM `{prefix_permissions}` WHERE `user` = ?;",array(intval($userid)));
     if($sql->rowCount()) {
         foreach($qry as $v => $k) {
             if($v != 'id' && $v != 'user' && $v != 'pos' && !in_array($v, $e)) {
@@ -2704,7 +2679,7 @@ function check_internal_url() {
     }
 
     $url = $pfad.'index.php';
-    $get_navi = $sql->selectSingle("SELECT `internal` FROM `{prefix_navi}` WHERE `url` = ? OR `url` = ?;",array($pfad,$url));
+    $get_navi = $sql->fetch("SELECT `internal` FROM `{prefix_navi}` WHERE `url` = ? OR `url` = ?;",array($pfad,$url));
     if($sql->rowCount()) {
         if ($get_navi['internal']) {
             return true;
@@ -2720,7 +2695,7 @@ function getPermissions($checkID = 0, $pos = 0) {
     //Rechte des Users oder des Teams suchen
     if(!empty($checkID)) {
         $check = empty($pos) ? 'user' : 'pos'; $checked = array();
-        $qry = $sql->selectSingle("SELECT * FROM `{prefix_permissions}` WHERE `".$check."` = ?;",array(intval($checkID)));
+        $qry = $sql->fetch("SELECT * FROM `{prefix_permissions}` WHERE `".$check."` = ?;",array(intval($checkID)));
         if ($sql->rowCount()) {
             foreach($qry as $k => $v) {
                 if($k != 'id' && $k != 'user' && $k != 'pos' && $k != 'intforum') {
@@ -2909,13 +2884,15 @@ final class dbc_index {
     private static $is_mem = false;
 
     public static final function init() {
-        self::$is_mem = self::MemSetIndex();
+        global $cache,$config_cache;
+        if(!$config_cache['use_cache']) { self::$is_mem = false; return; }
+        if(!$config_cache['dbc']) { self::$is_mem = false; return; }
+        self::$is_mem = $cache->isMemModule();
     }
 
-    public static final function setIndex($index_key,$data,$time=1.2) {
+    public static final function setIndex($index_key,$data,$time=2) {
         global $cache,$config_cache;
-
-        if(self::MemSetIndex()) {
+        if(self::$is_mem) {
             if (show_dbc_debug) {
                 DebugConsole::insert_info('dbc_index::setIndex()', 'Set index: "' . $index_key . '" to cache');
             }
@@ -2968,7 +2945,6 @@ final class dbc_index {
         }
         
         if(self::$is_mem && $config_cache['use_cache'] && $cache->isExisting('dbc_'.$index_key)) {
-
             if (show_dbc_debug) {
                 DebugConsole::insert_loaded('dbc_index::issetIndex()', 'Load index: "' . $index_key . '" from cache');
             }
@@ -2982,28 +2958,6 @@ final class dbc_index {
 
     public static final function useMem() {
         return self::$is_mem;
-    }
-
-    private static final function MemSetIndex() {
-        global $config_cache;
-        if(!$config_cache['dbc']) return false;
-        switch ($config_cache['storage']) {
-            case 'apc': return (extension_loaded('apc') && ini_get('apc.enabled') && strpos(PHP_SAPI,"CGI") === false); break;
-            case 'memcached': return (ping_port($config_cache['server'][0][0],$config_cache['server'][0][1],0.2) && class_exists("memcached")); break;
-            case 'memcache': return (ping_port($config_cache['server'][0][0],$config_cache['server'][0][1],0.2) && function_exists("memcache_connect")); break;
-            case 'xcache': return (extension_loaded('xcache') && function_exists("xcache_get")); break;
-            case 'wincache': return (extension_loaded('wincache') && function_exists("wincache_ucache_set")); break;
-            case 'auto':
-                return ((extension_loaded('apc') && ini_get('apc.enabled') && strpos(PHP_SAPI,"CGI") === false) ||
-                       ($config_cache['dbc_auto_memcache'] && ping_port($config_cache['server'][0][0],$config_cache['server'][0][1],0.2) && class_exists("memcached")) ||
-                       ($config_cache['dbc_auto_memcache'] && ping_port($config_cache['server'][0][0],$config_cache['server'][0][1],0.2) && function_exists("memcache_connect")) ||
-                       (extension_loaded('xcache') && function_exists("xcache_get")) ||
-                       (extension_loaded('wincache') && function_exists("wincache_ucache_set")));
-            break;
-            default: return false; break;
-        }
-
-        return false;
     }
 }
 
@@ -3155,7 +3109,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
     global $designpath,$language,$menu_index,$isSpider;
 
     javascript::set('lng',($language=='deutsch'?'de':'en'));
-    javascript::set('maxW',settings('maxwidth'));
+    javascript::set('maxW',settings::get('maxwidth'));
     javascript::set('shoutInterval',15000);  // refresh interval of the shoutbox in ms
     javascript::set('slideshowInterval',6000);  // refresh interval of the shoutbox in ms
     javascript::set('autoRefresh',1);  // Enable Auto-Refresh for Ajax
@@ -3165,8 +3119,8 @@ function page($index='',$title='',$where='',$index_templ='index') {
     // JS-Dateine einbinden * json *
     $java_vars = '<script language="javascript" type="text/javascript">var json=\''.javascript::encode().'\',dzcp_config=JSON&&JSON.parse(json)||$.parseJSON(json);</script>'."\n";
 
-    if(settings("wmodus") && $chkMe != 4) {
-        $login = show("errors/wmodus_login", array("secure" => settings('securelogin') ? show("user/secure") : ''));
+    if(settings::get("wmodus") && $chkMe != 4) {
+        $login = show("errors/wmodus_login", array("secure" => settings::get('securelogin') ? show("user/secure") : ''));
         cookie::save(); //Save Cookie
         echo show("errors/wmodus", array("tmpdir" => $tmpdir,
                                          "java_vars" => $java_vars,
@@ -3181,7 +3135,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
         //check permissions
         if(!$chkMe) {
-            $secure = settings('securelogin') ? show("menu/secure") : '';
+            $secure = settings::get('securelogin') ? show("menu/secure") : '';
             $login = show("menu/login", array("secure" => $secure));
             $check_msg = '';
         } else {
@@ -3200,7 +3154,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
         //misc vars
         $lang = $language;
         $template_switch = show("menu/tmp_switch", array("templates" => $tmpldir));
-        $clanname = re(settings("clanname"));
+        $clanname = re(settings::get("clanname"));
         $headtitle = show(_index_headtitle, array("clanname" => $clanname));
         $rss = $clanname;
         $title = re(strip_tags($title));

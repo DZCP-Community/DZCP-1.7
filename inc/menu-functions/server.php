@@ -27,7 +27,7 @@ function server($serverID = 0) {
     } else {
         if(fsockopen_support()) {
             $sID = intval($_GET['serverID']);
-            $get = $sql->selectSingle("SELECT * FROM `{prefix_server}` WHERE `id` = ?;",array($sID));
+            $get = $sql->fetch("SELECT * FROM `{prefix_server}` WHERE `id` = ?;",array($sID));
             $cache_hash = md5($get['ip'].':'.$get['port'].'_'.$get['game']);
             if(!$cache->isExisting('server_'.$cache_hash)) {
                 $get['ip'] = str_replace(' ', '', $get['ip']);
@@ -37,7 +37,7 @@ function server($serverID = 0) {
                 $server = $server['gs'];
                 
                 if(!empty($server) && $server && $server['game_online'] && !show_gameserver_debug)
-                    $cache->set('server_'.$cache_hash, $server, settings('cache_server'));
+                    $cache->set('server_'.$cache_hash, $server, settings::get('cache_server'));
             }
             else
                 $server = $cache->get('server_'.$cache_hash);
@@ -157,7 +157,7 @@ function server($serverID = 0) {
             $gtype = (!empty($server['game_type']) ? show(_server_gtype, array("type" => re($server['game_type']))) : '');
             $bots = (!empty($server['game_num_bot']) ? show(_server_bots, array("bots" => re($server['game_num_bot']))) : '');
 
-            $servername = jsconvert(re(cut($server['hostname'],($servermenu=settings('l_servernavi')))));
+            $servername = jsconvert(re(cut($server['hostname'],($servermenu=settings::get('l_servernavi')))));
             $servernameout = (!empty($server['game_hostname'])) ? $server['game_hostname'] : _navi_gsv_no_name_available;
 
             $info = 'onmouseover="DZCP.showInfo(\''.$servernameout.'\', \'IP/Port:;;'._navi_gsv_game.':;Map:;'._navi_gsv_players_online.':;'._navi_gsv_on_the_game.':\', \''.$get['ip'].':'.$get['port'].';;'.jsconvert(re('<img src="'.(!empty($server['game_mod_name_short']) ? $icon_mod : $game_icon).'" alt=""  class="icon" />')).

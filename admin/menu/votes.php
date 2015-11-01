@@ -5,8 +5,18 @@
  */
 
 if(_adminMenu != 'true') exit;
+$where = $where.': '._votes_head;
 
-    $where = $where.': '._votes_head;
+switch ($where) {
+    case $value:
+
+
+        break;
+
+    default:
+        break;
+}
+
       if($do == 'new')
       {
         $show = show($dir."/form_vote", array("head" => _votes_admin_head,

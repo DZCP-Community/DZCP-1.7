@@ -6,7 +6,7 @@
 
 if(defined('_Clanwars')) {
     header("Content-type: text/html; charset=utf-8");
-    $get = $sql->selectSingle("SELECT * FROM `{prefix_squads}` WHERE `id` = ?;",array(intval($_POST['squad'])));
+    $get = $sql->fetch("SELECT * FROM `{prefix_squads}` WHERE `id` = ?;",array(intval($_POST['squad'])));
 
     $show = show(_cw_details_squad, array("game" => re($get['game']),
                                           "name" => re($get['name']),

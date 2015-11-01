@@ -14,7 +14,7 @@ function server_show($sID = 0, $showID = 0) {
         header("Content-Type: text/xml; charset=".$charset);
 
     $sID = (!empty($_GET['sID']) && $sID == 0 ? intval($_GET['sID']) : $sID);
-    $get = $sql->selectSingle("SELECT * FROM `{prefix_server}` WHERE `id` = ?;",array($sID));
+    $get = $sql->fetch("SELECT * FROM `{prefix_server}` WHERE `id` = ?;",array($sID));
     $cache_hash = md5($get['ip'].':'.$get['port'].'_'.$get['game']);
     $static_server = ($get['game'] == 'nope');
 
@@ -31,7 +31,7 @@ function server_show($sID = 0, $showID = 0) {
             $server = $server['gs'];
 
             if(!empty($server) && $server && $server['game_online'])
-                $cache->set('server_'.$cache_hash,$server,settings('cache_server'));
+                $cache->set('server_'.$cache_hash,$server,settings::get('cache_server'));
         } else {
             $get['ip'] = str_replace(' ', '', $get['ip']);
             
@@ -296,6 +296,8 @@ function server_show($sID = 0, $showID = 0) {
                                              "image_map" => $image_map,
                                              "klapp_show_start" => (!$klapp_show ? '<!--' : ''),
                                              "klapp_show_end" => (!$klapp_show ? '-->' : '')));
+    
+    
     if($no_ajax) return $index; else exit($index);
 }
 

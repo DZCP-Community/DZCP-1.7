@@ -34,7 +34,7 @@ if($sql->rowCount()) {
         $online_ip = '';
         if($chkMe == 4) {
             $online_ip = $get['ip'];
-            $DNS = $sql->selectSingle("SELECT `dns` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array($online_ip),'dns');
+            $DNS = $sql->fetch("SELECT `dns` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array($online_ip),'dns');
             $online_host = ($gethostbyaddr=$DNS);
             $online_ip = ' * '.($get['ip'] == $gethostbyaddr ? $online_ip : $online_ip.' ('.$online_host.')');
         }
@@ -60,11 +60,11 @@ if($sql->rowCount()) {
 
         if($chkMe == 4) {
             $online_ip = $get['ip'];
-            $DNS = $sql->selectSingle("SELECT `dns` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array($online_ip),'dns');
+            $DNS = $sql->fetch("SELECT `dns` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array($online_ip),'dns');
             $online_host = ($gethostbyaddr=$DNS);
         } else {
             $online_ip = preg_replace("#^(.*)\.(.*)#","$1",$get['ip']);
-            $DNS = $sql->selectSingle("SELECT `dns` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array($get['ip']),'dns');
+            $DNS = $sql->fetch("SELECT `dns` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array($get['ip']),'dns');
             $online_host = preg_replace("#^(.*?)\.(.*)#","$2",($gethostbyaddr=$DNS));
         }
 

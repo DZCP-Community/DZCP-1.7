@@ -21,7 +21,7 @@ function custom_content($kid=1) {
     $qrycustom = $sql->select("SELECT `feldname`,`type`,`name` FROM `{prefix_profile}` WHERE `kid` = ? AND `shown` = 1 ORDER BY id ASC;",array($kid));
     if($sql->rowCount()) {
         foreach($qrycustom as $getcustom) {
-            $getcontent = $sql->selectSingle("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
+            $getcontent = $sql->fetch("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
             if(!empty($getcontent[$getcustom['feldname']])) {
                 switch($getcustom['type']) {
                     case 2:
@@ -49,7 +49,7 @@ function getcustom($kid=1,$user=0) {
     $set_id = ($user != 0 ? intval($user) : $userid);
     $qrycustom = $sql->select("SELECT `feldname`,`name` FROM `{prefix_profile}` WHERE `kid` = ? AND `shown` = 1 ORDER BY id ASC",array($kid)); $custom = "";
     foreach($qrycustom as $getcustom) {
-        $getcontent = $sql->selectSingle("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ? LIMIT 1;",array($set_id));
+        $getcontent = $sql->fetch("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ? LIMIT 1;",array($set_id));
         $custom .= show(_profil_edit_custom, array("name" => re(pfields_name($getcustom['name'])) . ":",
                                                    "feldname" => $getcustom['feldname'],
                                                    "value" => re($getcontent[$getcustom['feldname']])));

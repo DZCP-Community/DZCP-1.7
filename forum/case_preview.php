@@ -10,7 +10,7 @@ if(defined('_Forum')) {
   {
     if($do == 'editthread')
     {
-      $get = $sql->selectSingle("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
+      $get = $sql->fetch("SELECT * FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
 
       $get_datum = $get['t_date'];
 
@@ -41,7 +41,7 @@ if(defined('_Forum')) {
                                         "delete" => ""));
     if($guestCheck)
     {
-      $getu = $sql->selectSingle("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".$pUId."'");
+      $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".$pUId."'");
 
       $email = CryptMailto(re($getu['email']),_emailicon_forum);
       $pn = _forum_pn_preview;
@@ -65,13 +65,13 @@ if(defined('_Forum')) {
         else $hp = show(_hpicon_forum, array("hp" => links($_POST['hp'])));
       }
 
-    $getw = $sql->selectSingle("SELECT s1.kid,s1.topic,s2.kattopic,s2.sid
+    $getw = $sql->fetch("SELECT s1.kid,s1.topic,s2.kattopic,s2.sid
                 FROM `{prefix_forumthreads}` AS s1
                 LEFT JOIN `{prefix_forumsubkats}` AS s2
                 ON s1.kid = s2.id
                 WHERE s1.id = '".intval($tID)."'");
 
-    $kat = $sql->selectSingle("SELECT name FROM `{prefix_forumkats}` WHERE id = '".$getw['sid']."'");
+    $kat = $sql->fetch("SELECT name FROM `{prefix_forumkats}` WHERE id = '".$getw['sid']."'");
 
     $wheres = show(_forum_post_where_preview, array("wherepost" => re($_POST['topic']),
                                                     "wherekat" => re($getw['kattopic']),
@@ -120,7 +120,7 @@ if(defined('_Forum')) {
   } else {
     if($do == 'editpost')
     {
-      $get = $sql->selectSingle("SELECT * FROM `{prefix_forumposts}` WHERE id = '".intval($_GET['id'])."'");
+      $get = $sql->fetch("SELECT * FROM `{prefix_forumposts}` WHERE id = '".intval($_GET['id'])."'");
       $get_datum = $get['date'];
 
       if($get['reg'] == 0) $guestCheck = false;
@@ -152,7 +152,7 @@ if(defined('_Forum')) {
                                         "delete" => ""));
     if($guestCheck)
     {
-      $getu = $sql->selectSingle("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".intval($pUId)."'");
+      $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".intval($pUId)."'");
 
       $email = CryptMailto(re($getu['email']),_emailicon_forum);
       $pn = _forum_pn_preview;
@@ -175,8 +175,8 @@ if(defined('_Forum')) {
     }
 
     $index = show($dir."/forum_posts_show", array("nick" => cleanautor($pUId, '', $_POST['nick'], $_POST['email']),
-                                                  "postnr" => "#".($i+($page-1)*settings('m_fposts')),
-                                                  "p" => ($i+($page-1)*settings('m_fposts')),
+                                                  "postnr" => "#".($i+($page-1)*settings::get('m_fposts')),
+                                                  "p" => ($i+($page-1)*settings::get('m_fposts')),
                                                   "class" => 'class="commentsRight"',
                                                   "text" => bbcode(re($_POST['eintrag']),true).$editedby,
                                                   "pn" => $pn,

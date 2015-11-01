@@ -46,7 +46,7 @@ switch ($do) {
         }
     break;
     case 'edit':
-        $get = $sql->selectSingle("SELECT `league`,`rank`,`url`,`squad` FROM `{prefix_rankings}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT `league`,`rank`,`url`,`squad` FROM `{prefix_rankings}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $qrys = $sql->select("SELECT * FROM `{prefix_squads}` WHERE `status` = 1 ORDER BY `game` ASC;");
         foreach($qrys as $gets) {
             $sel = ($get['squad'] == $gets['id']) ? 'selected="selected"' : '';
@@ -74,7 +74,7 @@ switch ($do) {
                 $show = error(_error_empty_rank, 1);
             }
         } else {
-            $get = $sql->selectSingle("SELECT `id`,`rank` FROM `{prefix_rankings}` WHERE `id` = ?;",array(intval($_GET['id'])));
+            $get = $sql->fetch("SELECT `id`,`rank` FROM `{prefix_rankings}` WHERE `id` = ?;",array(intval($_GET['id'])));
             $sql->update("UPDATE `{prefix_rankings}` SET `league` = ?,"
                                                       . "`squad` = ?,"
                                                       . "`url` = ?,"

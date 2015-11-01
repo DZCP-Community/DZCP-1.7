@@ -5,21 +5,27 @@
  */
 
 if(defined('_Clanwars')) {
-    $qry = db("SELECT s1.id,s1.datum,s1.clantag,s1.gegner,s1.url,s1.xonx,s1.liga,s1.punkte,s1.gpunkte,s1.maps,s1.serverip,s1.servername,
-               s1.serverpwd,s1.bericht,s1.squad_id,s1.gametype,s1.gcountry,s1.lineup,s1.glineup,s1.matchadmins,s2.icon,s2.name,s2.game
-               FROM ".$db['cw']." AS s1
-               LEFT JOIN ".$db['squads']." AS s2 ON s1.squad_id = s2.id
-               WHERE s1.id = '".intval($_GET['id'])."'");
+    $get = $sql->fetch("SELECT s1.`id`,s1.`datum`,s1.`clantag`,s1.`gegner`,s1.`url`,s1.`xonx`,s1.`liga`,"
+                            . "s1.`punkte`,s1.`gpunkte`,s1.`maps`,s1.`serverip`,s1.`servername`, s1.`serverpwd`,"
+                            . "s1.`bericht`,s1.`squad_id`,s1.`gametype`,s1.`gcountry`,s1.`lineup`,s1.`glineup`,"
+                            . "s1.`matchadmins`,s2.`icon`,s2.`name`,s2.`game` "
+                            . "FROM `{prefix_clanwars}` AS `s1` "
+                            . "LEFT JOIN `{prefix_squads}` AS `s2` "
+                            . "ON s1.`squad_id` = s2.`id` "
+                            . "WHERE s1.`id` = ?;",array(intval($_GET['id'])));
 
-    if(!_rows($qry))
+    if(!$sql->rowCount())
         $index = error(_cw_dont_exist,1);
     else {
-        $get = _fetch($qry);  $serverpwd = ""; $serverpwd = ""; $players = "";
-        if($chkMe != 1 && $chkMe >= 2 && $get['punkte'] == "0" && $get['gpunkte'] == "0") {
+        $serverpwd = ""; $serverpwd = ""; $players = ""; $show_players = "";
+        if($chkMe != 1 && $chkMe >= 2 && !$get['punkte'] && !$get['gpunkte']) {
             if($get['datum'] > time()) {
-                $qryp = db("SELECT status,member FROM ".$db['cw_player']." WHERE cwid = '".intval($_GET['id'])."' ORDER BY status");
-                while($getp = _fetch($qryp))
-                {
+                $qryp = $sql->select("SELECT `status`,`member` "
+                        . "FROM `{prefix_clanwar_players}` "
+                        . "WHERE `cwid` = ? "
+                        . "ORDER BY status;",
+                    array(intval($_GET['id'])));
+                foreach($qryp as $getp) {
                     if($getp['status'] == "0")
                         $status = _cw_player_want;
                     elseif($getp['status'] == "1")
@@ -40,9 +46,9 @@ if(defined('_Clanwars')) {
                                                                       "status" => $status));
                 }
 
-                $cntPlayers = cnt($db['cw_player'], " WHERE cwid = '".intval($_GET['id'])."' AND member = '".$userid."'", "cwid");
+                $cntPlayers = cnt('{prefix_clanwar_players}', " WHERE `cwid` = ? AND `member` = ?", "cwid", array(intval($_GET['id']),$userid));
                 $value = $cntPlayers ? _button_value_edit : _button_value_add; $form_player = "";
-                if(db("SELECT id FROM ".$db['squaduser']." WHERE squad = '".$get['squad_id']."' AND user = '".$userid."'",true)) {
+                if($sql->rows("SELECT id FROM `{prefix_squaduser}` WHERE `squad` = ? AND `user` = ?;",array($get['squad_id'],$userid))) {
                     $form_player = show($dir."/form_player",array("id" => intval($_GET['id']),
                                                                    "admin" => (permission('clanwars') ? '<input id="contentSubmitAdmin" type="button" value="'._cw_reset_button.'" class="submit" onclick="DZCP.submitButton(\'contentSubmitAdmin\');DZCP.goTo(\'?action=resetplayers&amp;id='.intval($_GET['id']).'\')" />' : ''),
                                                                    "yes" => _yes,
@@ -142,14 +148,16 @@ if(defined('_Clanwars')) {
         }
 
         $screens = $cw_sc_loops >= 1 ? show($dir."/screenshots", array("head" => _cw_screens, "show_screenshots" => $show_sc)) : '';
-        $qryc = db("SELECT * FROM ".$db['cw_comments']."
-                    WHERE cw = ".intval($_GET['id'])."
-                    ORDER BY datum DESC
-                    LIMIT ".($page - 1)*settings('m_cwcomments').",".settings('m_cwcomments')."");
+        $qryc = $sql->select("SELECT * FROM `{prefix_cw_comments}` "
+                           . "WHERE `cw` = ? "
+                           . "ORDER BY `datum` DESC LIMIT ".
+                            ($page - 1)*settings::get('m_cwcomments').",".
+                            settings::get('m_cwcomments').";",
+                array(intval($_GET['id'])));
 
-        $entrys = cnt($db['cw_comments'], " WHERE cw = ".intval($_GET['id']));
-        $i = $entrys-($page - 1)*settings('m_cwcomments'); $comments = '';
-        while($getc = _fetch($qryc)) {
+        $entrys = cnt("{prefix_cw_comments}", " WHERE `cw` = ?", 'id', array(intval($_GET['id'])));
+        $i = $entrys-($page - 1)*settings::get('m_cwcomments'); $comments = '';
+        foreach($qryc as $getc) {
             $edit = ""; $delete = "";
             if(($chkMe >= 1 && $getc['reg'] == $userid) || permission("clanwars")) {
                 $edit = show("page/button_edit_single", array("id" => $get['id'],
@@ -192,11 +200,11 @@ if(defined('_Clanwars')) {
             $i--;
         }
 
-        if(settings("reg_cwcomments") && !$chkMe)
+        if(settings::get("reg_cwcomments") && !$chkMe)
             $add = _error_unregistered_nc;
         else {
             $add = "";
-            if(!ipcheck("cwid(".$_GET['id'].")", settings('f_cwcom'))) {
+            if(!ipcheck("cwid(".$_GET['id'].")", settings::get('f_cwcom'))) {
                 if($userid >= 1)
                     $form = show("page/editor_regged", array("nick" => autor($userid), "von" => _autor));
                 else {
@@ -230,7 +238,7 @@ if(defined('_Clanwars')) {
             }
         }
 
-        $seiten = nav($entrys,settings('m_cwcomments'),"?action=details&amp;id=".$_GET['id']."");
+        $seiten = nav($entrys,settings::get('m_cwcomments'),"?action=details&amp;id=".$_GET['id']."");
         $comments = show($dir."/comments",array("head" => _cw_comments_head,
                                                 "show" => $comments,
                                                 "seiten" => $seiten,
@@ -253,7 +261,6 @@ if(defined('_Clanwars')) {
 
         $logos = ($logo_squad == '_defaultlogo.jpg') && ($logo_gegner == '_defaultlogo.jpg');
         $pagetitle = re($get['name']).' vs. '.re($get['gegner']).' - '.$pagetitle;
-
         $index = show($dir."/details", array("head" => _cw_head_details,
                                              "result_head" => _cw_head_results,
                                              "lineup_head" => _cw_head_lineup,
@@ -294,11 +301,11 @@ if(defined('_Clanwars')) {
                                              "screenshots" => $screens));
 
         if($do == "add") {
-            if(_rows(db("SELECT `id` FROM ".$db['cw']." WHERE `id` = '".(int)$_GET['id']."'")) != 0) {
-                if(settings("reg_cwcomments") && !$chkMe )
+            if($sql->rows("SELECT `id` FROM `{prefix_clanwars}` WHERE `id` = ?;",array(intval($_GET['id']))) != 0) {
+                if(settings::get("reg_cwcomments") && !$chkMe )
                     $index = error(_error_have_to_be_logged, 1);
                 else {
-                    if(!ipcheck("cwid(".$_GET['id'].")", settings('f_cwcom'))) {
+                    if(!ipcheck("cwid(".$_GET['id'].")", settings::get('f_cwcom'))) {
                         if($userid >= 1)
                             $toCheck = empty($_POST['comment']);
                         else
@@ -348,25 +355,18 @@ if(defined('_Clanwars')) {
                                                                      "error" => $error,
                                                                      "eintraghead" => _eintrag));
                         } else {
-                            db("INSERT INTO ".$db['cw_comments']."
-                                SET `cw`       = '".intval($_GET['id'])."',
-                                    `datum`    = '".time()."',
-                                    `nick`     = '".(isset($_POST['nick']) ? up($_POST['nick']) : up(data('nick')))."',
-                                    `email`    = '".(isset($_POST['email']) ? up($_POST['email']) : up(data('email')))."',
-                                    `hp`       = '".(isset($_POST['hp']) ? links($_POST['hp']) : links(data('hp')))."',
-                                    `reg`      = '".intval($userid)."',
-                                    `comment`  = '".up($_POST['comment'])."',
-                                    `ip`       = '".$userip."'");
-
+                            $sql->insert("INSERT INTO `{prefix_cw_comments}` SET `cw` = ?,`datum` = ?,`nick` = ?,`email` = ?,`hp` = ?,`reg` = ?,`comment` = ?,`ip` = ?;",
+                                    array(intval($_GET['id']),time(),(isset($_POST['nick']) ? up($_POST['nick']) : up(data('nick'))),
+                                        (isset($_POST['email']) ? up($_POST['email']) : up(data('email'))),
+                                        (isset($_POST['hp']) ? links($_POST['hp']) : links(data('hp'))),
+                                        $userid,up($_POST['comment']),up($userip)));
                             setIpcheck("cwid(".$_GET['id'].")");
                             $index = info(_comment_added, "?action=details&amp;id=".$_GET['id']."");
                         }
-                    }
-                    else
-                        $index = error(show(_error_flood_post, array("sek" => settings('f_cwcom'))), 1);
+                    } else
+                        $index = error(show(_error_flood_post, array("sek" => settings::get('f_cwcom'))), 1);
                 }
-            }
-            else
+            } else
                 $index = error(_id_dont_exist,1);
         }
 
@@ -391,63 +391,45 @@ if(defined('_Clanwars')) {
             $index = info(_cw_screenshot_deleted, "?action=details&amp;id=".intval($_GET['id']));
         }
        elseif($do == "delete") {
-            $get = db("SELECT reg FROM ".$db['cw_comments']." WHERE id = '".intval($_GET['cid'])."'",false,true);
-            if($get['reg'] == $userid || permission('clanwars'))
-            {
-                db("DELETE FROM ".$db['cw_comments']." WHERE id = '".intval($_GET['cid'])."'");
+            $get = $sql->fetch("SELECT `reg` FROM `{prefix_cw_comments}` WHERE `id` = ?;",array(intval($_GET['cid'])));
+            if($get['reg'] == $userid || permission('clanwars')) {
+                $sql->delete("DELETE FROM `{prefix_cw_comments}` WHERE `id` = ?;",array(intval($_GET['cid'])));
                 $index = info(_comment_deleted, "?action=details&amp;id=".intval($_GET['id']));
-            }
-            else
+            } else
                 $index = error(_error_wrong_permissions, 1);
         } elseif($do == "editcom") {
-            $get = db("SELECT * FROM ".$db['cw_comments']." WHERE id = '".intval($_GET['cid'])."'",false,true);
+            $get = $sql->fetch("SELECT `reg` FROM `{prefix_cw_comments}` WHERE `id` = ?;",array(intval($_GET['cid'])));
             if($get['reg'] == $userid || permission('clanwars')) {
                 $editedby = show(_edited_by, array("autor" => autor($userid), "time" => date("d.m.Y H:i", time())._uhr));
-                db("UPDATE ".$db['cw_comments']."
-                    SET `nick`     = '".(isset($_POST['nick']) ? up($_POST['nick']) : up(data('nick')))."',
-                        `email`    = '".(isset($_POST['email']) ? up($_POST['email']) : up(data('email')))."',
-                        `hp`       = '".(isset($_POST['hp']) ? links($_POST['hp']) : links(data('hp')))."',
-                        `comment`  = '".up($_POST['comment'])."',
-                        `editby`   = '".up($editedby)."'
-                    WHERE id = '".intval($_GET['cid'])."'");
+                $sql->delete("UPDATE `{prefix_cw_comments}` SET `nick` = ?, `email` = ?, `hp` = ?, `comment` = ?, `editby` = ? WHERE `id` = ?",
+                        array((isset($_POST['nick']) ? up($_POST['nick']) : up(data('nick'))),
+                        (isset($_POST['email']) ? up($_POST['email']) : up(data('email'))),(isset($_POST['hp']) ? links($_POST['hp']) : links(data('hp'))),
+                        up($_POST['comment']),up($editedby),intval($_GET['cid'])));
                 $index = info(_comment_edited, "?action=details&amp;id=".$_GET['id']."");
-            }
-            else
+            } else
                 $index = error(_error_edit_post,1);
         } elseif($do == "edit") {
-            $get = db("SELECT * FROM ".$db['cw_comments']." WHERE id = '".intval($_GET['cid'])."'",false,true);
+            $get = $sql->fetch("SELECT * FROM `{prefix_cw_comments}` WHERE `id` = ?;",array(intval($_GET['cid'])));
             if($get['reg'] == $userid || permission('clanwars')) {
                 if($get['reg'] != 0)
                     $form = show("page/editor_regged", array("nick" => autor($get['reg']), "von" => _autor));
                 else {
-                    $form = show("page/editor_notregged", array("nickhead" => _nick,
-                                                                "emailhead" => _email,
-                                                                "hphead" => _hp,
-                                                                "postemail" => re($get['email']),
+                    $form = show("page/editor_notregged", array("postemail" => re($get['email']),
                                                                 "posthp" => links($get['hp']),
                                                                 "postnick" => re($get['nick'])));
                 }
 
                 $index = show("page/comments_add", array("titel" => _comments_edit,
-                                                         "nickhead" => _nick,
-                                                         "bbcodehead" => _bbcode,
-                                                         "emailhead" => _email,
-                                                         "hphead" => _hp,
-                                                         "security" => _register_confirm,
                                                          "sec" => $dir,
                                                          "form" => $form,
-                                                         "preview" => _preview,
                                                          "prevurl" => '../clanwars/?action=compreview&do=edit&id='.$_GET['id'].'&amp;cid='.$_GET['cid'],
                                                          "action" => '?action=details&amp;do=editcom&amp;id='.$_GET['id'].'&amp;cid='.$_GET['cid'],
-                                                         "ip" => _iplog_info,
                                                          "id" => $_GET['id'],
                                                          "what" => _button_value_edit,
                                                          "show" => "",
                                                          "posteintrag" => re($get['comment']),
-                                                         "error" => "",
-                                                         "eintraghead" => _eintrag));
-            }
-            else
+                                                         "error" => ""));
+            } else
                 $index = error(_error_edit_post,1);
         }
     }

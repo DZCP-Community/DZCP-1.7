@@ -2,4 +2,593 @@
  * DZCP - deV!L`z ClanPortal 1.7.0
  * http://www.dzcp.de
  */
-var doc=document,ie4=document.all,opera=window.opera,innerLayer,layer,x,y,doWheel=!1,offsetX=15,offsetY=5,tickerc=0,mTimer=new Array,tickerTo=new Array,tickerSpeed=new Array,isIE=!1,isWin=!1,isOpera=!1,jQueryV="1.11.3",$=jQuery,DZCP={jQueryCheck:function(e){return"undefined"!=typeof jQuery&&$().jquery>=jQueryV?!0:(e&&alert("Update your jQuery Version to >= "+jQueryV),!1)},init:function(){doc.body.id="dzcp-engine-1.7",DZCP.DebugLogger("jQuery Version: "+$().jquery+" is loaded!"),DZCP.DebugLogger("Load DZCP-Engine 1.7"),isIE=-1!==navigator.appVersion.indexOf("MSIE")?!0:!1,isWin=-1!==navigator.appVersion.toLowerCase().indexOf("win")?!0:!1,isOpera=-1!==navigator.userAgent.indexOf("Opera")?!0:!1,$("body").append('<div id="infoDiv"></div>'),layer=$("#infoDiv")[0],doc.body.onmousemove=this.trackMouse,DZCP.initLightbox(),$("#colorpicker").colorpicker(),$(".slidetabs").tabs(".images > div",{effect:"fade",rotate:!0}).slideshow(dzcp_config.slideshowInterval>1?{autoplay:!0,interval:dzcp_config.slideshowInterval}:{autoplay:!1,interval:6e3}),dzcp_config.autoRefresh&&DZCP.initAutoRefresh(),$(".tabs").tabs("> .switchs"),$(".tabs2").tabs(".switchs2 > div",{effect:"fade",rotate:!0})},initAutoRefresh:function(){return DZCP.jQueryCheck(!1)?(DZCP.DebugLogger("Initiation Auto-Refresh"),void($("#navShout").length&&dzcp_config.shoutInterval>1e3&&(DZCP.DebugLogger("Auto-Refresh for Shoutbox in "+dzcp_config.shoutInterval+"ms"),setInterval(function(){DZCP.initDynLoader("navShout","shoutbox","",!1)},dzcp_config.shoutInterval)))):!1},initLightbox:function(){return DZCP.jQueryCheck(!1)?(DZCP.DebugLogger("Initiation Lightbox"),void $("a[rel^=lightbox]").magnificPopup({type:"image",gallery:{enabled:!0},mainClass:"mfp-with-zoom",zoom:{enabled:!0,duration:300,easing:"ease-in-out",opener:function(e){return e.is("img")?e:e.find("img")}}})):!1},addEvent:function(e,t,i){if(!DZCP.jQueryCheck(!1))return!1;if(e.addEventListener)return e.addEventListener(t,i,!1),!0;if(e.attachEvent){var n=e.attachEvent("on"+t,i);return n}return!1},trackMouse:function(e){if(!DZCP.jQueryCheck(!1))return!1;if(innerLayer=$("#infoInnerLayer")[0],"object"==typeof layer){var t=doc.all,i=doc.getElementById&&!doc.all,n=5,o=-15;if(x=i?e.pageX-n:window.event.clientX+doc.documentElement.scrollLeft-n,y=i?e.pageY-o:window.event.clientY+doc.documentElement.scrollTop-o,innerLayer)var r=(t?innerLayer.offsetWidth:innerLayer.clientWidth)-3;else var r=(t?layer.clientWidth:layer.offsetWidth)-3;var a=i?window.innerWidth+window.pageXOffset-12:doc.documentElement.clientWidth+doc.documentElement.scrollLeft;layer.style.left=(x+offsetX+r>=a-offsetX?x-(r+offsetX):x+offsetX)+"px",layer.style.top=y+offsetY+"px"}return!0},popup:function(e,t,i){t=parseInt(t),i=parseInt(i)+50,popup=window.open(e,"Popup","width=1,height=1,location=0,scrollbars=0,resizable=1,status=0"),popup.resizeTo(t,i),popup.moveTo((screen.width-t)/2,(screen.height-i)/2),popup.focus()},initGameServer:function(e){DZCP.initDynLoader("navGameServer_"+e,"server","&serverID="+e,!0)},initTeamspeakServer:function(){DZCP.initDynLoader("navTeamspeakServer","teamspeak","",!0)},initDynLoader:function(e,t,i,n){if(!DZCP.jQueryCheck(!1))return!1;DZCP.DebugLogger("DynLoader -> Tag: '"+e+"' / URL: '../inc/ajax.php?i="+t+i+"'");var o=$.ajax({url:"../inc/ajax.php?i="+t+i,type:"GET",data:{},timeout:8e3,cache:!1,dataType:"html",contentType:"application/x-www-form-urlencoded;"});o.done(function(t){n?$("#"+e).html(t).hide().fadeIn("normal"):$("#"+e).html(t)})},initPageDynLoader:function(e,t){if(!DZCP.jQueryCheck(!1))return!1;DZCP.DebugLogger("PageDynLoader -> Tag: '"+e+"' / URL: '"+t+"'");var i=$.ajax({url:t,type:"GET",data:{},cache:!0,dataType:"html",contentType:"application/x-www-form-urlencoded;"});i.done(function(t){$("#"+e).html(t).hide().fadeIn("normal"),DZCP.initLightbox()})},initDynCaptcha:function(e,t,i,n,o,r,a){if(!DZCP.jQueryCheck(!1))return!1;var c="../inc/ajax.php?i=securimage";t>1&&(c=c+"&height="+t),i>1&&(c=c+"&width="+i),n>=1&&(c=c+"&lines="+n),o.length>1&&(c=c+"&namespace="+o),r>=1&&(c=c+"&length="+r),c=a>0?c+"&sid="+a:c+"&sid="+Math.random(),DZCP.DebugLogger("DynCaptcha -> Tag: '"+e+"' / URL: '"+c+"'");var l=$.ajax({url:c,type:"GET",data:{},cache:!1,dataType:"html",contentType:"application/x-www-form-urlencoded;"});l.done(function(t){$("#"+e).attr("src",t).hide().fadeIn("normal")})},EvalSound:function(e){if(!DZCP.jQueryCheck(!1))return!1;DZCP.DebugLogger("EvalSound -> URL: '"+e+"'");var t=new Audio(e);t.play()},shoutSubmit:function(){return DZCP.jQueryCheck(!1)?($.post("../shout/index.php?ajax",$("#shoutForm").serialize(),function(e){e&&alert(e.replace(/  /g," ")),$("#navShout").load("../inc/ajax.php?i=shoutbox"),e||$("#shouteintrag").prop("value","")}),!1):!1},switchuser:function(){var e=doc.formChange.changeme.options[doc.formChange.changeme.selectedIndex].value;window.location.href=e},tempswitch:function(){var e=doc.form.tempswitch.options[doc.form.tempswitch.selectedIndex].value;"lazy"!==e&&DZCP.goTo(e)},autocomplete:function(e,t){if(!DZCP.jQueryCheck(!1))return!1;DZCP.DebugLogger("Autocomplete -> URL: '../inc/ajax.php?i=autocomplete&type="+e+"&game="+i+"'");var i=$("#status :selected").val();$(document).load("../inc/ajax.php?i=autocomplete&type="+e+"&game="+i,function(e){var i=jQuery.parseJSON(e);""!==i.qport&&(t||""===$("#qport").val())&&($("#qport").val(i.qport),$("#autochanged").show())})},goTo:function(e,t){1===t?window.open(e):window.location.href=e},maxlength:function(e,t,i){e.value.length>i?e.value=e.value.substring(0,i):t.value=i-e.value.length},showInfo:function(e,t,i,n,o,r){if("object"==typeof layer){var a="";if(t&&i){for(var c=t.split(";"),l=i.split(";"),d="",s=0;s<c.length;++s)d=d+"<tr><td>"+c[s]+"</td><td>"+l[s]+"</td></tr>";a='<tr><td class="infoTop" colspan="2">'+e+"</td></tr>"+d}else a=t&&"undefined"==typeof i?'<tr><td class="infoTop" colspan="2">'+e+"</td></tr><tr><td>"+t+"</td></tr>":"<tr><td>"+e+"</td></tr>";var u="";u=n?'<tr><td colspan=2 align=center><img src="'+n+'" width="'+o+'" height="'+r+'" alt="" /></td></tr>':"",layer.innerHTML='<div id="hDiv">  <table class="hperc" cellspacing="0" style="height:100%">    <tr>      <td style="vertical-align:middle">        <div id="infoInnerLayer">          <table class="hperc" cellspacing="0">              '+a+"              "+u+"          </table>        </div>      </td>    </tr>  </table></div>",ie4&&!opera?(layer.innerHTML+='<iframe id="ieFix" frameborder="0" width="'+$("#hDiv")[0].offsetWidth+'" height="'+$("#hDiv")[0].offsetHeight+'"></iframe>',layer.style.display="block"):layer.style.display="block"}},showSteamBox:function(e,t,i,n,o){var r;switch(o){case 1:r="online";break;case 2:r="in-game";break;default:r="offline"}"object"==typeof layer&&(layer.innerHTML='<div id="hDiv">  <table class="hperc" cellspacing="0" style="height:100%">    <tr>      <td style="vertical-align:middle">        <div id="infoInnerLayer">             <table class="steam_box_bg" border="0" cellspacing="0" cellpadding="0">              <tr>                <td>                   <div class="steam_box steam_box_user '+r+'">                     <div class="steam_box_avatar '+r+'"> <img src="'+t+'" /></div>                     <div class="steam_box_content">'+e+'<br />                     <span class="friendSmallText">'+i+"<br>"+n+"</span></div>                   </div>                </td>              </tr>            </table>        </div>      </td>    </tr>  </table></div>",ie4&&!opera?(layer.innerHTML+='<iframe id="ieFix" frameborder="0" width="'+$("#hDiv")[0].offsetWidth+'" height="'+$("#hDiv")[0].offsetHeight+'"></iframe>',layer.style.display="block"):layer.style.display="block")},hideInfo:function(){"object"==typeof layer&&(layer.innerHTML="",layer.style.display="none")},toggle:function(e){return DZCP.jQueryCheck(!1)?void(0!==e&&("none"===$("#more"+e).css("display")?($("#more"+e).fadeIn("normal"),$("#img"+e).prop("src","../inc/images/collapse.gif")):($("#more"+e).fadeOut("normal"),$("#img"+e).prop("src","../inc/images/expand.gif")))):!1},fadetoggle:function(e){return DZCP.jQueryCheck(!1)?void(0!==e&&($("#more_"+e).fadeToggle("slow","swing"),$("#img_"+e).prop("hidden"===$("#img_"+e).prop("alt")?{alt:"normal",src:"../inc/images/toggle_normal.png"}:{alt:"hidden",src:"../inc/images/toggle_hidden.png"}))):!1},resizeImages:function(){if(!DZCP.jQueryCheck(!1))return!1;for(var e=0;e<doc.images.length;e++){var t=doc.images[e];if("content"===t.className){var i=t.width,n=t.height;if(0!==dzcp_config.maxW&&i>dzcp_config.maxW&&(t.width=dzcp_config.maxW,t.height=Math.round(n*(dzcp_config.maxW/i)),!DZCP.linkedImage(t))){var o=doc.createElement("span"),r=doc.createElement("a");o.appendChild(doc.createElement("br")),o.setAttribute("class","resized"),o.appendChild(doc.createTextNode("auto resized to "+t.width+"x"+t.height+" px")),r.setAttribute("href",t.src),r.setAttribute("rel","lightbox"),r.appendChild(t.cloneNode(!0)),t.parentNode.appendChild(o),t.parentNode.replaceChild(r,t),DZCP.initLightbox()}}}},linkedImage:function(e){do if(e=e.parentNode,"A"===e.nodeName)return!0;while("TD"!==e.nodeName&&"BODY"!==e.nodeName);return!1},calSwitch:function(e,t){if(!DZCP.jQueryCheck(!1))return!1;var i=$.ajax({url:"../inc/ajax.php?i=kalender&month="+e+"&year="+t,type:"GET",data:{},cache:!1,dataType:"html",contentType:"application/x-www-form-urlencoded;"});i.done(function(e){$("#navKalender").html(e).hide().fadeIn("normal")})},teamSwitch:function(e){return DZCP.jQueryCheck(!1)?(clearTimeout(mTimer[1]),void $("#navTeam").load("../inc/ajax.php?i=teams&tID="+e,DZCP.initTicker("teams","h",60))):!1},ajaxVote:function(e){return DZCP.jQueryCheck(!1)?(DZCP.submitButton("contentSubmitVote"),$.post("../votes/index.php?action=do&ajax=1&what=vote&id="+e,$("#navAjaxVote").serialize(),function(e){$("#navVote").html(e)}),!1):!1},ajaxFVote:function(e){return DZCP.jQueryCheck(!1)?(DZCP.submitButton("contentSubmitFVote"),$.post("../votes/index.php?action=do&fajax=1&what=fvote&id="+e,$("#navAjaxFVote").serialize(),function(e){$("#navFVote").html(e)}),!1):!1},ajaxPreview:function(e){if(!DZCP.jQueryCheck(!1))return!1;DZCP.DebugLogger("Ajax Preview -> Tag: '"+e+"'");for(var t=doc.getElementsByTagName("textarea"),i=0;i<t.length;i++){var n=t[i].className,o=t[i].id;if("editorStyle"===n||"editorStyleWord"===n||"editorStyleNewsletter"===n){var r=tinyMCE.getInstanceById(o);$("#"+o).prop("value",r.getBody().innerHTML)}}$("#previewDIV").html('<div style="width:100%;text-align:center"> <img src="../inc/images/admin/loading.gif" alt="" /></div>');var a="";"cwForm"===e&&$("input[type=file]").each(function(){a=a+"&"+$(this).prop("name")+"="+$(this).prop("value")});var c=prevURL;$.post(c,$("#"+e).serialize()+a,function(e){$("#previewDIV").html(e).hide().fadeIn("fast"),DZCP.resizeImages()})},del:function(e){return e=e.replace(/\+/g," "),e=e.replace(/oe/g,"ö"),confirm(e+"?")},hideForumFirst:function(){return DZCP.jQueryCheck(!1)?void $("#allkat").prop("checked",!1):!1},hideForumAll:function(){if(!DZCP.jQueryCheck(!1))return!1;for(var e=0;e<doc.forms.search.elements.length;e++){var t=doc.forms.search.elements[e];t.id.match(/k_/g)&&(t.checked=!1)}},submitButton:function(e){return DZCP.jQueryCheck(!1)?(submitID=e?e:"contentSubmit",$("#"+submitID).prop("disabled",!0),$("#"+submitID).css("color","#909090"),$("#"+submitID).css("cursor","default"),!0):!1},initTicker:function(e,t,i){if(!DZCP.jQueryCheck(!1))return!1;DZCP.DebugLogger("Initiation Newticker"),tickerTo[tickerc]="h"===t||"v"===t?t:"v",tickerSpeed[tickerc]=parseInt(i)<=10?10:parseInt(i);var n=$("#"+e).html(),o='  <div id="scrollDiv'+tickerc+'" class="scrollDiv" style="position:relative;left:0;z-index:1">';o+='    <table id="scrollTable'+tickerc+'" class="scrolltable"  cellpadding="0" cellspacing="0">',o+="      <tr>",o+='        <td onmouseover="clearTimeout(mTimer['+tickerc+'])" onmouseout="DZCP.startTickerDiv('+tickerc+')">';for(var r=0;10>r;r++)o+=n;o+="        </td>",o+="      </tr>",o+="    </table>",o+="  </div>",$("#"+e).html(o),window.setTimeout("DZCP.startTickerDiv("+tickerc+");",1500),tickerc++},startTickerDiv:function(e){return DZCP.jQueryCheck(!1)?(tableObj=$("#scrollTable"+e)[0],obj=tableObj.parentNode,objWidth="h"===tickerTo[e]?tableObj.offsetWidth:tableObj.offsetHeight,newWidth=2*Math.floor(objWidth/2)+2,obj.style.width=newWidth,void(mTimer[e]=setInterval("DZCP.moveDiv('"+obj.id+"', "+newWidth+", "+e+");",tickerSpeed[e]))):!1},moveDiv:function(e,t,i){if(!DZCP.jQueryCheck(!1))return!1;var n=$("#"+e)[0];"h"===tickerTo[i]?n.style.left=parseInt(n.style.left)<=0-t/2+2?0:parseInt(n.style.left)-1+"px":n.style.top=""===n.style.top||parseInt(n.style.top)<0-t/2+6?0:parseInt(n.style.top)-1+"px"},GoToAnchor:function(){return DZCP.jQueryCheck(!1)?void(DZCP.empty(dzcp_config.AnchorMove)||(DZCP.DebugLogger("GoToAnchor -> Tag: '"+dzcp_config.AnchorMove+"'"),$("html, body").animate({scrollTop:$("#"+dzcp_config.AnchorMove).offset().top-12},"slow"))):!1},empty:function(e){return DZCP.jQueryCheck(!1)?null===e||$.noop(e)||!/\S/.test(e):!1},DebugLogger:function(e){dzcp_config.debug&&console.info("DZCP Debug: "+e)},checkbox_switch:function(e,t){return DZCP.jQueryCheck(!1)?(DZCP.DebugLogger("Change all Checkboxes with ID:"+t+"_*"),void $('input:checkbox[id^="'+t+'_"]').not(e).prop("checked",e.checked)):!1},BooleanToString:function(e){return e?"true":"false"}};$(document).ready(function(){DZCP.jQueryCheck(!0)&&DZCP.init()}),$(window).load(function(){DZCP.jQueryCheck(!1)&&(DZCP.resizeImages(),DZCP.GoToAnchor())});
+
+// GLOBAL VARS
+var doc = document, ie4 = document.all, opera = window.opera;
+var innerLayer, layer, x, y, doWheel = false, offsetX = 15, offsetY = 5;
+var tickerc = 0, mTimer = new Array(), tickerTo = new Array(), tickerSpeed = new Array();
+var isIE = false, isWin = false, isOpera = false, jQueryV = "1.11.3", $ = jQuery;
+
+// DZCP JAVASCRIPT LIBARY FOR JQUERY >= V1.11.3
+var DZCP = {
+    jQueryCheck: function(error) {
+        if (typeof jQuery !== 'undefined' && $().jquery >= jQueryV) { 
+            return true; 
+        } else { if(error){ alert("Update your jQuery Version to >= "+jQueryV); } return false; }
+    },
+    
+  //init
+    init: function() {
+        doc.body.id = 'dzcp-engine-1.7';
+        DZCP.DebugLogger("jQuery Version: "+$().jquery+" is loaded!");
+        DZCP.DebugLogger('Load DZCP-Engine 1.7');
+        
+        isIE  = (navigator.appVersion.indexOf("MSIE") !== -1) ? true : false;
+        isWin = (navigator.appVersion.toLowerCase().indexOf("win") !== -1) ? true : false;
+        isOpera = (navigator.userAgent.indexOf("Opera") !== -1) ? true : false;
+        
+        $('body').append('<div id="infoDiv"></div>');
+        layer = $('#infoDiv')[0];
+        doc.body.onmousemove = this.trackMouse;
+       
+        // init lightbox
+        DZCP.initLightbox();
+        
+        // init colorpicker
+        $("#colorpicker").colorpicker();
+
+        //init slidetabs
+        if(dzcp_config.slideshowInterval > 1) { //set slideshowInterval to 0 for disable
+        $(".slidetabs").tabs(".images > div", {
+            effect: 'fade',
+            rotate: true
+        }).slideshow({
+            autoplay: true,
+            interval: dzcp_config.slideshowInterval
+            });
+        } else {
+            $(".slidetabs").tabs(".images > div", {
+                effect: 'fade',
+                rotate: true
+            }).slideshow({
+                autoplay: false,
+                interval: 6000
+            });
+        }
+
+        // init Auto-Refresh
+        if(dzcp_config.autoRefresh) {
+            DZCP.initAutoRefresh();
+        }
+
+        // init template
+        $(".tabs").tabs("> .switchs");
+        $(".tabs2").tabs(".switchs2 > div", { effect: 'fade', rotate: true });
+    },
+    
+    // init Auto-Refresh
+    initAutoRefresh: function() {
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('Initiation Auto-Refresh');
+        
+        // refresh shoutbox
+        if($("#navShout").length && dzcp_config.shoutInterval > 1000) { //set shoutInterval to 0 for disable >= 1000ms
+            DZCP.DebugLogger('Auto-Refresh for Shoutbox in '+dzcp_config.shoutInterval+"ms");
+            setInterval(function(){ DZCP.initDynLoader('navShout','shoutbox','',false); }, dzcp_config.shoutInterval);
+        }
+    },
+
+    // init lightbox
+    initLightbox: function() {
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('Initiation Lightbox');
+        $('a[rel^=lightbox]').magnificPopup({
+            type:'image',
+            gallery:{enabled:true},
+            mainClass: 'mfp-with-zoom',
+            zoom: {
+                enabled: true,
+                duration: 300,
+                easing: 'ease-in-out',
+                opener: function(openerElement) {
+                    return openerElement.is('img') ? openerElement : openerElement.find('img');
+            }
+        }
+        });
+    },
+
+    // handle events
+    addEvent : function(obj, evType, fn) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        if(obj.addEventListener)
+        {
+          obj.addEventListener(evType, fn, false);
+          return true;
+        } else if (obj.attachEvent) {
+          var r = obj.attachEvent('on' + evType, fn);
+          return r;
+        } else return false;
+    },
+
+    // track mouse
+    trackMouse: function(e) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        innerLayer = $('#infoInnerLayer')[0];
+        if(typeof(layer) === 'object') {
+        var ie4 = doc.all;
+        var ns6 = doc.getElementById && !doc.all;
+        var mLeft = 5;
+        var mTop = -15;
+
+        x = (ns6) ? e.pageX-mLeft : window.event.clientX+doc.documentElement.scrollLeft - mLeft;
+        y = (ns6) ? e.pageY-mTop  : window.event.clientY+doc.documentElement.scrollTop  - mTop;
+
+        if(innerLayer) {
+            var layerW = ((ie4) ? innerLayer.offsetWidth : innerLayer.clientWidth) - 3;
+        } else {
+            var layerW = ((ie4) ? layer.clientWidth : layer.offsetWidth) - 3;
+        }
+            var winW   = (ns6) ? (window.innerWidth) + window.pageXOffset - 12
+                     : doc.documentElement.clientWidth + doc.documentElement.scrollLeft;
+
+          layer.style.left = ((x + offsetX + layerW >= winW - offsetX) ? x - (layerW + offsetX) : x + offsetX) + 'px';
+          layer.style.top  = (y + offsetY) + 'px';
+      }
+        return true;
+    },
+
+    // handle popups
+    popup: function(url, x, y) {
+        x = parseInt(x); y = parseInt(y) + 50;
+        popup = window.open(url, 'Popup', "width=1,height=1,location=0,scrollbars=0,resizable=1,status=0");
+        popup.resizeTo(x, y);
+        popup.moveTo((screen.width - x) / 2, (screen.height-y) / 2);
+        popup.focus();
+    },
+
+  // init Gameserver via Ajax
+    initGameServer: function(serverID) {
+        DZCP.initDynLoader('navGameServer_' + serverID,'server','&serverID=' + serverID,true);
+    },
+
+  // init Teamspeakserver via Ajax
+    initTeamspeakServer: function() {
+        DZCP.initDynLoader('navTeamspeakServer','teamspeak','',true);
+    },
+
+    // init Ajax DynLoader
+    initDynLoader: function(tag,menu,options,fade) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('DynLoader -> Tag: \'' + tag + '\' / URL: \'' + "../inc/ajax.php?i=" + menu + options + '\'');
+        var request = $.ajax({ url: "../inc/ajax.php?i=" + menu + options, type: "GET", data: {}, timeout: 8000, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
+        request.done(function(msg) { if(fade) { $('#' + tag).html( msg ).hide().fadeIn("normal"); } else { $('#' + tag).html( msg ); } });
+   },
+    
+    // init Ajax DynLoader Sides via Ajax
+    initPageDynLoader: function(tag,url) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('PageDynLoader -> Tag: \'' + tag + '\' / URL: \'' + url + '\'');
+        var request = $.ajax({ url: url, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
+        request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); DZCP.initLightbox();  });
+    },
+    
+    // init Ajax DynCaptcha
+    initDynCaptcha: function(tag,height,width,lines,namespace,length,sid) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        var url_input = "../inc/ajax.php?i=securimage";
+        if(height >  1) { url_input = url_input + "&height="+height; }
+        if(width > 1) { url_input = url_input + "&width="+width; }
+        if(lines >= 1) { url_input = url_input + "&lines="+lines; }
+        if(namespace.length > 1) { url_input = url_input + "&namespace="+namespace; }
+        if(length >= 1) { url_input = url_input + "&length="+length; }
+        if(sid > 0) { url_input = url_input + "&sid="+sid; } else { url_input = url_input + "&sid="+Math.random(); }
+        DZCP.DebugLogger('DynCaptcha -> Tag: \'' + tag + '\' / URL: \'' + url_input + '\'');
+        var request = $.ajax({ url: url_input, type: "GET", data: {}, cache:false, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
+        request.done(function(msg) { $('#' + tag).attr("src",msg).hide().fadeIn("normal"); });
+    },
+
+    // Play Sound per JS-Audio
+    EvalSound: function(url) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('EvalSound -> URL: \'' + url + '\'');
+        var audio = new Audio(url);
+        audio.play();
+    },
+
+    // submit shoutbox
+    shoutSubmit: function() {
+        if(!DZCP.jQueryCheck(false)) return false;
+        $.post('../shout/index.php?ajax', $('#shoutForm').serialize(),function(req) {
+        if(req) alert(req.replace(/  /g, ' '));
+        $('#navShout').load('../inc/ajax.php?i=shoutbox');
+        if(!req) $('#shouteintrag').prop('value', '');
+      });
+
+      return false;
+    },
+
+  // switch userlist
+    switchuser: function() {
+      var url = doc.formChange.changeme.options[doc.formChange.changeme.selectedIndex].value;
+      window.location.href = url;
+    },
+
+  // Templateswitch
+    tempswitch: function() {
+      var url = doc.form.tempswitch.options[doc.form.tempswitch.selectedIndex].value;
+      if(url !== 'lazy') DZCP.goTo(url);
+    },
+    
+    autocomplete: function(type,change) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('Autocomplete -> URL: \'' + '../inc/ajax.php?i=autocomplete&type='+type+'&game='+selected_game + '\'');
+        var selected_game = $('#status :selected').val();
+        $( document ).load('../inc/ajax.php?i=autocomplete&type='+type+'&game='+selected_game, function(data) {
+            var json = jQuery.parseJSON(data);
+            if(json.qport !== '') {
+                if(change || $("#qport").val() === '') {
+                    $("#qport").val(json.qport);
+                    $("#autochanged").show();
+                }
+            }
+        });
+    },
+
+  // go to defined url
+    goTo: function(url, n) {
+      if(n === 1) window.open(url);
+      else window.location.href = url;
+    },
+
+  // limit text lenthn
+    maxlength: function(field, countfield, max) {
+        if(field.value.length > max) field.value = field.value.substring(0, max);
+        else countfield.value = max - field.value.length;
+    },
+
+  // handle info layer
+    showInfo: function(info, kats, text, img, width, height) {
+      if(typeof(layer) === 'object') {
+        var output = '';
+        if(kats && text){
+            var kat=kats.split(";");
+            var texts=text.split(";");
+            var katout = "";
+            for(var i=0; i<kat.length; ++i) {
+                  katout = katout + '<tr><td>'+kat[i]+'</td><td>'+texts[i]+'</td></tr>';
+            }
+            output = '<tr><td class="infoTop" colspan="2">'+info+'</td></tr>'+katout+'';
+        }else if(kats && typeof(text)==="undefined"){
+            output = '<tr><td class="infoTop" colspan="2">'+info+'</td></tr><tr><td>'+kats+'</td></tr>';
+        }else{
+            output = '<tr><td>'+info+'</td></tr>';
+        }
+
+        var userimg = "";
+        if(img){
+            userimg = '<tr><td colspan=2 align=center><img src="'+img+'" width="'+width+'" height="'+height+'" alt="" /></td></tr>';
+        }else{
+            userimg = '';
+        }
+        
+        layer.innerHTML =
+          '<div id="hDiv">' +
+          '  <table class="hperc" cellspacing="0" style="height:100%">' +
+          '    <tr>' +
+          '      <td style="vertical-align:middle">' +
+          '        <div id="infoInnerLayer">' +
+          '          <table class="hperc" cellspacing="0">' +
+          '              '+output+'' +
+          '              '+userimg+'' +
+          '          </table>' +
+          '        </div>' +
+          '      </td>' +
+          '    </tr>' +
+          '  </table>' +
+          '</div>';
+
+      //IE Fix
+        if(ie4 && !opera) {
+            layer.innerHTML += '<iframe id="ieFix" frameborder="0" width="' + $('#hDiv')[0].offsetWidth + '" height="' + $('#hDiv')[0].offsetHeight + '"></iframe>';
+            layer.style.display = 'block';
+        } else 
+            layer.style.display = 'block';
+      }
+    },
+
+    // handle Steam layer
+    showSteamBox: function(user, img, text, text2, status) {
+        var class_state;
+        switch(status) {
+            case 1: class_state = 'online'; break; //Online
+            case 2: class_state = 'in-game'; break; //Ingame
+            default: class_state = 'offline'; break; //Offline
+        }
+
+        if(typeof(layer) === 'object') {
+            layer.innerHTML =
+              '<div id="hDiv">' +
+              '  <table class="hperc" cellspacing="0" style="height:100%">' +
+              '    <tr>' +
+              '      <td style="vertical-align:middle">' +
+              '        <div id="infoInnerLayer">' +
+              '             <table class="steam_box_bg" border="0" cellspacing="0" cellpadding="0">' +
+              '              <tr>' +
+              '                <td>' +
+              '                   <div class="steam_box steam_box_user '+class_state+'">' +
+              '                     <div class="steam_box_avatar '+class_state+'"> <img src="'+img+'" /></div>' +
+              '                     <div class="steam_box_content">'+user+'<br />' +
+              '                     <span class="friendSmallText">'+text+'<br>'+text2+'</span></div>' +
+              '                   </div>' +
+              '                </td>' +
+              '              </tr>' +
+              '            </table>' +
+              '        </div>' +
+              '      </td>' +
+              '    </tr>' +
+              '  </table>' +
+              '</div>';
+
+            //IE Fix
+            if(ie4 && !opera) {
+                layer.innerHTML += '<iframe id="ieFix" frameborder="0" width="' + $('#hDiv')[0].offsetWidth + '" height="' + $('#hDiv')[0].offsetHeight + '"></iframe>';
+                layer.style.display = 'block';
+            } else
+                layer.style.display = 'block';
+        }
+    },
+
+    hideInfo: function() {
+        if(typeof(layer) === 'object') {
+            layer.innerHTML = '';
+            layer.style.display = 'none';
+        }
+    },
+
+    // toggle object
+    toggle: function(id) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        if(id === 0) return;
+        if($('#more' + id).css('display') === 'none') {
+            $("#more" + id).fadeIn("normal");
+            $('#img' + id).prop('src', '../inc/images/collapse.gif');
+        } else {
+            $("#more" + id).fadeOut("normal");
+            $('#img' + id).prop('src', '../inc/images/expand.gif');
+        }
+    },
+
+    // toggle with effect *TS3
+    fadetoggle: function(id) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        if(id === 0) return;
+        $("#more_"+id).fadeToggle("slow", "swing");
+        if($('#img_'+id).prop('alt') === "hidden") {
+            $('#img_'+id).prop({alt: 'normal', src: '../inc/images/toggle_normal.png'});
+        } else {
+            $('#img_'+id).prop({alt: 'hidden', src: '../inc/images/toggle_hidden.png'});
+        }
+    },
+    
+    // resize images
+    resizeImages: function() {
+        if(!DZCP.jQueryCheck(false)) return false;
+        for(var i=0;i<doc.images.length;i++) {
+            var d = doc.images[i];
+            if(d.className === 'content') {
+                var imgW = d.width;
+                var imgH = d.height;
+
+                if(dzcp_config.maxW !== 0 && imgW > dzcp_config.maxW) {
+                    d.width = dzcp_config.maxW;
+                    d.height = Math.round(imgH * (dzcp_config.maxW / imgW));
+
+                    if(!DZCP.linkedImage(d)) {
+                        var textLink = doc.createElement("span");
+                        var popupLink = doc.createElement("a");
+
+                        textLink.appendChild(doc.createElement("br"));
+                        textLink.setAttribute('class', 'resized');
+                        textLink.appendChild(doc.createTextNode('auto resized to '+d.width+'x'+d.height+' px'));
+
+                        popupLink.setAttribute('href', d.src);
+                        popupLink.setAttribute('rel', 'lightbox');
+                        popupLink.appendChild(d.cloneNode(true));
+
+                        d.parentNode.appendChild(textLink);
+                        d.parentNode.replaceChild(popupLink, d);
+
+                        DZCP.initLightbox();
+                    }
+                }
+            }
+        }
+    },
+
+    linkedImage: function(node) {
+        do {
+            node = node.parentNode;
+            if (node.nodeName === 'A') return true;
+        }
+        while(node.nodeName !== 'TD' && node.nodeName !== 'BODY');
+        return false;
+    },
+
+    // ajax calendar switch
+    calSwitch: function(m, y) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        var request = $.ajax({ url: '../inc/ajax.php?i=kalender&month=' + m + '&year=' + y, type: "GET", data: {}, cache:false, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
+        request.done(function(msg) { $('#navKalender').html( msg ).hide().fadeIn("normal"); });    
+    },
+
+  // ajax team switch
+    teamSwitch: function(obj) {
+      if(!DZCP.jQueryCheck(false)) return false;
+      clearTimeout(mTimer[1]);
+      $('#navTeam').load('../inc/ajax.php?i=teams&tID=' + obj, DZCP.initTicker('teams', 'h', 60));
+    },
+
+  // ajax vote
+    ajaxVote: function(id) {
+      if(!DZCP.jQueryCheck(false)) return false;
+      DZCP.submitButton('contentSubmitVote');
+      $.post('../votes/index.php?action=do&ajax=1&what=vote&id=' + id, $('#navAjaxVote').serialize(), function(req) {
+        $('#navVote').html(req);
+      });
+
+      return false;
+    },
+
+  // ajax forum vote
+    ajaxFVote: function(id) {
+     if(!DZCP.jQueryCheck(false)) return false;
+     DZCP.submitButton('contentSubmitFVote');
+      $.post('../votes/index.php?action=do&fajax=1&what=fvote&id=' + id, $('#navAjaxFVote').serialize(), function(req) {
+        $('#navFVote').html(req);
+      });
+
+       return false;
+      },
+
+  // ajax preview
+    ajaxPreview: function(form) {
+      if(!DZCP.jQueryCheck(false)) return false;
+      DZCP.DebugLogger('Ajax Preview -> Tag: \'' + form + '\'');
+      var tag=doc.getElementsByTagName("textarea");
+      for(var i=0;i<tag.length;i++) {
+        var thisTag = tag[i].className;
+        var thisID = tag[i].id;
+        if(thisTag === "editorStyle" || thisTag === "editorStyleWord" || thisTag === "editorStyleNewsletter") {
+          var inst = tinyMCE.getInstanceById(thisID);
+          $('#' + thisID).prop('value', inst.getBody().innerHTML);
+        }
+      }
+
+      $('#previewDIV').html('<div style="width:100%;text-align:center">'
+                             + ' <img src="../inc/images/admin/loading.gif" alt="" />'
+                             + '</div>');
+      var addpars = "";
+      if(form === 'cwForm') {
+          $("input[type=file]").each(function() {
+              addpars = addpars + "&" + $(this).prop('name') + "=" + $(this).prop('value');
+          });
+      }
+
+      var url = prevURL;
+      $.post(url, $('#' + form).serialize() + addpars, function(req) {
+        $('#previewDIV').html(req).hide().fadeIn("fast"); DZCP.resizeImages();
+      });
+    },
+
+  // confirm delete
+    del: function(txt) {
+      txt = txt.replace(/\+/g, ' ');
+      txt = txt.replace(/oe/g, 'ö');
+      return confirm(txt + '?');
+    },
+
+  // forum search
+    hideForumFirst: function() {
+        if(!DZCP.jQueryCheck(false)) return false;
+      $('#allkat').prop('checked', false);
+    },
+
+    hideForumAll: function() {
+        if(!DZCP.jQueryCheck(false)) return false;
+        for(var i = 0; i < doc.forms['search'].elements.length; i++)
+        {
+            var box = doc.forms['search'].elements[i];
+
+        if(box.id.match(/k_/g))
+              box.checked = false;
+        }
+    },
+
+  // disable submit button
+    submitButton: function(id) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        submitID = (id) ? id : 'contentSubmit';
+        $('#' + submitID).prop("disabled", true);
+        $('#' + submitID).css('color', '#909090');
+        $('#' + submitID).css('cursor', 'default');
+        return true;
+    },
+
+  // Newticker
+    initTicker: function(objID, to, ms) {
+        // set settings
+         if(!DZCP.jQueryCheck(false)) return false;
+         DZCP.DebugLogger('Initiation Newticker');
+         tickerTo[tickerc] = (to === 'h' || to === 'v') ? to : 'v';
+         tickerSpeed[tickerc] = (parseInt(ms) <= 10) ? 10 : parseInt(ms);
+
+        // prepare  object
+         var orgData = $('#' + objID).html();
+         var newData  = '  <div id="scrollDiv' + tickerc +'" class="scrollDiv" style="position:relative;left:0;z-index:1">';
+             newData += '    <table id="scrollTable' + tickerc +'" class="scrolltable"  cellpadding="0" cellspacing="0">';
+             newData += '      <tr>';
+             newData += '        <td onmouseover="clearTimeout(mTimer[' + tickerc +'])" onmouseout="DZCP.startTickerDiv(' + tickerc +')">';
+             for(var i=0;i<10;i++) newData += orgData;
+             newData += '        </td>';
+             newData += '      </tr>';
+             newData += '    </table>';
+             newData += '  </div>';
+
+         $('#' + objID).html(newData);
+         
+        // start ticker
+         window.setTimeout("DZCP.startTickerDiv("+tickerc+");",1500);
+         tickerc++;
+    },
+
+    startTickerDiv: function(subID) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        tableObj        = $('#scrollTable' + subID)[0];
+        obj             = tableObj.parentNode;
+        objWidth        = (tickerTo[subID] === 'h') ? tableObj.offsetWidth : tableObj.offsetHeight;
+        newWidth        = (Math.floor(objWidth/2)*2)+2;
+        obj.style.width = newWidth;
+
+        mTimer[subID] = setInterval("DZCP.moveDiv('"+obj.id+"', " + newWidth + ", " + subID + ");", tickerSpeed[subID]);
+    },
+
+    moveDiv: function(obj, width, subID) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        var thisObj = $('#' + obj)[0];
+        if(tickerTo[subID] === 'h') thisObj.style.left = (parseInt(thisObj.style.left) <= (0-(width/2)+2)) ? 0 : parseInt(thisObj.style.left)-1 + 'px';
+        else thisObj.style.top = (thisObj.style.top === '' || (parseInt(thisObj.style.top)<(0-(width/2)+6))) ? 0 : parseInt(thisObj.style.top)-1 + 'px';
+    },
+
+    GoToAnchor: function() {
+       if(!DZCP.jQueryCheck(false)) return false;
+       if(!DZCP.empty(dzcp_config.AnchorMove)) {
+            DZCP.DebugLogger('GoToAnchor -> Tag: \'' + dzcp_config.AnchorMove + '\'');
+            $('html, body').animate({ scrollTop: $("#" + dzcp_config.AnchorMove).offset().top - 12 }, 'slow');
+       }
+    },
+    
+    empty: function(value) {
+        if(!DZCP.jQueryCheck(false)) return false;
+        return (value === null || $.noop(value) || !/\S/.test(value));
+    },
+    
+    DebugLogger: function(message) {
+        if(dzcp_config.debug) {
+            console.info("DZCP Debug: " + message);
+        }
+    },
+    
+    checkbox_switch: function(obj,tag){
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('Change all Checkboxes with ID:'+tag+'_*');
+        $('input:checkbox[id^="'+tag+'_"]').not(obj).prop('checked', obj.checked);
+    },
+    
+    BooleanToString: function(boolean) {
+       return (boolean ? 'true' : 'false');
+    }
+};
+
+// load global events
+$(document).ready(function() { if(DZCP.jQueryCheck(true)) { DZCP.init(); }});
+$(window).load(function() { if(DZCP.jQueryCheck(false)) { DZCP.resizeImages(); DZCP.GoToAnchor(); }});

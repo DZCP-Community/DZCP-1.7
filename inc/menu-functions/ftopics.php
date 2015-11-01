@@ -15,19 +15,19 @@ function ftopics() {
     $f = 0; $ftopics = '';
     if($sql->rowCount()) {
         foreach($qry as $get) {
-            if($f == settings('m_ftopics')) { break; }
+            if($f == settings::get('m_ftopics')) { break; }
             if(fintern($get['kid'])) {
                 $lp = cnt("{prefix_forumposts}", " WHERE `sid` = ?","id",array($get['id']));
-                $pagenr = ceil($lp/settings('m_fposts'));
+                $pagenr = ceil($lp/settings::get('m_fposts'));
                 $page = !$pagenr ? 1 : $pagenr;
-                $info = !settings('allowhover') == 1 ? '' : 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['topic'])).'\', \''.
+                $info = !settings::get('allowhover') == 1 ? '' : 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['topic'])).'\', \''.
                         _forum_kat.';'._forum_posts.';'._forum_lpost.'\', \''.re($get['kattopic']).';'.++$lp.';'.
                         date("d.m.Y H:i", $get['lp'])._uhr.'\')" onmouseout="DZCP.hideInfo()"';
                 
                 $ftopics .= show("menu/forum_topics", array("id" => $get['id'],
                                                             "pagenr" => $page,
                                                             "p" => $lp,
-                                                            "titel" => cut(re($get['topic']),settings('l_ftopics')),
+                                                            "titel" => cut(re($get['topic']),settings::get('l_ftopics')),
                                                             "info" => $info,
                                                             "kid" => $get['kid']));
                 $f++;

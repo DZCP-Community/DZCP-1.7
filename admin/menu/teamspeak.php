@@ -18,7 +18,7 @@ switch ($do) {
         header("Location: ?admin=teamspeak");
     break;
     case 'menu':
-        $ts3_menu = $sql->selectSingle("SELECT `id` FROM `{prefix_teamspeak}` WHERE `show_navi` = 1;");
+        $ts3_menu = $sql->fetch("SELECT `id` FROM `{prefix_teamspeak}` WHERE `show_navi` = 1;");
         $qry = $sql->select("SELECT id FROM {prefix_teamspeak} WHERE `show_navi` = 1;");
         foreach($qry as $get) {
             $sql->update("UPDATE `{prefix_teamspeak}` SET `show_navi` = 0 WHERE `id` = ?;",array($get['id'])); 
@@ -31,7 +31,7 @@ switch ($do) {
         header("Location: ?admin=teamspeak");
     break;
     case 'delete':
-        $get = $sql->selectSingle("SELECT `host_ip_dns`,`server_port` FROM `{prefix_teamspeak}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
+        $get = $sql->fetch("SELECT `host_ip_dns`,`server_port` FROM `{prefix_teamspeak}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
         $ip_port = TS3Renderer::tsdns(re($get['host_ip_dns']));
         $host = ($ip_port != false && is_array($ip_port) ? $ip_port['ip'] : $get['host_ip_dns']);
         $port = ($ip_port != false && is_array($ip_port) ? $ip_port['port'] : $get['server_port']);
@@ -72,7 +72,7 @@ switch ($do) {
         }
 
         if(empty($show)) {
-            $get = $sql->selectSingle("SELECT * FROM `{prefix_teamspeak}` WHERE `id` = ?;",array(intval($_GET['id'])));
+            $get = $sql->fetch("SELECT * FROM `{prefix_teamspeak}` WHERE `id` = ?;",array(intval($_GET['id'])));
             $show = show($dir."/teamspeak_edit", array('id' => intval($_GET['id']),
                                                        'error' => (!empty($error) ? show("errors/errortable", array("error" => $error)) : ""),
                                                        'ip' => (isset($_POST['ip']) ? $_POST['ip'] : $get['host_ip_dns']),

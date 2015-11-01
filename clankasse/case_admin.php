@@ -22,7 +22,7 @@ if(defined('_Ck')) {
                 $index = show($dir."/new", array("thisyear" => date("Y"),
                                                  "dropdown_date" => $dropdown_date,
                                                  "trans" => $trans,
-                                                 "w" => str_replace(array('EUR','USD'), array('&euro;','$'),re(settings("k_waehrung")))));
+                                                 "w" => str_replace(array('EUR','USD'), array('&euro;','$'),re(settings::get("k_waehrung")))));
             break;
             case 'add':
                 if(!$_POST['t'] OR !$_POST['m'])
@@ -65,7 +65,7 @@ if(defined('_Ck')) {
             break;
             case 'edit':
                 if(isset($_GET['id'])) {
-                    $get = $sql->selectSingle("SELECT * FROM `{prefix_clankasse}` WHERE `id` = ?;",array(intval($_GET['id'])));
+                    $get = $sql->fetch("SELECT * FROM `{prefix_clankasse}` WHERE `id` = ?;",array(intval($_GET['id'])));
                     $dropdown_date = show(_dropdown_date, array("day" => dropdown("day",date("d",$get['datum'])),
                                                                 "month" => dropdown("month",date("m",$get['datum'])),
                                                                 "year" => dropdown("year",date("Y",$get['datum']))));
@@ -83,7 +83,7 @@ if(defined('_Ck')) {
                                                       "psel" => (!$get['pm'] ? 'selected="selected"' : ''),
                                                       "msel" => ($get['pm'] == 1 ? 'selected="selected"' : ''),
                                                       "trans" => $trans,
-                                                      "w" => str_replace(array('EUR','USD'), array('&euro;','$'),re(settings("k_waehrung"))),
+                                                      "w" => str_replace(array('EUR','USD'), array('&euro;','$'),re(settings::get("k_waehrung"))),
                                                       "evonan" => re($get['member']),
                                                       "sum" => re($get['betrag'])));
                 }
@@ -106,7 +106,7 @@ if(defined('_Ck')) {
             break;
             case 'paycheck':
                 if(isset($_GET['id'])) {
-                    $get = $sql->selectSingle("SELECT `payed` "
+                    $get = $sql->fetch("SELECT `payed` "
                             . "FROM `{prefix_clankasse_payed}` "
                             . "WHERE `user` = ?;",
                             array(intval($_GET['id'])));

@@ -8,11 +8,11 @@ if(defined('_Artikel')) {
     $qry = $sql->select("SELECT `id`,`kat`,`titel`,`datum`,`autor`,`text` "
             . "FROM `{prefix_artikel}` "
             . "WHERE `public` = 1 ".orderby_sql(array("artikel","titel","datum","kat"), 'ORDER BY `datum` DESC')." "
-            . "LIMIT ".($page - 1)*settings('m_artikel').",".settings('m_artikel').";");
+            . "LIMIT ".($page - 1)*settings::get('m_artikel').",".settings::get('m_artikel').";");
 
     if($sql->rowCount()) {
         foreach($qry as $get) {
-            $getk = $sql->selectSingle("SELECT `kategorie` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']));
+            $getk = $sql->fetch("SELECT `kategorie` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']));
             $titel = '<a style="display:block" href="?action=show&amp;id='.$get['id'].'">'.re($get['titel']).'</a>';
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/artikel_show", array("titel" => $titel,
@@ -28,7 +28,7 @@ if(defined('_Artikel')) {
         $show = show(_no_entrys_yet, array("colspan" => "4"));
     }
 
-    $seiten = nav(cnt("{prefix_artikel}"),settings('m_artikel'),"?page".(isset($_GET['show']) ? $_GET['show'] : 0).orderby_nav());
+    $seiten = nav(cnt("{prefix_artikel}"),settings::get('m_artikel'),"?page".(isset($_GET['show']) ? $_GET['show'] : 0).orderby_nav());
     $index = show($dir."/artikel", array("show" => $show,
                                          "nav" => $seiten,
                                          "order_autor" => orderby('autor'),

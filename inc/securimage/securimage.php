@@ -1220,7 +1220,7 @@ class Securimage {
             $params = array(md5(Securimage::$_captchaId),up($this->namespace));
         }
 
-        $row = $sql->selectSingle("SELECT `code`,`created`,`code_display` FROM `{prefix_captcha}` WHERE `id` = ? AND `namespace` = ?;",$params);
+        $row = $sql->fetch("SELECT `code`,`created`,`code_display` FROM `{prefix_captcha}` WHERE `id` = ? AND `namespace` = ?;",$params);
         if($sql->rowCount()) {
             if (!$this->isCodeExpired($row['created'])) {
                 if (Securimage::$_captchaId !== null) {

@@ -5,7 +5,7 @@
  */
 
 if(defined('_Artikel')) {
-    $getkat = $sql->selectSingle("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array(intval($_POST['kat'])));
+    $getkat = $sql->fetch("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array(intval($_POST['kat'])));
     $links1 = ""; $links2 = ""; $links3 = ""; $links = "";
     if($_POST['url1']) {
         $rel = _related_links;

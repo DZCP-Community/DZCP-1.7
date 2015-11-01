@@ -7,7 +7,7 @@
 if(defined('_UserMenu')) {
     header("Content-type: text/html; charset=utf-8");
     if($do == 'edit') {
-        $get = $sql->selectSingle("SELECT `reg`,`datum` "
+        $get = $sql->fetch("SELECT `reg`,`datum` "
                                 . "FROM `{prefix_usergb}` "
                                 . "WHERE `id` = ?;",array(intval($_GET['gbid'])));
         $get_id = '?';

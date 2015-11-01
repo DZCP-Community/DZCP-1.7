@@ -16,7 +16,7 @@ class sfs {
         global $userip;
         ## http://de.wikipedia.org/wiki/Private_IP-Adresse ##
         if(!validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && !validateIpV4Range($userip, '[127].[0].[0-255].[0-255]') && !validateIpV4Range($userip, '[10].[0-255].[0-255].[0-255]') && !validateIpV4Range($userip, '[172].[16-31].[0-255].[0-255]')) {
-            $get = $sql->selectSingle("SELECT * FROM `{prefix_ipban}` WHERE `ip` = ? LIMIT 1;",array($userip));
+            $get = $sql->fetch("SELECT * FROM `{prefix_ipban}` WHERE `ip` = ? LIMIT 1;",array($userip));
             if($sql->rowCount()) {
                 if((time()-$get['time']) > (2*86400) && $get['enable']) {
                     self::get(array('ip' => $userip)); //Array ( [success] => 1 [ip] => Array ( [lastseen] => 2013-04-26 19:57:51 [frequency] => 1327 [appears] => 1 [confidence] => 99.89 ) )
