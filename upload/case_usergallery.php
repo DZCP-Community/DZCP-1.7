@@ -17,7 +17,7 @@ if(defined('_Upload')) {
                     $index = error(_upload_no_data, 1);
                 elseif($size > settings::get('upicsize')."000")
                     $index = error(_upload_wrong_size, 1);
-                elseif(cnt($db['usergallery'], " WHERE user = ".$userid) == settings::get('m_gallerypics'))
+                elseif(cnt('{prefix_usergallery}', " WHERE user = ".$userid) == settings::get('m_gallerypics'))
                     $index = error(_upload_over_limit, 2);
                 elseif(file_exists(basePath."/inc/images/uploads/usergallery/".$userid."_".$_FILES['file']['name']))
                     $index = error(_upload_file_exists, 1);

@@ -80,11 +80,11 @@ if(defined('_UserMenu')) {
         } else {
             if(empty($_POST['pwd'])) {
                 $mkpwd = mkpwd();
-                $pwd = md5($mkpwd);
+                $pwd = pwd_encoder($mkpwd);
                 $msg = _info_reg_valid;
             } else {
                 $mkpwd = $_POST['pwd'];
-                $pwd = md5($mkpwd);
+                $pwd = pwd_encoder($mkpwd);
                 $msg = _info_reg_valid_pwd;
             }
 
@@ -94,11 +94,12 @@ if(defined('_UserMenu')) {
                    . "`email`    = ?, "
                    . "`ip`       = ?, "
                    . "`pwd`      = ?, "
+                   . "`pwd_encoder` = ?, "
                    . "`regdatum` = ".time().", "
                    . "`level`    = 1, "
                    . "`time`     = ".time().", "
                    . "`status`   = 1;",
-            array(up(trim($_POST['user'])),up(trim($_POST['nick'])),up(trim($_POST['email'])),visitorIp(),$pwd));
+            array(up(trim($_POST['user'])),up(trim($_POST['nick'])),up(trim($_POST['email'])),visitorIp(),up($pwd),settings::get('default_pwd_encoder')));
 
             $insert_id = $sql->lastInsertId();
             $sql->insert("INSERT INTO `{prefix_permissions}` SET `user` = ?;",array($insert_id));

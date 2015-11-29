@@ -22,16 +22,16 @@ switch ($do) {
             $data_array = array();
             $data_array['confidence'] = ''; $data_array['frequency'] = ''; $data_array['lastseen'] = '';
             $data_array['banned_msg'] = $info;
-            db("INSERT INTO ".$db['ipban']." SET `time` = ".time().", `ip` = '".$_POST['ip']."', `data` = '".serialize($data_array)."', `typ` = 3;");
+            $sql->insert("INSERT INTO `{prefix_ipban}` SET `time` = ".time().", `ip` = '".$_POST['ip']."', `data` = '".serialize($data_array)."', `typ` = 3;");
             $show = info(_ipban_admin_added, "?admin=ipban");
         }
     break;
     case 'delete':
-        db("DELETE FROM ".$db['ipban']." WHERE id = '".intval($_GET['id'])."'");
+        $sql->delete("DELETE FROM `{prefix_ipban}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $show = info(_ipban_admin_deleted, "?admin=ipban");
     break;
     case 'edit':
-        $get = db("SELECT * FROM ".$db['ipban']." WHERE id = '".intval($_GET['id'])."'",false,true);
+        $get = $sql->fetch("SELECT `ip`,`data` FROM `{prefix_ipban}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $data_array = unserialize($get['data']);
         $show = show($dir."/ipban_form", array("newhead" => _ipban_edit_head,"do" => "edit_save&amp;id=".$_GET['id']."","ip_set" => re($get['ip']),"info" => re($data_array['banned_msg']),"what" => _button_value_edit));
     break;
@@ -39,25 +39,25 @@ switch ($do) {
         if(empty($_POST['ip']))
             $show = error(_ip_empty);
         else {
-            $get = db("SELECT id,data FROM ".$db['ipban']." WHERE id = '".intval($_GET['id'])."'",false,true);
+            $get = $sql->fetch("SELECT `id`,`data` FROM `{prefix_ipban}` WHERE `id` = ?;",array(intval($_GET['id'])));
             $data_array = unserialize($get['data']);
             $data_array['banned_msg'] = re($_POST['info']);
-            db("UPDATE ".$db['ipban']." SET `ip` = '".$_POST['ip']."', `time` = '".time()."', `data` = '".serialize($data_array)."' WHERE id = '".intval($get['id'])."'");
+            $sql->update("UPDATE `{prefix_ipban}` SET `ip` = '".$_POST['ip']."', `time` = '".time()."', `data` = '".serialize($data_array)."' WHERE id = '".intval($get['id'])."'");
             $show = info(_ipban_admin_edited, "?admin=ipban");
         }
     break;
     case 'enable':
-        $get = db("SELECT id,enable FROM ".$db['ipban']." WHERE `id` = ".intval($_GET['id']),false,true);
-        db("UPDATE ".$db['ipban']." SET `enable` = '".($get['enable'] == '1' ? '0' : '1')."' WHERE `id` = ".$get['id'].";");
+        $get = $sql->fetch("SELECT `id`,`enable` FROM `{prefix_ipban}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        $sql->update("UPDATE `{prefix_ipban}` SET `enable` = '".($get['enable'] == '1' ? '0' : '1')."' WHERE `id` = ".$get['id'].";");
         $show = header("Location: ?admin=ipban&sfs_side=".(isset($_GET['sfs_side']) ? $_GET['sfs_side'] : 1)."&ub_side=".(isset($_GET['ub_side']) ? $_GET['ub_side'] : 1));
     break;
     case 'new':
         $show = show($dir."/ipban_form", array("newhead" => _ipban_new_head, "do" => "add", "ip_set" => '', "info" => '', "what" => _button_value_add));
     break;
     case 'search':
-        $qry_search = db("SELECT * FROM ".$db['ipban']." WHERE ip LIKE '%".$_POST['ip']."%' ORDER BY ip ASC"); //Suche
+        $qry = $sql->select("SELECT * FROM `{prefix_ipban}` WHERE `ip` LIKE '%?%' ORDER BY `ip` ASC;",array($_POST['ip'])); //Suche
         $color = 1; $show_search = '';
-        while($get = _fetch($qry_search)) {
+        foreach($qry as $get) {
             $data_array = unserialize($get['data']);
             $edit =$get['typ'] == '3' ? show("page/button_edit_single", array("id" => $get['id'], "action" => "admin=ipban&amp;do=edit", "title" => _button_title_edit)) : '';
             $action = "?admin=ipban&amp;do=enable&amp;id=".$get['id']."&amp;ub_side=".(isset($_GET['ub_side']) ? $_GET['ub_side'] : 1)."&amp;sfs_side=".(isset($_GET['sfs_side']) ? $_GET['sfs_side'] : 1);
@@ -77,13 +77,12 @@ switch ($do) {
         $show = ''; $show_sfs = ''; $show_user = '';
         $pager_sfs = ''; $pager_user = '';
 
-        $count_spam = db("SELECT id FROM ".$db['ipban']." WHERE typ = '1'",true,false); //Type 1 => Global Stopforumspam.com List
+        $count_spam = $sql->rows("SELECT `id` FROM `{prefix_ipban}` WHERE `typ` = 1;"); //Type 1 => Global Stopforumspam.com List
         if($count_spam >= 1) {
             $site = (isset($_GET['sfs_side']) ? $_GET['sfs_side'] : 1);
             if($site < 1) $site = 1; $end = $site*10; $start = $end-10;
 
-            $count_spam_nav = db("SELECT id FROM ".$db['ipban']." WHERE typ = '1' ORDER BY id DESC LIMIT ".$start.", 10",true,false); //Type Userban ROW
-
+            $count_spam_nav = $sql->rows("SELECT id FROM `{prefix_ipban}` WHERE `typ` = 1 ORDER BY `id` DESC LIMIT ?, 10;",array($start)); //Type Userban ROW
             if($start != 0)
                 $pager_sfs = '<a href="?admin=ipban&sfs_side='.($site-1).'&ub_side='.(isset($_GET['ub_side']) ? $_GET['ub_side'] : 1).'"><img align="absmiddle" src="../inc/images/previous.png" alt="left" /></a>';
             else
@@ -96,8 +95,8 @@ switch ($do) {
             else
                 $pager_sfs .= '<img src="../inc/images/next.png" alt="right" align="absmiddle" class="disabled" />';
 
-            $qry = db("SELECT * FROM ".$db['ipban']." WHERE typ = '1' ORDER BY id DESC LIMIT ".$start.",10"); $color = 1;
-            while($get = _fetch($qry)) {
+            $qry = $sql->select("SELECT * FROM `{prefix_ipban}` WHERE `typ` = 1 ORDER BY `id` DESC LIMIT ?,10;",array($start)); $color = 1;
+            foreach($qry as $get) {
                 $data_array = unserialize($get['data']);
                 $delete = show("page/button_delete_single", array("id" => $get['id'], "action" => "admin=ipban&amp;do=delete", "title" => _button_title_del, "del" => _confirm_del_ipban));
                 $action = "?admin=ipban&amp;do=enable&amp;id=".$get['id']."&amp;sfs_side=".($site)."&amp;ub_side=".(isset($_GET['ub_side']) ? $_GET['ub_side'] : 1);
@@ -111,7 +110,7 @@ switch ($do) {
         if(empty($show_sfs))
             $show_sfs = '<tr><td colspan="8" class="contentMainSecond">'._no_entrys.'</td></tr>';
 
-        $count_user = db("SELECT id FROM ".$db['ipban']." WHERE typ = '3'",true,false); //Type 3 => Usersban
+        $count_user = $sql->rows("SELECT id FROM `{prefix_ipban}` WHERE typ = '3'"); //Type 3 => Usersban
         if($count_user >= 1) {
             $site = (isset($_GET['ub_side']) ? $_GET['ub_side'] : 1);
 
@@ -119,7 +118,7 @@ switch ($do) {
             $end = $site*10;
             $start = $end-10;
 
-            $count_user_nav = db("SELECT id FROM ".$db['ipban']." WHERE typ = '3' ORDER BY id DESC LIMIT ".$start.", 10",true,false); //Type System Ban ROW
+            $count_user_nav = $sql->rows("SELECT id FROM `{prefix_ipban}` WHERE typ = '3' ORDER BY id DESC LIMIT ".$start.", 10"); //Type System Ban ROW
 
             if($start != 0)
                 $pager_user = '<a href="?admin=ipban&ub_side='.($site-1).'&sfs_side='.(isset($_GET['sfs_side']) ? $_GET['sfs_side'] : 1).'"><img align="absmiddle" src="../inc/images/previous.png" alt="left" /></a>';
@@ -133,8 +132,8 @@ switch ($do) {
             else
                 $pager_user .= '<img src="../inc/images/next.png" alt="right" align="absmiddle" class="disabled" />';
 
-            $qry = db("SELECT * FROM ".$db['ipban']." WHERE typ = '3' ORDER BY id DESC LIMIT ".$start.", 10"); $color = 1;
-            while($get = _fetch($qry)) {
+            $qry = $sql->select("SELECT * FROM `{prefix_ipban}` WHERE typ = '3' ORDER BY id DESC LIMIT ".$start.", 10"); $color = 1;
+            foreach($qry as $get) {
                 $data_array = unserialize($get['data']);
                 $edit = show("page/button_edit_single", array("id" => $get['id'], "action" => "admin=ipban&amp;do=edit", "title" => _button_title_edit));
                 $delete = show("page/button_delete_single", array("id" => $get['id'], "action" => "admin=ipban&amp;do=delete", "title" => _button_title_del, "del" => _confirm_del_ipban));

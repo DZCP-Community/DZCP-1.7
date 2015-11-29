@@ -85,7 +85,7 @@ if(defined('_UserMenu')) {
 
                     $editedby = show(_edited_by, array("autor" => autor($userid), "time" => date("d.m.Y H:i", time())._uhr));
                     array_push($params, up($_POST['eintrag']), intval($_POST['reg']),up($editedby), intval($_GET['gbid']));
-                    $sql->update("UPDATE ".$db['usergb']." SET".$addme." `nachricht` = ?, `reg` = ?, `editby` = ? WHERE id = ?;",$params);
+                    $sql->update("UPDATE `{prefix_usergb}` SET".$addme." `nachricht` = ?, `reg` = ?, `editby` = ? WHERE id = ?;",$params);
                     $index = info(_gb_edited, "?action=user&show=gb&id=".$_GET['id']);
                 } else {
                     $index = error(_error_edit_post,1);

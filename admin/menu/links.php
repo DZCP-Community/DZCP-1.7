@@ -5,140 +5,92 @@
  */
 
 if(_adminMenu != 'true') exit;
+$where = $where.': '._config_links;
 
-    $where = $where.': '._config_links;
-      if($do == "new")
-      {
-        $linktyp = '
-<tr>
-  <td class="contentMainTop" width="25%"><span class="fontBold">'._link_type.':</span></td>
-  <td class="contentMainFirst" align="center">
-    <table class="hperc" cellspacing="2">
-      <tr>
-        <td style="width:20px"><input type="radio" name="type" class="checkbox" value="links" checked=\"checked\" /></td>
-        <td>'._link.'</td>
-      </tr>
-      <tr>
-        <td><input type="radio" name="type" class="checkbox" value="sponsoren" /></td>
-        <td>'._sponsor.'</td>
-      </tr>
-    </table>
-  </td>
-</tr>';
+switch ($do) {
+    case 'new':
         $show = show($dir."/form_links", array("head" => _links_admin_head,
-                                               "link" => _links_link,
-                                               "beschreibung" => _links_beschreibung,
-                                               "art" => _links_art,
-                                               "linktyp" => $linktyp,
-                                               "text" => _links_admin_textlink,
-                                               "banner" => _links_admin_bannerlink,
                                                "bchecked" => 'checked="checked"',
                                                "bnone" => "",
                                                "tchecked" => "",
                                                "llink" => "",
                                                "lbeschreibung" => "",
-                                               "btext" => _links_text,
                                                "ltext" => "",
                                                "what" => _button_value_add,
                                                "do" => "add"));
-      } elseif($do == "add") {
-        if(empty($_POST['link']) || empty($_POST['beschreibung']) || (isset($_POST['banner']) && empty($_POST['text'])))
-        {
-          if(empty($_POST['link']))             $show = error(_links_empty_link, 1);
-          elseif(empty($_POST['beschreibung'])) $show = error(_links_empty_beschreibung, 1);
-          elseif(empty($_POST['text']))         $show = error(_links_empty_text, 1);
+    break;
+    case 'add':
+        if(empty($_POST['link']) || empty($_POST['beschreibung']) || (isset($_POST['banner']) && empty($_POST['text']))) {
+            if(empty($_POST['link']))             
+                $show = error(_links_empty_link, 1);
+            elseif(empty($_POST['beschreibung'])) 
+                $show = error(_links_empty_beschreibung, 1);
+            elseif(empty($_POST['text']))         
+                $show = error(_links_empty_text, 1);
         } else {
-          $qry = db("INSERT INTO ".$db['links']."
-                     SET `url`          = '".links($_POST['link'])."',
-                         `text`         = '".up($_POST['text'])."',
-                         `banner`       = '".up($_POST['banner'])."',
-                         `beschreibung` = '".up($_POST['beschreibung'])."'");
-
-          $show = info(_link_added, "?admin=links");
+            $sql->insert("INSERT INTO `{prefix_links}` SET `url` = ?, `text` = ?, `banner` = ?, `beschreibung` = ?;",
+                  array(links($_POST['link']),up($_POST['text']),up($_POST['banner']),up($_POST['beschreibung'])));
+            $show = info(_link_added, "?admin=links");
         }
-      } elseif($do == "edit") {
-
-        $qry = db("SELECT * FROM ".$db[$_GET['type']]."
-                   WHERE id = '".intval($_GET['id'])."'");
-        $get = _fetch($qry);
-
-        if($get['banner'] == 1){
-             $bchecked = 'checked="checked"';
-             $bnone = "";
-        }else{
-            $tchecked = 'checked="checked"';
-            $bnone = "display:none";
-        }
-
-        $linktyp = '<input type="hidden" name="type" value="'.$_GET['type'].'" />';
+    break;
+    case 'edit':
+        $get = $sql->fetch("SELECT * FROM `{prefix_links}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        
+        $tchecked = (!$get['banner'] ? 'checked="checked"' : '');
+        $bchecked = ($get['banner'] ? 'checked="checked"' : '');
+        $bnone = ($get['banner'] ? '' : "display:none");
 
         $show = show($dir."/form_links", array("head" => _links_admin_head_edit,
-                                               "link" => _links_link,
-                                               "linktyp" => $linktyp,
-                                               "beschreibung" => _links_beschreibung,
-                                               "art" => _links_art,
-                                               "text" => _links_admin_textlink,
-                                               "banner" => _links_admin_bannerlink,
                                                "bchecked" => $bchecked,
                                                "tchecked" => $tchecked,
                                                "bnone" => $bnone,
-                                               "llink" => $get['url'],
+                                               "llink" => links(re($get['url'])),
                                                "lbeschreibung" => re($get['beschreibung']),
-                                               "btext" => _links_text,
                                                "ltext" => re($get['text']),
                                                "what" => _button_value_edit,
                                                "do" => "editlink&amp;id=".$_GET['id'].""));
-      } elseif($do == "editlink") {
-        if(empty($_POST['link']) || empty($_POST['beschreibung']) || (isset($_POST['banner']) && empty($_POST['text'])))
-        {
-          if(empty($_POST['link']))             $show = error(_links_empty_link, 1);
-          elseif(empty($_POST['beschreibung'])) $show = error(_links_empty_beschreibung, 1);
-          elseif(empty($_POST['text']))         $show = error(_links_empty_text, 1);
+    break;
+    case 'editlink':
+        if(empty($_POST['link']) || empty($_POST['beschreibung']) || (isset($_POST['banner']) && empty($_POST['text']))) {
+          if(empty($_POST['link']))             
+              $show = error(_links_empty_link, 1);
+          elseif(empty($_POST['beschreibung'])) 
+              $show = error(_links_empty_beschreibung, 1);
+          elseif(empty($_POST['text']))         
+              $show = error(_links_empty_text, 1);
         } else {
-            $qry = db("UPDATE ".$db['links']."
-                       SET `url`          = '".links($_POST['link'])."',
-                           `text`         = '".up($_POST['text'])."',
-                           `banner`       = '".up($_POST['banner'])."',
-                           `beschreibung` = '".up($_POST['beschreibung'])."'
-                       WHERE id = '".intval($_GET['id'])."'");
-
-          $show = info(_link_edited, "?admin=links");
+            $sql->update("UPDATE `{prefix_links}` SET `url` = ?, `text` = ?, `banner` = ?, `beschreibung` = ? WHERE id = ?;",
+                    array(up(links($_POST['link'])),up($_POST['text']),up($_POST['banner']),up($_POST['beschreibung']),intval($_GET['id'])));
+            $show = info(_link_edited, "?admin=links");
         }
-      } elseif($do == "delete") {
-        $qry = db("DELETE FROM ".$db[$_GET['type']]."
-                   WHERE id = '".intval($_GET['id'])."'");
-
+    break;
+    case 'delete':
+        $sql->delete("DELETE FROM `{prefix_links}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $show = info(_link_deleted, "?admin=links");
-      } else {
-        $qry = db("SELECT * FROM ".$db['links']."
-                   ORDER BY banner DESC");
-        while($get = _fetch($qry))
-        {
-          $edit = show("page/button_edit_single", array("id" => $get['id'],
-                                                        "action" => "admin=links&amp;do=edit&amp;type=links",
-                                                        "title" => _button_title_edit));
-          $delete = show("page/button_delete_single", array("id" => $get['id'],
-                                                            "action" => "admin=links&amp;do=delete&amp;type=links",
-                                                            "title" => _button_title_del,
-                                                            "del" => convSpace(_confirm_del_link)));
+    break;
+    default:
+        $qry = $sql->select("SELECT * FROM `{prefix_links}` ORDER BY `banner` DESC;");
+        foreach($qry as $get) {
+            $edit = show("page/button_edit_single", array("id" => $get['id'],
+                                                          "action" => "admin=links&amp;do=edit",
+                                                          "title" => _button_title_edit));
+          
+            $delete = show("page/button_delete_single", array("id" => $get['id'],
+                                                              "action" => "admin=links&amp;do=delete",
+                                                              "title" => _button_title_del,
+                                                              "del" => convSpace(_confirm_del_link)));
 
-          $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-
-          $show1 .= show($dir."/links_show", array("link" => cut(re($get['url']),40),
-                                                   "class" => $class,
-                                                   "type" => "links",
-                                                   "edit" => $edit,
-                                                   "delete" => $delete
-                                                   ));
+            $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
+            $show .= show($dir."/links_show", array("link" => cut(re($get['url']),40),
+                                                    "class" => $class,
+                                                    "edit" => $edit,
+                                                    "delete" => $delete));
         }
 
-        if(empty($show1))
-            $show1 = '<tr><td colspan="3" class="contentMainSecond">'._no_entrys.'</td></tr>';
+        if(empty($show)) {
+            $show = '<tr><td colspan="3" class="contentMainSecond">'._no_entrys.'</td></tr>';
+        }
 
-        $show = show($dir."/links", array("head1" => _links_head,
-                                          "head2" => _sponsor_head,
-                                          "titel" => _link,
-                                          "show1" => $show1,
-                                          "add" => _links_admin_head
-                                          ));
-      }
+        $show = show($dir."/links", array("show" => $show));
+    break;
+}

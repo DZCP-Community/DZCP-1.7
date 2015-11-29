@@ -29,7 +29,6 @@ function gz_output($output='') {
         switch (_edition) {
             case 'dev': $dev_info = ' - Development Edition [ Runtime: '.$time.' ]'; break;
             case 'society': $dev_info = ' - Society Edition'; break;
-            case 'phar': $dev_info = ' - PHAR Kernel [ Runtime: '.$time.' - Version: '._phar_kernel.' ]'; break;
             default: $dev_info = ''; break;
         }
 

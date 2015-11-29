@@ -20,17 +20,15 @@ if(_adminMenu != 'true') exit;
 
             $error = show("errors/errortable", array("error" => $error));
 
-            $qry = db("SELECT id,name FROM ".$db['squads']."
-                       ORDER BY name");
-            while($get = _fetch($qry))
-            {
-          if($_POST['to'] == $get['id']) $selsq = 'selected="selected"';
-          else $selsq = "";
+            $qry = $sql->select("SELECT id,name FROM `{prefix_squads}` ORDER BY name");
+            foreach($qry as $get) {
+              if($_POST['to'] == $get['id']) $selsq = 'selected="selected"';
+              else $selsq = "";
 
-          $squads .= show(_to_squads, array("id" => $get['id'],
-                                            "sel" => $selsq,
-                                            "name" => re($get['name'])));
-        }
+              $squads .= show(_to_squads, array("id" => $get['id'],
+                                                "sel" => $selsq,
+                                                "name" => re($get['name'])));
+            }
 
         if($_POST['to'] == "reg") $selr = 'selected="selected"';
         elseif($_POST['to'] == "member") $selm = 'selected="selected"';
@@ -62,14 +60,12 @@ if(_adminMenu != 'true') exit;
                   $message = show(bbcode_email(settings::get('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
                   $subject = re(settings::get('eml_nletter_subj'));
 
-          $qry = db("SELECT email FROM ".$db['users']."
-                     WHERE nletter = 1");
-          while($get = _fetch($qry))
-          {
+          $qry = $sql->select("SELECT email FROM `{prefix_users}` WHERE nletter = 1");
+          foreach($qry as $get) {
             sendMail(re($get['email']),$subject,$message);
           }
 
-              $qry = db("UPDATE ".$db['userstats']."
+              $sql->update("UPDATE `{prefix_userstats}`
                          SET `writtenmsg` = writtenmsg+1
                          WHERE user = ".intval($userid));
 
@@ -79,14 +75,12 @@ if(_adminMenu != 'true') exit;
           $message = show(bbcode_email(settings::get('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
                   $subject = re(settings::get('eml_nletter_subj'));
 
-          $qry = db("SELECT email FROM ".$db['users']."
-                     WHERE level >= 2");
-          while($get = _fetch($qry))
-          {
+          $qry = $sql->select("SELECT email FROM `{prefix_users}` WHERE level >= 2");
+          foreach($qry as $get) {
             sendMail(re($get['email']),$subject,$message);
           }
 
-              $qry = db("UPDATE ".$db['userstats']."
+              $sql->update("UPDATE `{prefix_userstats}`
                         SET `writtenmsg` = writtenmsg+1
                         WHERE user = ".intval($userid));
 
@@ -95,16 +89,15 @@ if(_adminMenu != 'true') exit;
           $message = show(bbcode_email(settings::get('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
                   $subject = re(settings::get('eml_nletter_subj'));
 
-          $qry = db("SELECT s2.email FROM ".$db['squaduser']." AS s1
-                     LEFT JOIN ".$db['users']." AS s2
+          $qry = $sql->select("SELECT s2.email FROM `{prefix_squaduser}` AS s1
+                     LEFT JOIN `{prefix_users}` AS s2
                      ON s1.user = s2.id
                      WHERE s1.squad = '".$_POST['to']."'");
-          while($get = _fetch($qry))
-          {
+          foreach($qry as $get) {
             sendMail(re($get['email']),$subject,$message);
           }
 
-              $qry = db("UPDATE ".$db['userstats']."
+              $sql->update("UPDATE `{prefix_userstats}`
                           SET `writtenmsg` = writtenmsg+1
                           WHERE user = ".intval($userid));
 
@@ -112,9 +105,8 @@ if(_adminMenu != 'true') exit;
         }
       }
     } else {
-          $qry = db("SELECT id,name FROM ".$db['squads']." ORDER BY name"); $squads = '';
-          while($get = _fetch($qry))
-          {
+          $qry = $sql->select("SELECT id,name FROM `{prefix_squads}` ORDER BY name"); $squads = '';
+          foreach($qry as $get) {
               $squads .= show(_to_squads, array("id" => $get['id'],
                                                 "sel" => "",
                                                 "name" => re($get['name'])));

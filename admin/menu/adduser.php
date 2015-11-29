@@ -28,13 +28,14 @@ if(isset($_POST['user'])) {
         $show = error(_error_email_exists, 1);
     } else {
         $mkpwd = empty($_POST['pwd']) ? mkpwd() : $_POST['pwd'];
-        $pwd = md5($mkpwd);
+        $pwd = pwd_encoder($mkpwd);
         $bday = ($_POST['t'] && $_POST['m'] && $_POST['j'] ? cal($_POST['t']).".".cal($_POST['m']).".".$_POST['j'] : 0);
-        $qry = $sql->insert("INSERT INTO `{prefix_users}` "
+        $sql->insert("INSERT INTO `{prefix_users}` "
                           . "SET `user` = ?,"
                           . "`nick` = ?, "
                           . "`email` = ?,"
                           . "`pwd` = ?, "
+                          . "`pwd_encoder` = ?, "
                           . "`rlname` = ?, "
                           . "`sex` = ?, "
                           . "`bday` = ?, "
@@ -45,7 +46,7 @@ if(isset($_POST['user'])) {
                           . "`time` = ?, "
                           . "`gmaps_koord` = ?, "
                           . "`status` = 1;",
-                array(up($_POST['user']),up($_POST['nick']),up($_POST['email']),up($pwd),up($_POST['rlname']),intval($_POST['sex']),
+                array(up($_POST['user']),up($_POST['nick']),up($_POST['email']),up($pwd),settings::get('default_pwd_encoder'),up($_POST['rlname']),intval($_POST['sex']),
                 (!$bday ? 0 : strtotime($bday)),up($_POST['city']),up($_POST['land']),$time=time(),intval($_POST['level']),$time,up($_POST['gmaps_koord'])));
 
         $insert_id = $sql->lastInsertId();

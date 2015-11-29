@@ -58,8 +58,8 @@ if(defined('_Clanwars')) {
       }
 
       $anz_ges_wars = show(_cw_stats_ges_wars, array("ge_wars" => $anz_ge_wars));
-      $anz_ges_points = show(_cw_stats_ges_points, array("ges_won" => sum($db['cw'],"","punkte"),
-                                                                                  "ges_lost" => sum($db['cw'],"","gpunkte")));
+      $anz_ges_points = show(_cw_stats_ges_points, array("ges_won" => sum('{prefix_clanwars}',"","punkte"),
+                                                                                  "ges_lost" => sum('{prefix_clanwars}',"","gpunkte")));
 
       $anz_squads = cnt("{prefix_squads}", " WHERE status = '1'");
 

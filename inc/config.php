@@ -67,6 +67,10 @@ define('captcha_degrade_audio', false);
 define('captcha_sox_binary_path', 'sox');
 
 define('count_clicks_expires', (48*60*60)); // Wie Lange die IPs fur den Click-Counter gespeichert bleiben.
+
+define('php_code_enabled', false); // Erlaubt es auf "Adminbereich: Seiten erstellen/verwalten", PHP Code zu verwenden. * Nur Aktivieren wenn es gebracht wird! *
+
+
 //
 //
 // -> Zeichen fur den Passwort Generator
@@ -109,7 +113,7 @@ $config_cache = array();
 $config_cache['use_cache'] = true; // Verwende einen Cache, um abfragen zwischen speichern
 $config_cache['dbc'] = true; //Verwende database query caching * nur mit memory cache
 
-/* !!! Cache Manual Overwrite !!! */
+/* !!! Manual Cache Overwrite !!! */
 $config_cache['storage'] = "auto"; // auto,memcache,files,sqlite,wincache,xcache,predis,redis,ssdb oder apc
 $config_cache['memcache'] = array(array("127.0.0.1",11211,1)); //Adressen fur die memcache server
 $config_cache['redis'] = array("host"  => "127.0.0.1",
@@ -117,6 +121,7 @@ $config_cache['redis'] = array("host"  => "127.0.0.1",
                                "password"  =>  "",
                                "database"  =>  "",
                                "timeout"   =>  "");
+
 $config_cache['ssdb'] = array("host"  => "127.0.0.1",
                               "port"  =>  8888,
                               "password"  =>  "",

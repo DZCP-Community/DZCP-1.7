@@ -71,8 +71,8 @@ if(defined('_Forum')) {
         }
     }
     
-    $threads = show(_forum_cnt_threads, array("threads" => cnt($db['f_threads'])));
-    $posts = show(_forum_cnt_posts, array("posts" => cnt($db['f_posts'])+cnt($db['f_threads'])));
+    $threads = show(_forum_cnt_threads, array("threads" => cnt("{prefix_forumthreads}")));
+    $posts = show(_forum_cnt_posts, array("posts" => cnt("{prefix_forumposts}")+cnt("{prefix_forumthreads}")));
 
     $qrytp = $sql->select("SELECT `id`,`user`,`forumposts` FROM `{prefix_userstats}` ORDER BY `forumposts` DESC LIMIT 5;");
     $show_top = '';

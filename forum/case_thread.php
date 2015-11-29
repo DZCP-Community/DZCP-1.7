@@ -183,10 +183,10 @@ if(defined('_Forum')) {
                                                   "addglobal" => _forum_admin_addglobal,
                                                   "global" => $global));
         }
-          $getv = $sql->fetch("SELECT * FROM ".$db['votes']." WHERE id = '".$get['vote']."'");
+          $getv = $sql->fetch("SELECT * FROM `{prefix_votes}` WHERE id = '".$get['vote']."'");
 
-            $fget = $sql->fetch("SELECT s1.intern,s2.id FROM ".$db['f_kats']." AS s1
-                         LEFT JOIN ".$db['f_skats']." AS s2 ON s2.`sid` = s1.id
+            $fget = $sql->fetch("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
+                         LEFT JOIN `{prefix_forumsubkats}` AS s2 ON s2.`sid` = s1.id
                          WHERE s2.`id` = '".intval($_GET['kid'])."'");
 
             if($_POST['intern']) $intern = 'checked="checked"';
@@ -696,7 +696,7 @@ if(defined('_Forum')) {
                         }
                         if(!empty($_POST['a7']))
                         {
-                            $qry = $sql->insert("INSERT INTO `{prefix_vote_results}`
+                            $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a7',
                                                          `sel`  = '".up($_POST['a7'])."'");

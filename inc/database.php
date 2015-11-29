@@ -10,39 +10,6 @@ define('pdo_disable_update_statement', false);
 define('pdo_disable_insert_statement', false);
 define('pdo_disable_delete_statement', false);
 
-    /*
-     * 
-     * LOOPS
-     * 
-    foreach($sql->select("SELECT * FROM `".$db['settings']."`;") as $row) {
-        echo '<pre>';
-        print_r($row);
-        echo '<p>';
-    }
-     * */
-
-    /*
-    $rows = $database->select();
-    while($row = array_shift($rows)){
-
-    }
-     * 
-     * Functions Calls
-     * 
-     	$sql->update();
-	$sql->insert();
-	$sql->select();
-	$sql->rows();
-	$sql->fetch();
-	$sql->delete();
-	$sql->rowCount();
-	$sql->lastInsertId();
-	$sql->query();
-        $sql->show();
-        $sql->getConfig();
-        $sql->optimize();
-*/
-
 final class database {
     protected $dbConf = array();
     protected $instances = array();
@@ -297,8 +264,7 @@ final class database {
         // replace sql prefix
         if(strpos($qry,"{prefix_")!==false) {
             $qry = preg_replace_callback("#\{prefix_(.*?)\}#",function($tb) { 
-                global $sql_prefix; 
-                return str_ireplace($tb[0],$sql_prefix.$tb[1],$tb[0]); 
+                return str_ireplace($tb[0],$this->dbConf[$this->active]['prefix'].$tb[1],$tb[0]); 
             },$qry);
         }
 

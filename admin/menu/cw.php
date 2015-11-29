@@ -279,6 +279,6 @@ switch ($do) {
             $show = '<tr><td colspan="5" class="contentMainSecond">' . _no_entrys . '</td></tr>';
         }
 
-        $show = show($dir."/clanwars", array("squads" => $squads, "show" => $show, "navi" => nav(cnt($db['cw']),$maxadmincw,"?admin=cw&amp;squad=".(isset($_GET['squad']) ? $_GET['squad'] : ''))));
+        $show = show($dir."/clanwars", array("squads" => $squads, "show" => $show, "navi" => nav(cnt('{prefix_clanwars}'),$maxadmincw,"?admin=cw&amp;squad=".(isset($_GET['squad']) ? $_GET['squad'] : ''))));
     break;
 }

@@ -6,8 +6,8 @@
 
 if (!defined('_Stats')) exit();
 
-$allthreads = cnt($db['f_threads']);
-$allposts = cnt($db['f_posts']);
+$allthreads = cnt('{prefix_forumthreads}');
+$allposts = cnt('{prefix_forumposts}');
 $pperd = 0; $ppert = 0; $topposter = '-';
 if($allthreads > 0 && $allposts >= 0) {
     $ppert = round($allposts/$allthreads,2);

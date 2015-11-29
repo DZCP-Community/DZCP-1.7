@@ -16,12 +16,28 @@ if(defined('_UserMenu')) {
         if (settings::get('securelogin') && (!isset($_POST['secure']) || !$securimage->check($_POST['secure']))) {
             $index = error(captcha_mathematic ? _error_invalid_regcode_mathematic : _error_invalid_regcode);
         } else {
-            if($sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user` = ? AND `pwd` = ? AND `level` != 0;",array(up($_POST['user']),md5($_POST['pwd'])))) {
-                $get = $sql->fetch("SELECT `id`,`user`,`nick`,`pwd`,`email`,`level`,`time` "
+            $get = $sql->fetch("SELECT `id`,`user`,`nick`,`pwd`,`pwd_encoder`,`email`,`level`,`time` "
                         . "FROM `{prefix_users}` "
-                        . "WHERE `user` = ? AND `pwd` = ? AND `level` != 0;", 
-                array(up($_POST['user']), md5($_POST['pwd'])));
+                        . "WHERE `user` = ? AND `level` != 0;", 
+                array(up($_POST['user'])));
+
+            $login = false; $pwd = '';
+            if($get['id'] >= 1 && !empty($_POST['pwd'])) {
+                $pwd = pwd_encoder($_POST['pwd'],$get['pwd_encoder']);
+                $login = true;
+            }
+ 
+            if($get['id'] >= 1 && $login && re($get['pwd']) == $pwd) {
                 if (!isBanned($get['id'])) {
+                    //Update Password encoding
+                    if($get['pwd_encoder'] != settings::get('default_pwd_encoder')) {
+                        $sql->update("UPDATE `{prefix_users}` SET `pwd` = ?, `pwd_encoder` = ? "
+                                . "WHERE `id` = ?;", array(($pass = pwd_encoder($_POST['pwd'])), 
+                                    settings::get('default_pwd_encoder'), $get['id']));
+                        $get['pwd'] = $pass;
+                        $get['pwd_encoder'] = settings::get('default_pwd_encoder');
+                    }
+                    
                     $permanent_key = '';
                     if (isset($_POST['permanent'])) {
                         cookie::put('id', $get['id']);

@@ -6,7 +6,7 @@
 
 if (!defined('_Links')) exit();
 
-$qry = $sql->select("SELECT * FROM ".$db['links']." ORDER BY banner DESC;");
+$qry = $sql->select("SELECT * FROM `{prefix_links}` ORDER BY banner DESC;");
 if($sql->rowCount()) {
     foreach($qry as $get) {
         if($get['banner']) {

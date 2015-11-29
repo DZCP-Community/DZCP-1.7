@@ -9,8 +9,8 @@ $where = $where.': '._news_admin_head;
 
 switch ($do) {
     case 'add':
-        $qryk = db("SELECT id,kategorie FROM ".$db['newskat'].""); $kat = '';
-        while($getk = _fetch($qryk)) {
+        $qryk = $sql->select("SELECT id,kategorie FROM `{prefix_newskat}`"); $kat = '';
+        foreach($qry as $get) {
             $kat .= show(_select_field, array("value" => $getk['id'], "sel" => "", "what" => re($getk['kategorie'])));
         }
 
@@ -79,8 +79,8 @@ switch ($do) {
             if(empty($_POST['titel']))
                 $error = _empty_news_title;
 
-            $qryk = db("SELECT id,kategorie FROM ".$db['newskat'].""); $kat = '';
-            while($getk = _fetch($qryk)) {
+            $qryk = $sql->select("SELECT id,kategorie FROM `{prefix_newskat}`"); $kat = '';
+            foreach($qryk as $getk) {
                 $sel = ($_POST['kat'] == $getk['id'] ? 'selected="selected"' : '');
                 $kat .= show(_select_field, array("value" => $getk['id'],
                                                   "sel" => $sel,
@@ -160,7 +160,7 @@ switch ($do) {
                 $datum = "`datum` = '".intval($timeshifttime)."',";
             }
 
-            db("INSERT INTO ".$db['news']."
+            $sql->insert("INSERT INTO `{prefix_news}`
                 SET `autor`      = '".intval($userid)."',
                     `kat`        = '".intval($_POST['kat'])."',
                     `titel`      = '".up($_POST['titel'])."',
@@ -189,9 +189,9 @@ switch ($do) {
         }
     break;
     case 'edit':
-        $get = db("SELECT * FROM ".$db['news']." WHERE id = '".intval($_GET['id'])."'",false,true);
-        $qryk = db("SELECT id,kategorie FROM ".$db['newskat'].""); $kat = '';
-        while($getk = _fetch($qryk)) {
+        $get = $sql->fetch("SELECT * FROM `{prefix_news}` WHERE id = '".intval($_GET['id'])."'");
+        $qryk = $sql->select("SELECT id,kategorie FROM `{prefix_newskat}`"); $kat = '';
+        foreach($qryk as $getk) {
             $sel = ($get['kat'] == $getk['id'] ? 'selected="selected"' : '');
             $kat .= show(_select_field, array("value" => $getk['id'],
                                               "sel" => $sel,
@@ -290,7 +290,7 @@ switch ($do) {
                 $datum = "`datum` = '".intval($timeshifttime)."',";
             }
 
-            db("UPDATE ".$db['news']."
+            $sql->update("UPDATE `{prefix_news}`
                 SET `kat`        = '".intval($_POST['kat'])."',
                     `titel`      = '".up($_POST['titel'])."',
                     `text`       = '".up($_POST['newstext'])."',
@@ -335,15 +335,15 @@ switch ($do) {
     break;
     case 'public':
         if(isset($_GET['what']) && $_GET['what'] == 'set')
-            db("UPDATE ".$db['news']." SET `public` = '1', `datum`  = '".time()."' WHERE id = '".intval($_GET['id'])."'");
+            $sql->update("UPDATE `{prefix_news}` SET `public` = '1', `datum`  = '".time()."' WHERE id = '".intval($_GET['id'])."'");
         else
-            db("UPDATE ".$db['news']." SET `public` = '0' WHERE id = '".intval($_GET['id'])."'");
+            $sql->update("UPDATE `{prefix_news}` SET `public` = '0' WHERE id = '".intval($_GET['id'])."'");
 
         header("Location: ?admin=newsadmin");
     break;
     case 'delete':
-        db("DELETE FROM ".$db['news']." WHERE id = '".intval($_GET['id'])."'");
-        db("DELETE FROM ".$db['newscomments']." WHERE news = '".intval($_GET['id'])."'");
+        $sql->delete("DELETE FROM `{prefix_news}` WHERE id = '".intval($_GET['id'])."'");
+        $sql->delete("DELETE FROM `{prefix_newscomments}` WHERE news = '".intval($_GET['id'])."'");
 
         //Remove Pic
         foreach($picformat as $tmpendung) {
@@ -385,10 +385,10 @@ switch ($do) {
         $show = info(_newspic_deleted, "?admin=newsadmin&do=edit&id=".intval($_GET['id'])."");
     break;
     default:
-        $entrys = cnt($db['news']); $show_ = '';
-        $qry = db("SELECT * FROM ".$db['news']." ".orderby_sql(array("titel","datum","autor"), 'ORDER BY `public` ASC, `datum` DESC')."
+        $entrys = cnt('{prefix_news}'); $show_ = '';
+        $qry = $sql->select("SELECT * FROM `{prefix_news}` ".orderby_sql(array("titel","datum","autor"), 'ORDER BY `public` ASC, `datum` DESC')."
                    LIMIT ".($page - 1)*settings::get('m_adminnews').",".settings::get('m_adminnews')."");
-        while($get = _fetch($qry)) {
+        foreach($qry as $get) {
             $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                           "action" => "admin=newsadmin&amp;do=edit",
                                                           "title" => _button_title_edit));

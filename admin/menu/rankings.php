@@ -36,7 +36,7 @@ switch ($do) {
                 $show = error(_error_empty_rank, 1);
             }
         } else {
-            $qry = $sql->insert("INSERT INTO `{prefix_rankings}` SET `league` = ?, "
+            $sql->insert("INSERT INTO `{prefix_rankings}` SET `league` = ?, "
                                                                   . "`squad` = ?, "
                                                                   . "`url` = ?, "
                                                                   . "`rank` = ?, "

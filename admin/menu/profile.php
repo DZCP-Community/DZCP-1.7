@@ -27,33 +27,28 @@ if(_adminMenu != 'true') exit;
         {
           $show = error(_profil_no_type,1);
         } else {
-          $add = db("INSERT INTO ".$db['profile']."
+          $sql->insert("INSERT INTO `{prefix_profile}`
                      SET `name` = '".up($_POST['name'])."',
                                    `type` = '".intval($_POST['type'])."',
                          `kid`  = '".intval($_POST['kat'])."'");
-              $insID = _insert_id();
+              $insID = $sql->lastInsertId();
 
           $feldname = "custom_".$insID;
-              $add = db("UPDATE ".$db['profile']."
+               $sql->update("UPDATE `{prefix_profile}`
                      SET `feldname` = '".$feldname."'
                              WHERE id = '".intval($insID)."'");
 
-              $add = db("ALTER TABLE `".$db['users']."` ADD `".$feldname."` varchar(249) NOT NULL DEFAULT ''");
+              $sql->query("ALTER TABLE `{prefix_users}` ADD `".$feldname."` varchar(249) NOT NULL DEFAULT ''");
 
               $show = info(_profile_added,"?admin=profile");
         }
       } elseif($do == "delete") {
-        $qry = db("SELECT feldname FROM ".$db['profile']."
-                   WHERE id = '".intval($_GET['id'])."'");
-        $get = _fetch($qry);
-          $del = db("ALTER TABLE ".$db['users']." DROP `".$get['feldname']."`");
-        $del = db("DELETE FROM ".$db['profile']."
-                   WHERE id = '".intval($_GET['id'])."'");
+        $get = $sql->fetch("SELECT feldname FROM `{prefix_profile}` WHERE id = '".intval($_GET['id'])."'");
+        $sql->query("ALTER TABLE `{prefix_users}` DROP `".$get['feldname']."`");
+        $sql->delete("DELETE FROM `{prefix_profile}` WHERE id = '".intval($_GET['id'])."'");
         $show = info(_profil_deleted, "?admin=profile");
       } elseif($do == "edit") {
-        $qry = db("SELECT * FROM ".$db['profile']."
-                   WHERE id = '".intval($_GET['id'])."'");
-        $get = _fetch($qry);
+        $get = $sql->fetch("SELECT * FROM `{prefix_profile}` WHERE id = '".intval($_GET['id'])."'");
 
         $shown = str_replace("<option value='".$get['shown']."'>", "<option selected=\"selected\" value='".$get['shown']."'>", _profile_shown_dropdown);
           $kat = str_replace("<option value='".$get['kid']."'>", "<option selected=\"selected\" value='".$get['kid']."'>", _profile_kat_dropdown);
@@ -75,7 +70,7 @@ if(_adminMenu != 'true') exit;
         {
           $show = error(_profil_no_name,1);
         } else {
-              $add = db("UPDATE ".$db['profile']."
+              $sql->update("UPDATE `{prefix_profile}`
                      SET `name`  = '".up($_POST['name'])."',
                                    `kid`   = '".intval($_POST['kat'])."',
                                    `type`  = '".intval($_POST['type'])."',
@@ -87,21 +82,20 @@ if(_adminMenu != 'true') exit;
       } elseif($do == "shown") {
           if($_GET['what'] == 'set')
         {
-          $upd = db("UPDATE ".$db['profile']."
+          $sql->update("UPDATE `{prefix_profile}`
                      SET `shown` = '1'
                      WHERE id = '".intval($_GET['id'])."'");
         } elseif($_GET['what'] == 'unset') {
-          $upd = db("UPDATE ".$db['profile']."
+          $sql->update("UPDATE `{prefix_profile}`
                      SET `shown` = '0'
                      WHERE id = '".intval($_GET['id'])."'");
         }
         header("Location: ?admin=profile");
       } else {
-        $qry = db("SELECT * FROM ".$db['profile']."
+        $qry = $sql->select("SELECT * FROM `{prefix_profile}`
                    WHERE kid = '1'
                          ORDER BY name");
-        while($get = _fetch($qry))
-        {
+        foreach($qry as $get) {
           $shown = ($get['shown'] == 1)
                ? '<a href="?admin=profile&amp;do=shown&amp;id='.$get['id'].'&amp;what=unset"><img src="../inc/images/yes.gif" alt="" title="'._non_public.'" /></a>'
                : '<a href="?admin=profile&amp;do=shown&amp;id='.$get['id'].'&amp;what=set"><img src="../inc/images/no.gif" alt="" title="'._public.'" /></a>';
@@ -126,11 +120,10 @@ if(_adminMenu != 'true') exit;
                                                          "del" => $delete));
         }
 
-        $qry = db("SELECT * FROM ".$db['profile']."
+        $qry = $sql->select("SELECT * FROM `{prefix_profile}`
                    WHERE kid = '2'
                          ORDER BY name");
-        while($get = _fetch($qry))
-        {
+        foreach($qry as $get) {
           $shown = ($get['shown'] == 1)
                ? '<a href="?admin=profile&amp;do=shown&amp;id='.$get['id'].'&amp;what=unset"><img src="../inc/images/yes.gif" alt="" title="'._non_public.'" /></a>'
                : '<a href="?admin=profile&amp;do=shown&amp;id='.$get['id'].'&amp;what=set"><img src="../inc/images/no.gif" alt="" title="'._public.'" /></a>';
@@ -154,11 +147,10 @@ if(_adminMenu != 'true') exit;
                                                         "edit" => $edit,
                                                         "del" => $delete));
         }
-        $qry = db("SELECT * FROM ".$db['profile']."
+        $qry = $sql->select("SELECT * FROM `{prefix_profile}`
                    WHERE kid = '3'
                          ORDER BY name");
-        while($get = _fetch($qry))
-        {
+        foreach($qry as $get) {
           $shown = ($get['shown'] == 1)
                ? '<a href="?admin=profile&amp;do=shown&amp;id='.$get['id'].'&amp;what=unset"><img src="../inc/images/yes.gif" alt="" title="'._non_public.'" /></a>'
                : '<a href="?admin=profile&amp;do=shown&amp;id='.$get['id'].'&amp;what=set"><img src="../inc/images/no.gif" alt="" title="'._public.'" /></a>';
@@ -182,11 +174,10 @@ if(_adminMenu != 'true') exit;
                                                            "edit" => $edit,
                                                            "del" => $delete));
         }
-          $qry = db("SELECT * FROM ".$db['profile']."
+          $qry = $sql->select("SELECT * FROM `{prefix_profile}`
                    WHERE kid = '4'
                          ORDER BY name");
-        while($get = _fetch($qry))
-        {
+        foreach($qry as $get) {
            $shown = ($get['shown'] == 1)
                ? '<a href="?admin=profile&amp;do=shown&amp;id='.$get['id'].'&amp;what=unset"><img src="../inc/images/yes.gif" alt="" title="'._non_public.'" /></a>'
                : '<a href="?admin=profile&amp;do=shown&amp;id='.$get['id'].'&amp;what=set"><img src="../inc/images/no.gif" alt="" title="'._public.'" /></a>';
@@ -210,11 +201,10 @@ if(_adminMenu != 'true') exit;
                                                          "edit" => $edit,
                                                          "del" => $delete));
         }
-        $qry = db("SELECT * FROM ".$db['profile']."
+        $qry = $sql->select("SELECT * FROM `{prefix_profile}`
                    WHERE kid = '5'
                          ORDER BY name");
-        while($get = _fetch($qry))
-        {
+        foreach($qry as $get) {
           $shown = ($get['shown'] == 1)
                ? '<a href="?admin=profile&amp;do=shown&amp;id='.$get['id'].'&amp;what=unset"><img src="../inc/images/yes.gif" alt="" title="'._non_public.'" /></a>'
                : '<a href="?admin=profile&amp;do=shown&amp;id='.$get['id'].'&amp;what=set"><img src="../inc/images/no.gif" alt="" title="'._public.'" /></a>';

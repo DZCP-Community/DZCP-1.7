@@ -75,7 +75,7 @@ switch ($where) {
                                                 "question" => _votes_admin_question,
                                                 "answer" => _votes_admin_answer));
         } else {
-          $qry = db("INSERT INTO ".$db['votes']."
+          $sql->insert("INSERT INTO `{prefix_votes}`
                      SET `datum`  = '".time()."',
                          `titel`  = '".up($_POST['question'])."',
                          `intern` = '".intval($_POST['intern'])."',
@@ -83,68 +83,68 @@ switch ($where) {
 
           $vid = _insert_id();
 
-          $qry = db("INSERT INTO ".$db['vote_results']."
+          $sql->insert("INSERT INTO `{prefix_vote_results}`
                     SET `vid`   = '".intval($vid)."',
                         `what`  = 'a1',
                         `sel`   = '".up($_POST['a1'])."'");
 
-          $qry = db("INSERT INTO ".$db['vote_results']."
+          $sql->insert("INSERT INTO `{prefix_vote_results}`
                      SET `vid`  = '".intval($vid)."',
                          `what` = 'a2',
                          `sel`  = '".up($_POST['a2'])."'");
 
           if(!empty($_POST['a3']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a3',
                            `sel`  = '".up($_POST['a3'])."'");
           }
           if(!empty($_POST['a4']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a4',
                            `sel`  = '".up($_POST['a4'])."'");
           }
           if(!empty($_POST['a5']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a5',
                            `sel`  = '".up($_POST['a5'])."'");
           }
           if(!empty($_POST['a6']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a6',
                            `sel`  = '".up($_POST['a6'])."'");
           }
           if(!empty($_POST['a7']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a7',
                            `sel`  = '".up($_POST['a7'])."'");
           }
           if(!empty($_POST['a8']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a8',
                            `sel`  = '".up($_POST['a8'])."'");
           }
           if(!empty($_POST['a9']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a9',
                            `sel`  = '".up($_POST['a9'])."'");
           }
           if(!empty($_POST['a10']))
           {
-            $qry = db("INSERT INTO ".$db['vote_results']."
+            $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a10',
                            `sel`  = '".up($_POST['a10'])."'");
@@ -153,20 +153,13 @@ switch ($where) {
           $show = info(_vote_admin_successful, "?admin=votes");
         }
       } elseif($do == "delete") {
-        $qry = db("DELETE FROM ".$db['votes']."
-                   WHERE id = '".intval($_GET['id'])."'");
-
-        $qry = db("DELETE FROM ".$db['vote_results']."
-                   WHERE vid = '".intval($_GET['id'])."'");
-
-        db("DELETE FROM ".$db['ipcheck']." WHERE what = 'vid_".$_GET['id']."'");
+        $sql->delete("DELETE FROM `{prefix_votes}` WHERE id = '".intval($_GET['id'])."'");
+        $sql->delete("DELETE FROM `{prefix_vote_results}` WHERE vid = '".intval($_GET['id'])."'");
+        $sql->delete("DELETE FROM `{prefix_ipcheck}` WHERE what = 'vid_".$_GET['id']."'");
 
         $show = info(_vote_admin_delete_successful, "?admin=votes");
       } elseif($do == "edit") {
-        $qry = db("SELECT * FROM ".$db['votes']."
-                   WHERE id = '".intval($_GET['id'])."'");
-        $get = _fetch($qry);
-
+        $get = $sql->fetch("SELECT * FROM `{prefix_votes}` WHERE id = '".intval($_GET['id'])."'");
         if($get['intern'] == "1") $intern = 'checked="checked"';
         if($get['closed'] == "1") $isclosed = 'checked="checked"';
 
@@ -198,22 +191,20 @@ switch ($where) {
                                               "question" => _votes_admin_question,
                                               "answer" => _votes_admin_answer));
       } elseif($do == "editvote") {
-        $qry = db("SELECT * FROM ".$db['vote_results']."
-                  WHERE vid = '".intval($_GET['id'])."'");
-        $get = _fetch($qry);
+        $get = $sql->fetch("SELECT * FROM `{prefix_vote_results}` WHERE vid = '".intval($_GET['id'])."'");
 
-        $upd = db("UPDATE ".$db['votes']."
+        $sql->update("UPDATE `{prefix_votes}`
                    SET `titel`  = '".up($_POST['question'])."',
                        `intern` = '".intval($_POST['intern'])."',
                        `closed` = '".intval($_POST['closed'])."'
                    WHERE id = '".intval($_GET['id'])."'");
 
-        $upd1 = db("UPDATE ".$db['vote_results']."
+        $sql->update("UPDATE `{prefix_vote_results}`
                     SET `sel` = '".up($_POST['a1'])."'
                     WHERE what = 'a1'
                     AND vid = '".intval($_GET['id'])."'");
 
-        $upd2 = db("UPDATE ".$db['vote_results']."
+        $sql->update("UPDATE `{prefix_vote_results}`
                     SET `sel` = '".up($_POST['a2'])."'
                     WHERE what = 'a2'
                     AND vid = '".intval($_GET['id'])."'");
@@ -222,23 +213,23 @@ switch ($where) {
         {
           if(!empty($_POST['a'.$i.'']))
           {
-            if(cnt($db['vote_results'], " WHERE vid = '".intval($_GET['id'])."' AND what = 'a".$i."'") != 0)
+            if(cnt("{prefix_vote_results}", " WHERE vid = '".intval($_GET['id'])."' AND what = 'a".$i."'") != 0)
             {
-              $upd = db("UPDATE ".$db['vote_results']."
+              $sql->update("UPDATE `{prefix_vote_results}`
                          SET `sel` = '".up($_POST['a'.$i.''])."'
                          WHERE what = 'a".$i."'
                          AND vid = '".intval($_GET['id'])."'");
             } else {
-              $ins = db("INSERT INTO ".$db['vote_results']."
+              $sql->insert("INSERT INTO `{prefix_vote_results}`
                          SET `vid` = '".$_GET['id']."',
                              `what` = 'a".$i."',
                              `sel` = '".up($_POST['a'.$i.''])."'");
             }
           }
 
-          if(cnt($db['vote_results'], " WHERE vid = '".intval($_GET['id'])."' AND what = 'a".$i."'") != 0 && empty($_POST['a'.$i.'']))
+          if(cnt("{prefix_vote_results}", " WHERE vid = '".intval($_GET['id'])."' AND what = 'a".$i."'") != 0 && empty($_POST['a'.$i.'']))
           {
-            $del = db("DELETE FROM ".$db['vote_results']."
+            $sql->delete("DELETE FROM `{prefix_vote_results}`
                        WHERE vid = '".intval($_GET['id'])."'
                        AND what = 'a".$i."'");
           }
@@ -246,28 +237,21 @@ switch ($where) {
 
         $show = info(_vote_admin_successful_edited, "?admin=votes");
       } elseif($do == "menu") {
-        $qryv = db("SELECT intern FROM ".$db['votes']."
-                    WHERE id = '".intval($_GET['id'])."'
-                    AND intern = 1");
-        if(_rows($qryv))
-        {
+        if($sql->rows("SELECT intern FROM `{prefix_votes}` WHERE id = '".intval($_GET['id'])."' AND intern = 1")) {
           $show = error(_vote_admin_menu_isintern, 1);
         } else {
-          $qrys = db("SELECT * FROM ".$db['votes']."
-                      WHERE id = '".intval($_GET['id'])."'");
-          $get = _fetch($qrys);
-
+          $get = $sql->fetch("SELECT * FROM `{prefix_votes}` WHERE id = '".intval($_GET['id'])."'");
           if($get['menu'] == 1)
           {
-            $qry = db("UPDATE ".$db['votes']."
+            $sql->update("UPDATE `{prefix_votes}`
                        SET menu = '0'");
 
             header("Location: ?admin=votes");
           } else {
-            $qry = db("UPDATE ".$db['votes']."
+            $sql->update("UPDATE `{prefix_votes}`
                        SET menu = '0'");
 
-            $qry = db("UPDATE ".$db['votes']."
+            $sql->update("UPDATE `{prefix_votes}`
                        SET menu = '1'
                        WHERE id = '".intval($_GET['id'])."'");
 
@@ -275,11 +259,8 @@ switch ($where) {
           }
         }
       } else {
-        $qry = db("SELECT * FROM ".$db['votes']."
-                   WHERE forum = 0
-                   ORDER BY datum DESC");
-        while($get = _fetch($qry))
-        {
+        $qry = $sql->select("SELECT * FROM `{prefix_votes}` WHERE forum = 0 ORDER BY datum DESC");
+        foreach($qry as $get) {
           $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                         "action" => "admin=votes&amp;do=edit",
                                                         "title" => _button_title_edit));

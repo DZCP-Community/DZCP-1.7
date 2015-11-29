@@ -67,15 +67,15 @@ if($_POST) {
     if(settings::changed(($key='direct_refresh'),($var=intval($_POST['direct_refresh'])))) settings::set($key,$var);
     if(settings::changed(($key='cache_teamspeak'),($var=intval($_POST['cache_teamspeak'])))) settings::set($key,$var);
     if(settings::changed(($key='cache_server'),($var=intval($_POST['cache_server'])))) settings::set($key,$var);
-    if(settings::changed(($key='cache_engine'),($var=string::encode($_POST['cache_engine'])))) settings::set($key,$var);
+    if(settings::changed(($key='cache_engine'),($var=stringParser::encode($_POST['cache_engine'])))) settings::set($key,$var);
     if(settings::changed(($key='l_nwars'),($var=intval($_POST['l_nwars'])))) settings::set($key,$var);
     if(settings::changed(($key='news_feed'),($var=intval($_POST['feed'])))) settings::set($key,$var);
-    if(settings::changed(($key='clanname'),($var=string::encode($_POST['clanname'])))) settings::set($key,$var);
-    if(settings::changed(($key='default_pwd_encoder'),($var=string::encode($_POST['pwd_encoder'])))) settings::set($key,$var);
-    if(settings::changed(($key='pagetitel'),($var=string::encode($_POST['pagetitel'])))) settings::set($key,$var);
-    if(settings::changed(($key='badwords'),($var=string::encode($_POST['badwords'])))) settings::set($key,$var);
+    if(settings::changed(($key='clanname'),($var=stringParser::encode($_POST['clanname'])))) settings::set($key,$var);
+    if(settings::changed(($key='default_pwd_encoder'),($var=stringParser::encode($_POST['pwd_encoder'])))) settings::set($key,$var);
+    if(settings::changed(($key='pagetitel'),($var=stringParser::encode($_POST['pagetitel'])))) settings::set($key,$var);
+    if(settings::changed(($key='badwords'),($var=stringParser::encode($_POST['badwords'])))) settings::set($key,$var);
     if(settings::changed(($key='gmaps_who'),($var=intval($_POST['gmaps_who'])))) settings::set($key,$var);
-    if(settings::changed(($key='language'),($var=string::encode($_POST['language'])))) settings::set($key,$var);
+    if(settings::changed(($key='language'),($var=stringParser::encode($_POST['language'])))) settings::set($key,$var);
     if(settings::changed(($key='regcode'),($var=intval($_POST['regcode'])))) settings::set($key,$var);
     if(settings::changed(($key='forum_vote'),($var=intval($_POST['forum_vote'])))) settings::set($key,$var);
     if(settings::changed(($key='reg_forum'),($var=intval($_POST['reg_forum'])))) settings::set($key,$var);
@@ -84,36 +84,36 @@ if($_POST) {
     if(settings::changed(($key='reg_cwcomments'),($var=intval($_POST['reg_cwcomments'])))) settings::set($key,$var);
     if(settings::changed(($key='reg_newscomments'),($var=intval($_POST['reg_nc'])))) settings::set($key,$var);
     if(settings::changed(($key='reg_dl'),($var=intval($_POST['reg_dl'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_reg_subj'),($var=string::encode($_POST['eml_reg_subj'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_pwd_subj'),($var=string::encode($_POST['eml_pwd_subj'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_nletter_subj'),($var=string::encode($_POST['eml_nletter_subj'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_pn_subj'),($var=string::encode($_POST['eml_pn_subj'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_reg_subj'),($var=stringParser::encode($_POST['eml_reg_subj'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_pwd_subj'),($var=stringParser::encode($_POST['eml_pwd_subj'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_nletter_subj'),($var=stringParser::encode($_POST['eml_nletter_subj'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_pn_subj'),($var=stringParser::encode($_POST['eml_pn_subj'])))) settings::set($key,$var);
     if(settings::changed(($key='double_post'),($var=intval($_POST['double_post'])))) settings::set($key,$var);
     if(settings::changed(($key='gb_activ'),($var=intval($_POST['gb_activ'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_fabo_npost_subj'),($var=string::encode($_POST['eml_fabo_npost_subj'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_fabo_tedit_subj'),($var=string::encode($_POST['eml_fabo_tedit_subj'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_fabo_pedit_subj'),($var=string::encode($_POST['eml_fabo_pedit_subj'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_reg'),($var=string::encode($_POST['eml_reg'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_pwd'),($var=string::encode($_POST['eml_pwd'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_nletter'),($var=string::encode($_POST['eml_nletter'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_pn'),($var=string::encode($_POST['eml_pn'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_fabo_npost'),($var=string::encode($_POST['eml_fabo_npost'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_fabo_tedit'),($var=string::encode($_POST['eml_fabo_tedit'])))) settings::set($key,$var);
-    if(settings::changed(($key='eml_fabo_pedit'),($var=string::encode($_POST['eml_fabo_pedit'])))) settings::set($key,$var);
-    if(settings::changed(($key='mailfrom'),($var=string::encode($_POST['mailfrom'])))) settings::set($key,$var);
-    if(settings::changed(($key='tmpdir'),($var=string::encode($_POST['tmpdir'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_fabo_npost_subj'),($var=stringParser::encode($_POST['eml_fabo_npost_subj'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_fabo_tedit_subj'),($var=stringParser::encode($_POST['eml_fabo_tedit_subj'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_fabo_pedit_subj'),($var=stringParser::encode($_POST['eml_fabo_pedit_subj'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_reg'),($var=stringParser::encode($_POST['eml_reg'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_pwd'),($var=stringParser::encode($_POST['eml_pwd'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_nletter'),($var=stringParser::encode($_POST['eml_nletter'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_pn'),($var=stringParser::encode($_POST['eml_pn'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_fabo_npost'),($var=stringParser::encode($_POST['eml_fabo_npost'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_fabo_tedit'),($var=stringParser::encode($_POST['eml_fabo_tedit'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_fabo_pedit'),($var=stringParser::encode($_POST['eml_fabo_pedit'])))) settings::set($key,$var);
+    if(settings::changed(($key='mailfrom'),($var=stringParser::encode($_POST['mailfrom'])))) settings::set($key,$var);
+    if(settings::changed(($key='tmpdir'),($var=stringParser::encode($_POST['tmpdir'])))) settings::set($key,$var);
     if(settings::changed(($key='wmodus'),($var=intval($_POST['wmodus'])))) settings::set($key,$var);
-    if(settings::changed(($key='mail_extension'),($var=string::encode($_POST['mail_extension'])))) settings::set($key,$var);
+    if(settings::changed(($key='mail_extension'),($var=stringParser::encode($_POST['mail_extension'])))) settings::set($key,$var);
     if(settings::changed(($key='smtp_password'),($var=session::encode($_POST['smtp_pass'])))) settings::set($key,$var);
     if(settings::changed(($key='smtp_port'),($var=intval($_POST['smtp_port'])))) settings::set($key,$var);
-    if(settings::changed(($key='smtp_hostname'),($var=string::encode($_POST['smtp_host'])))) settings::set($key,$var);
-    if(settings::changed(($key='smtp_username'),($var=string::encode($_POST['smtp_username'])))) settings::set($key,$var);
+    if(settings::changed(($key='smtp_hostname'),($var=stringParser::encode($_POST['smtp_host'])))) settings::set($key,$var);
+    if(settings::changed(($key='smtp_username'),($var=stringParser::encode($_POST['smtp_username'])))) settings::set($key,$var);
     if(settings::changed(($key='smtp_tls_ssl'),($var=intval($_POST['smtp_tls_ssl'])))) settings::set($key,$var);
-    if(settings::changed(($key='sendmail_path'),($var=string::encode($_POST['sendmail_path'])))) settings::set($key,$var);
-    if(settings::changed(($key='memcache_host'),($var=string::encode($_POST['memcache_host'])))) settings::set($key,$var);
+    if(settings::changed(($key='sendmail_path'),($var=stringParser::encode($_POST['sendmail_path'])))) settings::set($key,$var);
+    if(settings::changed(($key='memcache_host'),($var=stringParser::encode($_POST['memcache_host'])))) settings::set($key,$var);
     if(settings::changed(($key='memcache_port'),($var=intval($_POST['memcache_port'])))) settings::set($key,$var);
-    if(settings::changed(($key='urls_linked'),($var=string::encode($_POST['urls_linked'])))) settings::set($key,$var);
-    if(settings::changed(($key='steam_api_key'),($var=string::encode($_POST['steam_apikey'])))) settings::set($key,$var);
+    if(settings::changed(($key='urls_linked'),($var=stringParser::encode($_POST['urls_linked'])))) settings::set($key,$var);
+    if(settings::changed(($key='steam_api_key'),($var=stringParser::encode($_POST['steam_apikey'])))) settings::set($key,$var);
     settings::load(true);
     notification::add_success(_config_set);
 }
@@ -121,14 +121,14 @@ if($_POST) {
 $files = get_files(basePath.'/inc/lang/languages/',false,true,array('php')); $lang = '';
 foreach($files as $file) {
     $lng = preg_replace("#.php#", "",$file);
-    $sel = (string::decode(settings::get('language')) == $lng ? 'selected="selected"' : '');
+    $sel = (stringParser::decode(settings::get('language')) == $lng ? 'selected="selected"' : '');
     $lang .= show(_select_field, array("value" => $lng, "what" => $lng, "sel" => $sel));
 }
 unset($files,$file,$lng,$sel);
 
 $tmps = get_files(basePath.'/inc/_templates_/',true); $tmplsel = '';
 foreach($tmps as $tmp) {
-    $selt = (string::decode(settings::get('tmpdir')) == $tmp ? 'selected="selected"' : '');
+    $selt = (stringParser::decode(settings::get('tmpdir')) == $tmp ? 'selected="selected"' : '');
     $tmplsel .= show(_select_field, array("value" => $tmp, "what" => $tmp, "sel" => $selt));
 }
 unset($tmps,$tmp,$selt);
@@ -165,30 +165,30 @@ $show = show($dir."/form_config", array( "cache_select"          => $cache_optio
                                          "c_length_what"         => _config_c_length_what,
                                          "cache_teamspeak"       => intval(settings::get('cache_teamspeak')),
                                          "cache_server"          => intval(settings::get('cache_server')),
-                                         "c_eml_reg_subj"        => string::decode(settings::get('eml_reg_subj')),
-                                         "c_eml_pwd_subj"        => string::decode(settings::get('eml_pwd_subj')),
-                                         "c_eml_nletter_subj"    => string::decode(settings::get('eml_nletter_subj')),
-                                         "c_eml_pn_subj"         => string::decode(settings::get('eml_pn_subj')),
-                                         "c_eml_fabo_npost_subj" => string::decode(settings::get('eml_fabo_npost_subj')),
-                                         "c_eml_fabo_tedit_subj" => string::decode(settings::get('eml_fabo_tedit_subj')),
-                                         "c_eml_fabo_pedit_subj" => string::decode(settings::get('eml_fabo_pedit_subj')),
-                                         "c_eml_reg"             => string::decode(settings::get('eml_reg')),
-                                         "c_eml_pwd"             => string::decode(settings::get('eml_pwd')),
-                                         "c_eml_nletter"         => string::decode(settings::get('eml_nletter')),
-                                         "c_eml_pn"              => string::decode(settings::get('eml_pn')),
-                                         "c_eml_fabo_tedit"      => string::decode(settings::get('eml_fabo_tedit')),
-                                         "c_eml_fabo_pedit"      => string::decode(settings::get('eml_fabo_pedit')),
-                                         "c_eml_fabo_nposr"      => string::decode(settings::get('eml_fabo_npost')),
-                                         "memcache_host"         => string::decode(settings::get('memcache_host')),
+                                         "c_eml_reg_subj"        => stringParser::decode(settings::get('eml_reg_subj')),
+                                         "c_eml_pwd_subj"        => stringParser::decode(settings::get('eml_pwd_subj')),
+                                         "c_eml_nletter_subj"    => stringParser::decode(settings::get('eml_nletter_subj')),
+                                         "c_eml_pn_subj"         => stringParser::decode(settings::get('eml_pn_subj')),
+                                         "c_eml_fabo_npost_subj" => stringParser::decode(settings::get('eml_fabo_npost_subj')),
+                                         "c_eml_fabo_tedit_subj" => stringParser::decode(settings::get('eml_fabo_tedit_subj')),
+                                         "c_eml_fabo_pedit_subj" => stringParser::decode(settings::get('eml_fabo_pedit_subj')),
+                                         "c_eml_reg"             => stringParser::decode(settings::get('eml_reg')),
+                                         "c_eml_pwd"             => stringParser::decode(settings::get('eml_pwd')),
+                                         "c_eml_nletter"         => stringParser::decode(settings::get('eml_nletter')),
+                                         "c_eml_pn"              => stringParser::decode(settings::get('eml_pn')),
+                                         "c_eml_fabo_tedit"      => stringParser::decode(settings::get('eml_fabo_tedit')),
+                                         "c_eml_fabo_pedit"      => stringParser::decode(settings::get('eml_fabo_pedit')),
+                                         "c_eml_fabo_nposr"      => stringParser::decode(settings::get('eml_fabo_npost')),
+                                         "memcache_host"         => stringParser::decode(settings::get('memcache_host')),
                                          "memcache_port"         => intval(settings::get('memcache_port')),
-                                         "steam_apikey"          => string::decode(settings::get('steam_api_key')),
+                                         "steam_apikey"          => stringParser::decode(settings::get('steam_api_key')),
                                          "tmplsel"               => $tmplsel,
                                          "maxwidth"              => intval(settings::get('maxwidth')),
                                          "l_servernavi"          => intval(settings::get('l_servernavi')),
-                                         "mailfrom"              => string::decode(settings::get('mailfrom')),
+                                         "mailfrom"              => stringParser::decode(settings::get('mailfrom')),
                                          "l_lreg"                => intval(settings::get('l_lreg')),
                                          "m_lreg"                => intval(settings::get('m_lreg')),
-                                         "badwords"              => string::decode(settings::get('badwords')),
+                                         "badwords"              => stringParser::decode(settings::get('badwords')),
                                          "l_shoutnick"           => intval(settings::get('l_shoutnick')),
                                          "m_awards"              => intval(settings::get('m_awards')),
                                          "f_cwcom"               => intval(settings::get('f_cwcom')),
@@ -242,13 +242,13 @@ $show = show($dir."/form_config", array( "cache_select"          => $cache_optio
                                          "l_nwars"               => intval(settings::get('l_nwars')),
                                          "c_teamrow"             => intval(settings::get('teamrow')),
                                          "f_artikelcom"          => intval(settings::get('f_artikelcom')),
-                                         "clanname"              => string::decode(settings::get('clanname')),
-                                         "pagetitel"             => string::decode(settings::get('pagetitel')),
-                                         "smtp_host"             => string::decode(settings::get('smtp_hostname')),
-                                         "smtp_username"         => string::decode(settings::get('smtp_username')),
+                                         "clanname"              => stringParser::decode(settings::get('clanname')),
+                                         "pagetitel"             => stringParser::decode(settings::get('pagetitel')),
+                                         "smtp_host"             => stringParser::decode(settings::get('smtp_hostname')),
+                                         "smtp_username"         => stringParser::decode(settings::get('smtp_username')),
                                          "smtp_pass"             => session::decode(settings::get('smtp_password')),
                                          "smtp_port"             => intval(settings::get('smtp_port')),
-                                         "sendmail_path"         => string::decode(settings::get('sendmail_path')),
+                                         "sendmail_path"         => stringParser::decode(settings::get('sendmail_path')),
                                          "smtp_tls_ssl"          => $smtp_secure_options,
                                          "lang"                  => $lang,
                                          "mail_ext_select"       => $mail_options,

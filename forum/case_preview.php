@@ -141,7 +141,7 @@ if(defined('_Forum')) {
         $pUId = $userid;
       }
       $tID = $_GET['id'];
-      $cnt = cnt($db['f_posts'], " WHERE sid = '".intval($_GET['id'])."'")+2;
+      $cnt = cnt("{prefix_forumposts}", " WHERE sid = '".intval($_GET['id'])."'")+2;
     }
 
     $titel = show(_eintrag_titel_forum, array("postid" => $cnt,

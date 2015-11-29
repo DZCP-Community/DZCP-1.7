@@ -10,8 +10,8 @@ $where = $where.': '._slider;
 
 switch ($do) {
     case 'new':
-        $qry = db("SELECT `pos`,`bez` FROM `".$db['slideshow']."` ORDER BY `pos` ASC;"); $positions = '';
-        while($get = _fetch($qry)) {
+        $qry = $sql->select("SELECT `pos`,`bez` FROM `{prefix_slideshow}` ORDER BY `pos` ASC;"); $positions = '';
+        foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => $get['pos']+1,
                                                     "what" => _nach.': '.re($get['bez']),
                                                     "sel" => ""));
@@ -44,8 +44,8 @@ switch ($do) {
             $selected = (isset($_POST['target']) && $_POST['target'] ? 'selected="selected"' : '');
             $selected_txt = (isset($_POST['showbez']) && $_POST['showbez'] ? 'selected="selected"' : '');
 
-            $qry = db("SELECT `pos`,`bez` FROM `".$db['slideshow']."` ORDER BY `pos` ASC;"); $positions = '';
-            while($get = _fetch($qry)) {
+            $qry = $sql->select("SELECT `pos`,`bez` FROM `{prefix_slideshow}` ORDER BY `pos` ASC;"); $positions = '';
+            foreach($qry as $get) {
                 $posid = ($get['pos']+1);
                 $positions .= show(_select_field, array("value" => $posid,
                         "what" => _nach.': '.re($get['bez']),
@@ -67,12 +67,12 @@ switch ($do) {
                                                        "v_pic" => ""));
         } else {
             $sign = ($_POST['position'] == '1' || $_POST['position'] == '2' ? ">= " : "> ");
-            db("UPDATE `".$db['slideshow']."` SET `pos` = pos+1 WHERE `pos` ".$sign." ".intval($_POST['position']));
+            $sql->update("UPDATE `{prefix_slideshow}` SET `pos` = pos+1 WHERE `pos` ".$sign." ".intval($_POST['position']));
 
             if(strpos($_POST['url'], 'www.') !== false)
                 $_POST['url'] = links($_POST['url']);
 
-            db("INSERT INTO `".$db['slideshow']."` SET `pos` = ".intval($_POST['position']).",
+            $sql->insert("INSERT INTO `{prefix_slideshow}` SET `pos` = ".intval($_POST['position']).",
                                                        `bez` = '".up($_POST['bez'])."',
                                                        `showbez` = ".intval($_POST['showbez']).",
                                                        `desc` = '".up($_POST['desc'])."',
@@ -92,10 +92,9 @@ switch ($do) {
         }
     break;
     case 'edit':
-        $get = db("SELECT * FROM ".$db['slideshow']." WHERE `id` = '".intval($_GET['id'])."'",false,true);
-
-        $qrypos = db("SELECT `pos`,`bez` FROM `".$db['slideshow']."` WHERE `id` != '".intval($get['id'])."' ORDER BY `pos` ASC");
-        while($getpos = _fetch($qrypos)) {
+        $get = $sql->fetch("SELECT * FROM `{prefix_slideshow}` WHERE `id` = '".intval($_GET['id'])."'");
+        $qrypos = $sql->select("SELECT `pos`,`bez` FROM `{prefix_slideshow}` WHERE `id` != '".intval($get['id'])."' ORDER BY `pos` ASC");
+        foreach($qrypos as $getpos) {
             $posid = ($getpos['pos']+1);
             $positions .= show(_select_field, array("value" => $posid,
                                                     "what" => _nach.': '.$getpos['bez'],
@@ -163,14 +162,14 @@ switch ($do) {
             $pos = "";
             if($_POST['position'] != "lazy") {
                 $sign = ($_POST['position'] == '1' || $_POST['position'] == '2' ? ">= " : "> ");
-                db("UPDATE `".$db['slideshow']."` SET `pos` = pos+1 WHERE `pos` ".$sign." '".intval($_POST['position'])."'");
+                $sql->update("UPDATE `{prefix_slideshow}` SET `pos` = pos+1 WHERE `pos` ".$sign." '".intval($_POST['position'])."'");
                 $pos = " `pos` = ".intval($_POST['position']).", ";
             }
 
             if(strpos($_POST['url'], 'www.') !== false)
                 $_POST['url'] = links($_POST['url']);
 
-            db("UPDATE `".$db['slideshow']."` SET".$pos."
+            $sql->update("UPDATE `{prefix_slideshow}` SET".$pos."
                       `bez` = '".up($_POST['bez'])."',
                       `showbez` = ".intval($_POST['showbez']).",
                       `url` = '".up($_POST['url'])."',
@@ -198,7 +197,7 @@ switch ($do) {
         }
     break;
     case 'delete':
-        db("DELETE FROM `".$db['slideshow']."` WHERE `id` = ".intval($_GET['id']));
+        $sql->delete("DELETE FROM `{prefix_slideshow}` WHERE `id` = ".intval($_GET['id']));
         $files = get_files(basePath."/inc/images/slideshow/",false,true,$picformat);
         foreach ($files as $file) {
             $file_exp_minimize = explode('_minimize_',$file);
@@ -210,8 +209,8 @@ switch ($do) {
         $show = info(_slider_admin_del_done, "?admin=slideshow");
     break;
     default:
-        $qry = db("SELECT `id`,`bez` FROM `".$db['slideshow']."` ORDER BY `pos` ASC"); $entry = '';
-        while($get = _fetch($qry)) {
+        $qry = $sql->select("SELECT `id`,`bez` FROM `{prefix_slideshow}` ORDER BY `pos` ASC"); $entry = '';
+        foreach($qry as $get) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                           "action" => "admin=slideshow&amp;do=edit",

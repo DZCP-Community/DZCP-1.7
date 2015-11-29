@@ -9,10 +9,9 @@ if(_adminMenu != 'true') exit;
     $where = $where.': '._navi_head;
       if($do == "add")
       {
-        $qry = db("SELECT s2.*, s1.name AS katname, s1.placeholder FROM ".$db['navi_kats']." AS s1 LEFT JOIN ".$db['navi']." AS s2 ON s1.`placeholder` = s2.`kat`
+        $qry = $sql->select("SELECT s2.*, s1.name AS katname, s1.placeholder FROM `{prefix_navi_kats}` AS s1 LEFT JOIN `{prefix_navi}` AS s2 ON s1.`placeholder` = s2.`kat`
                    ORDER BY s1.name, s2.pos");
-        while($get = _fetch($qry))
-        {
+        foreach($qry as $get) {
           if($thiskat != $get['kat']) {
             $position .= '
               <option class="dropdownKat" value="lazy">'.re($get['katname']).'</option>
@@ -54,11 +53,11 @@ if(_adminMenu != 'true') exit;
           $kat = preg_replace('/-(\d+)/','',$_POST['pos']);
           $pos = preg_replace("=nav_(.*?)-=","",$_POST['pos']);
 
-          $posi = db("UPDATE ".$db['navi']."
+          $sql->update("UPDATE `{prefix_navi}`
                       SET `pos` = pos+1
                       WHERE pos ".$sign." '".intval($pos)."'");
 
-          $posi = db("INSERT INTO ".$db['navi']."
+          $sql->insert("INSERT INTO `{prefix_navi}`
                       SET `pos`       = '".intval($pos)."',
                           `kat`       = '".up($kat)."',
                           `name`      = '".up($_POST['name'])."',
@@ -71,24 +70,21 @@ if(_adminMenu != 'true') exit;
           $show = info(_navi_added,"?admin=navi");
         }
       } elseif($do == "delete") {
-        $qry = db("SELECT * FROM ".$db['navi']."
-                   WHERE id = '".intval($_GET['id'])."'");
-        $get = _fetch($qry);
-
-        $del = db("DELETE FROM ".$db['sites']."
-                   WHERE id = '".intval($get['editor'])."'");
-
-        $del = db("DELETE FROM ".$db['navi']."
-                   WHERE id = '".intval($_GET['id'])."'");
+        $get = $sql->fetch("SELECT * FROM `{prefix_navi}` WHERE id = '".intval($_GET['id'])."'");
+        
+        $sql->delete("DELETE FROM `{prefix_sites}` WHERE id = '".intval($get['editor'])."'");
+        $sql->delete("DELETE FROM `{prefix_navi}` WHERE id = '".intval($_GET['id'])."'");
 
         $show = info(_navi_deleted, "?admin=navi");
       } elseif($do == "edit") {
-        $qry = db("SELECT s2.*, s1.name AS katname, s1.placeholder FROM ".$db['navi_kats']." AS s1 LEFT JOIN ".$db['navi']." AS s2 ON s1.`placeholder` = s2.`kat`
-                   ORDER BY s1.name, s2.pos");
+        $qry = $sql->select("SELECT s2.*, s1.name AS katname, s1.placeholder "
+                . "FROM `{prefix_navi_kats}` AS s1 "
+                . "LEFT JOIN `{prefix_navi}` AS s2 "
+                . "ON s1.`placeholder` = s2.`kat` "
+                . "ORDER BY s1.name, s2.pos");
          $i = 1;
          $thiskat = '';
-        while($get = _fetch($qry))
-        {
+         foreach($qry as $get) {
           if($thiskat != $get['kat']) {
             $position .= '
               <option class="dropdownKat" value="lazy">'.re($get['katname']).'</option>
@@ -103,9 +99,7 @@ if(_adminMenu != 'true') exit;
           $i++;
         }
 
-        $qry = db("SELECT * FROM ".$db['navi']."
-                   WHERE id = '".intval($_GET['id'])."'");
-        $get = _fetch($qry);
+        $get = $sql->fetch("SELECT * FROM `{prefix_navi}` WHERE id = '".intval($_GET['id'])."'");
 
         if($get['type'] == "1")
         {
@@ -148,11 +142,11 @@ if(_adminMenu != 'true') exit;
         $kat = preg_replace('/-(\d+)/','',$_POST['pos']);
         $pos = preg_replace("=nav_(.+)-=","",$_POST['pos']);
 
-        $posi = db("UPDATE ".$db['navi']."
+        $sql->update("UPDATE `{prefix_navi}`
                     SET pos = pos+1
                     WHERE pos ".$sign." '".intval($pos)."'");
 
-        $posi = db("UPDATE ".$db['navi']."
+        $sql->update("UPDATE `{prefix_navi}`
                     SET `pos`       = '".intval($pos)."',
                         `kat`       = '".up($kat)."',
                         `name`      = '".up($_POST['name'])."',
@@ -165,19 +159,19 @@ if(_adminMenu != 'true') exit;
 
         $show = info(_navi_edited,"?admin=navi");
       } elseif($do == "menu") {
-        $posi = db("UPDATE ".$db['navi']."
+        $sql->update("UPDATE `{prefix_navi}`
                     SET `shown`     = '".intval($_GET['set'])."'
                     WHERE id = '".intval($_GET['id'])."'");
 
         header("Location: ?admin=navi");
       } else if($do == 'intern') {
-        $posi = db("UPDATE ".$db['navi_kats']."
+        $sql->update("UPDATE `{prefix_navi_kats}`
                     SET `intern` = '".intval($_GET['set'])."'
                     WHERE id = '".intval($_GET['id'])."'");
 
         header("Location: ?admin=navi");
       } else if($do == 'editkat') {
-        $get = _fetch(db("SELECT * FROM ".$db['navi_kats']." WHERE `id` = '".intval($_GET['id'])."'"));
+        $get = $sql->fetch("SELECT * FROM `{prefix_navi_kats}` WHERE `id` = '".intval($_GET['id'])."'");
 
         $show = show($dir."/form_navi_kats", array("head" => _menu_edit_kat,
                                                    "name" => _sponsors_admin_name,
@@ -199,7 +193,7 @@ if(_adminMenu != 'true') exit;
                                                    "do" => 'updatekat&amp;id='.$get['id']
                                                    ));
       } else if($do == 'updatekat') {
-        db("UPDATE ".$db['navi_kats']."
+        $sql->update("UPDATE `{prefix_navi_kats}`
             SET `name`        = '".up($_POST['name'])."',
                 `placeholder` = 'nav_".up($_POST['placeholder'])."',
                 `level`       = '".intval($_POST['level'])."'
@@ -207,10 +201,10 @@ if(_adminMenu != 'true') exit;
 
         $show = info(_menukat_updated, '?admin=navi');
       } else if($do == 'deletekat') {
-        db("DELETE FROM ".$db['navi_kats']." WHERE `id` = '".intval($_GET['id'])."'");
+        $sql->delete("DELETE FROM `{prefix_navi_kats}` WHERE `id` = '".intval($_GET['id'])."'");
         $show = info(_menukat_deleted, '?admin=navi');
       }  else if($do == 'addkat') {
-        $get = _fetch(db("SELECT * FROM ".$db['navi_kats']." WHERE `id` = '".intval($_GET['id'])."'"));
+        $get = $sql->fetch("SELECT * FROM `{prefix_navi_kats}` WHERE `id` = '".intval($_GET['id'])."'");
 
         $show = show($dir."/form_navi_kats", array("head" => _menu_add_kat,
                                                    "name" => _sponsors_admin_name,
@@ -232,7 +226,7 @@ if(_adminMenu != 'true') exit;
                                                    "do" => 'insertkat'
                                                    ));
       } else if($do == 'insertkat') {
-        db("INSERT INTO ".$db['navi_kats']."
+        $sql->insert("INSERT INTO `{prefix_navi_kats}`
             SET `name`        = '".up($_POST['name'])."',
                 `placeholder` = 'nav_".up($_POST['placeholder'])."',
                 `level`       = '".intval($_POST['intern'])."'");
@@ -244,9 +238,8 @@ if(_adminMenu != 'true') exit;
 	$show_ = "";
 	$color = 0;
 
-        $qry = db("SELECT s1.*, s2.name AS katname FROM ".$db['navi']." AS s1 LEFT JOIN ".$db['navi_kats']." AS s2 ON s1.kat = s2.placeholder ORDER BY s2.name, s1.kat,s1.pos");
-        while($get = _fetch($qry))
-        {
+        $qry = $sql->select("SELECT s1.*, s2.name AS katname FROM `{prefix_navi}` AS s1 LEFT JOIN `{prefix_navi_kats}` AS s2 ON s1.kat = s2.placeholder ORDER BY s2.name, s1.kat,s1.pos");
+        foreach($qry as $get) {
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
 
           if($get['type'] == "0")
@@ -294,8 +287,8 @@ if(_adminMenu != 'true') exit;
 	$show_kats = "";
         $color = 0;
 
-	$qry = db("SELECT * FROM ".$db['navi_kats']." ORDER BY `name` ASC");
-        while($get = _fetch($qry)) {
+	$qry = $sql->select("SELECT * FROM `{prefix_navi_kats}` ORDER BY `name` ASC");
+        foreach($qry as $get) {
           $class = ($color % 2) ? 'contentMainFirst' : 'contentMainSecond'; $color++;
 
           $type = re($get['name']);

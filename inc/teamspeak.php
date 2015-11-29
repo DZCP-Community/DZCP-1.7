@@ -159,9 +159,10 @@ class TS3Renderer {
      * @return string
      */
     public static function channel_name($channel=array(),$tpl=false,$joints='',$ebene=1,$cut=false) {
-        if($cut) $channel['channel_name'] = (mb_strlen($channel['channel_name']) > (30 - ($ebene * 2)) ? cut($channel['channel_name'],(30 - ($ebene * 2)),true) : $channel['channel_name'] );
+        if($cut) $channel['channel_name'] = (mb_strlen(self::rep($channel['channel_name'])) > (30 - ($ebene * 2)) ? 
+                cut(self::rep($channel['channel_name']),(30 - ($ebene * 2)),true) : self::rep($channel['channel_name']));
         return '<a href="javascript:DZCP.popup(\'../teamspeak/login.php?ts3&amp;cName='.base64_encode($joints).'\', \'600\', \'100\')"
-        class="navTeamspeak" style="font-weight:bold;white-space:nowrap" title="'.spChars($channel['channel_name']).'">'.self::rep($channel['channel_name']).'</a>'."\n";
+        class="navTeamspeak" style="font-weight:bold;white-space:nowrap" title="'.spChars($channel['channel_name']).'">'.$channel['channel_name'].'</a>'."\n";
     }
 
     /**
@@ -285,13 +286,14 @@ class TS3Renderer {
         } else if(self::$AllowDownloadIcons) {
             $svid = md5(self::$data['sql']['host_ip_dns'].self::$data['sql']['server_port']);
             if(ts3viewer_icon_to_drive) {
-                if(file_exists(basePath.'/inc/images/tsviewer/custom_icons/'.$svid.'_'.$id.'.bin')) {
+                $base_file = basePath.'/inc/images/tsviewer/custom_icons/'.$svid.'_'.$id.'.bin';
+                if(file_exists($base_file)) {
                     self::$nf_pic_ids[$id] = true;
-                    $file_stream = file_get_contents(basePath.'/inc/images/tsviewer/custom_icons/'.$svid.'_'.$id.'.bin');
+                    $file_stream = file_get_contents($base_file);
                     $image = 'data:image/png;base64,'.base64_encode(hextobin($file_stream));
                 }
             }
-            
+
             if(!$cache->isExisting($svid.'_'.$id) && !array_key_exists($id, self::$nf_pic_ids) && empty($image)) {
                 // Sende Download-Anforderung zum TS3 Server
                 if(show_teamspeak_debug) {
@@ -310,8 +312,9 @@ class TS3Renderer {
                             DebugConsole::insert_successful('TS3Renderer::icon()', 'Icon: "icon_'.$id.'" Downloaded');
 
                         $cache->set($svid.'_'.$id,bin2hex($file_stream),(24*60*60));//24h
-                        if(ts3viewer_icon_to_drive)
+                        if(ts3viewer_icon_to_drive && !empty($file_stream)) {
                             file_put_contents(basePath.'/inc/images/tsviewer/custom_icons/'.$svid.'_'.$id.'.bin', bin2hex($file_stream));
+                        }
                         
                         $image = 'data:image/png;base64,'.base64_encode($file_stream);
                         self::$nf_pic_ids[$id] = true;
@@ -321,8 +324,6 @@ class TS3Renderer {
                     self::$nf_pic_ids[$id] = true;
             } else {
                 $image = ($cache->isExisting($svid.'_'.$id) ? 'data:image/png;base64,'.base64_encode(hextobin($cache->get($svid.'_'.$id))) : '');
-                if(ts3viewer_icon_to_drive)
-                    file_put_contents(basePath.'/inc/images/tsviewer/custom_icons/'.$svid.'_'.$id.'.bin', bin2hex($cache->get($svid.'_'.$id)));
             }
         }
 
@@ -511,7 +512,6 @@ class TS3Renderer {
 
     public static function time_convert($time, $ms = false) {
         if($ms) $time = $time / 1000;
-
         $day = floor($time/86400);
         $hours = floor(($time%86400)/3600);
         $minutes = floor(($time%3600)/60);

@@ -37,27 +37,23 @@ default:
 
   if(permission("intforum"))
   {
-    $qry = db("SELECT * FROM ".$db['f_kats']."
-               ORDER BY kid");
+    $qry = $sql->select("SELECT * FROM `{prefix_forumkats}` ORDER BY kid");
   } else {
-    $qry = db("SELECT * FROM ".$db['f_kats']."
-               WHERE intern = 0
-               ORDER BY kid");
+    $qry = $sql->select("SELECT * FROM `{prefix_forumkats}` WHERE intern = 0 ORDER BY kid");
   }
-  while($get = _fetch($qry))
-  {
+
+  foreach($qry as $get) {
     $fkats .= '<li><label class="searchKat" style="text-align:center">'.re($get['name']).'</label></li>';
 
     $showt = "";
-    $qrys = db("SELECT * FROM ".$db['f_skats']."
+    $qrys = $sql->select("SELECT * FROM `{prefix_forumsubkats}`
                 WHERE sid = '".$get['id']."'
                 ORDER BY kattopic");
-    while($gets = _fetch($qrys))
-    {
-      $intF = db("SELECT * FROM ".$db['f_access']."
+    foreach($qrys as $gets) {
+      $intF = $sql->rows("SELECT * FROM `{prefix_f_access}`
                   WHERE user = '".$_SESSION['id']."'
                   AND forum = '".$gets['id']."'");
-      if($get['intern'] == 0 || (($get['intern'] == 1 && _rows($intF)) || $chkMe == 4))
+      if($get['intern'] == 0 || (($get['intern'] == 1 && $intF) || $chkMe == 4))
       {
         if(preg_match("#k_".$gets['id']."\|#",$strkat)) $kcheck = 'checked="checked"';
         else  $kcheck = '';
@@ -85,12 +81,10 @@ default:
           for($x=0;$x<count($suche);$x++)
           {
             $z=0;
-            $qryu = db("SELECT id,nick FROM ".$db['users']."
-                        WHERE nick LIKE '%".trim($suche[$x])."%'");
-            if(_rows($qryu))
+            $qryu = $sql->select("SELECT id,nick FROM `{prefix_users}` WHERE nick LIKE '%".trim($suche[$x])."%'");
+            if($sql->rowCount())
             {
-              while($getu = _fetch($qryu))
-              {
+              foreach($qryu as $getu) {
                 if($z == 0) $c = 'WHERE (';
                 else        $c = 'OR ';
 
@@ -109,13 +103,11 @@ default:
             $z++;
           }
         } else {
-          $qryu = db("SELECT id,nick FROM ".$db['users']."
-                      WHERE nick LIKE '%".trim($_GET['search'])."%'");
-          if(_rows($qryu))
+          $qryu = $sql->select("SELECT id,nick FROM `{prefix_users}` WHERE nick LIKE '%".trim($_GET['search'])."%'");
+          if($sql->rowCount())
           {
             $x=0;
-            while($getu = _fetch($qryu))
-            {
+            foreach($qryu as $getu) {
               if($x == 0) $c = 'WHERE (';
               else        $c = 'OR ';
 
@@ -166,39 +158,37 @@ default:
 
       $dosearch = (!permission("intforum")) ? 'AND s4.intern = 0' : 'AND s4.intern = 1';
 
-      $qry = db("SELECT s1.id,s1.topic,s1.kid,s1.t_reg,s1.t_email,s1.t_nick,s1.hits,s4.intern,s3.id AS subid
-                 FROM ".$db['f_threads']." AS s1
-                 LEFT JOIN ".$db['f_posts']." AS s2
+      $qry = $sql->select("SELECT s1.id,s1.topic,s1.kid,s1.t_reg,s1.t_email,s1.t_nick,s1.hits,s4.intern,s3.id AS subid
+                 FROM `{prefix_forumthreads}` AS s1
+                 LEFT JOIN `{prefix_forumposts}` AS s2
                  ON s1.id = s2.sid
-                 LEFT JOIN ".$db['f_skats']." AS s3
+                 LEFT JOIN `{prefix_forumsubkats}` AS s3
                  ON s1.kid = s3.id
-                 LEFT JOIN ".$db['f_kats']." AS s4
+                 LEFT JOIN `{prefix_forumkats}` AS s4
                  ON s3.sid = s4.id
                  ".$dosearch."
                  GROUP by s1.id
                  ORDER BY s1.lp DESC
                  LIMIT ".($page - 1)*$maxfsearch.",".$maxfsearch."");
 
-      $qrye = db("SELECT s1.id
-                 FROM ".$db['f_threads']." AS s1
-                 LEFT JOIN ".$db['f_posts']." AS s2
+      $entrys = $sql->rows("SELECT s1.id
+                 FROM `{prefix_forumthreads}` AS s1
+                 LEFT JOIN `{prefix_forumposts}` AS s2
                  ON s1.id = s2.sid
-                 LEFT JOIN ".$db['f_skats']." AS s3
+                 LEFT JOIN `{prefix_forumsubkats}` AS s3
                  ON s2.kid = s3.id
                  AND s1.kid = s3.id
-                 LEFT JOIN ".$db['f_kats']." AS s4
+                 LEFT JOIN `{prefix_forumkats}` AS s4
                  ON s3.sid = s4.id
                  ".$dosearch."
                  GROUP by s1.id");
-       $entrys = _rows($qrye);
 
-        while($get = _fetch($qry))
-        {
-          $intF = db("SELECT * FROM ".$db['f_access']."
+       foreach($qry as $get) {
+          $intF = $sql->rows("SELECT * FROM `{prefix_f_access}`
                       WHERE user = '".$_SESSION['id']."'
                       AND forum = '".$get['subid']."'");
-          if(($get['intern'] == 1 && !_rows($intF) && $chkMe != 4)) $entrys--;
-          if($get['intern'] == 0 || (($get['intern'] == 1 && _rows($intF)) || $chkMe == 4))
+          if(($get['intern'] == 1 && !$intF && $chkMe != 4)) $entrys--;
+          if($get['intern'] == 0 || (($get['intern'] == 1 && $intF) || $chkMe == 4))
           {
             if($get['sticky'] == 1) $sticky = _forum_sticky;
             else $sticky = "";
@@ -206,17 +196,16 @@ default:
             if($get['closed'] == 1) $closed = _closedicon;
             else $closed = "";
 
-            $cntpage = cnt($db['f_posts'], " WHERE sid = ".$get['id']);
+            $cntpage = cnt("{prefix_forumposts}", " WHERE sid = ".$get['id']);
             if($cntpage == 0) $pagenr = 1;
             else $pagenr = ceil($cntpage/settings::get('m_ftopics'));
 
 
-            $qrylp = db("SELECT date,nick,reg,email FROM ".$db['f_posts']."
+            $getlp = $sql->fetch("SELECT date,nick,reg,email FROM `{prefix_forumposts}`
                          WHERE sid = '".$get['id']."'
                          ORDER BY date DESC");
-            if(_rows($qrylp))
+            if($sql->rowCount())
             {
-              $getlp = _fetch($qrylp);
               $lpost = show(_forum_thread_lpost, array("nick" => autor($getlp['reg'], '', $getlp['nick'], re($getlp['email'])),
                                                        "date" => date("d.m.y H:i", $getlp['date'])._uhr));
               $lpdate = $getlp['date'];
@@ -239,7 +228,7 @@ default:
                                                                  "topic" => $threadlink,
                                                                  "subtopic" => cut(re($get['subtopic']),settings::get('l_forumsubtopic')),
                                                                  "hits" => $get['hits'],
-                                                                 "replys" => cnt($db['f_posts'], " WHERE sid = '".$get['id']."'"),
+                                                                 "replys" => cnt("{prefix_forumposts}", " WHERE sid = '".$get['id']."'"),
                                                                  "class" => $class,
                                                                  "lpost" => $lpost,
                                                                  "autor" => autor($get['t_reg'], '', $get['t_nick'], $get['t_email'])));
@@ -303,11 +292,10 @@ default:
                                       ));
 break;
 case 'site';
-    $qry = db("SELECT * FROM ".$db['news']."
+    $qry = $sql->select("SELECT * FROM `{prefix_news}`
              WHERE (titel LIKE '%".up($_GET['searchword'])."%' AND titel != '') OR (text LIKE '%".up($_GET['searchword'])."%' AND `text` != '')
              ORDER BY titel ASC");
-  while($get = _fetch($qry))
-  {
+    foreach($qry as $get) {
     $class = ($color % 2) ? "contentMainFirst" : "contentMainSecond"; $color++;
     $shownews .= show($dir."/search_show", array("class" => $class,
                                                "type" => 'news',
@@ -317,11 +305,10 @@ case 'site';
   }
 
   unset($class);
-  $qry = db("SELECT * FROM ".$db['artikel']."
+  $qry = $sql->select("SELECT * FROM `{prefix_artikel}`
              WHERE (titel LIKE '%".up($_GET['searchword'])."%' AND titel != '') OR (text LIKE '%".up($_GET['searchword'])."%' AND `text` != '')
              ORDER BY titel ASC");
-  while($get = _fetch($qry))
-  {
+    foreach($qry as $get) {
     $class = ($color % 2) ? "contentMainFirst" : "contentMainSecond"; $color++;
     $showartikel .= show($dir."/search_show", array(
                                                "href" => '../artikel/index.php?action=show&amp;id='.$get['id'],
@@ -332,11 +319,10 @@ case 'site';
   }
 
   unset($class);
-  $qry = db("SELECT * FROM ".$db['sites']."
+  $qry = $sql->select("SELECT * FROM `{prefix_sites}`
              WHERE (titel LIKE '%".up($_GET['searchword'])."%' AND titel != '') OR (text LIKE '%".up($_GET['searchword'])."%' AND `text` != '')
              ORDER BY titel ASC");
-  while($get = _fetch($qry))
-  {
+  foreach($qry as $get) {
     $class = ($color % 2) ? "contentMainFirst" : "contentMainSecond"; $color++;
     $showsites .= show($dir."/search_show", array(
                                                "href" => '../sites/?show='.$get['id'],

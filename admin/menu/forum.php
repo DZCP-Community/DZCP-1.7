@@ -5,18 +5,17 @@
  */
 
 if(_adminMenu != 'true') exit;
+$where = $where.': '._config_forum_head;
 
-      $where = $where.': '._config_forum_head;
         if($_GET['show'] == "subkats")
         {
-          $qryk = db("SELECT s1.name,s2.id,s2.kattopic,s2.subtopic,s2.pos
-                      FROM ".$db['f_kats']." AS s1
-                      LEFT JOIN ".$db['f_skats']." AS s2
-                      ON s1.id = s2.sid
-                      WHERE s1.id = '".intval($_GET['id'])."'
-                      ORDER BY s2.pos");
-          while($getk = _fetch($qryk))
-          {
+          $qryk = $sql->select("SELECT s1.`name`,s2.`id`,s2.`kattopic`,s2.`subtopic`,s2.`pos` "
+                  . "FROM `{prefix_forumkats}` AS `s1` "
+                  . "LEFT JOIN `{prefix_forumsubkats}` AS `s2` "
+                  . "ON s1.`id` = s2.`sid` "
+                  . "WHERE s1.`id` = ? ORDER BY s2.`pos`;",
+                  array(intval($_GET['id'])));
+          foreach($qryk as $getk) {
             if(!empty($getk['kattopic']))
             {
               $subkat = show(_config_forum_subkats, array("topic" => re($getk['kattopic']),
@@ -26,6 +25,7 @@ if(_adminMenu != 'true') exit;
               $edit = show("page/button_edit_single", array("id" => $getk['id'],
                                                             "action" => "admin=forum&amp;do=editsubkat",
                                                             "title" => _button_title_edit));
+              
               $delete = show("page/button_delete_single", array("id" => $getk['id'],
                                                                 "action" => "admin=forum&amp;do=deletesubkat",
                                                                 "title" => _button_title_del,
@@ -50,16 +50,15 @@ if(_adminMenu != 'true') exit;
                                                            "edit" => _editicon_blank));
           }
         } else {
-          $qry = db("SELECT * FROM ".$db['f_kats']."
-                     ORDER BY kid");
-        while($get = _fetch($qry))
-        {
+          $qry = $sql->select("SELECT * FROM `{prefix_forumkats}` ORDER BY `kid`;");
+            foreach($qry as $get) {
           $kat = show(_config_forum_kats_titel, array("kat" => re($get['name']),
                                                       "id" => $get['id']));
 
           $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                         "action" => "admin=".$_GET['admin']."&amp;do=edit",
                                                         "title" => _button_title_edit));
+          
           $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                             "action" => "admin=".$_GET['admin']."&amp;do=delete",
                                                             "title" => _button_title_del,
@@ -75,7 +74,7 @@ if(_adminMenu != 'true') exit;
           $kats .= show($dir."/forum_show_kats", array("class" => $class,
                                                        "kat" => $kat,
                                                        "status" => $status,
-                                                       "skats" => cnt($db['f_skats'], " WHERE sid = '".intval($get['id'])."'"),
+                                                       "skats" => cnt('{prefix_forumsubkats}', " WHERE sid = '".intval($get['id'])."'"),
                                                        "edit" => $edit,
                                                        "delete" => $delete));
         }
@@ -89,10 +88,8 @@ if(_adminMenu != 'true') exit;
                                           "kats" => $kats));
         if($do == "newkat")
         {
-          $qry = db("SELECT * FROM ".$db['f_kats']."
-                     ORDER BY kid");
-          while($get = _fetch($qry))
-          {
+          $qry = $sql->select("SELECT * FROM `{prefix_forumkats}` ORDER BY `kid`;");
+            foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => $get['kid']+1,
                                                     "what" => _nach.' '.re($get['name']),
                                                     "sel" => ""));
@@ -113,52 +110,33 @@ if(_adminMenu != 'true') exit;
             if($_POST['kid'] == "1" || "2") $sign = ">= ";
             else  $sign = "> ";
 
-            $posi = db("UPDATE ".$db['f_kats']."
-                        SET `kid` = kid+1
-                        WHERE kid ".$sign." '".intval($_POST['kid'])."'");
-
-            $qry = db("INSERT INTO ".$db['f_kats']."
-                       SET `kid`    = '".intval($_POST['kid'])."',
-                           `name`   = '".up($_POST['kat'])."',
-                           `intern` = '".intval($_POST['intern'])."'");
+            $sql->update("UPDATE `{prefix_forumkats}` SET `kid` = kid+1 WHERE kid ".$sign." ?;",array(intval($_POST['kid'])));
+            $sql->insert("INSERT INTO `{prefix_forumkats}` SET `kid` = ?, `name` = ?, `intern` = ?",
+                    array(intval($_POST['kid']),up($_POST['kat']),intval($_POST['intern'])));
 
             $show = info(_config_forum_kat_added, "?admin=forum");
           } else {
             $show = error(_config_empty_katname, 1);
           }
         } elseif($do == "delete") {
-          $what = db("SELECT id FROM ".$db['f_skats']."
-                      WHERE sid = '".intval($_GET['id'])."'");
-          $get = _fetch($what);
-
-          $qry = db("DELETE FROM ".$db['f_kats']."
-                     WHERE id = '".intval($_GET['id'])."'");
-
-          $qry = db("DELETE FROM ".$db['f_threads']."
-                     WHERE kid = '".intval($get['id'])."'");
-
-          $qry = db("DELETE FROM ".$db['f_posts']."
-                     WHERE kid = '".intval($get['id'])."'");
-
-          $qry = db("DELETE FROM ".$db['f_skats']."
-                     WHERE sid = '".intval($_GET['id'])."'");
+          $get = $sql->fetch("SELECT id FROM `{prefix_forumsubkats}` WHERE sid = '".intval($_GET['id'])."'");
+          $sql->delete("DELETE FROM `{prefix_forumkats}` WHERE id = '".intval($_GET['id'])."'");
+          $sql->delete("DELETE FROM `{prefix_forumthreads}` WHERE kid = '".intval($get['id'])."'");
+          $sql->delete("DELETE FROM `{prefix_forumposts}` WHERE kid = '".intval($get['id'])."'");
+          $sql->delete("DELETE FROM `{prefix_forumsubkats}` WHERE sid = '".intval($_GET['id'])."'");
 
           $show = info(_config_forum_kat_deleted, "?admin=forum");
         } elseif($do == "edit") {
-          $qry = db("SELECT * FROM ".$db['f_kats']."
-                     WHERE id = '".intval($_GET['id'])."'");
-          while($get = _fetch($qry))
-          {
-            $pos = db("SELECT * FROM ".$db['f_kats']."
-                       ORDER BY kid");
-            while($getpos = _fetch($pos))
-            {
-              if($get['name'] != $getpos['name'])
-              {
-                $positions .= show(_select_field, array("value" => $getpos['kid']+1,
-                                                        "what" => _nach.' '.re($getpos['name'])));
-              }
-            }
+            $qry = $sql->select("SELECT * FROM `{prefix_forumkats}` WHERE id = '".intval($_GET['id'])."'");
+            foreach($qry as $get) {
+                $pos = $sql->select("SELECT * FROM `{prefix_forumkats}` ORDER BY kid;");
+                foreach($pos as $getpos) {
+                  if($get['name'] != $getpos['name'])
+                  {
+                    $positions .= show(_select_field, array("value" => $getpos['kid']+1,
+                                                            "what" => _nach.' '.re($getpos['name'])));
+                  }
+                }
 
             if($get['intern'] == "1") $sel = 'selected="selected"';
 
@@ -186,25 +164,17 @@ if(_adminMenu != 'true') exit;
 
               if($_POST['kid'] == "1" || "2") $sign = ">= ";
               else  $sign = "> ";
-              $posi = db("UPDATE ".$db['f_kats']."
-                        SET `kid` = kid+1
-                        WHERE `kid` ".$sign." '".intval($_POST['kid'])."'");
+              $sql->update("UPDATE `{prefix_forumkats}` SET `kid` = kid+1 WHERE `kid` ".$sign." '".intval($_POST['kid'])."'");
             }
 
 
-            $qry = db("UPDATE ".$db['f_kats']."
-                       SET `name`    = '".up($_POST['kat'])."',
-                           ".$kid."
-                           `intern`  = '".intval($_POST['intern'])."'
-                       WHERE id = '".intval($_GET['id'])."'");
+            $sql->update("UPDATE `{prefix_forumkats}` SET `name`    = '".up($_POST['kat'])."', ".$kid." `intern`  = '".intval($_POST['intern'])."' WHERE id = '".intval($_GET['id'])."'");
 
             $show = info(_config_forum_kat_edited, "?admin=forum");
           }
         } elseif($do == "newskat") {
-          $qry = db("SELECT * FROM ".$db['f_skats']." WHERE sid = " . (int) $_GET['id'] .
-                     " ORDER BY pos");
-          while($get = _fetch($qry))
-          {
+          $qry = $sql->select("SELECT * FROM `{prefix_forumsubkats}` WHERE sid = " . (int) $_GET['id']." ORDER BY pos");
+            foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => $get['pos']+1,
                                                     "what" => _nach.' '.re($get['kattopic']),
                                                     "sel" => ""));
@@ -228,27 +198,16 @@ if(_adminMenu != 'true') exit;
             if($_POST['order'] == "1" || "2") $sign = ">= ";
             else  $sign = "> ";
 
-            $posi = db("UPDATE ".$db['f_skats']."
-                        SET `pos` = pos+1
-                        WHERE `pos` ".$sign." '".intval($_POST['order'])."'");
-
-            $qry = db("INSERT INTO ".$db['f_skats']."
-                       SET `sid`      = '".intval($_GET['id'])."',
-                           `pos`    = '".intval($_POST['order'])."',
-                           `kattopic` = '".up($_POST['skat'])."',
-                           `subtopic` = '".up($_POST['stopic'])."'");
+            $sql->update("UPDATE `{prefix_forumsubkats}` SET `pos` = pos+1 WHERE `pos` ".$sign." '".intval($_POST['order'])."'");
+            $sql->insert("INSERT INTO `{prefix_forumsubkats}` SET `sid` = '".intval($_GET['id'])."', `pos` = '".intval($_POST['order'])."', `kattopic` = '".up($_POST['skat'])."', `subtopic` = '".up($_POST['stopic'])."'");
 
             $show = info(_config_forum_skat_added, "?admin=forum&show=subkats&amp;id=".$_GET['id']."");
           }
         } elseif($do == "editsubkat") {
-          $qry = db("SELECT * FROM ".$db['f_skats']."
-                     WHERE id = '".intval($_GET['id'])."'");
-          while($get = _fetch($qry)) //--> Start while subkat sort
-          {
-            $pos = db("SELECT * FROM ".$db['f_skats']." WHERE sid = ".$get['sid']."
-                       ORDER BY pos");
-            while($getpos = _fetch($pos))
-            {
+          $qry = $sql->select("SELECT `sid`,`kattopic` FROM `{prefix_forumsubkats}` WHERE `id` = ?;",array(intval($_GET['id'])));
+          foreach($qry as $get) {
+            $pos = $sql->select("SELECT `kattopic`,`pos` FROM `{prefix_forumsubkats}` WHERE `sid` = ? ORDER BY `pos`;",array($get['sid']));
+            foreach($pos as $getpos) {
               if($get['kattopic'] != $getpos['kattopic'])
               {
                 $positions .= show(_select_field, array("value" => $getpos['pos']+1,
@@ -281,12 +240,12 @@ if(_adminMenu != 'true') exit;
 
               if($_POST['order'] == "1" || "2") $sign = ">= ";
               else  $sign = "> ";
-              $posi = db("UPDATE ".$db['f_skats']."
+              $sql->update("UPDATE `{prefix_forumsubkats}`
                         SET `pos` = pos+1
                         WHERE `pos` ".$sign." '".intval($_POST['order'])."'");
             }
 
-            $qry = db("UPDATE ".$db['f_skats']."
+            $sql->update("UPDATE `{prefix_forumsubkats}`
                        SET `kattopic` = '".up($_POST['skat'])."',
                            ".$order."
                            `subtopic` = '".up($_POST['stopic'])."'
@@ -295,19 +254,10 @@ if(_adminMenu != 'true') exit;
             $show = info(_config_forum_skat_edited, "?admin=forum&show=subkats&amp;id=".$_POST['sid']."");
           }
         } elseif($do == "deletesubkat") {
-          $qry = db("SELECT sid FROM ".$db['f_skats']."
-                     WHERE id = '".intval($_GET['id'])."'");
-          $get = _fetch($qry);
-
-          $del = db("DELETE FROM ".$db['f_skats']."
-                     WHERE id = '".intval($_GET['id'])."'");
-
-          $del = db("DELETE FROM ".$db['f_threads']."
-                     WHERE kid = '".intval($_GET['id'])."'");
-
-          $del = db("DELETE FROM ".$db['f_posts']."
-                     WHERE kid = '".intval($_GET['id'])."'");
-
+          $get = $sql->fetch("SELECT `id`,`sid` FROM `{prefix_forumsubkats}` WHERE id = ?;",array(intval($_GET['id'])));
+          $sql->delete("DELETE FROM `{prefix_forumsubkats}` WHERE `id` = ?;",array(intval($get['id'])));
+          $sql->delete("DELETE FROM `{prefix_forumthreads}` WHERE `kid` = ?;",array(intval($get['id'])));
+          $sql->delete("DELETE FROM `{prefix_forumposts}` WHERE `kid` = ?;",array(intval($get['id'])));
           $show = info(_config_forum_skat_deleted, "?admin=forum&show=subkats&amp;id=".$get['sid']."");
         }
       }

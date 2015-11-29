@@ -78,7 +78,7 @@ if(defined('_News')) {
     $endc = $language == "deutsch" ? 'n' : '';
     $ccount = cnt('{prefix_newscomments}');
     $com = ($ccount == "1" ? _news_kommentar : _news_kommentare.$endc);
-    $stats = show(_news_stats, array("news" => $entrys, "comments" => cnt($db['newscomments']), "com" => $com));
+    $stats = show(_news_stats, array("news" => $entrys, "comments" => cnt('{prefix_newscomments}'), "com" => $com));
     
     //News Kategorie
     $qry = $sql->select("SELECT `id`,`kategorie` FROM {prefix_newskat};"); $kategorien = '';

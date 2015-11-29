@@ -8,7 +8,7 @@ if(defined('_Ck')) {
     if(!$chkMe || $chkMe < 2)
         $index = error(_error_wrong_permissions, 1);
     else {
-        $get_settings = settings::get(array('k_inhaber','k_nr','k_blz','k_bank','iban','bic','k_waehrung','k_vwz'));
+        $get_settings = settings::get(array('k_inhaber','k_nr','k_blz','k_bank','k_iban','k_bic','k_waehrung','k_vwz'));
         $entrys = cnt("{prefix_clankasse}");
         $qry = $sql->select("SELECT `id`,`pm`,`betrag`,`member`,`transaktion`,`datum` FROM `{prefix_clankasse}`
                   ".orderby_sql(array("betrag","transaktion","datum","member"), 'ORDER BY `datum` DESC').
@@ -91,8 +91,8 @@ if(defined('_Ck')) {
                                                "kontonr" => $get_settings['k_nr'],
                                                "new" => $new,
                                                "blz" => $get_settings['k_blz'],
-                                               "iban" => $get_settings['iban'],
-                                               "bic" => $get_settings['bic'],
+                                               "iban" => $get_settings['k_iban'],
+                                               "bic" => $get_settings['k_bic'],
                                                "bank" => $get_settings['k_bank'],
                                                "vwz" => $get_settings['k_vwz'],
                                                "summe" => $gesamt,

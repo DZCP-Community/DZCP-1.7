@@ -122,7 +122,7 @@ switch ($action):
                                            "2_balken" => $place2_balken,
                                            "3_balken" => $place3_balken));
 
-        $show_ = cnt($db['awards']) != 0 ? $show : show(_no_entrys_yet, array("colspan" => "10"));
+        $show_ = cnt('{prefix_awards}') != 0 ? $show : show(_no_entrys_yet, array("colspan" => "10"));
         $index = show($dir."/main", array("stats" => $stats, "legende" => $legende, "show" => $show_));
     break;
     case 'showall';
@@ -208,7 +208,7 @@ switch ($action):
         }
 
         $legende = show($dir."/legende", array("legende" => $legende));
-        $stats = show(_awards_stats, array("anz" => cnt($db['awards'])));
+        $stats = show(_awards_stats, array("anz" => cnt('{prefix_awards}')));
         $index = show($dir."/main", array("stats" => $stats, "legende" => $legende, "show" => $show));
     break;
 endswitch;

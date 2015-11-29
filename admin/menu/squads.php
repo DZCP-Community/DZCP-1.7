@@ -9,14 +9,14 @@ $where = $where.': '._member_admin_header;
 
 switch ($do) {
     case "add":
-        $qrynav = db("SELECT s2.*, s1.name AS katname, s1.placeholder
-                      FROM ".$db['navi_kats']."
-                      AS s1 LEFT JOIN ".$db['navi']."
+        $qrynav = $sql->select("SELECT s2.*, s1.name AS katname, s1.placeholder
+                      FROM `{prefix_navi_kats}`
+                      AS s1 LEFT JOIN `{prefix_navi}`
                       AS s2 ON s1.`placeholder` = s2.`kat`
                       ORDER BY s1.name, s2.pos");
 
         $navigation = ''; $thiskat = '';
-        while($getnav = _fetch($qrynav)) {
+        foreach($qrynav as $getnav) {
             if($thiskat != $getnav['kat']) {
                 $navigation .= '<option class="dropdownKat" value="lazy">'.re($getnav['katname']).'</option>
                                 <option value="'.re($getnav['placeholder']).'-1">-> '._admin_first.'</option>';
@@ -26,9 +26,9 @@ switch ($do) {
             $navigation .= empty($getnav['name']) ? '' : '<option value="'.re($getnav['placeholder']).'-'.($getnav['pos']+1).'">'._nach.' -> '.navi_name(re($getnav['name'])).'</option>';
         }
 
-        $qry = db("SELECT * FROM ".$db['squads']." ORDER BY pos");
+        $qry = $sql->select("SELECT * FROM `{prefix_squads}` ORDER BY pos");
         $positions = '';
-        while($get = _fetch($qry)) {
+        foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => $get['pos']+1,
                                                     "sel" => "",
                                                     "what" => _nach.' '.re($get['name'])));
@@ -88,8 +88,8 @@ switch ($do) {
             if($_POST['position'] == 1 || $_POST['position'] == 2) $sign = ">= ";
             else $sign = "> ";
 
-            db("UPDATE ".$db['squads']." SET `pos` = pos+1 WHERE pos ".$sign." '".intval($_POST['position'])."'");
-            db("INSERT INTO ".$db['squads']."
+            $sql->update("UPDATE `{prefix_squads}` SET `pos` = pos+1 WHERE pos ".$sign." '".intval($_POST['position'])."'");
+            $sql->insert("INSERT INTO `{prefix_squads}`
                 SET `name`         = '".up($_POST['squad'])."',
                     `game`         = '".up($_POST['game'])."',
                     `icon`         = '".up($_POST['icon'])."',
@@ -111,8 +111,8 @@ switch ($do) {
                 $kat = preg_replace('/-(\d+)/','',$_POST['navi']);
                 $pos = preg_replace("=nav_(.*?)-=","",$_POST['navi']);
 
-                db("UPDATE ".$db['navi']." SET `pos` = pos+1 WHERE pos ".$signnav." '".intval($pos)."'");
-                db("INSERT INTO ".$db['navi']."
+                $sql->update("UPDATE `{prefix_navi}` SET `pos` = pos+1 WHERE pos ".$signnav." '".intval($pos)."'");
+                $sql->insert("INSERT INTO `{prefix_navi}`
                     SET `pos`   = '".intval($pos)."',
                         `kat`       = '".up($kat)."',
                         `name`      = '".up($_POST['squad'])."',
@@ -156,13 +156,12 @@ switch ($do) {
         elseif(empty($_POST['game']))
         $show = error(_admin_squad_no_game, 1);
         else {
-            $get = db("SELECT pos FROM ".$db['squads']."
-                    WHERE id = '".intval($_GET['id'])."'",false,true);
+            $get = $sql->fetch("SELECT pos FROM `{prefix_squads}` WHERE id = '".intval($_GET['id'])."'");
 
             if($_POST['position'] != $get['pos']) {
                 if($_POST['position'] == 1 || $_POST['position'] == 2) $sign = ">= ";
                 else $sign = "> ";
-                db("UPDATE ".$db['squads']." SET `pos` = pos+1 WHERE pos ".$sign." '".intval($_POST['position'])."'");
+                $sql->update("UPDATE `{prefix_squads}` SET `pos` = pos+1 WHERE pos ".$sign." '".intval($_POST['position'])."'");
             }
 
             if($_POST['position'] == "lazy") $newpos = "";
@@ -171,7 +170,7 @@ switch ($do) {
             if($_POST['icon'] == "lazy") $newicon = "";
             else $newicon = "`icon` = '".up($_POST['icon'])."',";
 
-            db("UPDATE ".$db['squads']."
+            $sql->update("UPDATE `{prefix_squads}`
                 SET `name`          = '".up($_POST['squad'])."',
                     `game`          = '".up($_POST['game'])."',
                     ".$newpos."
@@ -186,17 +185,16 @@ switch ($do) {
                 WHERE id = '".intval($_GET['id'])."'");
 
             if(isset($_POST['navi']) && $_POST['navi'] != "lazy") {
-                $qry = db("SELECT * FROM ".$db['navi']." WHERE url = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'");
-                if(_rows($qry)) {
-                    $get = _fetch($qry);
+                $get = $sql->fetch("SELECT * FROM `{prefix_navi}` WHERE url = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'");
+                if($sql->rowCount()) {
                     if($_POST['navi'] == "1" || "2") $sign = ">= ";
                     else $sign = "> ";
 
                     $kat = preg_replace('/-(\d+)/','',$_POST['navi']);
                     $pos = preg_replace("=nav_(.+)-=","",$_POST['navi']);
 
-                    db("UPDATE ".$db['navi']." SET pos = pos+1 WHERE pos ".$sign." '".intval($pos)."'");
-                    db("UPDATE ".$db['navi']." SET `pos` = '".intval($pos)."',
+                    $sql->update("UPDATE `{prefix_navi}` SET pos = pos+1 WHERE pos ".$sign." '".intval($pos)."'");
+                    $sql->update("UPDATE `{prefix_navi}` SET `pos` = '".intval($pos)."',
                                                    `kat`       = '".up($kat)."',
                                                    `name`      = '".up($_POST['squad'])."',
                                                    `url`       = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'
@@ -208,9 +206,9 @@ switch ($do) {
                     $kat = preg_replace('/-(\d+)/','',$_POST['navi']);
                     $pos = preg_replace("=nav_(.*?)-=","",$_POST['navi']);
 
-                    db("UPDATE ".$db['navi']." SET `pos` = pos+1 WHERE pos ".$signnav." '".intval($pos)."'");
+                    $sql->update("UPDATE `{prefix_navi}` SET `pos` = pos+1 WHERE pos ".$signnav." '".intval($pos)."'");
 
-                    db("INSERT INTO ".$db['navi']."
+                    $sql->insert("INSERT INTO `{prefix_navi}`
                         SET `pos`       = '".intval($pos)."',
                             `kat`       = '".up($kat)."',
                             `name`      = '".up($_POST['squad'])."',
@@ -219,10 +217,8 @@ switch ($do) {
                             `type`      = '2'");
                 }
             } else {
-                $qry = db("SELECT * FROM ".$db['navi']." WHERE url = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'");
-
-                if(_rows($qry))
-                    db("DELETE FROM ".$db['navi']." WHERE url = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'");
+                if($sql->rows("SELECT id FROM `{prefix_navi}` WHERE url = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'"))
+                    $sql->delete("DELETE FROM `{prefix_navi}` WHERE url = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'");
             }
 
             //Banner
@@ -268,8 +264,8 @@ switch ($do) {
     break;
 
     case 'delete':
-        db("DELETE FROM ".$db['squads']." WHERE id = '".intval($_GET['id'])."'");
-        db("DELETE FROM ".$db['navi']." WHERE url = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'");
+        $sql->delete("DELETE FROM `{prefix_squads}` WHERE id = ?;",array(intval($_GET['id'])));
+        $sql->delete("DELETE FROM `{prefix_navi}` WHERE url = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'");
 
         //Remove Pic
         foreach($picformat as $tmpendung) {
@@ -305,14 +301,13 @@ switch ($do) {
     break;
 
     case 'edit':
-        $get = db("SELECT * FROM ".$db['squads']." WHERE id = '".intval($_GET['id'])."'",false,true);
-        $pos = db("SELECT pos,name FROM ".$db['squads']." ORDER BY pos"); $positions = '';
-        while($getpos = _fetch($pos))
-        {
+        $get = $sql->fetch("SELECT * FROM `{prefix_squads}` WHERE id = '".intval($_GET['id'])."'");
+        $pos = $sql->select("SELECT pos,name FROM `{prefix_squads}` ORDER BY pos"); $positions = '';
+        foreach($pos as $getpos) {
             if($getpos['name'] != $get['name']) {
-                $mp = db("SELECT pos FROM ".$db['squads']."
+                $mp = $sql->fetch("SELECT pos FROM `{prefix_squads}`
                           WHERE id != '".intval($get['id'])."'
-                          AND pos = '".intval(($get['pos']-1))."'",false,true);
+                          AND pos = '".intval(($get['pos']-1))."'");
 
                 $sel = $getpos['pos'] == $mp['pos'] ? 'selected="selected"' : '' ;
                 $positions .= show(_select_field, array("value" => $getpos['pos']+1,
@@ -321,10 +316,10 @@ switch ($do) {
             }
         }
 
-        $qrynav = db("SELECT s2.*, s1.name AS katname, s1.placeholder FROM ".$db['navi_kats']." AS s1 LEFT JOIN ".$db['navi']." AS s2 ON s1.`placeholder` = s2.`kat`
+        $qrynav = $sql->select("SELECT s2.*, s1.name AS katname, s1.placeholder FROM `{prefix_navi_kats}` AS s1 LEFT JOIN `{prefix_navi}` AS s2 ON s1.`placeholder` = s2.`kat`
                       ORDER BY s1.name, s2.pos");
         $i = 1; $thiskat = ''; $navigation = '';
-        while($getnav = _fetch($qrynav)) {
+        foreach($qrynav as $getnav) {
             if($thiskat != $getnav['kat']) {
                 $navigation .= '<option class="dropdownKat" value="lazy">'.re($getnav['katname']).'</option>
                 <option value="'.re($getnav['placeholder']).'-1">-> '._admin_first.'</option>';
@@ -418,9 +413,8 @@ switch ($do) {
     break;
 
     default:
-        $qry = db("SELECT * FROM ".$db['squads']." ORDER BY pos"); $squads = '';
-        while($get = _fetch($qry))
-        {
+        $qry = $sql->select("SELECT * FROM `{prefix_squads}` ORDER BY pos"); $squads = '';
+        foreach($qry as $get) {
             $edit = show("page/button_edit_single", array("id" => $get['id'],
                     "action" => "admin=squads&amp;do=edit",
                     "title" => _button_title_edit));

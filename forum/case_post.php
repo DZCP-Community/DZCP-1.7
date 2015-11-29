@@ -7,9 +7,7 @@
 if(defined('_Forum')) {
   if($do == "edit")
   {
-    $qry = db("SELECT * FROM ".$db['f_posts']."
-               WHERE id = '".intval($_GET['id'])."'");
-    $get = _fetch($qry);
+    $get = $sql->fetch("SELECT * FROM `{prefix_forumposts}` WHERE id = '".intval($_GET['id'])."'");
 
     if($get['reg'] == $userid || permission("forum"))
     {
@@ -51,9 +49,7 @@ if(defined('_Forum')) {
       $index = error(_error_wrong_permissions, 1);
     }
   } elseif($do == "editpost") {
-    $qry = db("SELECT reg FROM ".$db['f_posts']."
-               WHERE id = '".intval($_GET['id'])."'");
-    $get = _fetch($qry);
+    $get = $sql->fetch("SELECT reg FROM `{prefix_forumposts}` WHERE id = '".intval($_GET['id'])."'");
     if($get['reg'] == $userid || permission("forum"))
     {
       if($get['reg'] != 0 || permission('forum'))
@@ -104,14 +100,12 @@ if(defined('_Forum')) {
                                                                                "error" => $error,
                                                                            "eintraghead" => _eintrag));
       } else {
-        $qryp = db("SELECT * FROM ".$db['f_posts']."
-                    WHERE id = '".intval($_GET['id'])."'");
-        $getp = _fetch($qryp);
+        $getp = $sql->fetch("SELECT * FROM `{prefix_forumposts}` WHERE id = '".intval($_GET['id'])."'");
 
         $editedby = show(_edited_by, array("autor" => autor($userid),
                                            "time" => date("d.m.Y H:i", time())._uhr));
 
-        $qry = db("UPDATE ".$db['f_posts']."
+        $sql->update("UPDATE `{prefix_forumposts}`
                    SET `nick`   = '".up($_POST['nick'])."',
                        `email`  = '".up($_POST['email'])."',
                        `text`   = '".up($_POST['eintrag'])."',
@@ -119,17 +113,15 @@ if(defined('_Forum')) {
                        `edited` = '".up($editedby)."'
                    WHERE id = '".intval($_GET['id'])."'");
 
-      $checkabo = db("SELECT s1.user,s1.fid,s2.nick,s2.id,s2.email FROM ".$db['f_abo']." AS s1
-                        LEFT JOIN ".$db['users']." AS s2 ON s2.id = s1.user
+      $checkabo = $sql->select("SELECT s1.user,s1.fid,s2.nick,s2.id,s2.email FROM {prefix_f_abo} AS s1
+                        LEFT JOIN `{prefix_users}` AS s2 ON s2.id = s1.user
                       WHERE s1.fid = '".$getp['sid']."'");
-        while($getabo = _fetch($checkabo))
-        {
+      foreach($checkabo as $getabo) {
         if($userid != $getabo['user'])
         {
-          $topic = db("SELECT topic FROM ".$db['f_threads']." WHERE id = '".$getp['sid']."'");
-          $gettopic = _fetch($topic);
+          $gettopic = $sql->fetch("SELECT topic FROM `{prefix_forumthreads}` WHERE id = '".$getp['sid']."'");
 
-            $entrys = cnt($db['f_posts'], " WHERE `sid` = ".$getp['sid']);
+            $entrys = cnt("{prefix_forumposts}", " WHERE `sid` = ".$getp['sid']);
 
             if($entrys == "0") $pagenr = "1";
             else $pagenr = ceil($entrys/settings::get('m_fposts'));
@@ -150,7 +142,7 @@ if(defined('_Forum')) {
           sendMail(re($getabo['email']),$subj,$message);
         }
       }
-        $entrys = cnt($db['f_posts'], " WHERE `sid` = ".$getp['sid']);
+        $entrys = cnt("{prefix_forumposts}", " WHERE `sid` = ".$getp['sid']);
 
         if($entrys == "0") $pagenr = "1";
         else $pagenr = ceil($entrys/settings::get('m_fposts'));
@@ -171,11 +163,10 @@ if(defined('_Forum')) {
     } else {
       if(!ipcheck("fid(".$_GET['kid'].")", settings::get('f_forum')))
       {
-        $check = db("SELECT s2.id,s1.intern FROM ".$db['f_kats']." AS s1
-                     LEFT JOIN ".$db['f_skats']." AS s2
+        $checks = $sql->fetch("SELECT s2.id,s1.intern FROM `{prefix_forumkats}` AS s1
+                     LEFT JOIN `{prefix_forumsubkats}` AS s2
                      ON s2.sid = s1.id
                      WHERE s2.id = '".intval($_GET['kid'])."'");
-        $checks = _fetch($check);
         if(forumcheck($_GET['id'], "closed"))
         {
           $index = error(_error_forum_closed, 1);
@@ -192,18 +183,14 @@ if(defined('_Forum')) {
           }
           if(isset($_GET['zitat']))
           {
-            $qryzitat = db("SELECT nick,reg,text FROM ".$db['f_posts']."
-                            WHERE id = '".intval($_GET['zitat'])."'");
-            $getzitat = _fetch($qryzitat);
+            $getzitat = $sql->fetch("SELECT nick,reg,text FROM `{prefix_forumposts}` WHERE id = '".intval($_GET['zitat'])."'");
 
             if($getzitat['reg'] == "0") $nick = $getzitat['nick'];
             else                        $nick = autor($getzitat['reg']);
 
             $zitat = zitat($nick, $getzitat['text']);
           } elseif(isset($_GET['zitatt'])) {
-            $qryzitat = db("SELECT t_nick,t_reg,t_text FROM ".$db['f_threads']."
-                            WHERE id = '".intval($_GET['zitatt'])."'");
-            $getzitat = _fetch($qryzitat);
+            $getzitat = $sql->fetch("SELECT t_nick,t_reg,t_text FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['zitatt'])."'");
 
             if($getzitat['t_reg'] == "0") $nick = $getzitat['t_nick'];
             else                          $nick = data("nick",$getzitat['t_reg']);
@@ -216,14 +203,12 @@ if(defined('_Forum')) {
           $dowhat = show(_forum_dowhat_add_post, array("id" => $_GET['id'],
                                                        "kid" => $_GET['kid']));
 
-          $qryl = db("SELECT * FROM ".$db['f_posts']."
+          $getl = $sql->fetch("SELECT * FROM `{prefix_forumposts}`
                       WHERE kid = '".intval($_GET['kid'])."'
                       AND sid = '".intval($_GET['id'])."'
                       ORDER BY date DESC");
-          if(_rows($qryl))
+          if($sql->rowCount())
           {
-            $getl = _fetch($qryl);
-
             if(data("signatur",$getl['reg'])) $sig = _sig.bbcode(data("signatur",$getl['reg']));
             else                               $sig = "";
 
@@ -238,7 +223,7 @@ if(defined('_Forum')) {
             if($chkMe == 4 || permission('ipban')) $posted_ip = $getl['ip'];
             else              $posted_ip = _logged;
 
-            $titel = show(_eintrag_titel_forum, array("postid" => (cnt($db['f_posts'], " WHERE sid =".intval($_GET['id']))+1),
+            $titel = show(_eintrag_titel_forum, array("postid" => (cnt("{prefix_forumposts}", " WHERE sid =".intval($_GET['id']))+1),
                                                                                         "datum" => date("d.m.Y", $getl['date']),
                                                                                         "zeit" => date("H:i", $getl['date'])._uhr,
                                                 "url" => '#',
@@ -246,9 +231,7 @@ if(defined('_Forum')) {
                                                 "delete" => ""));
             if($getl['reg'] != 0)
             {
-              $qryu = db("SELECT nick,icq,hp,email FROM ".$db['users']."
-                          WHERE id = '".$getl['reg']."'");
-              $getu = _fetch($qryu);
+              $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".$getl['reg']."'");
 
               $email = CryptMailto(re($getu['email']),_emailicon_forum);
               $pn = _forum_pn_preview;
@@ -288,12 +271,11 @@ if(defined('_Forum')) {
                                                              "zitat" => _forum_zitat_preview,
                                                              "onoff" => $onoff,
                                                              "top" => "",
-                                                             "lp" => cnt($db['f_posts'], " WHERE sid = '".intval($_GET['id'])."'")+1));
+                                                             "lp" => cnt("{prefix_forumposts}", " WHERE sid = '".intval($_GET['id'])."'")+1));
           } else {
-            $qryt = db("SELECT * FROM ".$db['f_threads']."
+            $gett = $sql->fetch("SELECT * FROM `{prefix_forumthreads}`
                         WHERE kid = '".intval($_GET['kid'])."'
                         AND id = '".intval($_GET['id'])."'");
-            $gett = _fetch($qryt);
 
             if(data("signatur",$gett['t_reg'])) $sig = _sig.bbcode(data("signatur",$gett['t_reg']));
             else $sig = "";
@@ -320,9 +302,8 @@ if(defined('_Forum')) {
                                                 "delete" => ""));
             if($gett['t_reg'] != 0)
             {
-              $qryu = db("SELECT nick,icq,hp,email FROM ".$db['users']."
+              $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}`
                           WHERE id = '".$gett['t_reg']."'");
-              $getu = _fetch($qryu);
 
               $email = CryptMailto(re($getu['email']),_emailicon_forum);
               $pn = show(_pn_write_forum, array("id" => $gett['t_reg'],
@@ -364,7 +345,7 @@ if(defined('_Forum')) {
                                                              "zitat" => "",
                                                              "onoff" => $onoff,
                                                              "top" => "",
-                                                             "lp" => cnt($db['f_posts'], " WHERE sid = '".intval($_GET['id'])."'")+1));
+                                                             "lp" => cnt("{prefix_forumposts}", " WHERE sid = '".intval($_GET['id'])."'")+1));
           }
 
           if($userid >= 1)
@@ -409,8 +390,8 @@ if(defined('_Forum')) {
       }
     }
   } elseif($do == "addpost") {
-        $qry_thread = db("SELECT `id`,`kid` FROM ".$db['f_threads']." WHERE `id` = '".(int)$_GET['id']."'");
-        if(_rows($qry_thread) == 0)
+        $get_threadkid = $sql->fetch("SELECT `id`,`kid` FROM `{prefix_forumthreads}` WHERE `id` = '".(int)$_GET['id']."'");
+        if(!$sql->rowCount())
         {
             $index = error(_id_dont_exist,1);
         } else {
@@ -418,12 +399,10 @@ if(defined('_Forum')) {
             {
                 $index = error(_error_unregistered,1);
             } else {
-                $get_threadkid = _fetch($qry_thread);
-                $check = db("SELECT s2.id,s1.intern FROM ".$db['f_kats']." AS s1
-                                         LEFT JOIN ".$db['f_skats']." AS s2
+                $checks = $sql->fetch("SELECT s2.id,s1.intern FROM `{prefix_forumkats}` AS s1
+                                         LEFT JOIN `{prefix_forumsubkats}` AS s2
                                          ON s2.sid = s1.id
                                          WHERE s2.id = '".intval($_GET['kid'])."'");
-                $checks = _fetch($check);
 
                 if($checks['intern'] == 1 && !permission("intforum") && !fintern($checks['id'])) {
                     exit();
@@ -453,14 +432,12 @@ if(defined('_Forum')) {
                     $error = show("errors/errortable", array("error" => $error));
                     $dowhat = show(_forum_dowhat_add_post, array("id" => $_GET['id'],
                                                                                                              "kid" => $get_threadkid['kid']));
-                    $qryl = db("SELECT * FROM ".$db['f_posts']."
+                    $getl = $sql->fetch("SELECT * FROM `{prefix_forumposts}`
                                             WHERE kid = '".intval($get_threadkid['kid'])."'
                                             AND sid = '".intval($_GET['id'])."'
                                             ORDER BY date DESC");
-                    if(_rows($qryl))
+                    if($sql->rowCount())
                     {
-                        $getl = _fetch($qryl);
-
                         if(data("signatur",$getl['reg'])) $sig = _sig.bbcode(data("signatur",$getl['reg']));
                         else $sig = "";
 
@@ -477,7 +454,7 @@ if(defined('_Forum')) {
                         if($chkMe == 4 || permission('ipban')) $posted_ip = $getl['ip'];
                         else $posted_ip = _logged;
 
-                        $titel = show(_eintrag_titel_forum, array("postid" => (cnt($db['f_posts'], " WHERE sid = ".intval($_GET['id']))+1),
+                        $titel = show(_eintrag_titel_forum, array("postid" => (cnt("{prefix_forumposts}", " WHERE sid = ".intval($_GET['id']))+1),
                                                                                                 "datum" => date("d.m.Y", $getl['date']),
                                                                                                 "zeit" => date("H:i", $getl['date'])._uhr,
                                                                                                 "url" => '#',
@@ -486,10 +463,8 @@ if(defined('_Forum')) {
 
                         if($getl['reg'] != 0)
                         {
-                            $qryu = db("SELECT nick,icq,hp,email FROM ".$db['users']."
-                                                    WHERE id = '".$getl['reg']."'");
-                            $getu = _fetch($qryu);
-
+                            $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".$getl['reg']."'");
+                            
                             $email = CryptMailto(re($getu['email']),_emailicon_forum);
                             $pn = show(_pn_write_forum, array("id" => $getl['reg'],
                                                                                                 "nick" => $getu['nick']));
@@ -534,12 +509,11 @@ if(defined('_Forum')) {
                                                                                                                          "zitat" => "",
                                                                                                                          "onoff" => $onoff,
                                                                                                                          "top" => "",
-                                                                                                                         "lp" => cnt($db['f_posts'], " WHERE sid = '".intval($_GET['id'])."'")+1));
+                                                                                                                         "lp" => cnt("{prefix_forumposts}", " WHERE sid = '".intval($_GET['id'])."'")+1));
                     } else {
-                        $qryt = db("SELECT * FROM ".$db['f_threads']."
+                        $gett = $sql->fetch("SELECT * FROM `{prefix_forumthreads}`
                                                 WHERE kid = '".intval($get_threadkid['kid'])."'
                                                 AND id = '".intval($_GET['id'])."'");
-                        $gett = _fetch($qryt);
 
                         if(data("signatur",$gett['t_reg'])) $sig = _sig.bbcode(data("signatur",$gett['t_reg']));
                         else $sig = "";
@@ -559,9 +533,7 @@ if(defined('_Forum')) {
 
                         if($gett['t_reg'] != 0)
                         {
-                            $qryu = db("SELECT nick,icq,hp,email FROM ".$db['users']."
-                                                    WHERE id = '".$gett['t_reg']."'");
-                            $getu = _fetch($qryu);
+                            $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".$gett['t_reg']."'");
 
                             $email = CryptMailto(re($getu['email']),_emailicon_forum);
                             $pn = show(_pn_write_forum, array("id" => $gett['t_reg'], "nick" => $getu['nick']));
@@ -608,7 +580,7 @@ if(defined('_Forum')) {
                                                                                                                          "zitat" => "",
                                                                                                                          "onoff" => $onoff,
                                                                                                                          "top" => "",
-                                                                                                                         "lp" => cnt($db['f_posts'], " WHERE sid = '".intval($_GET['id'])."'")+1));
+                                                                                                                         "lp" => cnt("{prefix_forumposts}", " WHERE sid = '".intval($_GET['id'])."'")+1));
                     }
 
                     $index = show($dir."/post", array("titel" => _forum_new_post_head,
@@ -636,15 +608,13 @@ if(defined('_Forum')) {
                                                                                         "eintraghead" => _eintrag));
                 } else {
                     $spam = 0;
-                    $qrydp = db("SELECT * FROM ".$db['f_posts']."
+                    $getdp = $sql->fetch("SELECT * FROM `{prefix_forumposts}`
                                              WHERE kid = '".intval($get_threadkid['kid'])."'
                                              AND sid = '".intval($_GET['id'])."'
                                              ORDER BY date DESC
                                              LIMIT 1");
-                    if(_rows($qrydp))
+                    if($sql->rowCount())
                     {
-                        $getdp = _fetch($qrydp);
-
                         if($userid >= 1)
                         {
                             if($userid == $getdp['reg'] && settings::get('double_post')) $spam = 1;
@@ -655,10 +625,9 @@ if(defined('_Forum')) {
                         }
                     } else {
 
-                        $qrytdp = db("SELECT * FROM ".$db['f_threads']."
+                        $gettdp = $sql->fetch("SELECT * FROM `{prefix_forumthreads}`
                                     WHERE kid = '".intval($get_threadkid['kid'])."'
                                     AND id = '".intval($_GET['id'])."'");
-                        $gettdp = _fetch($qrytdp);
 
                         if($userid >= 1)
                         {
@@ -679,12 +648,12 @@ if(defined('_Forum')) {
                                                                                                      "ltext" => addslashes($getdp['text']),
                                                                                                      "ntext" => up($_POST['eintrag'])));
 
-                                                    $qry = db("UPDATE ".$db['f_threads']."
+                                                    $sql->update("UPDATE `{prefix_forumthreads}`
                                                                                          SET `lp` = '".time()."'
                                     WHERE kid = '".intval($_GET['kid'])."'
                                     AND id = '".intval($_GET['id'])."'");
 
-                            $qry = db("UPDATE ".$db['f_posts']."
+                            $sql->update("UPDATE `{prefix_forumposts}`
                                                  SET `date`   = '".time()."',
                                                          `text`   = '".$text."'
                                                  WHERE id = '".$getdp['id']."'");
@@ -696,12 +665,12 @@ if(defined('_Forum')) {
                                                                                                      "ltext" => addslashes($gettdp['t_text']),
                                                                                                      "ntext" => up($_POST['eintrag'])));
 
-                            $qry = db("UPDATE ".$db['f_threads']."
+                            $sql->update("UPDATE `{prefix_forumthreads}`
                                                  SET `lp`   = '".time()."',
                                                  `t_text`   = '".$text."'
                                                  WHERE id = '".$gettdp['id']."'");
                 } else {
-                    $qry = db("INSERT INTO ".$db['f_posts']."
+                    $sql->insert("INSERT INTO `{prefix_forumposts}`
                                          SET `kid`   = '".intval($get_threadkid['kid'])."',
                                                  `sid`   = '".intval($_GET['id'])."',
                                                  `date`  = '".time()."',
@@ -712,7 +681,7 @@ if(defined('_Forum')) {
                                                  `text`  = '".up($_POST['eintrag'])."',
                                                  `ip`    = '".$userip."'");
 
-                    $update = db("UPDATE ".$db['f_threads']."
+                    $sql->update("UPDATE `{prefix_forumthreads}`
                                                 SET `lp`    = '".time()."',
                                                         `first` = '0'
                                                 WHERE id    = '".intval($_GET['id'])."'");
@@ -720,21 +689,20 @@ if(defined('_Forum')) {
 
                 setIpcheck("fid(".$get_threadkid['kid'].")");
 
-                    $update = db("UPDATE ".$db['userstats']."
+                    $sql->update("UPDATE `{prefix_userstats}`
                                                 SET `forumposts` = forumposts+1
                                                 WHERE `user`       = '".$userid."'");
 
-                    $checkabo = db("SELECT s1.user,s1.fid,s2.nick,s2.id,s2.email FROM ".$db['f_abo']." AS s1
-                                    LEFT JOIN ".$db['users']." AS s2 ON s2.id = s1.user
+                    $checkabo = $sql->select("SELECT s1.user,s1.fid,s2.nick,s2.id,s2.email FROM {prefix_f_abo} AS s1
+                                    LEFT JOIN `{prefix_users}` AS s2 ON s2.id = s1.user
                                                     WHERE s1.fid = '".intval($_GET['id'])."'");
-                    while($getabo = _fetch($checkabo))
-                    {
+                    
+                    foreach($checkabo as $getabo) {
                         if($userid != $getabo['user'])
                         {
-                            $topic = db("SELECT topic FROM ".$db['f_threads']." WHERE id = '".intval($_GET['id'])."'");
-                            $gettopic = _fetch($topic);
+                            $gettopic = $sql->fetch("SELECT topic FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
 
-                            $entrys = cnt($db['f_posts'], " WHERE `sid` = ".intval($_GET['id']));
+                            $entrys = cnt("{prefix_forumposts}", " WHERE `sid` = ".intval($_GET['id']));
 
                             if($entrys == "0") $pagenr = "1";
                             else $pagenr = ceil($entrys/settings::get('m_fposts'));
@@ -756,7 +724,7 @@ if(defined('_Forum')) {
                         }
                     }
 
-                    $entrys = cnt($db['f_posts'], " WHERE `sid` = ".intval($_GET['id']));
+                    $entrys = cnt("{prefix_forumposts}", " WHERE `sid` = ".intval($_GET['id']));
 
                     if($entrys == "0") $pagenr = "1";
                     else $pagenr = ceil($entrys/settings::get('m_fposts'));
@@ -770,26 +738,23 @@ if(defined('_Forum')) {
             }
         }
   } elseif($do == "delete") {
-    $qry = db("SELECT * FROM ".$db['f_posts']."
-               WHERE id = '".intval($_GET['id'])."'");
-    $get = _fetch($qry);
-
+    $get = $sql->fetch("SELECT * FROM `{prefix_forumposts}` WHERE id = '".intval($_GET['id'])."'");
     if($get['reg'] == $userid OR permission("forum"))
     {
-      $del = db("DELETE FROM ".$db['f_posts']."
+      $sql->delete("DELETE FROM `{prefix_forumposts}`
                  WHERE id = '".intval($_GET['id'])."'");
 
       $fposts = userstats("forumposts",$get['reg'])-1;
-      $upd = db("UPDATE ".$db['userstats']."
+      $sql->update("UPDATE `{prefix_userstats}`
                  SET `forumposts` = '".intval($fposts)."'
                  WHERE user = '".$get['reg']."'");
 
-      $entrys = cnt($db['f_posts'], " WHERE `sid` = ".$get['sid']);
+      $entrys = cnt("{prefix_forumposts}", " WHERE `sid` = ".$get['sid']);
 
       if($entrys == "0")
       {
         $pagenr = "1";
-        $update = db("UPDATE ".$db['f_threads']."
+        $sql->update("UPDATE `{prefix_forumthreads}`
                       SET `first` = '1'
                       WHERE kid = '".$get['kid']."'");
       } else {

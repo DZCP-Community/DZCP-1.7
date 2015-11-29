@@ -60,9 +60,10 @@ if(defined('_UserMenu')) {
                         $index = info(_info_edit_profile_done, "?action=user&amp;id=" . $userid . "");
                         $newpwd = "";
                         if (isset($_POST['pwd']) && !empty($_POST['pwd'])) {
-                            if(md5($_POST['pwd']) == md5($_POST['cpwd'])) {
-                                $_SESSION['pwd'] = md5($_POST['pwd']);
-                                $newpwd = "`pwd` = '".$_SESSION['pwd']."',";
+                            if(pwd_encoder($_POST['pwd']) == pwd_encoder($_POST['cpwd'])) {
+                                $_SESSION['pwd'] = pwd_encoder($_POST['pwd']);
+                                $newpwd = "`pwd` = '".up($_SESSION['pwd'])."',";
+                                $newpwd .= "`pwd_encoder` = ".settings::get('default_pwd_encoder').",";
                                 $index = info(_info_edit_profile_done, "?action=user&amp;id=" . $userid . "");
                             } else {
                                 $index = error(_error_passwords_dont_match, 1);
@@ -70,7 +71,7 @@ if(defined('_UserMenu')) {
                         }
 
                         $bday = ($_POST['t'] && $_POST['m'] && $_POST['j'] ? cal($_POST['t']) . "." . cal($_POST['m']) . "." . $_POST['j'] : 0);
-                        $qrycustom = $sql->select("SELECT `feldname`,`type` FROM `" . $db['profile']."`"); $customfields = '';
+                        $qrycustom = $sql->select("SELECT `feldname`,`type` FROM `{prefix_profile}`"); $customfields = '';
                         foreach($qrycustom as $getcustom) {
                             $customfields .= " `".$getcustom['feldname']."` = '".($getcustom['type'] == 2 ? links($_POST[$getcustom['feldname']]) : up($_POST[$getcustom['feldname']]))."', ";
                         }

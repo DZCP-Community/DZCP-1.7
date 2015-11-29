@@ -5,11 +5,10 @@
  */
 
 if(defined('_Forum')) {
-  $check = db("SELECT s2.id,s1.intern FROM ".$db['f_kats']." AS s1
-               LEFT JOIN ".$db['f_skats']." AS s2
+  $checks = $sql->fetch("SELECT s2.id,s1.intern FROM `{prefix_forumkats}` AS s1
+               LEFT JOIN `{prefix_forumsubkats}` AS s2
                ON s2.sid = s1.id
                WHERE s2.id = '".intval($_GET['id'])."'");
-  $checks = _fetch($check);
 
   if($checks['intern'] == 1 && (!permission("intforum") && !fintern($checks['id'])))
   {
@@ -17,14 +16,14 @@ if(defined('_Forum')) {
   } else {
     if(empty($_POST['suche']))
     {
-      $qry = db("SELECT * FROM ".$db['f_threads']."
+      $qry = $sql->select("SELECT * FROM `{prefix_forumthreads}`
                  WHERE kid ='".intval($_GET['id'])."'
                  OR global = 1
                  ORDER BY global DESC, sticky DESC, lp DESC, t_date DESC
                  LIMIT ".($page - 1)*settings::get('m_fthreads').",".settings::get('m_fthreads')."");
     } else {
-      $qry = db("SELECT s1.global,s1.topic,s1.subtopic,s1.t_text,s1.t_email,s1.hits,s1.t_reg,s1.t_date,s1.closed,s1.sticky,s1.id
-                 FROM ".$db['f_threads']." AS s1
+      $qry = $sql->select("SELECT s1.global,s1.topic,s1.subtopic,s1.t_text,s1.t_email,s1.hits,s1.t_reg,s1.t_date,s1.closed,s1.sticky,s1.id
+                 FROM `{prefix_forumthreads}` AS s1
                  WHERE s1.topic LIKE '%".$_POST['suche']."%'
                  AND s1.kid = '".intval($_GET['id'])."'
                  OR s1.subtopic LIKE '%".$_POST['suche']."%'
@@ -35,12 +34,11 @@ if(defined('_Forum')) {
                  LIMIT ".($page - 1)*settings::get('m_fthreads').",".settings::get('m_fthreads')."");
     }
 
-    $entrys = cnt($db['f_threads'], " WHERE kid = ".intval($_GET['id']));
+    $entrys = cnt("{prefix_forumthreads}", " WHERE kid = ".intval($_GET['id']));
     $i = 2;
 
     $threads = '';
-    while($get = _fetch($qry))
-    {
+    foreach($qry as $get) {
       if($get['sticky'] == "1") $sticky = _forum_sticky;
       else $sticky = "";
 
@@ -50,16 +48,14 @@ if(defined('_Forum')) {
       if($get['closed'] == "1") $closed = show("page/button_closed", array());
       else $closed = "";
 
-      $cntpage = cnt($db['f_posts'], " WHERE sid = ".$get['id']);
+      $cntpage = cnt("{prefix_forumposts}", " WHERE sid = ".$get['id']);
 
       if($cntpage == "0") $pagenr = "1";
       else $pagenr = ceil($cntpage/settings::get('m_fposts'));
 
       if(empty($_POST['suche']))
       {
-        $gets = db("SELECT id FROM ".$db['f_skats']."
-                    WHERE id = '".intval($_GET['id'])."'",false,true);
-
+        $gets = $sql->fetch("SELECT id FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['id'])."'");
         $threadlink = show(_forum_thread_link, array("topic" => re(cut($get['topic'],settings::get('l_forumtopic'))),
                                                      "id" => $get['id'],
                                                      "kid" => $gets['id'],
@@ -78,12 +74,11 @@ if(defined('_Forum')) {
                                                             "page" => $pagenr));
       }
 
-      $qrylp = db("SELECT date,nick,reg,email FROM ".$db['f_posts']."
+      $getlp = $sql->fetch("SELECT date,nick,reg,email FROM `{prefix_forumposts}`
                    WHERE sid = '".$get['id']."'
                    ORDER BY date DESC");
-      if(_rows($qrylp))
+      if($sql->rowCount())
       {
-        $getlp = _fetch($qrylp);
         $lpost = show(_forum_thread_lpost, array("nick" => autor($getlp['reg'], '', $getlp['nick'], re($getlp['email'])),
                                                  "date" => date("d.m.y H:i", $getlp['date'])._uhr));
         $lpdate = $getlp['date'];
@@ -97,16 +92,14 @@ if(defined('_Forum')) {
                                                          "topic" => $threadlink,
                                                          "subtopic" => re(cut($get['subtopic'],settings::get('l_forumsubtopic'))),
                                                          "hits" => $get['hits'],
-                                                         "replys" => cnt($db['f_posts'], " WHERE sid = '".$get['id']."'"),
+                                                         "replys" => cnt("{prefix_forumposts}", " WHERE sid = '".$get['id']."'"),
                                                          "class" => $class,
                                                          "lpost" => $lpost,
                                                          "autor" => autor($get['t_reg'], '', $get['t_nick'], $get['t_email'])));
       $i--;
     }
 
-    $gets = db("SELECT id,kattopic FROM ".$db['f_skats']."
-                WHERE id = '".intval($_GET['id'])."'",false,true);
-
+    $gets = $sql->fetch("SELECT id,kattopic FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['id'])."'");
     $search = show($dir."/forum_skat_search", array("head_search" => _forum_head_skat_search,
                                                     "id" => $_GET['id'],
                                                     "suchwort" => isset($_POST['suche']) ? re($_POST['suche']) : ''));
@@ -135,11 +128,8 @@ if(defined('_Forum')) {
                                                     "new" => $new,));
     }
 
-    $subkat = db("SELECT sid FROM ".$db['f_skats']."
-                  WHERE id = '".intval($_GET['id'])."'",false,true);
-
-    $kat = db("SELECT name FROM ".$db['f_kats']."
-                WHERE id = '".$subkat['sid']."'",false,true);
+    $subkat = $sql->fetch("SELECT sid FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['id'])."'");
+    $kat = $sql->fetch("SELECT name FROM `{prefix_forumkats}` WHERE id = '".$subkat['sid']."'");
 
     $wheres = show(_forum_subkat_where, array("where" => re($gets['kattopic']),
                                               "id" => $gets['id']));

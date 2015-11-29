@@ -48,8 +48,8 @@ $support .= "\r\n";
 $support .= "#####################\r\n";
 $support .= "Domain & User\r\n";
 $support .= "#####################\r\n";
-$support .= "Domain: http://".$_SERVER['HTTP_HOST'].str_replace('/admin','/',dirname($_SERVER['PHP_SELF']))."\r\n";
-$support .= "System/Browser: ".$_SERVER['HTTP_USER_AGENT']."\r\n";
+$support .= "Domain: http://".GetServerVars('HTTP_HOST').str_replace('/admin','/',dirname(GetServerVars('PHP_SELF')))."\r\n";
+$support .= "System/Browser: ".GetServerVars('HTTP_USER_AGENT')."\r\n";
 $support .= "\r\n";
 
 $support .= "#####################\r\n";
@@ -92,7 +92,7 @@ $support .= "open_basedir: ".$PhpInfo['Core']['open_basedir'][0]."\r\n";
 $support .= "GD-Version: ".$PhpInfo['gd']['GD Version']."\r\n";
 $support .= "PHP-Memory Limit: ".$PhpInfo['Core']['memory_limit'][0]."\r\n";
 $support .= "imagettftext(): ".(function_exists('imagettftext')==true? 'existiert' : 'existiert nicht')."\r\n";
-$support .= "HTTP_ACCEPT_ENCODING: ".$_SERVER["HTTP_ACCEPT_ENCODING"]."\r\n";
+$support .= "HTTP_ACCEPT_ENCODING: ".GetServerVars('HTTP_ACCEPT_ENCODING')."\r\n";
 $support .= "PHP OPcache: ".(function_exists('opcache_get_status') ? 'On' : 'Off')."\r\n";
 
 //Removed in PHP 5.4.x +

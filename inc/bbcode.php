@@ -8,7 +8,6 @@
 require_once(basePath.'/inc/crypt.php');
 require_once(basePath.'/inc/sessions.php');
 require_once(basePath.'/inc/secure.php');
-require_once(basePath."/inc/database_old_code_adapter.php");
 require_once(basePath.'/inc/_version.php');
 require_once(basePath.'/inc/pop3.php');
 require_once(basePath.'/inc/smtp.php');
@@ -54,7 +53,7 @@ $config_cache['securityKey'] = settings::get('prev');
 if(empty($config_cache['storage']) || $config_cache['storage'] == 'auto') {
     $config_cache['storage'] = settings::get('cache_engine');
     if(settings::get('cache_engine') == 'memcache') {
-        $config_cache['memcache'] = array(array(string::decode(settings::get('memcache_host')),
+        $config_cache['memcache'] = array(array(stringParser::decode(settings::get('memcache_host')),
             intval(settings::get('memcache_port')),1));
     }
 }
@@ -70,7 +69,7 @@ settings::load();
 if(!$ajaxJob && auto_db_optimize && settings::get('db_optimize') < time() && !$installer && !$updater) {
     @ignore_user_abort(true);
     settings::set('db_optimize', (time()+auto_db_optimize_interval));
-    db_optimize();
+    db_optimize(); settings::load(true);
     $sql->insert("INSERT INTO `{prefix_ipcheck}` SET `ip` = ?, `user_id` = ?, `what` = 'db_optimize()', `time` = ?;",array('0.0.0.0',intval(userid()),time()));
     @ignore_user_abort(false);
 }
@@ -290,6 +289,19 @@ if(cookie::get('id') != false && cookie::get('pkey') != false && empty($_SESSION
             $sql->delete("DELETE FROM `{prefix_autologin}` WHERE `id` = ?;",array($get_almgr['id']));
             dzcp_session_destroy();
         }
+    }
+}
+
+//-> Passwort in md5 oder sha1 bis 512 codieren
+function pwd_encoder($password,$encoder=-1) {
+    $encoder = ($encoder != -1 ? $encoder : 
+            settings::get('default_pwd_encoder'));
+    switch ($encoder) {
+        case 0: return md5($password);
+        case 1: return sha1($password);
+        case 3: return hash('sha256', $password);
+        case 2:
+        default: return hash('sha512', $password);
     }
 }
 
@@ -880,7 +892,7 @@ function make_clickable($ret) {
 
 //Diverse BB-Codefunktionen
 function bbcode($txt, $tinymce=false, $no_vid=false, $ts=false, $nolink=false) {
-    $txt = string::decode($txt);
+    $txt = stringParser::decode($txt);
     if (!$no_vid && settings::get('urls_linked') && !$nolink) {
         $txt = make_clickable($txt);
     }
@@ -996,7 +1008,7 @@ function zitat($nick,$zitat) {
  * @return string
  */
 function re($txt = '') {
-    return string::decode($txt);
+    return stringParser::decode($txt);
 }
 
 /**
@@ -1332,7 +1344,7 @@ function spChars($txt) {
  * @return uft8 string
  */
 function up($txt = '') {
-    return string::encode($txt);
+    return stringParser::encode($txt);
 }
 
 /**
@@ -2187,7 +2199,7 @@ function sendMail($mailto,$subject,$content) {
         switch (settings::get('mail_extension')) {
             case 'smtp':
                 $mail->isSMTP();
-                $mail->Host = string::decode(settings::get('smtp_hostname'));
+                $mail->Host = stringParser::decode(settings::get('smtp_hostname'));
                 $mail->Port = intval(settings::get('smtp_port'));
                 switch (settings::get('smtp_tls_ssl')) {
                     case 1: $mail->SMTPSecure = 'tls'; break;
@@ -2195,16 +2207,16 @@ function sendMail($mailto,$subject,$content) {
                     default: $mail->SMTPSecure = ''; break;
                 }
                 $mail->SMTPAuth = (empty(settings::get('smtp_username')) && empty(settings::get('smtp_password')) ? false : true);
-                $mail->Username = string::decode(settings::get('smtp_username'));
+                $mail->Username = stringParser::decode(settings::get('smtp_username'));
                 $mail->Password = session::decode(settings::get('smtp_password'));
             break;
             case 'sendmail':
                 $mail->isSendmail();
-                $mail->Sendmail = string::decode(settings::get('sendmail_path'));
+                $mail->Sendmail = stringParser::decode(settings::get('sendmail_path'));
             break;
         }
 
-        $mail->From = ($mailfrom =string::decode(settings::get('mailfrom')));
+        $mail->From = ($mailfrom =stringParser::decode(settings::get('mailfrom')));
         $mail->FromName = $mailfrom;
         $mail->AddAddress(preg_replace('/(\\n+|\\r+|%0A|%0D)/i', '',$mailto));
         $mail->Subject = $subject;
@@ -2860,7 +2872,7 @@ function db_optimize() {
 }
 
 //-> Codiert Text zur Speicherung
-final class string {
+final class stringParser {
     /**
      * Codiert Text in das UTF8 Charset.
      *

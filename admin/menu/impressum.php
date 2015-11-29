@@ -9,7 +9,9 @@ if(_adminMenu != 'true') exit;
 $where = $where.': '._config_impressum_head;
 
 if($do == "update") {
-    $sql->update("UPDATE `{prefix_settings}` SET `i_autor` = ?, `i_domain` = ? WHERE `id` = 1;",array(up($_POST['seitenautor']),up($_POST['domain'])));
+    if(settings::changed(($key='i_autor'),($var=up($_POST['seitenautor'])))) settings::set($key,$var);
+    if(settings::changed(($key='i_domain'),($var=up($_POST['domain'])))) settings::set($key,$var);
+    settings::load(true);
     $show = info(_config_set, "?admin=impressum");
 } else {
     $show = show($dir."/form_impressum", array("domain" => re(settings::get('i_domain')),

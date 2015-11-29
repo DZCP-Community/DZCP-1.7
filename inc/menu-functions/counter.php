@@ -6,7 +6,7 @@
  */
 
 function counter($js=false) {
-    global $db,$sql,$useronline,$where,$isSpider;
+    global $sql,$useronline,$where,$isSpider;
     
     if(!$js) {
         $counter = '<div style="width:100%;padding:10px 0;text-align:center"><img src="../inc/images/ajax_loading.gif" alt="" /></div>'.
@@ -40,7 +40,7 @@ function counter($js=false) {
 
             $info = '';
             if(abs(online_reg()) != 0) {
-                $qryo = $sql->select("SELECT `id` FROM `".$db['users']."` WHERE (time+?) > ? AND `online` = 1 ORDER BY `nick`;",array($useronline,time()));
+                $qryo = $sql->select("SELECT `id` FROM `{prefix_users}` WHERE (time+?) > ? AND `online` = 1 ORDER BY `nick`;",array($useronline,time()));
                 $kats = ''; $text = '';
                 if($sql->rowCount()) {
                     foreach($qryo as $geto) {

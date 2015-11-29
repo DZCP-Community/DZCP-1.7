@@ -15,10 +15,8 @@ switch ($do) {
                 $addfile .= show($dir."/form_gallery_addfile", array("file" => _gallery_image, "i" => $i));
             }
 
-            db("INSERT INTO ".$db['gallery']." SET `kat` = '".up($_POST['gallery'])."',
-                                                   `intern`   = '".intval($_POST['intern'])."',
-                                                   `beschreibung`   = '".up($_POST['beschreibung'])."',
-                                                   `datum`          = '".time()."'");
+            $sql->insert("INSERT INTO `{prefix_gallery}` SET `kat` = ?,`intern` = ?,`beschreibung` = ?,`datum` = ?;",
+                array(up($_POST['gallery']),intval($_POST['intern']),up($_POST['beschreibung']),time()));
 
             $show = show($dir."/form_gallery_step2", array("head" => _gallery_admin_head,
                                                            "what" => re($_POST['gallery']),
@@ -49,7 +47,7 @@ switch ($do) {
         $show = info(_gallery_added, "?admin=gallery");
     break;
     case 'delgal':
-        db("DELETE FROM ".$db['gallery']." WHERE id = '".intval($_GET['id'])."'");
+        $sql->delete("DELETE FROM `{prefix_gallery}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $files = get_files(basePath."/gallery/images/",false,true,$picformat);
         foreach ($files as $file) {
             if(preg_match("#".$_GET['id']."_(.*?).(gif|jpg|jpeg|png)#",strtolower($file))!= FALSE) {
@@ -76,7 +74,7 @@ switch ($do) {
         $show = info(_gallery_pic_deleted, "../gallery/?action=show&amp;id=".$pid[1]."");
     break;
     case 'edit':
-        $get = db("SELECT * FROM ".$db['gallery']." WHERE id = '".intval($_GET['id'])."'",false,true);
+        $get = $sql->fetch("SELECT * FROM `{prefix_gallery}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $show = show($dir."/form_gallery_edit", array("head" => _gallery_admin_edit,
                                                       "gallery" => _gallery_gallery,
                                                       "intern" => _internal,
@@ -88,15 +86,13 @@ switch ($do) {
                                                       "e_beschr" => re($get['beschreibung'])));
     break;
     case 'editgallery':
-        db("UPDATE ".$db['gallery']." SET `kat` = '".up($_POST['gallery'])."',
-                                          `intern` = '".intval($_POST['intern'])."',
-                                          `beschreibung` = '".up($_POST['beschreibung'])."'
-                                      WHERE id = '".intval($_GET['id'])."'");
+        $sql->update("UPDATE `{prefix_gallery}` SET `kat` = ?, `intern` = ?, `beschreibung` = ? WHERE `id` = ?;",
+            array(up($_POST['gallery']),intval($_POST['intern']),up($_POST['beschreibung']),intval($_GET['id'])));
 
         $show = info(_gallery_edited, "?admin=gallery");
     break;
     case 'new':
-        $get = db("SELECT * FROM ".$db['gallery']." WHERE id = '".intval($_GET['id'])."'",false,true);
+        $get = $sql->fetch("SELECT * FROM `{prefix_gallery}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $option = '';
         for($i=1;$i<=100;$i++) {
             $option .= "<option value=\"".$i."\">".$i."</option>";
@@ -111,7 +107,7 @@ switch ($do) {
                                                      "option" => $option));
     break;
     case 'editstep2':
-        $get = db("SELECT * FROM ".$db['gallery']." WHERE id = '".intval($_GET['id'])."'",false,true);
+        $get = $sql->fetch("SELECT `id`,`kat` FROM `{prefix_gallery}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $addfile = '';
         for($i=1;$i<=$_POST['anzahl'];$i++) {
             $addfile .= show($dir."/form_gallery_addfile", array("file" => _gallery_image, "i" => $i));
@@ -165,9 +161,8 @@ switch ($do) {
                                                  "option" => $option));
     break;
     default:
-        $qry = db("SELECT * FROM ".$db['gallery']." ORDER BY id DESC");
-        while($get = _fetch($qry))
-        {
+        $qry = $sql->select("SELECT * FROM `{prefix_gallery}` ORDER BY id DESC;");
+        foreach($qry as $get) {
             $files = get_files(basePath."/gallery/images/",false,true,$picformat,false,array(),'minimize'); $cnt = 0;
             foreach ($files as $file) {
                 if(preg_match("#^".$get['id']."_(.*?).(gif|jpg|jpeg|png)#",strtolower($file))!=FALSE)
