@@ -58,7 +58,11 @@ final class database {
         if (!isset($this->instances[$active]) || $this->instances[$active] instanceOf database === false) {
             $this->instances[$active] = new database();
             $this->instances[$active]->setConfig($active,$this->dbConf[$active]);
-            $this->instances[$active]->connect($active);
+            if($active == 'test') {
+                return $this->instances[$active]->connect($active);
+            } else {
+                $this->instances[$active]->connect($active);
+            }
         }
 
         return $this->instances[$active];
@@ -103,9 +107,9 @@ final class database {
             return false;
         }
         
-        if (($type = $this->getQueryType($qry)) !== "delete") {
+        if (($type = $this->getQueryType($qry)) !== "delete" && $type !== "drop") {
             DebugConsole::sql_error_Exception("Incorrect Delete Query",$qry,$params);
-            DebugConsole::insert_error('database::delete','Incorrect Delete Query!');
+            DebugConsole::insert_error('database::delete','Incorrect Delete/Drop Query!');
             DebugConsole::insert_sql_info('database::delete',$qry,$params);
             return false;
         }
@@ -174,11 +178,11 @@ final class database {
         }
     }
     
-    public function show($qry,array $params = array()) {
+    public function show($qry) {
         if (($type = $this->getQueryType($qry)) !== "show") {
-            DebugConsole::sql_error_Exception("Incorrect Show Query",$qry,$params);
+            DebugConsole::sql_error_Exception("Incorrect Show Query",$qry,array());
             DebugConsole::insert_error('database::show','Incorrect Show Query!');
-            DebugConsole::insert_sql_info('database::show',$qry,$params);
+            DebugConsole::insert_sql_info('database::show',$qry,array());
             return array();
         }
 
@@ -187,6 +191,17 @@ final class database {
         } else {
             return array();
         }
+    }
+    
+    public function create($qry) {
+        if (($type = $this->getQueryType($qry)) !== "create") {
+            DebugConsole::sql_error_Exception("Incorrect Create Query",$qry,array());
+            DebugConsole::insert_error('database::show','Incorrect Create Query!');
+            DebugConsole::insert_sql_info('database::create',$qry,array());
+            return array();
+        }
+
+        return $this->run_query($qry, array(), $type);
     }
     
     public function optimize($qry) {
@@ -255,8 +270,15 @@ final class database {
 
             $this->dbHandle = $db;
             $this->active = $active; //mark as active
+            if($active == 'test') {
+                return array('status'=>true,'msg'=>'','code'=>0);
+            }
         } catch (PDOException $ex) {
-            die("PDO: Connection Exception: " . $ex->getMessage());
+            if($active == 'test') {
+                return array('status'=>false,'msg'=>$ex->getMessage(),'code'=>$ex->getCode());
+            } else {
+                die("PDO: Connection Exception: " . $ex->getMessage());
+            }
         }
     }
     
@@ -268,11 +290,21 @@ final class database {
             },$qry);
         }
 
+        if(strpos($qry,"{engine}")!==false) {
+            switch ($this->dbConf[$this->active]['db_engine']) {
+                case 1: $replace = 'ENGINE=MyISAM '; break; //MyISAM Engine
+                case 2: $replace = 'ENGINE=InnoDB '; break; //InnoDB Engine
+                case 3: $replace = 'ENGINE=Aria '; break; //Aria Engine
+                default: $replace = ''; break;
+            }
+            $qry = str_ireplace('{engine}', $replace, $qry);
+        }
+
         return $qry;
     }
-
+    
     protected final function run_query($qry, array $params, $type) {
-        if (in_array($type, array("insert", "select", "update", "delete","show","optimize")) === false) {
+        if (in_array($type, array("insert", "select", "update", "delete","show","optimize","create","drop")) === false) {
            die("PDO: Unsupported Query Type!<p>".$qry);
         }
 
@@ -309,7 +341,7 @@ final class database {
             $this->rowCount = $stmnt->rowCount();
             return ($type === "select" || $type === "show") ? $stmnt : true;
         } catch (PDOException $ex) {
-            die("PDO: Exception: " . $ex->getMessage());
+            die("PDO: Exception: " . $ex->getMessage()."<br><br>SQL-Query:<br>".$qry.(count($params) ? "<br><br>Input params:".  var_export($params,true) : ''));
         }
     }
 

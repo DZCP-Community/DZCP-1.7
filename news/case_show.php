@@ -196,7 +196,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                                                                       "del" => convSpace(_confirm_del_entry)));
                 }
 
-                $email = ""; $hp = ""; $avatar = "";
+                $email = ""; $hp = ""; $avatar = ""; $onoff = "";
                 if (!$getc['reg']) {
                     if ($getc['hp']) {
                         $hp = show(_hpicon_forum, array("hp" => links(re($getc['hp']))));

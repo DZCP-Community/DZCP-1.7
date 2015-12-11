@@ -201,7 +201,6 @@ define('_contact_hp', '<a href="[hp]" target="_blank">[hp]</a>');
 define('_linkus_bannerlink', '<a href="[url]" target="_blank"><img src="[banner]" alt="[besch]" title="[besch]" /></a><p><textarea class="inputField_dis" onfocus="this.className=\'inputField_en\';this.select();" onblur="this.className=\'inputField_dis\';" readonly="readonly" name="textarea" rows="auto" cols="auto" style="height: 40px; width: 80%;">&lt;a href="[url]" target="blank"&gt;&lt;img src="[banner]" alt="[besch]" title="[besch]" /&gt;&lt;/a&gt;</textarea></p>');
 define('_linkus_admin', '<a href="?action=admin&amp;do=new">[new]</a>');
 ## Admin ##
-define('_news_edit_link', "editnews&amp;id=[id]");
 define('_artikel_edit_link', 'editartikel&amp;id=[id]');
 define('_config_delete', '<a href="?admin=[what]&amp;do=delete&amp;id=[id]"><img src="../inc/images/delete.png" alt="" class="icon" /></a>');
 define('_config_edit', '<a href="?admin=[what]&amp;do=edit&amp;id=[id]"><img src="../inc/images/edit.png" alt="" class="icon" /></a>');

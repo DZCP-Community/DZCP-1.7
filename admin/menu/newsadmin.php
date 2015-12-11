@@ -9,187 +9,239 @@ $where = $where.': '._news_admin_head;
 
 switch ($do) {
     case 'add':
+        //Insert
+        $notification_p = ""; $saved = false;
+        if(isset($_POST['titel'])) {
+            if(empty($_POST['titel']) || empty($_POST['newstext'])) {
+                if(empty($_POST['newstext'])) {
+                    notification::add_error(_empty_news);
+                }
+                
+                if(empty($_POST['titel'])) {
+                    notification::add_error(_empty_news_title);
+                }
+                
+                javascript::set('AnchorMove', 'notification-box');
+            } else {
+                $timeshift = ''; $public = ''; $datum = ''; $params = array();
+                $stickytime = isset($_POST['sticky']) ? mktime($_POST['h'],$_POST['min'],0,$_POST['m'],$_POST['t'],$_POST['j']) : '0';
+                if(isset($_POST['timeshift'])) {
+                    $timeshifttime = mktime($_POST['h_ts'],$_POST['min_ts'],0,$_POST['m_ts'],$_POST['t_ts'],$_POST['j_ts']);
+                    $timeshift = "`timeshift` = 1,";
+                    $public = "`public` = 1,";
+                    $params[] = intval($timeshifttime);
+                    $datum = "`datum` = ?,";
+                }
+                
+                $sql->insert("INSERT INTO `{prefix_news}` SET `autor` = ?,`kat` = ?,`titel` = ?,`text` = ?,`klapplink` = ?,`klapptext` = ?,"
+                        . "`link1` = ?,`link2` = ?,`link3` = ?,`url1` = ?,`url2` = ?,`url3` = ?,`intern` = ?,".$timeshift."".$public."".$datum."`sticky` = ?;",
+                        array_merge(array(intval($userid),intval($_POST['kat']),up($_POST['titel']),up($_POST['newstext']),up($_POST['klapptitel']),
+                            up($_POST['morenews']),up($_POST['link1']),up($_POST['link2']),up($_POST['link3']),up(links($_POST['url1'])),up(links($_POST['url2'])),
+                            up(links($_POST['url3'])),(isset($_POST['intern']) ? 1 : 0)),$params,array(intval($stickytime))));
+
+                $picUploadError = false;
+                if(isset($_FILES['newspic']['tmp_name']) && !empty($_FILES['newspic']['tmp_name'])) {
+                    $tmpname = $_FILES['newspic']['tmp_name'];
+                    $file_name = $_FILES['newspic']['name'];
+                    if($tmpname) {
+                        $file_info = getimagesize($tmpname);
+                        if(!$file_info) {
+                            notification::add_error(_upload_error);
+                            $picUploadError = true;
+                        } else {
+                            $file_info['width']  = $file_info[0];
+                            $file_info['height'] = $file_info[1];
+                            $file_info['mime']   = $file_info[2];
+                            unset($file_info[3],$file_info['bits'],$file_info['channels'],
+                                $file_info[0],$file_info[1],$file_info[2]);
+
+                            if(!array_key_exists($file_info['mime'], $extensions)) {
+                                notification::add_error(_upload_ext_error);
+                                $picUploadError = true;
+                            } else {
+                                $endung = explode(".", $file_name);
+                                $endung = strtolower($endung[count($endung)-1]);
+                                if(!move_uploaded_file($tmpname, basePath."/inc/images/uploads/news/".$sql->lastInsertId().".".strtolower($endung))) {
+                                    notification::add_error(_upload_error);
+                                    $picUploadError = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if(!$picUploadError) {
+                    javascript::set('AnchorMove', 'notification-box');
+                    notification::add_success(_news_sended, "?admin=newsadmin",2);
+                    $saved = true;
+                } else {
+                    javascript::set('AnchorMove', 'notification-box');
+                }
+            }
+        }
+        
+        //Show
         $qryk = $sql->select("SELECT id,kategorie FROM `{prefix_newskat}`"); $kat = '';
-        foreach($qry as $get) {
-            $kat .= show(_select_field, array("value" => $getk['id'], "sel" => "", "what" => re($getk['kategorie'])));
+        foreach($qryk as $getk) {
+            $sel = (isset($_POST['kat']) && $_POST['kat'] == $getk['id'] ? 'selected="selected"' : '');
+            $kat .= show(_select_field, array("value" => $getk['id'],
+                                              "sel" => $sel,
+                                              "what" => re($getk['kategorie'])));
         }
 
-        $dropdown_date = show(_dropdown_date, array("day" => dropdown("day",date("d")),
-                                                    "month" => dropdown("month",date("m")),
-                                                    "year" => dropdown("year",date("Y"))));
+        $dropdown_date = show(_dropdown_date, array("day" => dropdown("day",isset($_POST['t']) ? intval($_POST['t']) : date("d")),
+                                                    "month" => dropdown("month",isset($_POST['m']) ? intval($_POST['m']) : date("m")),
+                                                    "year" => dropdown("year",isset($_POST['j']) ? intval($_POST['j']) : date("Y"))));
 
-        $dropdown_time = show(_dropdown_time, array("hour" => dropdown("hour",date("H")),
-                                                    "minute" => dropdown("minute",date("i")),
+        $dropdown_time = show(_dropdown_time, array("hour" => dropdown("hour",isset($_POST['h']) ? intval($_POST['h']) : date("H")),
+                                                    "minute" => dropdown("minute",isset($_POST['min']) ? intval($_POST['min']) : date("i")),
                                                     "uhr" => _uhr));
 
         $timeshift_date = show(_dropdown_date_ts, array("nr" => "ts",
-                                                        "day" => dropdown("day",date("d")),
-                                                        "month" => dropdown("month",date("m")),
-                                                        "year" => dropdown("year",date("Y"))));
+                                                        "day" => dropdown("day",isset($_POST['t_ts']) ? intval($_POST['t_ts']) : date("d")),
+                                                        "month" => dropdown("month",isset($_POST['m_ts']) ? intval($_POST['m_ts']) : date("m")),
+                                                        "year" => dropdown("year",isset($_POST['j_ts']) ? intval($_POST['j_ts']) : date("Y"))));
 
         $timeshift_time = show(_dropdown_time_ts, array("nr" => "ts",
-                                                        "hour" => dropdown("hour",date("H")),
-                                                        "minute" => dropdown("minute",date("i")),
+                                                        "hour" => dropdown("hour",isset($_POST['h_ts']) ? intval($_POST['h_ts']) : date("H")),
+                                                        "minute" => dropdown("minute",isset($_POST['min_ts']) ? intval($_POST['min_ts']) : date("i")),
                                                         "uhr" => _uhr));
 
         $show = show($dir."/news_form", array("head" => _admin_news_head,
-                                              "nautor" => _autor,
-                                              "autor" => autor($userid),
-                                              "nimage" => _news_userimage,
+                                              "autor" => autor(),
                                               "n_newspic" => "",
                                               "delnewspic" => "",
-                                              "nkat" => _news_admin_kat,
                                               "kat" => $kat,
-                                              "preview" => _preview,
-                                              "ntitel" => _titel,
-                                              "do" => "insert",
-                                              "ntext" => _eintrag,
-                                              "error" => "",
-                                              "titel" => "",
-                                              "newstext" => "",
-                                              "morenews" => "",
-                                              "link1" => "",
-                                              "link2" => "",
-                                              "link3" => "",
-                                              "url1" => "",
-                                              "url2" => "",
-                                              "url3" => "",
-                                              "klapplink" => "",
-                                              "sticky" => "",
-                                              "getsticky" => _news_get_sticky,
+                                              "do" => "add",
+                                              "all_disabled" => ($saved ? " disabled" : ""),
+                                              "titel" => (isset($_POST['titel']) ? $_POST['titel'] : ''),
+                                              "newstext" => (isset($_POST['newstext']) ? $_POST['newstext'] : ''),
+                                              "morenews" => (isset($_POST['morenews']) ? $_POST['morenews'] : ''),
+                                              "link1" => (isset($_POST['link1']) ? $_POST['link1'] : ''),
+                                              "link2" => (isset($_POST['link2']) ? $_POST['link2'] : ''),
+                                              "link3" => (isset($_POST['link3']) ? $_POST['link3'] : ''),
+                                              "url1" => (isset($_POST['url1']) ? $_POST['url1'] : ''),
+                                              "url2" => (isset($_POST['url2']) ? $_POST['url2'] : ''),
+                                              "url3" => (isset($_POST['url3']) ? $_POST['url3'] : ''),
+                                              "klapplink" => (isset($_POST['klapptitel']) ? $_POST['klapptitel'] : ''),
+                                              "sticky" => (isset($_POST['sticky']) ? 'checked="checked"' : ''),
                                               "button" =>  _button_value_add,
-                                              "nklapptitel" => _news_admin_klapptitel,
-                                              "nmore" => _news_admin_more,
-                                              "linkname" => _linkname,
-                                              "interna" => _news_admin_intern,
-                                              "intern" => "",
-                                              "till" => _news_sticky_till,
+                                              "intern" => (isset($_POST['intern']) ? 'checked="checked"' : ''),
                                               "dropdown_time" => $dropdown_time,
                                               "dropdown_date" => $dropdown_date,
-                                              "gettimeshift" => _news_get_timeshift,
-                                              "from" => _news_timeshift_from,
                                               "timeshift_date" => $timeshift_date,
                                               "timeshift_time" => $timeshift_time,
-                                              "timeshift" => "",
-                                              "nurl" => _url));
-    break;
-    case 'insert':
-        if(empty($_POST['titel']) || empty($_POST['newstext'])) {
-            $error = _empty_news;
-            if(empty($_POST['titel']))
-                $error = _empty_news_title;
-
-            $qryk = $sql->select("SELECT id,kategorie FROM `{prefix_newskat}`"); $kat = '';
-            foreach($qryk as $getk) {
-                $sel = ($_POST['kat'] == $getk['id'] ? 'selected="selected"' : '');
-                $kat .= show(_select_field, array("value" => $getk['id'],
-                                                  "sel" => $sel,
-                                                  "what" => re($getk['kategorie'])));
-            }
-
-            $int = isset($_POST['intern']) ? 'checked="checked"' : '';
-            $sticky = isset($_POST['sticky']) ? 'checked="checked"' : '';
-            $timeshift = isset($_POST['timeshift']) ? 'checked="checked"' : '';
-
-            $dropdown_date = show(_dropdown_date, array("day" => dropdown("day",$_POST['t']),
-                                                        "month" => dropdown("month",$_POST['m']),
-                                                        "year" => dropdown("year",$_POST['j'])));
-
-            $dropdown_time = show(_dropdown_time, array("hour" => dropdown("hour",$_POST['h']),
-                                                        "minute" => dropdown("minute",$_POST['min']),
-                                                        "uhr" => _uhr));
-
-            $timeshift_date = show(_dropdown_date_ts, array("nr" => "ts",
-                                                            "day" => dropdown("day",$_POST['t_ts']),
-                                                            "month" => dropdown("month",$_POST['m_ts']),
-                                                            "year" => dropdown("year",$_POST['j_ts'])));
-
-            $timeshift_time = show(_dropdown_time_ts, array("nr" => "ts",
-                                                            "hour" => dropdown("hour",$_POST['h_ts']),
-                                                            "minute" => dropdown("minute",$_POST['min_ts']),
-                                                            "uhr" => _uhr));
-
-            $error = show("errors/errortable", array("error" => $error));
-            $show = show($dir."/news_form", array("head" => _admin_news_head,
-                                                  "nautor" => _autor,
-                                                  "autor" => autor($userid),
-                                                  "nimage" => _news_userimage,
-                                                  "n_newspic" => "",
-                                                  "delnewspic" => "",
-                                                  "nkat" => _news_admin_kat,
-                                                  "kat" => $kat,
-                                                  "preview" => _preview,
-                                                  "do" => "insert",
-                                                  "ntitel" => _titel,
-                                                  "titel" => re($_POST['titel']),
-                                                  "newstext" => re($_POST['newstext']),
-                                                  "morenews" => re($_POST['morenews']),
-                                                  "link1" => re($_POST['link1']),
-                                                  "link2" => re($_POST['link2']),
-                                                  "link3" => re($_POST['link3']),
-                                                  "url1" => $_POST['url1'],
-                                                  "url2" => $_POST['url2'],
-                                                  "url3" => $_POST['url3'],
-                                                  "klapplink" => re($_POST['klapptitel']),
-                                                  "ntext" => _eintrag,
-                                                  "button" => _button_value_add,
-                                                  "error" => $error,
-                                                  "nklapptitel" => _news_admin_klapptitel,
-                                                  "nmore" => _news_admin_more,
-                                                  "linkname" => _linkname,
-                                                  "intern" => $int,
-                                                  "sticky" => $sticky,
-                                                  "getsticky" => _news_get_sticky,
-                                                  "till" => _news_sticky_till,
-                                                  "dropdown_date" => $dropdown_date,
-                                                  "dropdown_time" => $dropdown_time,
-                                                  "interna" => _news_admin_intern,
-                                                  "timeshift_date" => $timeshift_date,
-                                                  "timeshift_time" => $timeshift_time,
-                                                  "timeshift" => $timeshift,
-                                                  "gettimeshift" => _news_get_timeshift,
-                                                  "from" => _news_timeshift_from,
-                                                  "nurl" => _url));
-        }  else  {
-            $stickytime = isset($_POST['sticky']) ? mktime($_POST['h'],$_POST['min'],0,$_POST['m'],$_POST['t'],$_POST['j']) : '0';
-            $timeshift = ''; $public = ''; $datum = '';
-            if(isset($_POST['timeshift'])) {
-                $timeshifttime = mktime($_POST['h_ts'],$_POST['min_ts'],0,$_POST['m_ts'],$_POST['t_ts'],$_POST['j_ts']);
-                $timeshift = "`timeshift` = '1',";
-                $public = "`public` = '1',";
-                $datum = "`datum` = '".intval($timeshifttime)."',";
-            }
-
-            $sql->insert("INSERT INTO `{prefix_news}`
-                SET `autor`      = '".intval($userid)."',
-                    `kat`        = '".intval($_POST['kat'])."',
-                    `titel`      = '".up($_POST['titel'])."',
-                    `text`       = '".up($_POST['newstext'])."',
-                    `klapplink`  = '".up($_POST['klapptitel'])."',
-                    `klapptext`  = '".up($_POST['morenews'])."',
-                    `link1`      = '".up($_POST['link1'])."',
-                    `link2`      = '".up($_POST['link2'])."',
-                    `link3`      = '".up($_POST['link3'])."',
-                    `url1`       = '".links($_POST['url1'])."',
-                    `url2`       = '".links($_POST['url2'])."',
-                    `url3`       = '".links($_POST['url3'])."',
-                    `intern`     = '".intval($_POST['intern'])."',
-                    ".$timeshift."
-                    ".$public."
-                    ".$datum."
-                    `sticky`     = '".intval($stickytime)."'");
-
-            if(isset($_FILES['newspic']['tmp_name']) && !empty($_FILES['newspic']['tmp_name'])) {
-                $endung = explode(".", $_FILES['newspic']['name']);
-                $endung = strtolower($endung[count($endung)-1]);
-                move_uploaded_file($_FILES['newspic']['tmp_name'], basePath."/inc/images/uploads/news/"._insert_id().".".strtolower($endung));
-            }
-
-            $show = info(_news_sended, "?admin=newsadmin");
-        }
+                                              "timeshift" => (isset($_POST['timeshift']) ? 'checked="checked"' : '')));
     break;
     case 'edit':
-        $get = $sql->fetch("SELECT * FROM `{prefix_news}` WHERE id = '".intval($_GET['id'])."'");
+        if(isset($_GET['id'])) {
+            $_SESSION['editID'] = intval($_GET['id']);
+        } else if(!array_key_exists('editID', $_SESSION)) {
+            $_SESSION['editID'] = 0;
+        }
+        
+        $get = $sql->fetch("SELECT * FROM `{prefix_news}` WHERE id = ".$_SESSION['editID'].";");
+        if(isset($_POST['titel'])) {
+            if(empty($_POST['titel']) || empty($_POST['newstext'])) {
+                if(empty($_POST['newstext'])) {
+                    notification::add_error(_empty_news);
+                }
+                
+                if(empty($_POST['titel'])) {
+                    notification::add_error(_empty_news_title);
+                }
+                
+                javascript::set('AnchorMove', 'notification-box');
+            } else {
+                $timeshift = ''; $public = ''; $datum = ''; $params = array();
+                $stickytime = isset($_POST['sticky']) ? mktime($_POST['h'],$_POST['min'],0,$_POST['m'],$_POST['t'],$_POST['j']) : '0';
+                if(isset($_POST['timeshift'])) {
+                    $timeshifttime = mktime($_POST['h_ts'],$_POST['min_ts'],0,$_POST['m_ts'],$_POST['t_ts'],$_POST['j_ts']);
+                    $timeshift = "`timeshift` = 1,";
+                    $public = "`public` = 1,";
+                    $params[] = intval($timeshifttime);
+                    $datum = "`datum` = ?,";
+                }
+
+                $picUploadError = false;
+                if(isset($_FILES['newspic']['tmp_name']) && !empty($_FILES['newspic']['tmp_name'])) {
+                    $tmpname = $_FILES['newspic']['tmp_name'];
+                    $file_name = $_FILES['newspic']['name'];
+                    if($tmpname) {
+                        $file_info = getimagesize($tmpname);
+                        if(!$file_info) {
+                            notification::add_error(_upload_error);
+                            $picUploadError = true;
+                        } else {
+                            $file_info['width']  = $file_info[0];
+                            $file_info['height'] = $file_info[1];
+                            $file_info['mime']   = $file_info[2];
+                            unset($file_info[3],$file_info['bits'],$file_info['channels'],
+                                $file_info[0],$file_info[1],$file_info[2]);
+
+                            if(!array_key_exists($file_info['mime'], $extensions)) {
+                                notification::add_error(_upload_ext_error);
+                                $picUploadError = true;
+                            } else {
+                                //Remove Pic
+                                foreach($picformat as $tmpendung) {
+                                    if(file_exists(basePath."/inc/images/uploads/news/".intval($get['id']).".".$tmpendung))
+                                        @unlink(basePath."/inc/images/uploads/news/".intval($get['id']).".".$tmpendung);
+                                }
+
+                                //Remove minimize
+                                $files = get_files(basePath."/inc/images/uploads/news/",false,true,$picformat);
+                                if($files) {
+                                    foreach ($files as $file) {
+                                        if(preg_match("#".intval($_GET['id'])."(.*?).(gif|jpg|jpeg|png)#",strtolower($file))!= FALSE) {
+                                            $res = preg_match("#".intval($_GET['id'])."_(.*)#",$file,$match);
+                                            if(file_exists(basePath."/inc/images/uploads/news/".intval($get['id'])."_".$match[1]))
+                                                @unlink(basePath."/inc/images/uploads/news/".intval($get['id'])."_".$match[1]);
+                                        }
+                                    }
+                                }
+                                
+                                $endung = explode(".", $file_name);
+                                $endung = strtolower($endung[count($endung)-1]);
+                                if(!move_uploaded_file($tmpname, basePath."/inc/images/uploads/news/".$get['id'].".".strtolower($endung))) {
+                                    notification::add_error(_upload_error);
+                                    $picUploadError = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if(!$picUploadError) {
+                    $sql->update("UPDATE `{prefix_news}`
+                        SET `kat`        = '".intval($_POST['kat'])."',
+                            `titel`      = '".up($_POST['titel'])."',
+                            `text`       = '".up($_POST['newstext'])."',
+                            `klapplink`  = '".up($_POST['klapptitel'])."',
+                            `klapptext`  = '".up($_POST['morenews'])."',
+                            `link1`      = '".up($_POST['link1'])."',
+                            `url1`       = '".links($_POST['url1'])."',
+                            `link2`      = '".up($_POST['link2'])."',
+                            `url2`       = '".links($_POST['url2'])."',
+                            `link3`      = '".up($_POST['link3'])."',
+                            `intern`     = '".(isset($_POST['intern']) ? intval($_POST['intern']) : 0)."',
+                            `url3`       = '".up(links($_POST['url3']))."',
+                            ".$timeshift."
+                            ".$public."
+                            ".$datum."
+                            `sticky`     = '".intval($stickytime)."'
+                        WHERE id = ".$get['id'].";");
+                    
+                    $get = $sql->fetch("SELECT * FROM `{prefix_news}` WHERE id = ".$get['id'].";");
+                    javascript::set('AnchorMove', 'notification-box');
+                    notification::add_success(_news_edited, "?admin=newsadmin",2);
+                    $saved = true;
+                } else {
+                    javascript::set('AnchorMove', 'notification-box');
+                }
+            }
+        }
+        
         $qryk = $sql->select("SELECT id,kategorie FROM `{prefix_newskat}`"); $kat = '';
         foreach($qryk as $getk) {
             $sel = ($get['kat'] == $getk['id'] ? 'selected="selected"' : '');
@@ -198,7 +250,6 @@ switch ($do) {
                                               "what" => re($getk['kategorie'])));
         }
 
-        $do = show(_news_edit_link, array("id" => $_GET['id']));
         $int = ($get['intern'] ? 'checked="checked"' : '');
         $timeshift = ($get['timeshift'] ? 'checked="checked"' : '');
         $sticky = ($get['sticky'] ? 'checked="checked"' : '');
@@ -217,6 +268,7 @@ switch ($do) {
 
         $timeshift_date = show(_dropdown_date_ts, array("nr" => "ts", "day" => dropdown("day",date("d")), "month" => dropdown("month",date("m")), "year" => dropdown("year",date("Y"))));
         $timeshift_time = show(_dropdown_time_ts, array("nr" => "ts", "hour" => dropdown("hour",date("H")), "minute" => dropdown("minute",date("i")), "uhr" => _uhr));
+        
         if($get['timeshift']) {
             $timeshift_date = show(_dropdown_date_ts, array("nr" => "ts",
                                                             "day" => dropdown("day",date("d",$get['datum'])),
@@ -231,107 +283,39 @@ switch ($do) {
 
         $newsimage = ""; $delnewspic = "";
         foreach($picformat as $tmpendung) {
-            if(file_exists(basePath."/inc/images/uploads/news/".intval($_GET['id']).".".$tmpendung)) {
-                $newsimage = img_size('inc/images/uploads/news/'.intval($_GET['id']).'.'.$tmpendung)."<br /><br />";
-                $delnewspic = '<a href="?admin=newsadmin&do=delnewspic&id='.$_GET['id'].'">'._newspic_del.'</a><br /><br />';
+            if(file_exists(basePath."/inc/images/uploads/news/".$get['id'].".".$tmpendung)) {
+                $newsimage = img_size('inc/images/uploads/news/'.$get['id'].'.'.$tmpendung)."<br /><br />";
+                $delnewspic = '<a href="?admin=newsadmin&do=delnewspic&id='.$get['id'].'">'._newspic_del.'</a><br /><br />';
                 break;
             }
         }
 
         $show = show($dir."/news_form", array("head" => _admin_news_edit_head,
-                                              "nautor" => _autor,
                                               "autor" => autor($get['autor']),
-                                              "nimage" => _news_userimage,
                                               "n_newspic" => $newsimage,
                                               "delnewspic" => $delnewspic,
-                                              "nkat" => _news_admin_kat,
                                               "kat" => $kat,
-                                              "do" => $do,
-                                              "preview" => _preview,
-                                              "ntitel" => _titel,
+                                              "all_disabled" => "",
+                                              "do" => "edit",
                                               "titel" => re($get['titel']),
                                               "newstext" => re($get['text']),
                                               "morenews" => re($get['klapptext']),
                                               "link1" => re($get['link1']),
                                               "link2" => re($get['link2']),
                                               "link3" => re($get['link3']),
-                                              "url1" => $get['url1'],
-                                              "url2" => $get['url2'],
-                                              "url3" => $get['url3'],
+                                              "url1" => re($get['url1']),
+                                              "url2" => re($get['url2']),
+                                              "url3" => re($get['url3']),
                                               "klapplink" => re($get['klapplink']),
                                               "dropdown_date" => $dropdown_date,
                                               "dropdown_time" => $dropdown_time,
                                               "timeshift_date" => $timeshift_date,
                                               "timeshift_time" => $timeshift_time,
                                               "timeshift" => $timeshift,
-                                              "ntext" => _eintrag,
                                               "error" => "",
                                               "button" => _button_value_edit,
-                                              "nklapptitel" => _news_admin_klapptitel,
-                                              "nmore" => _news_admin_more,
-                                              "linkname" => _linkname,
                                               "intern" => $int,
-                                              "sticky" => $sticky,
-                                              "getsticky" => _news_get_sticky,
-                                              "till" => _news_sticky_till,
-                                              "gettimeshift" => _news_get_timeshift,
-                                              "from" => _news_timeshift_from,
-                                              "interna" => _news_admin_intern,
-                                              "nurl" => _url));
-    break;
-    case 'editnews':
-        if(isset($_POST)) {
-            $stickytime = (isset($_POST['sticky']) ? mktime($_POST['h'],$_POST['min'],0,$_POST['m'],$_POST['t'],$_POST['j']) : '0');
-            $timeshift = ''; $public = ''; $datum = '';
-            if(isset($_POST['timeshift'])) {
-                $timeshifttime = mktime($_POST['h_ts'],$_POST['min_ts'],0,$_POST['m_ts'],$_POST['t_ts'],$_POST['j_ts']);
-                $timeshift = "`timeshift` = '1',";
-                $public = "`public` = '1',";
-                $datum = "`datum` = '".intval($timeshifttime)."',";
-            }
-
-            $sql->update("UPDATE `{prefix_news}`
-                SET `kat`        = '".intval($_POST['kat'])."',
-                    `titel`      = '".up($_POST['titel'])."',
-                    `text`       = '".up($_POST['newstext'])."',
-                    `klapplink`  = '".up($_POST['klapptitel'])."',
-                    `klapptext`  = '".up($_POST['morenews'])."',
-                    `link1`      = '".up($_POST['link1'])."',
-                    `url1`       = '".links($_POST['url1'])."',
-                    `link2`      = '".up($_POST['link2'])."',
-                    `url2`       = '".links($_POST['url2'])."',
-                    `link3`      = '".up($_POST['link3'])."',
-                    `intern`     = '".intval($_POST['intern'])."',
-                    `url3`       = '".links($_POST['url3'])."',
-                    ".$timeshift."
-                    ".$public."
-                    ".$datum."
-                    `sticky`     = '".intval($stickytime)."'
-                WHERE id = '".intval($_GET['id'])."'");
-
-            if(isset($_FILES['newspic']['tmp_name']) && !empty($_FILES['newspic']['tmp_name'])) {
-                foreach($picformat as $tmpendung) {
-                    if(file_exists(basePath."/inc/images/uploads/news/".intval($_GET['id']).".".$tmpendung))
-                        @unlink(basePath."/inc/images/uploads/news/".intval($_GET['id']).".".$tmpendung);
-                }
-
-                //Remove minimize
-                $files = get_files(basePath."/inc/images/uploads/news/",false,true,$picformat);
-                foreach ($files as $file) {
-                    if(preg_match("#".intval($_GET['id'])."(.*?).(gif|jpg|jpeg|png)#",strtolower($file))!= FALSE) {
-                        $res = preg_match("#".intval($_GET['id'])."_(.*)#",$file,$match);
-                        if(file_exists(basePath."/inc/images/uploads/news/".intval($_GET['id'])."_".$match[1]))
-                            @unlink(basePath."/inc/images/uploads/news/".intval($_GET['id'])."_".$match[1]);
-                    }
-                }
-
-                $endung = explode(".", $_FILES['newspic']['name']);
-                $endung = strtolower($endung[count($endung)-1]);
-                move_uploaded_file($_FILES['newspic']['tmp_name'], basePath."/inc/images/uploads/news/".intval($_GET['id']).".".strtolower($endung));
-            }
-
-            $show = info(_news_edited, "?admin=newsadmin");
-        }
+                                              "sticky" => $sticky));
     break;
     case 'public':
         if(isset($_GET['what']) && $_GET['what'] == 'set')
@@ -363,7 +347,7 @@ switch ($do) {
             }
         }
 
-        $show = info(_news_deleted, "?admin=newsadmin");
+        notification::add_success(_news_deleted, "?admin=newsadmin",2);
     break;
     case 'delnewspic':
         //Remove Pic

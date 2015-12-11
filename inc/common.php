@@ -8,6 +8,9 @@
 require_once(basePath."/inc/debugger.php");
 require_once(basePath."/inc/config.php");
 require_once(basePath."/inc/database.php");
+require_once(basePath.'/inc/crypt.php');
+require_once(basePath.'/inc/sessions.php');
+require_once(basePath.'/inc/secure.php');
 
 if (function_exists("date_default_timezone_set") && function_exists("date_default_timezone_get") && use_default_timezone) {
     date_default_timezone_set(date_default_timezone_get());
@@ -15,6 +18,10 @@ if (function_exists("date_default_timezone_set") && function_exists("date_defaul
     date_default_timezone_set(default_timezone);
 } else {
     date_default_timezone_set("Europe/Berlin");
+}
+
+if(!array_key_exists('installer', $_SESSION)) {
+    $_SESSION['installer'] = false;
 }
 
 if (!isset($thumbgen)) {
@@ -50,44 +57,61 @@ if(!$thumbgen) {
 ## REQUIRES ##
 //DZCP-Install default variable
 $database = new database(); //Load DB Class
-if(!isset($installer)) { $installer = false; }
 
 //Load SQL Config
 if(file_exists(basePath."/inc/mysql.php")) {
     require_once(basePath."/inc/mysql.php");
 }
 
-$sql = $database->getInstance(); //Connect to DB * default *
-if(!isset($installation)) { $installation = false; }
-if(!isset($updater)) { $updater = false; }
-if(!isset($global_index)) { $global_index = false; }
+if(!$_SESSION['installer']) {
+    $sql = $database->getInstance(); //Connect to DB * default *
+    if(!isset($global_index)) { $global_index = false; }
+}
 
 function show($tpl="", $array=array(), $array_lang_constant=array(), $array_block=array()) {
     global $tmpdir;
     return show_runner($tpl,"inc/_templates_/".$tmpdir."/",$array,$array_lang_constant,$array_block,false);
 }
 
+//-> filter placeholders
+function pholderreplace($pholder) {
+    $search = array('@<script[^>]*?>.*?</script>@si','@<style[^>]*?>.*?</style>@siU','@<[\/\!][^<>]*?>@si','@<![\s\S]*?--[ \t\n\r]*>@');
+    $pholder = preg_replace("#<script(.*?)</script>#is","",$pholder);
+    $pholder = preg_replace("#<style(.*?)</style>#is","",$pholder);
+    $pholder = preg_replace($search, '', $pholder);
+    $pholder = str_replace(" ","",$pholder);
+    $pholder = preg_replace("#&(.*?);#s","",$pholder);
+    $pholder = str_replace("\r","",$pholder);
+    $pholder = str_replace("\n","",$pholder);
+    $pholder = preg_replace("#\](.*?)\[#is","][",$pholder);
+    $pholder = str_replace("][","^",$pholder);
+    $pholder = preg_replace("#^(.*?)\[#s","",$pholder);
+    $pholder = preg_replace("#\](.*?)$#s","",$pholder);
+    $pholder = str_replace("[","",$pholder);
+    return str_replace("]","",$pholder);
+}
+
 //-> Ersetzt Platzhalter im HTML Code 
 function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=array(), $array_block=array(),$addon=false) {
-    global $tmpdir,$chkMe,$cache,$config_cache,$installation;
+    global $tmpdir,$chkMe,$cache,$config_cache;
     if(!empty($tpl) && $tpl != null) {
         $template = basePath."/".$dir.$tpl;
 
         //HTML Cache for Template Files
-        if(!$installation) {
+        if(!$_SESSION['installer']) {
             $cacheHash = md5($template);
             if(template_cache && $config_cache['use_cache'] && dbc_index::useMem() && $cache->isExisting('tpl_'.$cacheHash)) {
                 $tpl = re($cache->get('tpl_'.$cacheHash));
                 if(show_dbc_debug) {
                     DebugConsole::insert_info('template::show()', 'Get Template-Cache: "' . 'tpl_' . $cacheHash . '"');
                 }
-            }
-            else {
+            } else {
                 if(file_exists($template.".html") && is_file($template.".html")) {
                     $tpl = file_get_contents($template.".html");
                     if (substr($tpl, 0, 3) === pack("CCC", 0xef, 0xbb, 0xbf)) {
                         $tpl = substr($tpl, 3);
                     }
+                    
                     if(template_cache && $config_cache['use_cache'] && dbc_index::useMem()) {
                         $cache->set('tpl_'.$cacheHash,up($tpl),template_cache_time);
                         if (show_dbc_debug) {
@@ -98,6 +122,7 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
             }
         }
         else {
+            $template = basePath."/_installer/html/".$tpl;
             if(file_exists($template . ".html") && is_file($template.".html")) {
                 $tpl = file_get_contents($template . ".html");
                 if (substr($tpl, 0, 3) === pack("CCC", 0xef, 0xbb, 0xbf)) {
@@ -107,9 +132,15 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
         }
 
         //put placeholders in array
-        $array['dir'] = '../inc/_templates_/'.$tmpdir;
-        $array['idir'] = '../inc/images'; //Image DIR [idir]
-        $array['adir'] = ($addon ? '../'.$addon : '../inc/_templates_/'.$tmpdir); //Addon DIR [adir]
+        if(!$_SESSION['installer']) {
+            $array['dir'] = '../inc/_templates_/'.$tmpdir;
+            $array['idir'] = '../inc/images'; //Image DIR [idir]
+            $array['adir'] = ($addon ? '../'.$addon : '../inc/_templates_/'.$tmpdir); //Addon DIR [adir]
+        } else {
+            $array['dir'] = '../_installer/html';
+            $array['idir'] = '../_installer/html/img'; //Image DIR [idir]
+        }
+        
         $pholder = explode("^",pholderreplace($tpl));
         for($i=0;$i<=count($pholder)-1;$i++) {
             if (in_array($pholder[$i], $array_block) || array_key_exists($pholder[$i], $array) || 
@@ -142,6 +173,6 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
     return $tpl;
 }
 
-if(!$installation) {
+if(!$_SESSION['installer']) {
     require_once(basePath."/inc/bbcode.php");
 }

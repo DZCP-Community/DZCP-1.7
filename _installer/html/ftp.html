@@ -1,0 +1,58 @@
+<table width="100%" cellpadding="3" cellspacing="1">
+  <tr>
+    <td class="head">&raquo; FTP Zugriff</td>
+  </tr>
+  <tr>
+    <td align="justify">Richtet den FTP Zugriff f&uuml;r automatische Updates und das &auml;ndern der Dateirechte ein.</td>
+  </tr>
+</table>
+[success_status]
+<table width="100%" cellpadding="2" cellspacing="1">
+  <tr>
+    <td colspan="4" align="justify" class="head"><br /><b>&raquo; FTP Zugriff einrichten</b></td>
+  </tr>
+  <tr>
+    <td colspan="4" class="info"><b>Hinweis:</b> Als Pfad muss der FTP-Pfad zum Stammverzeichnis eingetragen werden!<br />
+        <b>Beispiel:</b> <i>/dzcp</i></td>
+  </tr>
+  <tr>
+    <td height="10"></td>
+  </tr>
+<form action="index.php?action=ftp&amp;do=check" method="POST">
+  <tr>
+    <td><b>FTP-Host:</b></td><td><input type="text" name="host" [disabled] value="[ftp_host]"></td>
+    <td><b>FTP-Pfad:</b></td><td><input type="text" name="pfad" [disabled] value="[ftp_pfad]"></td>
+  </tr>
+  <tr>
+    <td><b>FTP-Benutzername:</b></td><td><input type="text" name="ftp_user" [disabled] value="[ftp_user]"></td>
+    <td><b>FTP-Passwort:</b></td><td><input type="password" name="ftp_pwd" [disabled] value="[ftp_pwd]"></td>
+  </tr>
+  <tr>
+    <td><b>Verwende SSL:</b></td><td><label>
+      <input name="ftp_ssl" type="checkbox" id="ftp_ssl"[ssl] value="1" [ftp_ssl] />
+    </label></td>
+    <td colspan="2">&nbsp;</td>
+    </tr>
+  <tr>
+    <td height="10"></td>
+  </tr>
+  <tr>
+    <td colspan="4" align="center"><input style="width:400px;" type="submit" [disabled] value="FTP Zugriff testen"> | <script language="JavaScript">document.writeln('<input type="button" value="&Uuml;berspringen" class="button" [disabled] onclick="document.forms[0].action=\'index.php?action=prepare\';document.forms[0].submit()" tabindex="6">');</script> |<script language="JavaScript">document.writeln('<input type="button" value="Zur&uuml;ck" class="button" [disabled] onclick="document.forms[0].action=\'index.php?action=installtype\';document.forms[0].submit()" tabindex="6">');</script></td>
+  </tr>
+</form>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>
+</table>
+<table width="100%" cellpadding="3" cellspacing="1" class="emph">
+    <tr>
+        <td><b>Root</b></td>
+        <td><b>Core</b></td>
+    </tr>
+    <tr>
+        <td valign="top">[main]</td>
+        <td valign="top">[core]</td>
+    </tr>
+</table><p>
+[next]
+[jump]

@@ -5,9 +5,6 @@
  */
 
 ## INCLUDES/REQUIRES ##
-require_once(basePath.'/inc/crypt.php');
-require_once(basePath.'/inc/sessions.php');
-require_once(basePath.'/inc/secure.php');
 require_once(basePath.'/inc/_version.php');
 require_once(basePath.'/inc/pop3.php');
 require_once(basePath.'/inc/smtp.php');
@@ -36,8 +33,8 @@ if (!is_dir($config_cache['path'])) { //Check cache dir
 }
 
 //Auto Update Detect
-if(file_exists(basePath."/_installer/index.php") && !view_error_reporting 
-        && !$installation && !$thumbgen && !$ajaxJob) {
+/*
+if(file_exists(basePath."/_installer/index.php") && !view_error_reporting && !$thumbgen && !$ajaxJob) {
     $sqlqry = $sql->select('SHOW TABLE STATUS'); $table_data = array();
     foreach($sqlqry as $table) { 
         $table_data[$table['Name']] = true; 
@@ -47,7 +44,7 @@ if(file_exists(basePath."/_installer/index.php") && !view_error_reporting
         $global_index ? header('Location: _installer/update.php') :
         header('Location: ../_installer/update.php');
     unset($user_check);
-}
+} */
 
 $config_cache['securityKey'] = settings::get('prev');
 if(empty($config_cache['storage']) || $config_cache['storage'] == 'auto') {
@@ -58,6 +55,7 @@ if(empty($config_cache['storage']) || $config_cache['storage'] == 'auto') {
     }
 }
 
+
 phpFastCache::setup($config_cache);
 $cache = new phpFastCache();
 phpFastCache::$disabled = !$config_cache['use_cache'];
@@ -66,7 +64,7 @@ dbc_index::init();
 settings::load();
 
 //-> Automatische Datenbank Optimierung
-if(!$ajaxJob && auto_db_optimize && settings::get('db_optimize') < time() && !$installer && !$updater) {
+if(!$ajaxJob && auto_db_optimize && settings::get('db_optimize') < time()) {
     @ignore_user_abort(true);
     settings::set('db_optimize', (time()+auto_db_optimize_interval));
     db_optimize(); settings::load(true);
@@ -2641,26 +2639,6 @@ function isSpider($SetUserAgent=false) {
     }
     
     return false;
-}
-
-//-> filter placeholders
-function pholderreplace($pholder) {
-    $search = array('@<script[^>]*?>.*?</script>@si','@<style[^>]*?>.*?</style>@siU','@<[\/\!][^<>]*?>@si','@<![\s\S]*?--[ \t\n\r]*>@');
-
-    //Replace
-    $pholder = preg_replace("#<script(.*?)</script>#is","",$pholder);
-    $pholder = preg_replace("#<style(.*?)</style>#is","",$pholder);
-    $pholder = preg_replace($search, '', $pholder);
-    $pholder = str_replace(" ","",$pholder);
-    $pholder = preg_replace("#&(.*?);#s","",$pholder);
-    $pholder = str_replace("\r","",$pholder);
-    $pholder = str_replace("\n","",$pholder);
-    $pholder = preg_replace("#\](.*?)\[#is","][",$pholder);
-    $pholder = str_replace("][","^",$pholder);
-    $pholder = preg_replace("#^(.*?)\[#s","",$pholder);
-    $pholder = preg_replace("#\](.*?)$#s","",$pholder);
-    $pholder = str_replace("[","",$pholder);
-    return str_replace("]","",$pholder);
 }
 
 //-> Zugriffsberechtigung auf die Seite

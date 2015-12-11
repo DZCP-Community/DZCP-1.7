@@ -77,6 +77,8 @@ define('php_code_enabled', false); // Erlaubt es auf "Adminbereich: Seiten erste
 // ->                       Alphabet:                       Alphabet klein:               Zahlen:        Sonderzeichen:
 $passwordComponents = array("ABCDEFGHIJKLMNOPQRSTUVWXYZ" , "abcdefghijklmnopqrstuvwxyz" , "0123456789" , "#$@!");
 
+$extensions = array('image/jpeg','image/gif','image/png');
+
 #########################################
 //-> Sessions Settings Start * Expert *
 #########################################

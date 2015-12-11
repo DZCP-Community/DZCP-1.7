@@ -1681,6 +1681,7 @@ define('_lobby_gallery', 'Galerien');
 define('_new_gal_1', 'neue Galerie');
 define('_new_gal_2', 'neue Galerien');
 ## Upload ##
+define('_upload_ext_error', 'Nur jpg, gif oder png Dateien!');
 define('_upload_wrong_size', 'Die ausgew&auml;hlte Datei ist gr&ouml;&szlig;er als zugelassen!');
 define('_upload_no_data', 'Du musst eine Datei angeben!');
 define('_info_upload_success', 'Die Datei wurde erfolgreich hochgeladen!');
