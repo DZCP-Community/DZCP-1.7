@@ -2494,6 +2494,24 @@ function cal($i) {
     return $tag_nr;
 }
 
+//->  Umfrageantworten selektieren
+function voteanswer($what, $vid) {
+    global $sql;
+    if(dbc_index::issetIndex('vote_results_'.$vid)) {
+        $data = dbc_index::getIndex('vote_results_'.$vid);
+    } else {
+        $data = $sql->select("SELECT `what`,`sel` FROM `{prefix_vote_results}` WHERE `vid` = ?;",array(intval($vid)));
+        dbc_index::setIndex('vote_results_'.$vid, $data);
+    }
+    
+    foreach ($data as $value) {
+        if(strtolower($value['what']) == strtolower($what)) {
+            return $value['sel'];
+        }
+    }
+    return '';
+}
+
 //-> Entfernt fuehrende Nullen bei Monatsangaben
 function nonum($i) {
     if (preg_match("=10=Uis", $i) == false) {
@@ -2930,7 +2948,7 @@ final class dbc_index {
 
     public static final function issetIndex($index_key) {
         global $cache,$config_cache;
-        if (isset(self::$index[$index_key])) {
+        if(array_key_exists($index_key, self::$index)) {
             return true;
         }
         

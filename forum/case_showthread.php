@@ -121,7 +121,7 @@ if(defined('_Forum')) {
                                                       "status" => getrank($getp['reg']),
                                                       "avatar" => useravatar($getp['reg']),
                                                       "ip" => $posted_ip,
-                                                      "edited" => $getp['edited'],
+                                                      "edited" => re($getp['edited']),
                                                       "posts" => $userposts,
                                                       "titel" => $titel,
                                                       "signatur" => $sig,
@@ -160,7 +160,7 @@ if(defined('_Forum')) {
       $zitat = show("page/button_zitat", array("id" => $_GET['id'],
                                                "action" => "action=post&amp;do=add&amp;kid=".$getw['kid']."&amp;zitatt=".$get['id'],
                                                "title" => _button_title_zitat));
-      if($get['closed'] == "1")
+      if($get['closed'] == 1)
       {
         $add = show("page/button_closed", array());
       } else {
@@ -170,7 +170,7 @@ if(defined('_Forum')) {
 
       $nav = nav($entrys,settings::get('m_fposts'),"?action=showthread&amp;id=".$_GET['id'].$hL);
 
-      if(data("signatur",$get['t_reg'])) $sig = _sig.bbcode(data("signatur",$get['t_reg']));
+      if(data("signatur",$get['t_reg'])) $sig = _sig.bbcode(re(data("signatur",$get['t_reg'])));
       else $sig = "";
 
       $editt = '';
@@ -198,12 +198,9 @@ if(defined('_Forum')) {
         $move = '';
         foreach($qryok as $getok) {
           $skat = "";
-          $qryo = $sql->select("SELECT * FROM `{prefix_forumsubkats}`
-                      WHERE sid = '".$getok['id']."'
-                      ORDER BY kattopic");
-          foreach($qryo as $getok) {
-            $skat .= show(_forum_select_field_skat, array("value" => $geto['id'],
-                                                          "what" => re($geto['kattopic'])));
+          $qryo = $sql->select("SELECT * FROM `{prefix_forumsubkats}` WHERE sid = '".$getok['id']."' ORDER BY kattopic");
+          foreach($qryo as $geto) {
+            $skat .= show(_forum_select_field_skat, array("value" => $geto['id'],"what" => re($geto['kattopic'])));
           }
 
           $move .= show(_forum_select_field_kat, array("value" => "lazy",
@@ -290,7 +287,7 @@ if(defined('_Forum')) {
         $vote = '<tr><td>'.fvote($get['vote']).'</td></tr>';
       }
 
-      $title = re($getw['topic']).' - '.$title;
+      $where = re($getw['topic']).' - '.$where;
       $index = show($dir."/forum_posts", array("head" => _forum_head,
                                                "where" => $wheres,
                                                "admin" => $admin,
@@ -307,7 +304,7 @@ if(defined('_Forum')) {
                                                "text" => $text,
                                                "status" => getrank($get['t_reg']),
                                                "avatar" => useravatar($get['t_reg']),
-                                               "edited" => $get['edited'],
+                                               "edited" => re($get['edited']),
                                                "signatur" => $sig,
                                                "date" => _posted_by.date("d.m.y H:i", $get['t_date'])._uhr,
                                                "zitat" => $zitat,

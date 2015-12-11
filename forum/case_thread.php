@@ -184,8 +184,7 @@ if(defined('_Forum')) {
                                                   "global" => $global));
         }
           $getv = $sql->fetch("SELECT * FROM `{prefix_votes}` WHERE id = '".$get['vote']."'");
-
-            $fget = $sql->fetch("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
+          $fget = $sql->fetch("SELECT s1.intern,s2.id FROM `{prefix_forumkats}` AS s1
                          LEFT JOIN `{prefix_forumsubkats}` AS s2 ON s2.`sid` = s1.id
                          WHERE s2.`id` = '".intval($_GET['kid'])."'");
 
@@ -303,11 +302,10 @@ if(defined('_Forum')) {
                      SET `datum`  = '".time()."',
                          `titel`  = '".up($_POST['question'])."',
                          `intern` = '".intval($_POST['intern'])."',
-                                     `forum`  = 1,
+                         `forum`  = 1,
                          `von`    = '".intval($userid)."'");
 
-          $vid = _insert_id();
-
+          $vid = $sql->lastInsertId();
           $sql->insert("INSERT INTO `{prefix_vote_results}`
                     SET `vid`   = '".intval($vid)."',
                         `what`  = 'a1',
