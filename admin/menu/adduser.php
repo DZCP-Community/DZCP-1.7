@@ -8,9 +8,9 @@ if(_adminMenu != 'true') exit;
 $where = $where.': '._config_useradd_head;
 
 if(isset($_POST['user'])) {
-    $check_user = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user`= ?;", array(up($_POST['user'])));
-    $check_nick = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `nick`= ?;", array(up($_POST['nick'])));
-    $check_email = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `email`= ?;", array(up($_POST['email'])));
+    $check_user = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user`= ?;", array(stringParser::encode($_POST['user'])));
+    $check_nick = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `nick`= ?;", array(stringParser::encode($_POST['nick'])));
+    $check_email = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `email`= ?;", array(stringParser::encode($_POST['email'])));
 
     if(empty($_POST['user'])) {
         $show = error(_empty_user, 1);
@@ -46,8 +46,8 @@ if(isset($_POST['user'])) {
                           . "`time` = ?, "
                           . "`gmaps_koord` = ?, "
                           . "`status` = 1;",
-                array(up($_POST['user']),up($_POST['nick']),up($_POST['email']),up($pwd),settings::get('default_pwd_encoder'),up($_POST['rlname']),intval($_POST['sex']),
-                (!$bday ? 0 : strtotime($bday)),up($_POST['city']),up($_POST['land']),$time=time(),intval($_POST['level']),$time,up($_POST['gmaps_koord'])));
+                array(stringParser::encode($_POST['user']),stringParser::encode($_POST['nick']),stringParser::encode($_POST['email']),stringParser::encode($pwd),settings::get('default_pwd_encoder'),stringParser::encode($_POST['rlname']),intval($_POST['sex']),
+                (!$bday ? 0 : strtotime($bday)),stringParser::encode($_POST['city']),stringParser::encode($_POST['land']),$time=time(),intval($_POST['level']),$time,stringParser::encode($_POST['gmaps_koord'])));
 
         $insert_id = $sql->lastInsertId();
         setIpcheck("createuser(".$_SESSION['id']."_".$insert_id.")");
@@ -141,10 +141,10 @@ if(empty($show)) {
     foreach($qrysq as $getsq) {
         $qrypos = $sql->select("SELECT `id`,`position` FROM `{prefix_positions}` ORDER BY `pid`;"); $posi = "";
         foreach($qrypos as $getpos) {
-            $posi .= show(_select_field_posis, array("value" => $getpos['id'], "sel" => "", "what" => re($getpos['position'])));
+            $posi .= show(_select_field_posis, array("value" => $getpos['id'], "sel" => "", "what" => stringParser::decode($getpos['position'])));
         }
 
-        $esquads .= show(_checkfield_squads, array("id" => $getsq['id'], "check" => "","eposi" => $posi,"squad" => re($getsq['name'])));
+        $esquads .= show(_checkfield_squads, array("id" => $getsq['id'], "check" => "","eposi" => $posi,"squad" => stringParser::decode($getsq['name'])));
     }
 
     $gmaps = show('membermap/geocoder', array('form' => 'adduser'));

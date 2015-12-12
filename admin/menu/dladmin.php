@@ -11,7 +11,7 @@ switch ($do) {
         $qry = $sql->select("SELECT `id`,`name` FROM `{prefix_download_kat}` ORDER BY `name`;"); $kats = '';
         foreach($qry as $get) {
             $kats .= show(_select_field, array("value" => $get['id'],
-                                               "what" => re($get['name']),
+                                               "what" => stringParser::decode($get['name']),
                                                "sel" => ""));
         }
 
@@ -39,14 +39,14 @@ switch ($do) {
                 $show = error(_downloads_empty_url, 1);
             }
         } else {
-            $dl = (preg_match("#^www#i",$_POST['url']) ? links($_POST['url']) : up($_POST['url']));
+            $dl = (preg_match("#^www#i",$_POST['url']) ? links($_POST['url']) : stringParser::encode($_POST['url']));
             $sql->insert("INSERT INTO `{prefix_downloads}` SET `download` = ?, "
                     . "`url` = ?, "
                     . "`date` = ?, "
                     . "`beschreibung` = ?, "
                     . "`kat` = ?, "
                     . "`intern` = ?;",
-                    array(up($_POST['download']),$dl,time(),up($_POST['beschreibung']),
+                    array(stringParser::encode($_POST['download']),$dl,time(),stringParser::encode($_POST['beschreibung']),
                         intval($_POST['kat']),intval($_POST['intern']),intval($_POST['intern'])));
 
             $show = info(_downloads_added, "?admin=dladmin");
@@ -59,15 +59,15 @@ switch ($do) {
         foreach($qryk as $getk) {
             $sel = ($getk['id'] == $get['kat'] ? 'selected="selected"' : '');
             $kats .= show(_select_field, array("value" => $getk['id'],
-                                               "what" => re($getk['name']),
+                                               "what" => stringParser::decode($getk['name']),
                                                "sel" => $sel));
         }
 
         $show = show($dir."/form_dl", array("admin_head" => _downloads_admin_head_edit,
-                                            "ddownload" => re($get['download']),
+                                            "ddownload" => stringParser::decode($get['download']),
                                             "dintern" => $get['intern'] ? 'checked="checked"' : '',
-                                            "durl" => re($get['url']),
-                                            "dbeschreibung" => re($get['beschreibung']),
+                                            "durl" => stringParser::decode($get['url']),
+                                            "dbeschreibung" => stringParser::decode($get['beschreibung']),
                                             "what" => _button_value_edit,
                                             "do" => "editdl&amp;id=".$_GET['id']."",
                                             "kats" => $kats));
@@ -79,14 +79,14 @@ switch ($do) {
             elseif(empty($_POST['url']))  
                 $show = error(_downloads_empty_url, 1);
         } else {
-            $dl = preg_match("#^www#i",$_POST['url']) ? up(links($_POST['url'])) : up($_POST['url']);
+            $dl = preg_match("#^www#i",$_POST['url']) ? stringParser::encode(links($_POST['url'])) : stringParser::encode($_POST['url']);
             $sql->update("UPDATE `{prefix_downloads}` SET `download` = ?, "
                     . "`url` = ?, "
                     . "`beschreibung` = ?, "
                     . "`kat` = ?, "
                     . "`intern` = ? "
                     . "WHERE id = ?;",
-                array(up($_POST['download']),$dl,up($_POST['beschreibung']),intval($_POST['kat']),
+                array(stringParser::encode($_POST['download']),$dl,stringParser::encode($_POST['beschreibung']),intval($_POST['kat']),
                     intval($_POST['intern']),intval($_GET['id'])));
 
             $show = info(_downloads_edited, "?admin=dladmin");
@@ -110,7 +110,7 @@ switch ($do) {
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/downloads_show", array("id" => $get['id'],
-                                                        "dl" => re($get['download']),
+                                                        "dl" => stringParser::decode($get['download']),
                                                         "class" => $class,
                                                         "edit" => $edit,
                                                         "delete" => $delete));

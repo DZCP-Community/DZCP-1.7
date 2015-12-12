@@ -295,7 +295,7 @@ class GameQ_Protocols_Etqw extends GameQ_Protocols
         $result->add('game_mod_name_long', $this->is_mod ? $this->name_long : $mod_name_long);
         $result->add('game_mod_name_short', $this->is_mod ? $this->name_short : $mod_name_short);
         $result->add('game_hostname',htmlentities($this->server_data_stream['name'], ENT_QUOTES, "UTF-8"));
-        $result->add('game_map', re(str_replace('maps/', '', $this->server_data_stream['map'])));
+        $result->add('game_map',stringParser::decode(str_replace('maps/', '', $this->server_data_stream['map'])));
         $result->add('game_map_pic_dir', 'id_tech_4/etqw'.($this->is_mod || $is_mod_ml ? '/'.$this->server_data_stream['gamename'] : '/'.$this->basic_game_dir) );
         $result->add('game_type',ucfirst($this->server_data_stream['si_gameType']));
         $result->add('game_dir', !$this->is_mod && !$is_mod_ml ? 'etqw' : $this->server_data_stream['gamename']);

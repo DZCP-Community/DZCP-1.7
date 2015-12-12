@@ -13,7 +13,7 @@ $allkats = cnt("{prefix_newskat}");
 $qry = $sql->select("SELECT `kategorie` FROM `{prefix_newskat}` ORDER BY `id` ASC;");
 $kats = '';
 foreach($qry as $get) {
-    $kats .= re($get['kategorie']).", ";
+    $kats .= stringParser::decode($get['kategorie']).", ";
 }
 $kats = substr($kats, 0, -2);
 

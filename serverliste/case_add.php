@@ -20,11 +20,11 @@ if(isset($_POST['clanname'])) {
         notification::add_error(_error_empty_slots);
     else {
         $sql->insert("INSERT INTO `{prefix_messages}` SET `datum` = ?, `von` = 0, `an` = 1,`titel` = ?, `nachricht` = ?;",
-            array(time(),up(_slist_title),up(_slist_added_msg)));
+            array(time(),stringParser::encode(_slist_title),stringParser::encode(_slist_added_msg)));
 
         $url = !empty($_POST['clanurl']) && $_POST['clanurl'] != 'http://' ? links($_POST['clanurl']) : '-';
         $sql->insert("INSERT INTO `{prefix_serverliste}` SET `datum` = ?, `clanname` = ?, `clanurl` = ?, `ip` = ?, `port` = ?, `pwd` = ?, `slots` = ?;",
-            array(time(),up($_POST['clanname']),up($url),up($_POST['ip']),intval($_POST['port']),up($_POST['pwd']),intval($_POST['slots'])));
+            array(time(),stringParser::encode($_POST['clanname']),stringParser::encode($url),stringParser::encode($_POST['ip']),intval($_POST['port']),stringParser::encode($_POST['pwd']),intval($_POST['slots'])));
 
         $index = info(_successful_server_saved, "../serverliste/");
     }

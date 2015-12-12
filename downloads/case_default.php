@@ -17,20 +17,20 @@ foreach($qry as $get) {
             if(isset($_GET['hl']) && intval($_GET['hl']) == $getdl['id']) {
                 $display = "";
                 $img = "collapse";
-                $download = highlight(re($getdl['download']));
+                $download = highlight(stringParser::decode($getdl['download']));
             } else
-                $download = re($getdl['download']);
+                $download = stringParser::decode($getdl['download']);
 
             $link = show(_downloads_link, array("id" => $getdl['id'],
                                                 "download" => $download,
-                                                "titel" => re($getdl['download'])));
+                                                "titel" => stringParser::decode($getdl['download'])));
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/downloads_show", array("class" => $class,
                                                         "link" => $link,
                                                         "kid" => $get['id'],
                                                         "display" => $display,
-                                                        "beschreibung" => bbcode(re($getdl['beschreibung'])),
+                                                        "beschreibung" => bbcode::parse_html($getdl['beschreibung']),
                                                         "hits" => $getdl['hits']));
         }
 
@@ -39,7 +39,7 @@ foreach($qry as $get) {
         $kat = show(_dl_titel, array("id" => $get['id'],
                                      "file" => $dltitel,
                                      "cnt" => $cntKat,
-                                     "name" => re($get['name'])));
+                                     "name" => stringParser::decode($get['name'])));
 
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
         $kats .= show($dir."/download_kats", array("kat" => $kat,

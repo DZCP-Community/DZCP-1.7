@@ -127,7 +127,7 @@ function server_show($sID = 0, $showID = 0) {
         //Admin MSG
         $icon_basic_inp = GameQ::search_game_icon($icon_basic);
         if($icon_basic_inp['found'] && stristr($icon_basic_inp['image'], 'unknown') === FALSE && empty($get['icon'])) {
-            $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(up($icon_basic),$get['id']));
+            $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(stringParser::encode($icon_basic),$get['id']));
         }
         
         if((checkme() == 4 || permission('editserver')) && !$icon_basic_inp['found']) {
@@ -150,7 +150,7 @@ function server_show($sID = 0, $showID = 0) {
             }
 
             if($icon_mod_inp['found']) {
-                $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(up($icon_mod),$get['id']));
+                $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(stringParser::encode($icon_mod),$get['id']));
             }
             $icon_mod = $icon_mod_inp['image'];
             unset($icon_mod_inp);
@@ -200,7 +200,7 @@ function server_show($sID = 0, $showID = 0) {
         }
 
         if(!empty($server['game_hostname']))
-            $sql->update("UPDATE `{prefix_server}` SET `name` = ? WHERE `id` = ?;",array(up($server['game_hostname']),$get['id'])); //Update Hostname to DB
+            $sql->update("UPDATE `{prefix_server}` SET `name` = ? WHERE `id` = ?;",array(stringParser::encode($server['game_hostname']),$get['id'])); //Update Hostname to DB
     } else {
         //Server Status
         $server['game_hostname'] =  $get['name'];
@@ -254,9 +254,9 @@ function server_show($sID = 0, $showID = 0) {
     $dedicated = ($server['game_dedicated'] ? '<img src="../inc/images/dedicated.png" alt="" title="Dedicated Server" class="icon" />' : ''); //Dedicated Server
     $os = ($server['game_os'] ? '<img src="../inc/images/'.$server['game_os'].'_os.png" alt="" title="'.($server['game_os'] == 'windows' ? 'Windows' : 'Linux').' Server" class="icon" />' : ''); //Server OS
     $mod = (!empty($server['game_mod_name_long']) ? '<span class="fontBold">Mod:</span> '.$server['game_mod_name_long'].' <img src="'.$icon_mod.'" alt="" class="icon" /><br />' : '');
-    $pwds = (!empty($get['pwd']) && permission("gs_showpw") && $server['game_password'] ? show(_server_pwd, array("pwd" => re($get['pwd']))) : '');
-    $gtype = (!empty($server['game_type']) ? show(_server_gtype, array("type" => re($server['game_type']))) : '');
-    $bots = (!empty($server['game_num_bot']) ? show(_server_bots, array("bots" => re($server['game_num_bot']))) : '');
+    $pwds = (!empty($get['pwd']) && permission("gs_showpw") && $server['game_password'] ? show(_server_pwd, array("pwd" => stringParser::decode($get['pwd']))) : '');
+    $gtype = (!empty($server['game_type']) ? show(_server_gtype, array("type" => stringParser::decode($server['game_type']))) : '');
+    $bots = (!empty($server['game_num_bot']) ? show(_server_bots, array("bots" => stringParser::decode($server['game_num_bot']))) : '');
     $klapp = show(_klapptext_server_link, array("link" => _server_splayerstats, "id" => $get['id'], "moreicon" => $moreicon));
 
     $index = show($dir."/server_show", array("showscore" => $show_score_td,
@@ -291,7 +291,7 @@ function server_show($sID = 0, $showID = 0) {
                                              "klapp" => $klapp,
                                              "ip" => $get['ip'],
                                              "playerstats" => $playerstats,
-                                             "name" => cut(re($server['game_hostname']),70,true),
+                                             "name" => cut(stringParser::decode($server['game_hostname']),70,true),
                                              "av_icons" => $image_secure.$dedicated.$os,
                                              "image_map" => $image_map,
                                              "klapp_show_start" => (!$klapp_show ? '<!--' : ''),

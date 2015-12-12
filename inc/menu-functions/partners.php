@@ -13,12 +13,12 @@ function partners() {
     if($sql->rowCount()) {
         foreach($qry as $get) {
             if($get['textlink']) {
-                $partners .= show("menu/partners_textlink", array("link" => re($get['link']),
-                                                                  "name" => re($get['banner'])));
+                $partners .= show("menu/partners_textlink", array("link" => stringParser::decode($get['link']),
+                                                                  "name" => stringParser::decode($get['banner'])));
             } else {
-                $partners .= show("menu/partners", array("link" => re($get['link']),
-                                                         "title" => htmlspecialchars(str_replace('http://', '', re($get['link']))),
-                                                         "banner" => re($get['banner'])));
+                $partners .= show("menu/partners", array("link" => stringParser::decode($get['link']),
+                                                         "title" => htmlspecialchars(str_replace('http://', '', stringParser::decode($get['link']))),
+                                                         "banner" => stringParser::decode($get['banner'])));
             }
 
             $table = strstr($partners, '<tr>') ? true : false;

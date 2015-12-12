@@ -67,20 +67,20 @@ if(defined('_Clanwars')) {
                                                        "head" => _cw_players_head,
                                                        "form_player" => $form_player));
 
-                $serverpwd = show(_cw_serverpwd, array("cw_serverpwd" => re($get['serverpwd'])));
+                $serverpwd = show(_cw_serverpwd, array("cw_serverpwd" => stringParser::decode($get['serverpwd'])));
             }
         }
 
-        $show = show(_cw_details_squad, array("game" => re($get['game']),
-                                              "name" => re($get['name']),
+        $show = show(_cw_details_squad, array("game" => stringParser::decode($get['game']),
+                                              "name" => stringParser::decode($get['name']),
                                               "id" => $get['squad_id'],
                                               "img" => squad($get['icon'])));
         $flagge = flag($get['gcountry']);
-        $gegner = show(_cw_details_gegner_blank, array("gegner" => re($get['clantag']." - ".$get['gegner']),
-                                                       "url" => !empty($get['url']) ? re($get['url']) : "#"));
+        $gegner = show(_cw_details_gegner_blank, array("gegner" => stringParser::decode($get['clantag']." - ".$get['gegner']),
+                                                       "url" => !empty($get['url']) ? stringParser::decode($get['url']) : "#"));
 
-        $server = show(_cw_details_server, array("servername" => re($get['servername']),
-                                                 "serverip" => re($get['serverip'])));
+        $server = show(_cw_details_server, array("servername" => stringParser::decode($get['servername']),
+                                                 "serverip" => stringParser::decode($get['serverip'])));
 
         if($get['punkte'] == "0" && $get['gpunkte'] == "0")
             $result = _cw_no_results;
@@ -94,7 +94,7 @@ if(defined('_Clanwars')) {
                                                             "title" => _button_title_edit));
         }
 
-        $bericht = $get['bericht'] ? bbcode($get['bericht']) : "&nbsp;";
+        $bericht = $get['bericht'] ? bbcode::parse_html($get['bericht']) : "&nbsp;";
         $libPath = "inc/images/clanwars/"; $cw_sc_loops = 0;
         $files = get_files(basePath."/inc/images/clanwars/",false,true,$picformat,false,array(),'minimize'); $cw_screenshots = array();
         if($files) {
@@ -174,7 +174,7 @@ if(defined('_Clanwars')) {
             if(!$getc['reg']) {
                 $hp = $getc['hp'] ? show(_hpicon, array("hp" => $getc['hp'])) : '';
                 $email = $getc['email'] ? '<br />'.CryptMailto($getc['email'],_emailicon_forum) : '';
-                $nick = show(_link_mailto, array("nick" => re($getc['nick']), "email" => $getc['email']));
+                $nick = show(_link_mailto, array("nick" => stringParser::decode($getc['nick']), "email" => $getc['email']));
             } else {
                 $onoff = onlinecheck($getc['reg']);
                 $nick = autor($getc['reg']);
@@ -188,8 +188,8 @@ if(defined('_Clanwars')) {
 
             $posted_ip = $chkMe == 4 || permission('ipban') ? $getc['ip'] : _logged;
             $comments .= show("page/comments_show", array("titel" => $titel,
-                                                          "comment" => bbcode($getc['comment']),
-                                                          "editby" => bbcode($getc['editby']),
+                                                          "comment" => bbcode::parse_html($getc['comment']),
+                                                          "editby" => bbcode::parse_html($getc['editby']),
                                                           "nick" => $nick,
                                                           "hp" => $hp,
                                                           "email" => $email,
@@ -260,7 +260,7 @@ if(defined('_Clanwars')) {
         }
 
         $logos = ($logo_squad == '_defaultlogo.jpg') && ($logo_gegner == '_defaultlogo.jpg');
-        $pagetitle = re($get['name']).' vs. '.re($get['gegner']).' - '.$pagetitle;
+        $pagetitle = stringParser::decode($get['name']).' vs. '.stringParser::decode($get['gegner']).' - '.$pagetitle;
         $index = show($dir."/details", array("head" => _cw_head_details,
                                              "result_head" => _cw_head_results,
                                              "lineup_head" => _cw_head_lineup,
@@ -273,11 +273,11 @@ if(defined('_Clanwars')) {
                                              "logo_squad" => $logo_squad,
                                              "logo_gegner" => $logo_gegner,
                                              "squad" => $show,
-                                             "squad_name" => re($get['name']),
-                                             "gametype" => empty($get['gametype']) ? '-' : re($get['gametype']),
-                                             "lineup" => preg_replace("#\,#","<br />",re($get['lineup'])),
-                                             "glineup" => preg_replace("#\,#","<br />",re($get['glineup'])),
-                                             "match_admins" => empty($get['matchadmins']) ? '-' : re($get['matchadmins']),
+                                             "squad_name" => stringParser::decode($get['name']),
+                                             "gametype" => empty($get['gametype']) ? '-' : stringParser::decode($get['gametype']),
+                                             "lineup" => preg_replace("#\,#","<br />",stringParser::decode($get['lineup'])),
+                                             "glineup" => preg_replace("#\,#","<br />",stringParser::decode($get['glineup'])),
+                                             "match_admins" => empty($get['matchadmins']) ? '-' : stringParser::decode($get['matchadmins']),
                                              "datum" => _datum,
                                              "gegner" => _cw_head_gegner,
                                              "xonx" => _cw_head_xonx,
@@ -292,9 +292,9 @@ if(defined('_Clanwars')) {
                                              "serverpwd" => $serverpwd,
                                              "cw_datum" => date("d.m.Y H:i", $get['datum'])._uhr,
                                              "cw_gegner" => $gegner,
-                                             "cw_xonx" => empty($get['xonx']) ? '-' : re($get['xonx']),
-                                             "cw_liga" => empty($get['liga']) ? '-' : re($get['liga']),
-                                             "cw_maps" => empty($get['maps']) ? '-' : re($get['maps']),
+                                             "cw_xonx" => empty($get['xonx']) ? '-' : stringParser::decode($get['xonx']),
+                                             "cw_liga" => empty($get['liga']) ? '-' : stringParser::decode($get['liga']),
+                                             "cw_maps" => empty($get['maps']) ? '-' : stringParser::decode($get['maps']),
                                              "cw_server" => $server,
                                              "cw_result" => $result,
                                              "cw_bericht" => $bericht,
@@ -350,16 +350,16 @@ if(defined('_Clanwars')) {
                                                                      "show" => "",
                                                                      "postemail" => isset($_POST['email']) ? $_POST['email'] : '',
                                                                      "posthp" => isset($_POST['hp']) ? links($_POST['hp']) : '',
-                                                                     "postnick" => isset($_POST['nick']) ? re($_POST['nick']) : '',
-                                                                     "posteintrag" => re($_POST['comment']),
+                                                                     "postnick" => isset($_POST['nick']) ? stringParser::decode($_POST['nick']) : '',
+                                                                     "posteintrag" => stringParser::decode($_POST['comment']),
                                                                      "error" => $error,
                                                                      "eintraghead" => _eintrag));
                         } else {
                             $sql->insert("INSERT INTO `{prefix_cw_comments}` SET `cw` = ?,`datum` = ?,`nick` = ?,`email` = ?,`hp` = ?,`reg` = ?,`comment` = ?,`ip` = ?;",
-                                    array(intval($_GET['id']),time(),(isset($_POST['nick']) ? up($_POST['nick']) : up(data('nick'))),
-                                        (isset($_POST['email']) ? up($_POST['email']) : up(data('email'))),
+                                    array(intval($_GET['id']),time(),(isset($_POST['nick']) ? stringParser::encode($_POST['nick']) : stringParser::encode(data('nick'))),
+                                        (isset($_POST['email']) ? stringParser::encode($_POST['email']) : stringParser::encode(data('email'))),
                                         (isset($_POST['hp']) ? links($_POST['hp']) : links(data('hp'))),
-                                        $userid,up($_POST['comment']),up($userip)));
+                                        $userid,stringParser::encode($_POST['comment']),stringParser::encode($userip)));
                             setIpcheck("cwid(".$_GET['id'].")");
                             $index = info(_comment_added, "?action=details&amp;id=".$_GET['id']."");
                         }
@@ -402,9 +402,9 @@ if(defined('_Clanwars')) {
             if($get['reg'] == $userid || permission('clanwars')) {
                 $editedby = show(_edited_by, array("autor" => autor($userid), "time" => date("d.m.Y H:i", time())._uhr));
                 $sql->delete("UPDATE `{prefix_cw_comments}` SET `nick` = ?, `email` = ?, `hp` = ?, `comment` = ?, `editby` = ? WHERE `id` = ?",
-                        array((isset($_POST['nick']) ? up($_POST['nick']) : up(data('nick'))),
-                        (isset($_POST['email']) ? up($_POST['email']) : up(data('email'))),(isset($_POST['hp']) ? links($_POST['hp']) : links(data('hp'))),
-                        up($_POST['comment']),up($editedby),intval($_GET['cid'])));
+                        array((isset($_POST['nick']) ? stringParser::encode($_POST['nick']) : stringParser::encode(data('nick'))),
+                        (isset($_POST['email']) ? stringParser::encode($_POST['email']) : stringParser::encode(data('email'))),(isset($_POST['hp']) ? links($_POST['hp']) : links(data('hp'))),
+                        stringParser::encode($_POST['comment']),stringParser::encode($editedby),intval($_GET['cid'])));
                 $index = info(_comment_edited, "?action=details&amp;id=".$_GET['id']."");
             } else
                 $index = error(_error_edit_post,1);
@@ -414,9 +414,9 @@ if(defined('_Clanwars')) {
                 if($get['reg'] != 0)
                     $form = show("page/editor_regged", array("nick" => autor($get['reg']), "von" => _autor));
                 else {
-                    $form = show("page/editor_notregged", array("postemail" => re($get['email']),
+                    $form = show("page/editor_notregged", array("postemail" => stringParser::decode($get['email']),
                                                                 "posthp" => links($get['hp']),
-                                                                "postnick" => re($get['nick'])));
+                                                                "postnick" => stringParser::decode($get['nick'])));
                 }
 
                 $index = show("page/comments_add", array("titel" => _comments_edit,
@@ -427,7 +427,7 @@ if(defined('_Clanwars')) {
                                                          "id" => $_GET['id'],
                                                          "what" => _button_value_edit,
                                                          "show" => "",
-                                                         "posteintrag" => re($get['comment']),
+                                                         "posteintrag" => stringParser::decode($get['comment']),
                                                          "error" => ""));
             } else
                 $index = error(_error_edit_post,1);

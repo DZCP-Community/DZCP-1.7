@@ -16,7 +16,7 @@ $dir = "online";
 
 ## SECTIONS ##
 if($chkMe){
-    $sql->update("UPDATE `{prefix_users}` SET `time` = ".time().", `whereami` = ? WHERE `id` = ?;",array(up($where),$userid));
+    $sql->update("UPDATE `{prefix_users}` SET `time` = ".time().", `whereami` = ? WHERE `id` = ?;",array(stringParser::encode($where),$userid));
 }
 
 //Users
@@ -26,7 +26,7 @@ $qry = $sql->select("SELECT `id`,`ip`,`nick`,`whereami` FROM `{prefix_users}` "
 if($sql->rowCount()) {
     foreach($qry as $get) {
         if (!preg_match("#autor_#is", $get['whereami'])) {
-            $whereami = re($get['whereami']);
+            $whereami = stringParser::decode($get['whereami']);
         } else {
             $whereami = preg_replace_callback("#autor_(.*?)$#", create_function('$id', 'return autor("$id[1]");'), $get['whereami']);
         }
@@ -53,7 +53,7 @@ $qry = $sql->select("SELECT * FROM `{prefix_counter_whoison}` "
 if($sql->rowCount()) {
     foreach($qry as $get) {
         if (!preg_match("#autor_#is", $get['whereami'])) {
-            $whereami = re($get['whereami']);
+            $whereami = stringParser::decode($get['whereami']);
         } else {
             $whereami = preg_replace_callback("#autor_(.*?)$#", create_function('$id', 'return autor("$id[1]");'), $get['whereami']);
         }

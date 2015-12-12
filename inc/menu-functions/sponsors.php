@@ -13,8 +13,8 @@ function sponsors() {
     if($sql->rowCount()) {
         foreach($qry as $get) {
             $banner = show(_sponsors_bannerlink, array("id" => $get['id'],
-                                                       "title" => htmlspecialchars(str_replace('http://', '', re($get['link']))),
-                                                       "banner" => (empty($get['xlink']) ? "../banner/sponsors/box_".$get['id'].".".$get['xend'] : re($get['xlink']))));
+                                                       "title" => htmlspecialchars(str_replace('http://', '', stringParser::decode($get['link']))),
+                                                       "banner" => (empty($get['xlink']) ? "../banner/sponsors/box_".$get['id'].".".$get['xend'] : stringParser::decode($get['xlink']))));
 
             $sponsors .= show("menu/sponsors", array("banner" => $banner));
         }

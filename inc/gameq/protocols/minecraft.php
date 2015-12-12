@@ -82,7 +82,7 @@ class GameQ_Protocols_Minecraft extends GameQ_Protocols_Gamespy3
         $result->add('game_mod_name_long', '');
         $result->add('game_mod_name_short', '');
         $result->add('game_hostname',htmlentities($this->server_data_stream['hostname'], ENT_QUOTES, "UTF-8"));
-        $result->add('game_map', re($this->server_data_stream['map']));
+        $result->add('game_map', stringParser::decode($this->server_data_stream['map']));
         $result->add('game_map_pic_dir', 'minecraft/'.$this->server_data_stream['map']);
         $result->add('game_type',ucfirst($this->server_data_stream['gametype']));
         $result->add('game_dir', 'minecraft');

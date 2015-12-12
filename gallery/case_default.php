@@ -27,12 +27,12 @@ if($sql->rowCount()) {
 
         $cntpics = $cnt == 1 ? _gallery_image : _gallery_images;
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-        $show .= show($dir."/gallery_show", array("link" => re($get['kat']),
+        $show .= show($dir."/gallery_show", array("link" => stringParser::decode($get['kat']),
                                                   "class" => $class,
                                                   "images" => $cntpics,
                                                   "image" => $imgArr[0],
                                                   "id" => $get['id'],
-                                                  "beschreibung" => bbcode(re($get['beschreibung'])),
+                                                  "beschreibung" => bbcode::parse_html($get['beschreibung']),
                                                   "cnt" => $cnt));
 
     }

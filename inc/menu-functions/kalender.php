@@ -68,7 +68,7 @@ function kalender($month="",$year="",$js=false) {
                             array(cal($i).".".$monat.".".$jahr));
                     foreach($qry as $get) {
                         $cws = "set";
-                        $titlecw .='&lt;img src=../inc/images/cw.gif class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_cw.re($get['gegner'])).'&lt;br />';
+                        $titlecw .='&lt;img src=../inc/images/cw.gif class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_cw.stringParser::decode($get['gegner'])).'&lt;br />';
                     }
 
                     $event = ""; $titleev = "";
@@ -76,7 +76,7 @@ function kalender($month="",$year="",$js=false) {
                             array(cal($i).".".$monat.".".$jahr));
                     foreach($qry as $get) {
                         $event = "set";
-                        $titleev .= '&lt;img src=../inc/images/event.png class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_event.re($get['title'])).'&lt;br />';
+                        $titleev .= '&lt;img src=../inc/images/event.png class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_event.stringParser::decode($get['title'])).'&lt;br />';
                     }
 
                     $info = 'onmouseover="DZCP.showInfo(\''.cal($i).'.'.$monat.'.'.$jahr.'\', \''.$titlebd.$titlecw.$titleev.'\')" onmouseout="DZCP.hideInfo()"';

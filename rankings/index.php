@@ -23,7 +23,7 @@ $qry = $sql->select("SELECT s1.`id`,s1.`lastranking`,s1.`rank`,s1.`squad`,s1.`le
 
 if($sql->rowCount()) {
     foreach($qry as $get) {
-        $squad = '<a href="../squads/?showsquad='.$get['squad'].'">'.re($get['name']).'</a>';
+        $squad = '<a href="../squads/?showsquad='.$get['squad'].'">'.stringParser::decode($get['name']).'</a>';
         $league = '<a href="'.$get['url'].'" target="_blank">'.$get['league'].'</a>';
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
         $show .= show($dir."/rankings_show", array("class" => $class,

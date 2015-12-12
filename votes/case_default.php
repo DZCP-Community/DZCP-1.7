@@ -39,7 +39,7 @@ if(defined('_Votes')) {
                 $balken = show(_votes_balken, array("width" => $rawpercent));
                 $result_head = _votes_results_head;
                 $votebutton = "";
-                $results .= show($dir."/votes_results", array("answer" => re($getv['sel']),
+                $results .= show($dir."/votes_results", array("answer" => stringParser::decode($getv['sel']),
                                                               "percent" => $percent,
                                                               "class" => $class,
                                                               "stimmen" => $getv['stimmen'],
@@ -48,7 +48,7 @@ if(defined('_Votes')) {
                 $result_head = _votes_results_head_vote;
                 $votebutton = '<input id="voteSubmit_'.$get['id'].'" type="submit" value="'._button_value_vote.'" class="submit" />';
                 $results .= show($dir."/votes_vote", array("id" => $getv['id'],
-                                                           "answer" => re($getv['sel']),
+                                                           "answer" => stringParser::decode($getv['sel']),
                                                            "class" => $class));
             }
         }
@@ -67,7 +67,7 @@ if(defined('_Votes')) {
             $display = "none";
         }
 
-        $ftitel = $get['forum'] ? re($get['titel']).' (Forum)' : re($get['titel']);
+        $ftitel = $get['forum'] ? stringParser::decode($get['titel']).' (Forum)' : stringParser::decode($get['titel']);
         $titel = show(_votes_titel, array("titel" => $ftitel,
                                           "vid" => $get['id'],
                                           "icon" => $moreicon,

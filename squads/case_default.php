@@ -10,11 +10,11 @@ $qry = $sql->select("SELECT `name`,`icon`,`id`,`beschreibung` FROM `{prefix_squa
 if($cnt_squads = $sql->rowCount()) {
     foreach($qry as $get) {
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-        $squad = show(_gameicon, array("icon" => re($get['icon']))).' '.re($get['name']); $style = '';
+        $squad = show(_gameicon, array("icon" => stringParser::decode($get['icon']))).' '.stringParser::decode($get['name']); $style = '';
         foreach($picformat AS $end) {
             if(file_exists(basePath.'/inc/images/squads/'.intval($get['id']).'.'.$end)) {
                 $style = 'text-align:center;padding:0';
-                $squad = '<img src="../inc/images/squads/'.intval($get['id']).'.'.$end.'" alt="'.re($get['name']).'" />';
+                $squad = '<img src="../inc/images/squads/'.intval($get['id']).'.'.$end.'" alt="'.stringParser::decode($get['name']).'" />';
                 break;
             }
         }
@@ -23,8 +23,8 @@ if($cnt_squads = $sql->rowCount()) {
                                                  "squad" => $squad,
                                                  "style" => $style,
                                                  "class" => $class,
-                                                 "beschreibung" => bbcode(re($get['beschreibung'])),
-                                                 "squadname" => re($get['name'])));
+                                                 "beschreibung" => bbcode::parse_html(stringParser::decode($get['beschreibung'])),
+                                                 "squadname" => stringParser::decode($get['name'])));
     }
 }
 

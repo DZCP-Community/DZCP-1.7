@@ -32,7 +32,7 @@ $where = $where.': '._partners_head;
           $show = error(_empty_url, 1);
         } else {
           $sql->insert("INSERT INTO `{prefix_partners}` SET `link` = ?, `banner`   = ?, `textlink` = ?;",
-                  array(up(links($_POST['link'])),up(empty($_POST['textlink']) ? $_POST['banner'] : $_POST['textlink']),intval(empty($_POST['textlink']) ? 0 : 1)));
+                  array(stringParser::encode(links($_POST['link'])),stringParser::encode(empty($_POST['textlink']) ? $_POST['banner'] : $_POST['textlink']),intval(empty($_POST['textlink']) ? 0 : 1)));
 
           $show = info(_partners_added, "?admin=partners");
         }
@@ -42,7 +42,7 @@ $where = $where.': '._partners_head;
         $files = get_files(basePath.'/banner/partners/',false,true);
         for($i=0; $i<count($files); $i++)
         {
-          if(re($get['banner']) == $files[$i]) $sel = 'selected="selected"';
+          if(stringParser::decode($get['banner']) == $files[$i]) $sel = 'selected="selected"';
           else $sel = "";
 
           $banners .= show(_partners_select_icons, array("icon" => $files[$i],
@@ -53,8 +53,8 @@ $where = $where.': '._partners_head;
                                                   "nothing" => "",
                                                   "banner" => _partners_button,
                                                   "link" => _link,
-                                                  "e_link" => re($get['link']),
-                                                  "e_textlink" => (empty($get['textlink']) ? '' : re($get['banner'])),
+                                                  "e_link" => stringParser::decode($get['link']),
+                                                  "e_textlink" => (empty($get['textlink']) ? '' : stringParser::decode($get['banner'])),
                                                   "or" => _or,
                                                   "textlink" => _partnerbuttons_textlink,
                                                   "banners" => $banners,
@@ -64,7 +64,9 @@ $where = $where.': '._partners_head;
           $show = error(_empty_url, 1);
         } else {
           $sql->update("UPDATE `{prefix_partners}` SET `link` = ?, `banner` = ?, `textlink` = ? WHERE `id` = ?;",
-                  array(up(links($_POST['link'])),up(empty($_POST['textlink']) ? $_POST['banner'] : $_POST['textlink']),intval(empty($_POST['textlink']) ? 0 : 1),intval($_GET['id'])));
+                  array(stringParser::encode(links($_POST['link'])),
+                      stringParser::encode(empty($_POST['textlink']) ? $_POST['banner'] : $_POST['textlink']),
+                      intval(empty($_POST['textlink']) ? 0 : 1),intval($_GET['id'])));
           $show = info(_partners_edited, "?admin=partners");
         }
       } elseif($do == "delete") {
@@ -81,12 +83,12 @@ $where = $where.': '._partners_head;
                                                             "title" => _button_title_del,
                                                             "del" => convSpace(_confirm_del_entry)));
 
-          $rlink = links(re($get['link']));
-          $button = '<img src="../banner/partners/'.re($get['banner']).'" alt="'.$rlink.'" title="'.$rlink.'" />';
+          $rlink = links(stringParser::decode($get['link']));
+          $button = '<img src="../banner/partners/'.stringParser::decode($get['banner']).'" alt="'.$rlink.'" title="'.$rlink.'" />';
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
           $show .= show($dir."/partners_show", array("class" => $class,
-                                                      "button" => (empty($get['textlink']) ? $button : '<center>'._partnerbuttons_textlink.': <b>'.re($get['banner']).'</b></center>'),
-                                                      "link" => re($get['link']),
+                                                      "button" => (empty($get['textlink']) ? $button : '<center>'._partnerbuttons_textlink.': <b>'.stringParser::decode($get['banner']).'</b></center>'),
+                                                      "link" => stringParser::decode($get['link']),
                                                       "id" => $get['id'],
                                                       "edit" => $edit,
                                                       "delete" => $delete));

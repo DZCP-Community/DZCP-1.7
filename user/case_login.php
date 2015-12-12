@@ -19,7 +19,7 @@ if(defined('_UserMenu')) {
             $get = $sql->fetch("SELECT `id`,`user`,`nick`,`pwd`,`pwd_encoder`,`email`,`level`,`time` "
                         . "FROM `{prefix_users}` "
                         . "WHERE `user` = ? AND `level` != 0;", 
-                array(up($_POST['user'])));
+                array(stringParser::encode($_POST['user'])));
 
             $login = false; $pwd = '';
             if($get['id'] >= 1 && !empty($_POST['pwd'])) {
@@ -27,7 +27,7 @@ if(defined('_UserMenu')) {
                 $login = true;
             }
  
-            if($get['id'] >= 1 && $login && re($get['pwd']) == $pwd) {
+            if($get['id'] >= 1 && $login && stringParser::decode($get['pwd']) == $pwd) {
                 if (!isBanned($get['id'])) {
                     //Update Password encoding
                     if($get['pwd_encoder'] != settings::get('default_pwd_encoder')) {
@@ -96,7 +96,7 @@ if(defined('_UserMenu')) {
                     $index = error(_login_banned);
                 }
             } else {
-                $get = $sql->fetch("SELECT `id` FROM `{prefix_users}` WHERE `user` = ?;",array(up($_POST['user'])));
+                $get = $sql->fetch("SELECT `id` FROM `{prefix_users}` WHERE `user` = ?;",array(stringParser::encode($_POST['user'])));
                 if($sql->rowCount()) {
                     setIpcheck("trylogin(".$get['id'].")");
                 }

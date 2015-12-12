@@ -15,13 +15,13 @@ function events() {
     $eventbox = '';
     if($sql->rowCount()) {
         foreach($qry as $get) {
-            $info = 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['title'])).'\', \''._kalender_uhrzeit.';'.
+            $info = 'onmouseover="DZCP.showInfo(\''.jsconvert(stringParser::decode($get['title'])).'\', \''._kalender_uhrzeit.';'.
                     _datum.'\', \''.date("H:i", $get['datum'])._uhr.';'.
                     date("d.m.Y", $get['datum']).'\')" onmouseout="DZCP.hideInfo()"';
             
             $events = show(_next_event_link, array("datum" => date("d.m.",$get['datum']),
                                                    "timestamp" => $get['datum'],
-                                                   "event" => re($get['title']),
+                                                   "event" => stringParser::decode($get['title']),
                                                    "info" => $info));
 
             $eventbox .= show("menu/event", array("events" => $events, "info" => $info));

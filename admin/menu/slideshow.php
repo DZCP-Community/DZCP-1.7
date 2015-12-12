@@ -13,7 +13,7 @@ switch ($do) {
         $qry = $sql->select("SELECT `pos`,`bez` FROM `{prefix_slideshow}` ORDER BY `pos` ASC;"); $positions = '';
         foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => $get['pos']+1,
-                                                    "what" => _nach.': '.re($get['bez']),
+                                                    "what" => _nach.': '.stringParser::decode($get['bez']),
                                                     "sel" => ""));
         }
 
@@ -48,7 +48,7 @@ switch ($do) {
             foreach($qry as $get) {
                 $posid = ($get['pos']+1);
                 $positions .= show(_select_field, array("value" => $posid,
-                        "what" => _nach.': '.re($get['bez']),
+                        "what" => _nach.': '.stringParser::decode($get['bez']),
                         "sel" => (isset($_POST['position']) && $_POST['position'] == $posid ? 'selected="selected"' : '')));
             }
 
@@ -73,10 +73,10 @@ switch ($do) {
                 $_POST['url'] = links($_POST['url']);
 
             $sql->insert("INSERT INTO `{prefix_slideshow}` SET `pos` = ".intval($_POST['position']).",
-                                                       `bez` = '".up($_POST['bez'])."',
+                                                       `bez` = '".stringParser::encode($_POST['bez'])."',
                                                        `showbez` = ".intval($_POST['showbez']).",
-                                                       `desc` = '".up($_POST['desc'])."',
-                                                       `url`  = '".up($_POST['url'])."',
+                                                       `desc` = '".stringParser::encode($_POST['desc'])."',
+                                                       `url`  = '".stringParser::encode($_POST['url'])."',
                                                        `target` = ".intval($_POST['target'])."");
 
 
@@ -112,16 +112,16 @@ switch ($do) {
             }
         }
 
-        $show = show($dir."/slideshow_form", array("id" => re($get['id']),
+        $show = show($dir."/slideshow_form", array("id" => stringParser::decode($get['id']),
                                                    "error" => "",
                                                    "do" => "editdo",
                                                    "head" => _slider_admin_edit,
                                                    "value" => _button_value_edit,
-                                                   "tdesc" => re($get['desc']),
-                                                   "v_bezeichnung" => re($get['bez']),
+                                                   "tdesc" => stringParser::decode($get['desc']),
+                                                   "v_bezeichnung" => stringParser::decode($get['bez']),
                                                    "v_pos_none" => _slider_position_lazy,
                                                    "v_position" => $positions,
-                                                   "v_url" => re($get['url']),
+                                                   "v_url" => stringParser::decode($get['url']),
                                                    "selected" => $selected,
                                                    "selected_txt" => $selected_txt,
                                                    "v_pic" => img_size($image)."<br />"));
@@ -145,7 +145,7 @@ switch ($do) {
                 }
             }
 
-            $show = show($dir."/slideshow_form", array("id" => re($_POST['id']),
+            $show = show($dir."/slideshow_form", array("id" => stringParser::decode($_POST['id']),
                                                        "error" => $error,
                                                        "do" => "editdo",
                                                        "head" => _slider_admin_edit,
@@ -170,10 +170,10 @@ switch ($do) {
                 $_POST['url'] = links($_POST['url']);
 
             $sql->update("UPDATE `{prefix_slideshow}` SET".$pos."
-                      `bez` = '".up($_POST['bez'])."',
+                      `bez` = '".stringParser::encode($_POST['bez'])."',
                       `showbez` = ".intval($_POST['showbez']).",
-                      `url` = '".up($_POST['url'])."',
-                      `desc` = '".up($_POST['desc'])."',
+                      `url` = '".stringParser::encode($_POST['url'])."',
+                      `desc` = '".stringParser::encode($_POST['desc'])."',
                       `target` = ".intval($_POST['target'])."
                 WHERE `id` = ".intval($_POST['id']));
 

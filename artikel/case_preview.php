@@ -9,19 +9,19 @@ if(defined('_Artikel')) {
     $links1 = ""; $links2 = ""; $links3 = ""; $links = "";
     if($_POST['url1']) {
         $rel = _related_links;
-        $links1 = show(_artikel_link, array("link" => re($_POST['link1']),
+        $links1 = show(_artikel_link, array("link" => stringParser::decode($_POST['link1']),
                                             "url" => links($_POST['url1'])));
     }
     
     if($_POST['url2']) {
         $rel = _related_links;
-        $links2 = show(_artikel_link, array("link" => re($_POST['link2']),
+        $links2 = show(_artikel_link, array("link" => stringParser::decode($_POST['link2']),
                                             "url" => links($_POST['url2'])));
     }
     
     if($_POST['url3']) {
         $rel = _related_links;
-        $links3 = show(_artikel_link, array("link" => re($_POST['link3']),
+        $links3 = show(_artikel_link, array("link" => stringParser::decode($_POST['link3']),
                                             "url" => links($_POST['url3'])));
     }
 
@@ -32,7 +32,7 @@ if(defined('_Artikel')) {
                                             "rel" => $rel));
     }
 
-    $artikelimage = '../inc/images/newskat/'.re($getkat['katimg']);
+    $artikelimage = '../inc/images/newskat/'.stringParser::decode($getkat['katimg']);
     foreach($picformat as $tmpendung) {
         if(file_exists(basePath."/inc/images/uploads/artikel/".$get['id'].".".$tmpendung)) {
             $artikelimage = '../inc/images/uploads/artikel/'.$get['id'].'.'.$tmpendung;
@@ -48,7 +48,7 @@ if(defined('_Artikel')) {
                                            "notification_page" => "",
                                            "showmore" => $showmore,
                                            "icq" => "",
-                                           "text" => bbcode($_POST['artikel'],true),
+                                           "text" => bbcode::parse_html($_POST['artikel'],true),
                                            "datum" => date("j.m.y H:i")._uhr,
                                            "links" => $links,
                                            "autor" => autor($userid)));

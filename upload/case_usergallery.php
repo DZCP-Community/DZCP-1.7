@@ -27,7 +27,7 @@ if(defined('_Upload')) {
                                 . "SET `user` = ?, "
                                 . "`beschreibung` = ?, "
                                 . "`pic`          = ?;",
-                                array(intval($userid),up($_POST['beschreibung']),up(strtolower($_FILES['file']['name']))));
+                                array(intval($userid),stringParser::encode($_POST['beschreibung']),stringParser::encode(strtolower($_FILES['file']['name']))));
 
                         $index = info(_info_upload_success, "../user/?action=editprofile&show=gallery");
                     } else
@@ -40,7 +40,7 @@ if(defined('_Upload')) {
                     $infos = show(_upload_usergallery_info, array("userpicsize" => settings::get('upicsize')));
                     $index = show($dir."/usergallery_edit", array("showpic" => img_size("inc/images/uploads/usergallery/".$get['user']."_".$get['pic']),
                                                                   "id" => $get['id'],
-                                                                  "showbeschreibung" => re($get['beschreibung']),
+                                                                  "showbeschreibung" => stringParser::decode($get['beschreibung']),
                                                                   "name" => "file",
                                                                   "infos" => $infos));
                 }
@@ -69,12 +69,12 @@ if(defined('_Upload')) {
                     
                     if(empty($index)) {
                         $pic = "`pic` = ?, ";
-                        $params = array(up($_FILES['file']['name']));
+                        $params = array(stringParser::encode($_FILES['file']['name']));
                     }
                 }
 
                 if(empty($index)) {
-                    $params = array_merge($params,array(up($_POST['beschreibung']),intval($_POST['id']),intval($userid)));
+                    $params = array_merge($params,array(stringParser::encode($_POST['beschreibung']),intval($_POST['id']),intval($userid)));
                     $sql->update("UPDATE `{prefix_usergallery}` SET ".$pic."`beschreibung` = ? WHERE `id` = ? AND `user` = ?;",$params);
                     $index = info(_edit_gallery_done, "../user/?action=editprofile&show=gallery");
                 }

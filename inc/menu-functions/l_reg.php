@@ -15,7 +15,7 @@ function l_reg() {
     $lreg = '';
     if($sql->rowCount()) {
         foreach($qry as $get) {
-            $lreg .= show("menu/last_reg", array("nick" => cut(re($get['nick']), settings::get('l_lreg')),
+            $lreg .= show("menu/last_reg", array("nick" => cut(stringParser::decode($get['nick']), settings::get('l_lreg')),
                                                  "country" => flag($get['country']),
                                                  "reg" => date("d.m.", $get['regdatum']),
                                                  "id" => $get['id']));

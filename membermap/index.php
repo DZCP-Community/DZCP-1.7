@@ -36,7 +36,7 @@ foreach($mm_qry as $mm_get) {
             $mm_infos .= "</tr>','<tr>";
         }
 
-        $mm_infos .= '<td><b style="font-size:13px">&nbsp;'.re($mm_get['city']).'</td></tr><tr>';
+        $mm_infos .= '<td><b style="font-size:13px">&nbsp;'.stringParser::decode($mm_get['city']).'</td></tr><tr>';
         $mm_coords .= 'new google.maps.LatLng' . $mm_get['gmaps_koord'];
         $realCount++;
     } else {
@@ -65,7 +65,7 @@ foreach($mm_qry as $mm_user_get) {
                                                     'userListPic' => userpic($mm_user_get['id'],40,50),
                                                     'userListName' => autor($mm_user_get['id']),
                                                     'userListRank' => getrank($mm_user_get['id']),
-                                                    'userListCity' => re($mm_user_get['city']),
+                                                    'userListCity' => stringParser::decode($mm_user_get['city']),
                                                     'class' => $class));
 }
 

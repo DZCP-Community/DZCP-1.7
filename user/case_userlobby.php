@@ -63,7 +63,7 @@ if(defined('_UserMenu')) {
                                 $can_erase = true;
                                 $forumposts_show .= "&nbsp;&nbsp;" . $date . show(_user_new_forum, array("cnt" => $cnt,
                                                     "tid" => $gettopic['id'],
-                                                    "thread" => re($gettopic['topic']),
+                                                    "thread" => stringParser::decode($gettopic['topic']),
                                                     "intern" => $intern,
                                                     "wichtig" => $wichtig,
                                                     "post" => $post,
@@ -104,7 +104,7 @@ if(defined('_UserMenu')) {
                     $cws .= show(_user_new_cw, array("datum" => date("d.m. H:i", $getcw['datum']) . _uhr,
                                                      "id" => $getcw['id'],
                                                      "icon" => $getcw['icon'],
-                                                     "gegner" => re($getcw['clantag'])));
+                                                     "gegner" => stringParser::decode($getcw['clantag'])));
                 }
             }
         }
@@ -225,7 +225,7 @@ if(defined('_UserMenu')) {
                         $can_erase = true;
                         $newsc .= show(_user_new_newsc, array("cnt" => $cnt,
                                                               "id" => $getnewsc['news'],
-                                                              "news" => re($getcheckn['titel']),
+                                                              "news" => stringParser::decode($getcheckn['titel']),
                                                               "eintrag" => $eintrag));
                     }
                 }
@@ -478,7 +478,7 @@ if(defined('_UserMenu')) {
                                              . "ORDER BY `date` DESC LIMIT 1;",
                             array($getft['kid'],$getft['id']));
 
-                    $text = strip_tags(!empty($getp) ? re($getp['text']) : re($getft['t_text']));
+                    $text = strip_tags(!empty($getp) ? stringParser::decode($getp['text']) : stringParser::decode($getft['t_text']));
                     $intern = $getft['intern'] != 1 ? "" : '<span class="fontWichtig">' . _internal . ':</span>';
                     $wichtig = $getft['sticky'] != 1 ? '' : '<span class="fontWichtig">' . _sticky . ':</span> ';
                     $ftopics .= show($dir . "/userlobby_forum", array("id" => $getft['id'],
@@ -487,8 +487,8 @@ if(defined('_UserMenu')) {
                                                                       "intern" => $intern,
                                                                       "wichtig" => $wichtig,
                                                                       "lpost" => cut($text, 100),
-                                                                      "kat" => re($getft['kattopic']),
-                                                                      "titel" => re($getft['topic']),
+                                                                      "kat" => stringParser::decode($getft['kattopic']),
+                                                                      "titel" => stringParser::decode($getft['topic']),
                                                                       "kid" => $getft['kid']));
                 }
             }

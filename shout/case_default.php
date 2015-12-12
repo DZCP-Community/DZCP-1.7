@@ -23,7 +23,7 @@ if(!ipcheck("shout", settings::get('f_shout'))) {
     else {
         $reg = !$userid ? $_POST['email'] : $userid;
         $sql->insert("INSERT INTO `{prefix_shoutbox}` SET `datum` = ?,`nick` = ?,`email` = ?,`text` = ?,`ip` = ?;",
-            array(time(),up($_POST['name']),up($reg),up(substr(str_replace("\n", ' ', $_POST['eintrag']),0,settings::get('shout_max_zeichen'))),$userip));
+            array(time(),stringParser::encode($_POST['name']),stringParser::encode($reg),stringParser::encode(substr(str_replace("\n", ' ', $_POST['eintrag']),0,settings::get('shout_max_zeichen'))),$userip));
 
         setIpcheck("shout");
         

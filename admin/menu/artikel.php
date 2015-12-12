@@ -11,7 +11,7 @@ switch($do) {
     case 'add':
         $qryk = $sql->select("SELECT `id`,`kategorie` FROM `{prefix_newskat}`;"); $kat = '';
         foreach($qryk as $getk) {
-            $kat .= show(_select_field, array("value" => $getk['id'],"sel" => "","what" => re($getk['kategorie'])));
+            $kat .= show(_select_field, array("value" => $getk['id'],"sel" => "","what" => stringParser::decode($getk['kategorie'])));
         }
 
         $show = show($dir."/artikel_form", array("head" => _artikel_add,
@@ -42,7 +42,7 @@ switch($do) {
                 $sel = ($_POST['kat'] == $getk['id'] ? 'selected="selected"' : '');
                 $kat .= show(_select_field, array("value" => $getk['id'],
                                                   "sel" => $sel,
-                                                  "what" => re($getk['kategorie'])));
+                                                  "what" => stringParser::decode($getk['kategorie'])));
             }
 
             $error = show("errors/errortable", array("error" => $error));
@@ -50,11 +50,11 @@ switch($do) {
                                                      "autor" => autor($userid),
                                                      "kat" => $kat,
                                                      "do" => "insert",
-                                                     "titel" => re($_POST['titel']),
-                                                     "artikeltext" => re($_POST['artikel']),
-                                                     "link1" => re($_POST['link1']),
-                                                     "link2" => re($_POST['link2']),
-                                                     "link3" => re($_POST['link3']),
+                                                     "titel" => stringParser::decode($_POST['titel']),
+                                                     "artikeltext" => stringParser::decode($_POST['artikel']),
+                                                     "link1" => stringParser::decode($_POST['link1']),
+                                                     "link2" => stringParser::decode($_POST['link2']),
+                                                     "link3" => stringParser::decode($_POST['link3']),
                                                      "url1" => $_POST['url1'],
                                                      "url2" => $_POST['url2'],
                                                      "url3" => $_POST['url3'],
@@ -66,8 +66,9 @@ switch($do) {
             if(isset($_POST)) {
                 $sql->insert("INSERT INTO `{prefix_artikel}` SET `autor` = ?, `kat` = ?, `titel` = ?, `text` = ?, "
                             ."`link1`  = ?, `link2`  = ?, `link3`  = ?, `url1`   = ?, `url2`   = ?, `url3`   = ?;",
-                array(intval($userid),intval($_POST['kat']),up($_POST['titel']),up($_POST['artikel']),up($_POST['link1']),
-                        up($_POST['link2']),up($_POST['link3']),up(links($_POST['url1'])),up(links($_POST['url2'])),up(links($_POST['url3']))));
+                array(intval($userid),intval($_POST['kat']),stringParser::encode($_POST['titel']),stringParser::encode($_POST['artikel']),stringParser::encode($_POST['link1']),
+                        stringParser::encode($_POST['link2']),stringParser::encode($_POST['link3']),stringParser::encode(links($_POST['url1'])),stringParser::encode(links($_POST['url2'])),
+                    stringParser::encode(links($_POST['url3']))));
 
                 if(isset($_FILES['artikelpic']['tmp_name']) && !empty($_FILES['artikelpic']['tmp_name'])) {
                     $endung = explode(".", $_FILES['artikelpic']['name']);
@@ -84,7 +85,7 @@ switch($do) {
         $qryk = $sql->select("SELECT `id`,`kategorie` FROM `{prefix_newskat}`;"); $kat = '';
         foreach($qryk as $getk) {
             $sel = ($get['kat'] == $getk['id'] ? 'selected="selected"' : '');
-            $kat .= show(_select_field, array("value" => $getk['id'], "sel" => $sel, "what" => re($getk['kategorie'])));
+            $kat .= show(_select_field, array("value" => $getk['id'], "sel" => $sel, "what" => stringParser::decode($getk['kategorie'])));
         }
 
         $artikelimage = ""; $delartikelpic = "";
@@ -104,14 +105,14 @@ switch($do) {
                                                  "kat" => $kat,
                                                  "do" => $do,
                                                  "ntitel" => _titel,
-                                                 "titel" => re($get['titel']),
-                                                 "artikeltext" => re($get['text']),
-                                                 "link1" => re($get['link1']),
-                                                 "link2" => re($get['link2']),
-                                                 "link3" => re($get['link3']),
-                                                 "url1" => re($get['url1']),
-                                                 "url2" => re($get['url2']),
-                                                 "url3" => re($get['url3']),
+                                                 "titel" => stringParser::decode($get['titel']),
+                                                 "artikeltext" => stringParser::decode($get['text']),
+                                                 "link1" => stringParser::decode($get['link1']),
+                                                 "link2" => stringParser::decode($get['link2']),
+                                                 "link3" => stringParser::decode($get['link3']),
+                                                 "url1" => stringParser::decode($get['url1']),
+                                                 "url2" => stringParser::decode($get['url2']),
+                                                 "url3" => stringParser::decode($get['url3']),
                                                  "ntext" => _eintrag,
                                                  "error" => "",
                                                  "button" => _button_value_edit,
@@ -125,9 +126,9 @@ switch($do) {
         if(isset($_POST)) {
             $sql->update("UPDATE `{prefix_artikel}` SET `kat` = ?, `titel` = ?, `text` = ?, `link1` = ?, "
             . "`link2` = ?, `link3` = ?, `url1` = ?, `url2` = ?, `url3` = ? WHERE `id` = ?;",
-            array(intval($_POST['kat']),up($_POST['titel']),up($_POST['artikel']),up($_POST['link1']),
-                up($_POST['link2']),up($_POST['link3']),up(links($_POST['url1'])),
-                up(links($_POST['url2'])),up(links($_POST['url3'])),intval($_GET['id'])));
+            array(intval($_POST['kat']),stringParser::encode($_POST['titel']),stringParser::encode($_POST['artikel']),stringParser::encode($_POST['link1']),
+                stringParser::encode($_POST['link2']),stringParser::encode($_POST['link3']),stringParser::encode(links($_POST['url1'])),
+                stringParser::encode(links($_POST['url2'])),stringParser::encode(links($_POST['url3'])),intval($_GET['id'])));
 
             if(isset($_FILES['artikelpic']['tmp_name']) && !empty($_FILES['artikelpic']['tmp_name'])) {
                 foreach($picformat as $tmpendung) {
@@ -220,7 +221,7 @@ switch($do) {
                                                               "title" => _button_title_del,
                                                               "del" => convSpace(_confirm_del_artikel)));
 
-            $titel = show(_artikel_show_link, array("titel" => cut(re($get['titel']),settings::get('l_newsadmin')), "id" => $get['id']));
+            $titel = show(_artikel_show_link, array("titel" => cut(stringParser::decode($get['titel']),settings::get('l_newsadmin')), "id" => $get['id']));
             $public = ($get['public'] ? '<a href="?admin=artikel&amp;do=public&amp;id='.$get['id'].'&amp;what=unset"><img src="../inc/images/public.gif" alt="" title="'._non_public.'" /></a>'
                     : '<a href="?admin=artikel&amp;do=public&amp;id='.$get['id'].'&amp;what=set"><img src="../inc/images/nonpublic.gif" alt="" title="'._public.'" /></a>');
 

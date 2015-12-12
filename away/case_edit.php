@@ -22,8 +22,8 @@ if(defined('_Away')) {
                                                "error" => "",
                                                "date1" => $date1,
                                                "date2" => $date2,
-                                               "titel" => re($get['titel']),
-                                               "text" => re($get['reason']),
+                                               "titel" => stringParser::decode($get['titel']),
+                                               "text" => stringParser::decode($get['reason']),
                                                "submit" => _button_value_edit));
 
         $abdata = mktime(0,0,0,$_POST['m'],$_POST['t'],$_POST['j']);
@@ -62,7 +62,7 @@ if(defined('_Away')) {
                 $time = mktime(23,59,59,$_POST['monat'],$_POST['tag'],$_POST['jahr']);
                 $editedby = show(_edited_by, array("autor" => autor($userid),"time" => date("d.m.Y H:i", time())._uhr));
                 $sql->update("UPDATE `{prefix_away}` SET `start`= ?,`end`= ?,`titel`= ?,`reason`= ?,`lastedit`= ? WHERE `id` = ?;",
-                    array(intval($abdata),intval($time),up($_POST['titel']),up($_POST['reason']),up($editedby),intval($_GET['id'])));
+                    array(intval($abdata),intval($time),stringParser::encode($_POST['titel']),stringParser::encode($_POST['reason']),stringParser::encode($editedby),intval($_GET['id'])));
 
                 $index = info(_away_successful_edit, "../away/");
             }

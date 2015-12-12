@@ -28,7 +28,7 @@ if(_adminMenu != 'true') exit;
           $show = error(_profil_no_type,1);
         } else {
           $sql->insert("INSERT INTO `{prefix_profile}`
-                     SET `name` = '".up($_POST['name'])."',
+                     SET `name` = '".stringParser::encode($_POST['name'])."',
                                    `type` = '".intval($_POST['type'])."',
                          `kid`  = '".intval($_POST['kat'])."'");
               $insID = $sql->lastInsertId();
@@ -55,7 +55,7 @@ if(_adminMenu != 'true') exit;
           $type = str_replace("<option value='".$get['type']."'>", "<option selected=\"selected\" value='".$get['type']."'>", _profile_type_dropdown);
 
         $show = show($dir."/form_profil_edit", array("name" => _profile_name,
-                                                                             "p_name" => re($get['name']),
+                                                                             "p_name" => stringParser::decode($get['name']),
                                                                              "kat" => _profile_kat,
                                                                              "type" => _profile_type,
                                                                              "id" => $_GET['id'],
@@ -71,7 +71,7 @@ if(_adminMenu != 'true') exit;
           $show = error(_profil_no_name,1);
         } else {
               $sql->update("UPDATE `{prefix_profile}`
-                     SET `name`  = '".up($_POST['name'])."',
+                     SET `name`  = '".stringParser::encode($_POST['name'])."',
                                    `kid`   = '".intval($_POST['kat'])."',
                                    `type`  = '".intval($_POST['type'])."',
                                    `shown` = '".intval($_POST['shown'])."'
@@ -113,7 +113,7 @@ if(_adminMenu != 'true') exit;
                                                             "title" => _button_title_del,
                                                             "del" => convSpace(_confirm_del_profil)));
           $show_about .= show($dir."/profil_show", array("class" => $class,
-                                                         "name" => re($get['name']),
+                                                         "name" => stringParser::decode($get['name']),
                                                                                "type" => $type,
                                                                                    "shown" => $shown,
                                                          "edit" => $edit,
@@ -141,7 +141,7 @@ if(_adminMenu != 'true') exit;
                                                             "title" => _button_title_del,
                                                             "del" => convSpace(_confirm_del_profil)));
           $show_clan .= show($dir."/profil_show", array("class" => $class,
-                                                        "name" => re($get['name']),
+                                                        "name" => stringParser::decode($get['name']),
                                                                               "type" => $type,
                                                                                   "shown" => $shown,
                                                         "edit" => $edit,
@@ -168,7 +168,7 @@ if(_adminMenu != 'true') exit;
                                                             "title" => _button_title_del,
                                                             "del" => convSpace(_confirm_del_profil)));
           $show_contact .= show($dir."/profil_show", array("class" => $class,
-                                                           "name" => re($get['name']),
+                                                           "name" => stringParser::decode($get['name']),
                                                                                  "type" => $type,
                                                                                        "shown" => $shown,
                                                            "edit" => $edit,
@@ -195,7 +195,7 @@ if(_adminMenu != 'true') exit;
                                                             "title" => _button_title_del,
                                                             "del" => convSpace(_confirm_del_profil)));
           $show_favos .= show($dir."/profil_show", array("class" => $class,
-                                                         "name" => re($get['name']),
+                                                         "name" => stringParser::decode($get['name']),
                                                                                "type" => $type,
                                                                                    "shown" => $shown,
                                                          "edit" => $edit,
@@ -222,7 +222,7 @@ if(_adminMenu != 'true') exit;
                                                             "title" => _button_title_del,
                                                             "del" => convSpace(_confirm_del_profil)));
           $show_hardware .= show($dir."/profil_show", array("class" => $class,
-                                                            "name" => re($get['name']),
+                                                            "name" => stringParser::decode($get['name']),
                                                                                   "type" => $type,
                                                                                         "shown" => $shown,
                                                             "edit" => $edit,

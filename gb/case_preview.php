@@ -60,7 +60,7 @@ if(isset($_GET['view']) ? ($_GET['view'] == 'comment' ? true : false) : false) {
 
     if($regCheck) {
         $gbtitel = show(_gb_titel_noreg, array("postid" => $get_id,
-                                               "nick" => re($get_nick),
+                                               "nick" => stringParser::decode($get_nick),
                                                "edit" => "",
                                                "delete" => "",
                                                "comment" => "",
@@ -85,9 +85,9 @@ if(isset($_GET['view']) ? ($_GET['view'] == 'comment' ? true : false) : false) {
 }
 
 if(isset($_GET['view']) ? ($_GET['view'] == 'comment' ? true : false) : false)
-    $index = str_replace("<br /><br />", "", show($dir."/commentlayout", array("nick" => $get_nick, "datum" => date("d.m.Y H:i", $get_date), "comment" => bbcode($_POST['eintrag']), "editby" => bbcode($editby,true), "edit" => '', "delete" => '')));
+    $index = str_replace("<br /><br />", "", show($dir."/commentlayout", array("nick" => $get_nick, "datum" => date("d.m.Y H:i", $get_date), "comment" => bbcode::parse_html($_POST['eintrag']), "editby" => bbcode($editby,true), "edit" => '', "delete" => '')));
 else
-    $index = show($dir."/gb_show", array("gbtitel" => $gbtitel, "nachricht" => bbcode($_POST['eintrag'],true), "editby" => bbcode($editby,true), "ip" => $posted_ip, "comments" => ''));
+    $index = show($dir."/gb_show", array("gbtitel" => $gbtitel, "nachricht" => bbcode::parse_html($_POST['eintrag'],true), "editby" => bbcode::parse_html($editby,true), "ip" => $posted_ip, "comments" => ''));
 
 update_user_status_preview();
 exit(utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>'));

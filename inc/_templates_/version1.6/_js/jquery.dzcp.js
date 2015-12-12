@@ -60,12 +60,14 @@ var DZCP = {
         if(dzcp_config.autoRefresh) {
             DZCP.initAutoRefresh();
         }
+		
+		DZCP.initCodeHighlighting();
 
         // init template
         $(".tabs").tabs("> .switchs");
         $(".tabs2").tabs(".switchs2 > div", { effect: 'fade', rotate: true });
     },
-    
+	
     // init Auto-Refresh
     initAutoRefresh: function() {
         if(!DZCP.jQueryCheck(false)) return false;
@@ -78,6 +80,16 @@ var DZCP = {
         }
     },
 
+    // init code highlighting
+    initCodeHighlighting: function() {
+        if(!DZCP.jQueryCheck(false)) return false;
+        DZCP.DebugLogger('Initiation Code Highlighting');
+		  $('pre code').each(function(i, block) {
+			hljs.configure({ tabReplace: '    '});
+			hljs.highlightBlock(block);
+		  });
+    },
+	
     // init lightbox
     initLightbox: function() {
         if(!DZCP.jQueryCheck(false)) return false;
@@ -160,7 +172,7 @@ var DZCP = {
     initDynLoader: function(tag,menu,options,fade) {
         if(!DZCP.jQueryCheck(false)) return false;
         DZCP.DebugLogger('DynLoader -> Tag: \'' + tag + '\' / URL: \'' + "../inc/ajax.php?i=" + menu + options + '\'');
-        var request = $.ajax({ url: "../inc/ajax.php?i=" + menu + options, type: "GET", data: {}, timeout: 8000, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
+        var request = $.ajax({ url: "../inc/ajax.php?i=" + menu + options, type: "GET", data: {}, timeout: 8000, cache:false, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
         request.done(function(msg) { if(fade) { $('#' + tag).html( msg ).hide().fadeIn("normal"); } else { $('#' + tag).html( msg ); } });
    },
     
@@ -169,7 +181,8 @@ var DZCP = {
         if(!DZCP.jQueryCheck(false)) return false;
         DZCP.DebugLogger('PageDynLoader -> Tag: \'' + tag + '\' / URL: \'' + url + '\'');
         var request = $.ajax({ url: url, type: "GET", data: {}, cache:true, dataType: "html", contentType: "application/x-www-form-urlencoded;" });
-        request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); DZCP.initLightbox();  });
+        request = DZCP.lzw_decode(request);
+        request.done(function(msg) { $('#' + tag).html( msg ).hide().fadeIn("normal"); DZCP.initLightbox(); });
     },
     
     // init Ajax DynCaptcha
@@ -476,7 +489,8 @@ var DZCP = {
 
       var url = prevURL;
       $.post(url, $('#' + form).serialize() + addpars, function(req) {
-        $('#previewDIV').html(req).hide().fadeIn("fast"); DZCP.resizeImages();
+		$('#previewDIV').html(req).hide().fadeIn("fast");
+		DZCP.resizeImages(); DZCP.initCodeHighlighting();
       });
     },
 
@@ -586,7 +600,33 @@ var DZCP = {
     
     BooleanToString: function(boolean) {
        return (boolean ? 'true' : 'false');
-    }
+    },
+    
+    lzw_decode: function(s) {
+        var dict = {};
+        var data = (s + "").split("");
+        var currChar = data[0];
+        var oldPhrase = currChar;
+        var out = [currChar];
+        var code = 256;
+        var phrase;
+        for (var i=1; i<data.length; i++) {
+            var currCode = data[i].charCodeAt(0);
+            if (currCode < 256) {
+                phrase = data[i];
+            }
+            else {
+               phrase = dict[currCode] ? dict[currCode] : (oldPhrase + currChar);
+            }
+            out.push(phrase);
+            currChar = phrase.charAt(0);
+            dict[code] = oldPhrase + currChar;
+            code++;
+            oldPhrase = phrase;
+        }
+        
+        return out.join("");
+    }    
 };
 
 // load global events

@@ -27,16 +27,16 @@ function top_match() {
             }
 
             if(settings::get('allowhover') == 1 || settings::get('allowhover') == 2)
-                $hover = 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['name'])).' vs. '.
-                    jsconvert(re($get['gegner'])).'\', \''._played_at.';'._cw_xonx.';'._result.';'._comments_head.'\', \''.
-                    date("d.m.Y H:i", $get['datum'])._uhr.';'.jsconvert(re($get['xonx'])).';'.
+                $hover = 'onmouseover="DZCP.showInfo(\''.jsconvert(stringParser::decode($get['name'])).' vs. '.
+                    jsconvert(stringParser::decode($get['gegner'])).'\', \''._played_at.';'._cw_xonx.';'._result.';'._comments_head.'\', \''.
+                    date("d.m.Y H:i", $get['datum'])._uhr.';'.jsconvert(stringParser::decode($get['xonx'])).';'.
                     cw_result_nopic_nocolor($get['punkte'],$get['gpunkte']).';'.
                     cnt('{prefix_cw_comments}', "WHERE `cw` = ?","id",array($get['id'])).'\')" onmouseout="DZCP.hideInfo()"';
 
             $topmatch .= show("menu/top_match", array("id" => $get['id'],
-                                                      "clantag" => cut(re($get['clantag']),settings::get('l_lwars')),
-                                                      "team" => cut(re($get['name']),settings::get('l_lwars')),
-                                                      "game" => substr(strtoupper(str_replace('.'.re($get['icon']), '', re($get['icon']))), 0, 5),
+                                                      "clantag" => cut(stringParser::decode($get['clantag']),settings::get('l_lwars')),
+                                                      "team" => cut(stringParser::decode($get['name']),settings::get('l_lwars')),
+                                                      "game" => substr(strtoupper(str_replace('.'.stringParser::decode($get['icon']), '', stringParser::decode($get['icon']))), 0, 5),
                                                       "id" => $get['id'],
                                                       "gegner" => $gegner,
                                                       "squad" => $squad,

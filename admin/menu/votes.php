@@ -55,7 +55,7 @@ switch ($where) {
           $show = show($dir."/form_vote", array("head" => _votes_admin_head,
                                                 "value" => _button_value_add,
                                                 "what" => "&amp;do=add",
-                                                "question1" => re($_POST['question']),
+                                                "question1" => stringParser::decode($_POST['question']),
                                                 "a1" => $_POST['a1'],
                                                 "closed" => "",
                                                 "br1" => "<!--",
@@ -77,7 +77,7 @@ switch ($where) {
         } else {
           $sql->insert("INSERT INTO `{prefix_votes}`
                      SET `datum`  = '".time()."',
-                         `titel`  = '".up($_POST['question'])."',
+                         `titel`  = '".stringParser::encode($_POST['question'])."',
                          `intern` = '".intval($_POST['intern'])."',
                          `von`    = '".intval($userid)."'");
 
@@ -86,68 +86,68 @@ switch ($where) {
           $sql->insert("INSERT INTO `{prefix_vote_results}`
                     SET `vid`   = '".intval($vid)."',
                         `what`  = 'a1',
-                        `sel`   = '".up($_POST['a1'])."'");
+                        `sel`   = '".stringParser::encode($_POST['a1'])."'");
 
           $sql->insert("INSERT INTO `{prefix_vote_results}`
                      SET `vid`  = '".intval($vid)."',
                          `what` = 'a2',
-                         `sel`  = '".up($_POST['a2'])."'");
+                         `sel`  = '".stringParser::encode($_POST['a2'])."'");
 
           if(!empty($_POST['a3']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a3',
-                           `sel`  = '".up($_POST['a3'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a3'])."'");
           }
           if(!empty($_POST['a4']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a4',
-                           `sel`  = '".up($_POST['a4'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a4'])."'");
           }
           if(!empty($_POST['a5']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a5',
-                           `sel`  = '".up($_POST['a5'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a5'])."'");
           }
           if(!empty($_POST['a6']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a6',
-                           `sel`  = '".up($_POST['a6'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a6'])."'");
           }
           if(!empty($_POST['a7']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a7',
-                           `sel`  = '".up($_POST['a7'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a7'])."'");
           }
           if(!empty($_POST['a8']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a8',
-                           `sel`  = '".up($_POST['a8'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a8'])."'");
           }
           if(!empty($_POST['a9']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a9',
-                           `sel`  = '".up($_POST['a9'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a9'])."'");
           }
           if(!empty($_POST['a10']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a10',
-                           `sel`  = '".up($_POST['a10'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a10'])."'");
           }
 
           $show = info(_vote_admin_successful, "?admin=votes");
@@ -172,7 +172,7 @@ switch ($where) {
                                               "value" => _button_value_edit,
                                               "br1" => "",
                                               "br2" => "",
-                                              "question1" => re($get['titel']),
+                                              "question1" => stringParser::decode($get['titel']),
                                               "a1" => voteanswer("a1",$_GET['id']),
                                               "a2" => voteanswer("a2",$_GET['id']),
                                               "a3" => voteanswer("a3",$_GET['id']),
@@ -194,18 +194,18 @@ switch ($where) {
         $get = $sql->fetch("SELECT * FROM `{prefix_vote_results}` WHERE vid = '".intval($_GET['id'])."'");
 
         $sql->update("UPDATE `{prefix_votes}`
-                   SET `titel`  = '".up($_POST['question'])."',
+                   SET `titel`  = '".stringParser::encode($_POST['question'])."',
                        `intern` = '".intval($_POST['intern'])."',
                        `closed` = '".intval($_POST['closed'])."'
                    WHERE id = '".intval($_GET['id'])."'");
 
         $sql->update("UPDATE `{prefix_vote_results}`
-                    SET `sel` = '".up($_POST['a1'])."'
+                    SET `sel` = '".stringParser::encode($_POST['a1'])."'
                     WHERE what = 'a1'
                     AND vid = '".intval($_GET['id'])."'");
 
         $sql->update("UPDATE `{prefix_vote_results}`
-                    SET `sel` = '".up($_POST['a2'])."'
+                    SET `sel` = '".stringParser::encode($_POST['a2'])."'
                     WHERE what = 'a2'
                     AND vid = '".intval($_GET['id'])."'");
 
@@ -216,14 +216,14 @@ switch ($where) {
             if(cnt("{prefix_vote_results}", " WHERE vid = '".intval($_GET['id'])."' AND what = 'a".$i."'") != 0)
             {
               $sql->update("UPDATE `{prefix_vote_results}`
-                         SET `sel` = '".up($_POST['a'.$i.''])."'
+                         SET `sel` = '".stringParser::encode($_POST['a'.$i.''])."'
                          WHERE what = 'a".$i."'
                          AND vid = '".intval($_GET['id'])."'");
             } else {
               $sql->insert("INSERT INTO `{prefix_vote_results}`
                          SET `vid` = '".$_GET['id']."',
                              `what` = 'a".$i."',
-                             `sel` = '".up($_POST['a'.$i.''])."'");
+                             `sel` = '".stringParser::encode($_POST['a'.$i.''])."'");
             }
           }
 
@@ -274,7 +274,7 @@ switch ($where) {
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
 
           $show_ .= show($dir."/votes_show", array("date" => date("d.m.Y",$get['datum']),
-                                                   "vote" => re($get['titel']),
+                                                   "vote" => stringParser::decode($get['titel']),
                                                    "class" => $class,
                                                    "edit" => $edit,
                                                    "icon" => $icon,

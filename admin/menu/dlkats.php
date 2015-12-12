@@ -13,7 +13,7 @@ switch ($do) {
                 array(intval($_GET['id'])));
         $show = show($dir."/dlkats_form", array("newhead" => _dl_edit_head,
                                                 "do" => "editkat&amp;id=".$_GET['id']."",
-                                                "kat" => re($get['name']),
+                                                "kat" => stringParser::decode($get['name']),
                                                 "what" => _button_value_edit));
     break;
     case 'editkat':
@@ -21,7 +21,7 @@ switch ($do) {
             $show = error(_dl_empty_kat,1);
         } else {
             $sql->update("UPDATE `{prefix_download_kat}` SET `name` = ? WHERE `id` = ?;",
-                    array(up($_POST['kat']),intval($_GET['id'])));
+                    array(stringParser::encode($_POST['kat']),intval($_GET['id'])));
             $show = info(_dl_admin_edited, "?admin=dlkats");
         }
     break;
@@ -41,7 +41,7 @@ switch ($do) {
             $show = error(_dl_empty_kat,1);
         } else {
             $sql->insert("INSERT INTO `{prefix_download_kat}` SET `name` = ?;",
-                  array(up($_POST['kat'])));
+                  array(stringParser::encode($_POST['kat'])));
             $show = info(_dl_admin_added, "?admin=dlkats");
         }
     break;
@@ -59,7 +59,7 @@ switch ($do) {
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/dlkats_show", array("edit" => $edit,
-                                                     "name" => re($get['name']),
+                                                     "name" => stringParser::decode($get['name']),
                                                      "class" => $class,
                                                      "delete" => $delete));
         }

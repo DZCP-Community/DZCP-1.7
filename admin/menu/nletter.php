@@ -27,7 +27,7 @@ if(_adminMenu != 'true') exit;
 
               $squads .= show(_to_squads, array("id" => $get['id'],
                                                 "sel" => $selsq,
-                                                "name" => re($get['name'])));
+                                                "name" => stringParser::decode($get['name'])));
             }
 
         if($_POST['to'] == "reg") $selr = 'selected="selected"';
@@ -48,7 +48,7 @@ if(_adminMenu != 'true') exit;
                                                 "leader" => _msg_leader,
                                                 "squad" => _msg_global_squad,
                                                 "squads" => $squads,
-                                                "posteintrag" => re($_POST['eintrag']),
+                                                "posteintrag" => stringParser::decode($_POST['eintrag']),
                                                 "titel" => _nletter_head,
                                                 "nickhead" => _nick,
                                                 "bbcodehead" => _bbcode,
@@ -58,11 +58,11 @@ if(_adminMenu != 'true') exit;
         if($_POST['to'] == "reg")
         {
                   $message = show(bbcode_email(settings::get('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
-                  $subject = re(settings::get('eml_nletter_subj'));
+                  $subject =stringParser::decode(settings::get('eml_nletter_subj'));
 
           $qry = $sql->select("SELECT email FROM `{prefix_users}` WHERE nletter = 1");
           foreach($qry as $get) {
-            sendMail(re($get['email']),$subject,$message);
+            sendMail(stringParser::decode($get['email']),$subject,$message);
           }
 
               $sql->update("UPDATE `{prefix_userstats}`
@@ -73,11 +73,11 @@ if(_adminMenu != 'true') exit;
 
         } elseif($_POST['to'] == "member") {
           $message = show(bbcode_email(settings::get('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
-                  $subject = re(settings::get('eml_nletter_subj'));
+                  $subject =stringParser::decode(settings::get('eml_nletter_subj'));
 
           $qry = $sql->select("SELECT email FROM `{prefix_users}` WHERE level >= 2");
           foreach($qry as $get) {
-            sendMail(re($get['email']),$subject,$message);
+            sendMail(stringParser::decode($get['email']),$subject,$message);
           }
 
               $sql->update("UPDATE `{prefix_userstats}`
@@ -87,14 +87,14 @@ if(_adminMenu != 'true') exit;
               $show = info(_msg_member_answer_done, "?admin=nletter");
         } else {
           $message = show(bbcode_email(settings::get('eml_nletter')), array("text" => bbcode_nletter($_POST['eintrag'])));
-                  $subject = re(settings::get('eml_nletter_subj'));
+                  $subject =stringParser::decode(settings::get('eml_nletter_subj'));
 
           $qry = $sql->select("SELECT s2.email FROM `{prefix_squaduser}` AS s1
                      LEFT JOIN `{prefix_users}` AS s2
                      ON s1.user = s2.id
                      WHERE s1.squad = '".$_POST['to']."'");
           foreach($qry as $get) {
-            sendMail(re($get['email']),$subject,$message);
+            sendMail(stringParser::decode($get['email']),$subject,$message);
           }
 
               $sql->update("UPDATE `{prefix_userstats}`
@@ -109,7 +109,7 @@ if(_adminMenu != 'true') exit;
           foreach($qry as $get) {
               $squads .= show(_to_squads, array("id" => $get['id'],
                                                 "sel" => "",
-                                                "name" => re($get['name'])));
+                                                "name" => stringParser::decode($get['name'])));
           }
 
           $show = show($dir."/nletter", array("von" => $userid,

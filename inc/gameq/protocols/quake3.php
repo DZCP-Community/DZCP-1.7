@@ -302,7 +302,7 @@ class GameQ_Protocols_Quake3 extends GameQ_Protocols
         $result->add('game_mod_name_long', $this->is_mod ? $this->name_long : $mod_name_long);
         $result->add('game_mod_name_short', $this->is_mod ? $this->name_short : $mod_name_short);
         $result->add('game_hostname',htmlentities($this->server_data_stream['sv_hostname'], ENT_QUOTES, "UTF-8"));
-        $result->add('game_map', re($this->server_data_stream['mapname']));
+        $result->add('game_map', stringParser::decode($this->server_data_stream['mapname']));
         $result->add('game_map_pic_dir', 'quake3/'.($this->is_mod || $is_mod_ml ? $this->server_data_stream['gamename'] : $this->basic_game_dir) );
         $result->add('game_type', $no_gametype ? '' : strtoupper($this->server_data_stream['g_gametype']));
         $result->add('game_dir', !$this->is_mod && !$is_mod_ml ? $this->server_data_stream['gamename'] : $this->basic_game_dir);

@@ -39,8 +39,8 @@ if($do == 'addgb') {
         }
     } else {
         $sql->insert("INSERT INTO `{prefix_gb}` SET `datum` = ?, `editby` = '', `public` = 0, `nick` = ?, `email` = ?, `hp` = ?, `reg` = ?, `nachricht` = ?, `ip` = ?;",
-                array(time(),(isset($_POST['nick']) ? up($_POST['nick']) : ''),(isset($_POST['email']) ? up($_POST['email']) : ''),
-                (isset($_POST['hp']) ? up($_POST['hp']) : ''),userid(),up($_POST['eintrag']),visitorIp()));
+                array(time(),(isset($_POST['nick']) ? stringParser::encode($_POST['nick']) : ''),(isset($_POST['email']) ? stringParser::encode($_POST['email']) : ''),
+                (isset($_POST['hp']) ? stringParser::encode($_POST['hp']) : ''),userid(),stringParser::encode($_POST['eintrag']),visitorIp()));
 
         setIpcheck("gb");
         $index = info(_gb_entry_successful, "../gb/");
@@ -53,8 +53,8 @@ if(empty($index)) {
     $entrys = cnt("{prefix_gb}"); $i = $entrys-($page - 1)*settings::get('m_gb');
     if($sql->rowCount()) { $show = '';
         foreach($qry as $get) {
-            $gbhp = !empty($get['hp']) ? show(_hpicon, array("hp" => links(re($get['hp'])))) : "";
-            $gbemail = !empty($get['email']) ? CryptMailto(re($get['email'])) : "";
+            $gbhp = !empty($get['hp']) ? show(_hpicon, array("hp" => links(stringParser::decode($get['hp'])))) : "";
+            $gbemail = !empty($get['email']) ? CryptMailto(stringParser::decode($get['email'])) : "";
             $delete = ""; $edit = ""; $comment = "";
             if((checkme() != 'unlogged' && $get['reg'] == userid()) || permission("gb")) {
                 $edit = show("page/button_edit_single", array("id" => $get['id'],
@@ -78,7 +78,7 @@ if(empty($index)) {
 
             if(!$get['reg']) {
                 $gbtitel = show(_gb_titel_noreg, array("postid" => $i,
-                                                       "nick" => re($get['nick']),
+                                                       "nick" => stringParser::decode($get['nick']),
                                                        "edit" => $edit,
                                                        "delete" => $delete,
                                                        "comment" => $comment,
@@ -117,11 +117,11 @@ if(empty($index)) {
                                                                           "del" => convSpace(_confirm_del_entry)));
                     }
 
-                    $nick = (!$getc['reg'] ? CryptMailto(re($getc['email']),_link_mailto,array('nick' => re($getc['nick']))) : autor($getc['reg']));
-                    $comments .= show($dir."/commentlayout", array("nick" => re($nick), 
-                                                                   "editby" => bbcode(re($getc['editby'])), 
+                    $nick = (!$getc['reg'] ? CryptMailto(stringParser::decode($getc['email']),_link_mailto,array('nick' => stringParser::decode($getc['nick']))) : autor($getc['reg']));
+                    $comments .= show($dir."/commentlayout", array("nick" => stringParser::decode($nick), 
+                                                                   "editby" => bbcode::parse_html($getc['editby']), 
                                                                    "datum" => date("d.m.Y H:i", $getc['datum'])._uhr, 
-                                                                   "comment" => bbcode(re($getc['comment'])), 
+                                                                   "comment" => bbcode::parse_html($getc['comment']), 
                                                                    "edit" => $edit, 
                                                                    "delete" => $delete));
                 }
@@ -129,9 +129,9 @@ if(empty($index)) {
 
             $posted_ip = ($chkMe == 4 || permission('ipban') ? $get['ip'] : _logged);
             $show .= show($dir."/gb_show", array("gbtitel" => $gbtitel, 
-                                                 "nachricht" => bbcode(re($get['nachricht'])), 
+                                                 "nachricht" => bbcode::parse_html($get['nachricht']), 
                                                  "comments" => $comments, 
-                                                 "editby" => bbcode(re($get['editby'])), 
+                                                 "editby" => bbcode::parse_html($get['editby']), 
                                                  "ip" => $posted_ip));
             $i--;
         }

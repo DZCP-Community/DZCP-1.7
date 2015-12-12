@@ -17,7 +17,7 @@ if($do == 'deletesingle') {
     $params = array();
     if(!empty($_GET['sip'])) {
         $search = "WHERE `ip` = ? AND `time` != 0 AND `what` NOT REGEXP 'vid_'";
-        array_push($params, up($_GET['sip']));
+        array_push($params, stringParser::encode($_GET['sip']));
         $swhat = $_GET['sip'];
     } else {
         $search = "WHERE `time` != 0 AND `what` NOT REGEXP 'vid_'";

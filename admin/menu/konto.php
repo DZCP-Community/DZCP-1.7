@@ -9,14 +9,14 @@ $where = $where.': '._config_clankasse_head;
 
 switch ($do) {
     case 'update':
-        if(settings::changed(($key='k_inhaber'),($var=up($_POST['inhaber'])))) settings::set($key,$var);
-        if(settings::changed(($key='k_nr'),($var=up($_POST['kontonr'])))) settings::set($key,$var);
-        if(settings::changed(($key='k_waehrung'),($var=up($_POST['waehrung'])))) settings::set($key,$var);
-        if(settings::changed(($key='k_bank'),($var=up($_POST['bank'])))) settings::set($key,$var);
-        if(settings::changed(($key='k_blz'),($var=up($_POST['blz'])))) settings::set($key,$var);
-        if(settings::changed(($key='k_vwz'),($var=up($_POST['vwz'])))) settings::set($key,$var);
-        if(settings::changed(($key='k_iban'),($var=up($_POST['iban'])))) settings::set($key,$var);
-        if(settings::changed(($key='k_bic'),($var=up($_POST['bic'])))) settings::set($key,$var);
+        if(settings::changed(($key='k_inhaber'),($var=stringParser::encode($_POST['inhaber'])))) settings::set($key,$var);
+        if(settings::changed(($key='k_nr'),($var=stringParser::encode($_POST['kontonr'])))) settings::set($key,$var);
+        if(settings::changed(($key='k_waehrung'),($var=stringParser::encode($_POST['waehrung'])))) settings::set($key,$var);
+        if(settings::changed(($key='k_bank'),($var=stringParser::encode($_POST['bank'])))) settings::set($key,$var);
+        if(settings::changed(($key='k_blz'),($var=stringParser::encode($_POST['blz'])))) settings::set($key,$var);
+        if(settings::changed(($key='k_vwz'),($var=stringParser::encode($_POST['vwz'])))) settings::set($key,$var);
+        if(settings::changed(($key='k_iban'),($var=stringParser::encode($_POST['iban'])))) settings::set($key,$var);
+        if(settings::changed(($key='k_bic'),($var=stringParser::encode($_POST['bic'])))) settings::set($key,$var);
         settings::load(true);
         $show = info(_config_set, "?admin=konto");
     break;
@@ -31,7 +31,7 @@ switch ($do) {
         if(empty($_POST['kat'])) {
             $show = error(_clankasse_empty_kat, 1);
         } else {
-            $sql->insert("INSERT INTO `{prefix_clankasse_kats}` SET `kat` = ?",array(up($_POST['kat'])));
+            $sql->insert("INSERT INTO `{prefix_clankasse_kats}` SET `kat` = ?",array(stringParser::encode($_POST['kat'])));
             $show = info(_clankasse_kat_added, "?admin=konto");
         }
     break;
@@ -39,7 +39,7 @@ switch ($do) {
         $get = $sql->fetch("SELECT `kat` FROM {prefix_clankasse_kats} WHERE `id` = ?;",array(intval($_GET['id'])));
         $show = show($dir."/form_clankasse", array("newhead" => _clankasse_edit_head,
                                                    "do" => "editkat&amp;id=".$_GET['id']."",
-                                                   "kat" => re($get['kat']),
+                                                   "kat" => stringParser::decode($get['kat']),
                                                    "top" => _config_c_clankasse,
                                                    "what" => _button_value_edit,
                                                    "dlkat" => _description));
@@ -48,7 +48,7 @@ switch ($do) {
         if(empty($_POST['kat'])) {
             $show = error(_clankasse_empty_kat, 1);
         } else {
-            $sql->update("UPDATE `{prefix_clankasse_kats}` SET `kat` = ? WHERE `id` = ?;",array(up($_POST['kat']),intval($_GET['id'])));
+            $sql->update("UPDATE `{prefix_clankasse_kats}` SET `kat` = ? WHERE `id` = ?;",array(stringParser::encode($_POST['kat']),intval($_GET['id'])));
             $show = info(_clankasse_kat_edited, "?admin=konto");
         }
     break;
@@ -58,10 +58,10 @@ switch ($do) {
     break;
     default:
         $get = settings::get_array(array('k_inhaber','k_nr','k_blz','k_bank','k_iban','k_bic','k_waehrung','k_vwz'));
-        $waehrung_list = str_replace("<option value=\"".re($get['k_waehrung'])."\">","<option value=\"".re($get['k_waehrung'])."\" selected=\"selected\">", _select_field_waehrung);
+        $waehrung_list = str_replace("<option value=\"".stringParser::decode($get['k_waehrung'])."\">","<option value=\"".stringParser::decode($get['k_waehrung'])."\" selected=\"selected\">", _select_field_waehrung);
         
         $konto_show = show($dir."/form_konto", array("kinhaber" => _clankasse_inhaber,
-                                                     "inhaber" => re($get['k_inhaber']),
+                                                     "inhaber" => stringParser::decode($get['k_inhaber']),
                                                      "kkontonr" => _clankasse_nr,
                                                      "kontonr" => intval($get['k_nr']),
                                                      "kblz" => _clankasse_blz,
@@ -70,10 +70,10 @@ switch ($do) {
                                                      "waehrung" => $waehrung_list,
                                                      "blz" => intval($get['k_blz']),
                                                      "kbank" => _clankasse_bank,
-                                                     "bank" => re($get['k_bank']),
-                                                     "vwz" => re($get['k_vwz']),
-                                                     "iban" => re($get['k_iban']),
-                                                     "bic" => re($get['k_bic'])));
+                                                     "bank" => stringParser::decode($get['k_bank']),
+                                                     "vwz" => stringParser::decode($get['k_vwz']),
+                                                     "iban" => stringParser::decode($get['k_iban']),
+                                                     "bic" => stringParser::decode($get['k_bic'])));
 
         $konto = show($dir."/form", array("head" => _config_konto_head,
                                           "what" => "konto",
@@ -93,7 +93,7 @@ switch ($do) {
                                                               "title" => _button_title_del,
                                                               "del" => convSpace(_confirm_del_entry)));
 
-            $show .= show($dir."/clankasse_show", array("name" => re($getk['kat']),
+            $show .= show($dir."/clankasse_show", array("name" => stringParser::decode($getk['kat']),
                                                          "class" => $class,
                                                          "edit" => $edit,
                                                          "delete" => $delete));

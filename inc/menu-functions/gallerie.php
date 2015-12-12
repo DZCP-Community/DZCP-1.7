@@ -16,10 +16,10 @@ function gallerie() {
         shuffle($files); $files = limited_array($files,1,4);
         foreach($files as $file) {
             if(!empty($file)) {
-                $info = 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['kat'])).'\', \''._gal_pics.'\', \''.$cnt.'\')" onmouseout="DZCP.hideInfo()"';
-                $gallery .= show("menu/gallerie", array("info" => '<p><b>'.jsconvert(re($get['kat'])).'</b></p><p>'._gal_pics.$cnt.'</p>',
+                $info = 'onmouseover="DZCP.showInfo(\''.jsconvert(stringParser::decode($get['kat'])).'\', \''._gal_pics.'\', \''.$cnt.'\')" onmouseout="DZCP.hideInfo()"';
+                $gallery .= show("menu/gallerie", array("info" => '<p><b>'.jsconvert(stringParser::decode($get['kat'])).'</b></p><p>'._gal_pics.$cnt.'</p>',
                                                        "image" => $file,
-                                                       "kat" => re($get['kat']),
+                                                       "kat" => stringParser::decode($get['kat']),
                                                        "info" => $info,
                                                        "id" => $get['id']));
             }

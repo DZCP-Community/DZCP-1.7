@@ -20,7 +20,7 @@ switch ($do) {
                 notification::add_error(_admin_startpage_no_url);
             else {
                 $sql->update("UPDATE `{prefix_startpage}` SET `name` = ?, `url` = ?, `level` = ? WHERE `id` = ?;",
-                        array(up($_POST['name']),up($_POST['url']),intval($_POST['level']),intval($_GET['id'])));
+                        array(stringParser::encode($_POST['name']),stringParser::encode($_POST['url']),intval($_POST['level']),intval($_GET['id'])));
                 
                 notification::add_success(_admin_startpage_editd, "?admin=startpage");
             }
@@ -42,8 +42,8 @@ switch ($do) {
             
             $show = show($dir."/startpage_form", array("head" => _admin_startpage_edit,
                                                         "do" => "edit&amp;id=".$_GET['id'],
-                                                        "name" => (isset($_POST['name']) && !empty($_POST['name']) ? $_POST['name'] : re($get['name'])),
-                                                        "url" => (isset($_POST['url']) ? $_POST['url'] : re($get['url'])),
+                                                        "name" => (isset($_POST['name']) && !empty($_POST['name']) ? $_POST['name'] : stringParser::decode($get['name'])),
+                                                        "url" => (isset($_POST['url']) ? $_POST['url'] : stringParser::decode($get['url'])),
                                                         "level" => $elevel,
                                                         "what" => _button_value_edit,
                                                         "error" => (!empty($error) ? show("errors/errortable", array("error" => $error)) : "")));
@@ -57,7 +57,7 @@ switch ($do) {
                 notification::add_error(_admin_startpage_no_url);
             else {
                 $sql->insert("INSERT INTO `{prefix_startpage}` SET `name` = ?, `url` = ?, `level` = ?;",
-                        array(up($_POST['name']),up($_POST['url']),intval($_POST['level'])));
+                        array(stringParser::encode($_POST['name']),stringParser::encode($_POST['url']),intval($_POST['level'])));
                 
                 notification::add_success(_admin_startpage_added, "?admin=startpage");
             }
@@ -83,7 +83,7 @@ switch ($do) {
             $edit = show("page/button_edit_single", array("id" => $get['id'], "action" => "admin=startpage&amp;do=edit", "title" => _button_title_edit));
             $delete = show("page/button_delete_single", array("id" => $get['id'], "action" => "admin=startpage&amp;do=delete", "title" => _button_title_del, "del" => _confirm_del_entry));
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-            $show .= show($dir."/startpage_show", array("edit" => $edit, "name" => re($get['name']), "url" => re($get['url']), "class" => $class, "delete" => $delete));
+            $show .= show($dir."/startpage_show", array("edit" => $edit, "name" => stringParser::decode($get['name']), "url" => stringParser::decode($get['url']), "class" => $class, "delete" => $delete));
         }
 
         if(empty($show))

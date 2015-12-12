@@ -49,8 +49,8 @@ if(defined('_Forum')) {
                 $threads = cnt('{prefix_forumthreads}', " WHERE `kid` = ?","id",array($gets['id']));
                 $posts = cnt('{prefix_forumposts}', " WHERE `kid` = ?","id",array($gets['id']));
                 $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-                $showt .= show($dir."/kats_show", array("topic" => re($gets['kattopic']),
-                                                        "subtopic" => re($gets['subtopic']),
+                $showt .= show($dir."/kats_show", array("topic" => stringParser::decode($gets['kattopic']),
+                                                        "subtopic" => stringParser::decode($gets['subtopic']),
                                                         "lpost" => $lpost,
                                                         "frompic" => "forum_read.gif",
                                                         "subforum" => "",
@@ -63,8 +63,8 @@ if(defined('_Forum')) {
             }
         } //end while
 
-        if($get['intern'] == 1) $katname =  show(_forum_katname_intern, array("katname" => re($get['name'])));
-        else $katname = re($get['name']);
+        if($get['intern'] == 1) $katname =  show(_forum_katname_intern, array("katname" => stringParser::decode($get['name'])));
+        else $katname = stringParser::decode($get['name']);
 
         if(!empty($showt)) {
             $show .= show($dir."/kats", array("katname" => $katname, "showt" => $showt));
@@ -118,7 +118,7 @@ if(defined('_Forum')) {
     /* Wer ist online */
     $qry = $sql->select('SELECT `position`,`color` FROM `{prefix_positions}`;'); $team_groups = '';
     foreach($qry as $get) {
-        $team_groups .= show(_forum_team_groups, array('color' => re($get['color']), 'group' => re($get['position'])));
+        $team_groups .= show(_forum_team_groups, array('color' => stringParser::decode($get['color']), 'group' => stringParser::decode($get['position'])));
     }
 
     $counter_users = online_reg('Forum'); $counter_gast = online_guests('Forum');

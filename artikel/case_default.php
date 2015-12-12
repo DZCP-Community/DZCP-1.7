@@ -13,14 +13,14 @@ if(defined('_Artikel')) {
     if($sql->rowCount()) {
         foreach($qry as $get) {
             $getk = $sql->fetch("SELECT `kategorie` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']));
-            $titel = '<a style="display:block" href="?action=show&amp;id='.$get['id'].'">'.re($get['titel']).'</a>';
+            $titel = '<a style="display:block" href="?action=show&amp;id='.$get['id'].'">'.stringParser::decode($get['titel']).'</a>';
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/artikel_show", array("titel" => $titel,
-                                                      "kat" => re($getk['kategorie']),
+                                                      "kat" => stringParser::decode($getk['kategorie']),
                                                       "id" => $get['id'],
                                                       "display" => "none",
                                                       "class" => $class,
-                                                      "text" => bbcode(re($get['text'])),
+                                                      "text" => bbcode::parse_html($get['text']),
                                                       "datum" => date("d.m.Y", $get['datum']),
                                                       "autor" => autor($get['autor'])));
         }

@@ -10,4 +10,4 @@ $get = $sql->fetch("SELECT `url`,`id` FROM `{prefix_links}` WHERE `id` = ?;",arr
 if(count_clicks('link',$get['id']))
     $sql->update("UPDATE `{prefix_links}` SET `hits` = (hits+1) WHERE `id` = ?;",array($get['id']));
 
-header("Location: ".re($get['url']));
+header("Location: ".stringParser::decode($get['url']));

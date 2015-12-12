@@ -31,7 +31,7 @@ switch ($do) {
                 $show = error(_linkus_empty_text, 1);
         } else {
             $sql->insert("INSERT INTO `{prefix_linkus}` SET `url` = ?, `text` = ?, `banner` = ?, `beschreibung` = ?;",
-            array(up(links($_POST['link'])),up($_POST['text']),up($_POST['banner']),up($_POST['beschreibung'])));
+            array(stringParser::encode(links($_POST['link'])),stringParser::encode($_POST['text']),stringParser::encode($_POST['banner']),stringParser::encode($_POST['beschreibung'])));
             
             $show = info(_linkus_added, "?admin=linkus");
         }
@@ -44,10 +44,10 @@ switch ($do) {
                                                 "art" => _linkus_art,
                                                 "text" => _linkus_admin_textlink,
                                                 "banner" => _linkus_admin_bannerlink,
-                                                "llink" => links(re($get['url'])),
-                                                "lbeschreibung" => re($get['beschreibung']),
+                                                "llink" => links(stringParser::decode($get['url'])),
+                                                "lbeschreibung" => stringParser::decode($get['beschreibung']),
                                                 "btext" => _linkus_text,
-                                                "ltext" => re($get['text']),
+                                                "ltext" => stringParser::decode($get['text']),
                                                 "what" => _button_value_edit,
                                                 "do" => "editlink&amp;id=".$_GET['id'].""));
     break;
@@ -61,7 +61,7 @@ switch ($do) {
               $show = error(_linkus_empty_text, 1);
         } else {
             $sql->update("UPDATE `{prefix_linkus}` SET `url` = ?, `text` = ?, `banner` = ?, `beschreibung` = ? WHERE `id` = ?;",
-                    array(up(links($_POST['link'])),up($_POST['text']),up($_POST['banner']),up($_POST['beschreibung']),intval($_GET['id'])));
+                    array(stringParser::encode(links($_POST['link'])),stringParser::encode($_POST['text']),stringParser::encode($_POST['banner']),stringParser::encode($_POST['beschreibung']),intval($_GET['id'])));
             $show = info(_linkus_edited, "?admin=linkus");
         }
     break;
@@ -75,7 +75,7 @@ switch ($do) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
 
             $banner = show(_linkus_bannerlink, array("id" => $get['id'],
-                                                     "banner" => re($get['text'])));
+                                                     "banner" => stringParser::decode($get['text'])));
 
             $edit = show("page/button_edit", array("id" => $get['id'],
                                                    "action" => "admin=linkus&amp;do=edit",
@@ -86,12 +86,12 @@ switch ($do) {
                                                        "title" => _button_title_del));
 
             $show .= show($dir."/linkus_show", array("class" => $class,
-                                                     "beschreibung" => re($get['beschreibung']),
+                                                     "beschreibung" => stringParser::decode($get['beschreibung']),
                                                      "edit" => $edit,
                                                      "delete" => $delete,
                                                      "cnt" => $cnt,
                                                      "banner" => $banner,
-                                                     "besch" => re($get['beschreibung']),
+                                                     "besch" => stringParser::decode($get['beschreibung']),
                                                      "url" => $get['url']));
             $cnt++;
         }

@@ -56,13 +56,13 @@ if(defined('_News')) {
     foreach($qry as $get) {
         $getk = $sql->fetch("SELECT `kategorie` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']));
         $comments = cnt('{prefix_newscomments}'," WHERE `news` = ".$get['id']);
-        $titel = show(_news_show_link, array("titel" => cut(re($get['titel']),settings::get('l_newsarchiv')), "id" => $get['id']));
+        $titel = show(_news_show_link, array("titel" => cut(stringParser::decode($get['titel']),settings::get('l_newsarchiv')), "id" => $get['id']));
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
         $show .= show($dir."/archiv_show", array("autor" => autor($get['autor']),
                                                  "date" => date("d.m.y", $get['datum']),
                                                  "titel" => $titel,
                                                  "class" => $class,
-                                                 "kat" => re($getk['kategorie']),
+                                                 "kat" => stringParser::decode($getk['kategorie']),
                                                  "comments" => $comments));
     }
 
@@ -112,7 +112,7 @@ if(defined('_News')) {
                                         "or" => _or,
                                         "kategorien" => $kategorien,
                                         "choose" => _news_kat_choose,
-                                        "search" => re($search),
+                                        "search" => stringParser::decode($search),
                                         "btn_search" => _button_value_search,
                                         "thisyear" => $ty,
                                         "kat" => _news_admin_kat,

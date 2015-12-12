@@ -94,7 +94,7 @@ class GameQ_Protocols_Ut extends GameQ_Protocols_Gamespy {
         $result->add('game_mod_name_long', '');
         $result->add('game_mod_name_short', '');
         $result->add('game_hostname',htmlentities($this->server_data_stream['hostname'], ENT_QUOTES, "UTF-8"));
-        $result->add('game_map', re($this->server_data_stream['mapname']));
+        $result->add('game_map', stringParser::decode($this->server_data_stream['mapname']));
         $result->add('game_map_pic_dir', $this->server_data_stream['gq_protocol'].'/unreal/ut');
         $result->add('game_type', $game_type);
         $result->add('game_dir', 'ut');

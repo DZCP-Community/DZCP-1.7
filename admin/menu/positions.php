@@ -12,7 +12,7 @@ switch ($do) {
         $qry = $sql->select("SELECT `pid`,`position` FROM `{prefix_positions}` ORDER BY pid DESC;"); $positions = '';
         foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => ($get['pid']+1),
-                                                    "what" => _nach.' '.re($get['position']),
+                                                    "what" => _nach.' '.stringParser::decode($get['position']),
                                                     "sel" => ""));
         }
 
@@ -20,8 +20,8 @@ switch ($do) {
         $get = $sql->fetch("SELECT `position`,`color` FROM `{prefix_positions}` WHERE `id` = ".$id.";");
         $show = show($dir."/form_pos", array("newhead" => _pos_edit_head,
                                              "do" => "editpos&amp;id=".$id."",
-                                             "kat" => re($get['position']),
-                                             "color" => re($get['color']),
+                                             "kat" => stringParser::decode($get['position']),
+                                             "color" => stringParser::decode($get['color']),
                                              "getpermissions" => getPermissions($id, 1),
                                              "getboardpermissions" => getBoardPermissions($id, 1),
                                              "positions" => $positions,
@@ -36,7 +36,7 @@ switch ($do) {
             $pid = ($_POST['pos'] == "lazy" ? "" : ",`pid` = ".$posid);
             $sign = ($_POST['pos'] == "1" || $_POST['pos'] == "2" ? ">= " : "> ");
             $sql->update("UPDATE `{prefix_positions}` SET `pid` = (pid+1) WHERE `pid` ".$sign." ".$posid.";");
-            $sql->update("UPDATE `{prefix_positions}` SET `position` = '".up($_POST['kat'])."' ".$pid.", `color` = '".up($_POST['color'])."' WHERE `id` = ".$id.";");
+            $sql->update("UPDATE `{prefix_positions}` SET `position` = '".stringParser::encode($_POST['kat'])."' ".$pid.", `color` = '".stringParser::encode($_POST['color'])."' WHERE `id` = ".$id.";");
 
             // Permissions Update
             if(empty($_POST['perm'])) {
@@ -93,7 +93,7 @@ switch ($do) {
         $qry = $sql->select("SELECT `pid`,`position` FROM `{prefix_positions}` ORDER BY pid DESC;"); $positions = '';
         foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => ($get['pid']+1),
-                                                    "what" => _nach.' '.re($get['position']),
+                                                    "what" => _nach.' '.stringParser::decode($get['position']),
                                                     "sel" => ""));
         }
 
@@ -115,7 +115,7 @@ switch ($do) {
         } else {
             $sign = ($_POST['pos'] == "1" || $_POST['pos'] == "2" ? ">= " : "> ");
             $sql->update("UPDATE `{prefix_positions}` SET `pid` = (pid+1) WHERE pid ".$sign." '".intval($_POST['pos'])."';");
-            $sql->insert("INSERT INTO `{prefix_positions}` SET `pid` = '".intval($_POST['pos'])."', `position` = '".up($_POST['kat'])."', `color` = '".up($_POST['color'])."';");
+            $sql->insert("INSERT INTO `{prefix_positions}` SET `pid` = '".intval($_POST['pos'])."', `position` = '".stringParser::encode($_POST['kat'])."', `color` = '".stringParser::encode($_POST['color'])."';");
             
             $posID = _insert_id();
             $qry = $sql->show("SHOW FIELDS FROM `{prefix_permissions}`;"); $sql_update = '';
@@ -160,7 +160,7 @@ switch ($do) {
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show_pos .= show($dir."/positions_show", array("edit" => $edit,
-                                                      "name" => re($get['position']),
+                                                      "name" => stringParser::decode($get['position']),
                                                       "class" => $class,
                                                       "delete" => $delete));
         }

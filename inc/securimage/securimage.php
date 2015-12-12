@@ -1198,7 +1198,7 @@ class Securimage {
                     . "`code_display` = ?, "
                     . "`namespace` = ?, "
                     . "`created` = ?;",
-        array(md5($id),up($this->code),up($this->code_display),up($this->namespace),time()));
+        array(md5($id),stringParser::encode($this->code),stringParser::encode($this->code_display),stringParser::encode($this->namespace),time()));
         if($sql->lastInsertId() >= 1) {
             return true;
         }
@@ -1215,18 +1215,18 @@ class Securimage {
      */
     protected function getCodeFromDatabase() {
         global $sql;
-        $params = array(md5(visitorIp()),up($this->namespace));
+        $params = array(md5(visitorIp()),stringParser::encode($this->namespace));
         if (Securimage::$_captchaId !== null) {
-            $params = array(md5(Securimage::$_captchaId),up($this->namespace));
+            $params = array(md5(Securimage::$_captchaId),stringParser::encode($this->namespace));
         }
 
         $row = $sql->fetch("SELECT `code`,`created`,`code_display` FROM `{prefix_captcha}` WHERE `id` = ? AND `namespace` = ?;",$params);
         if($sql->rowCount()) {
             if (!$this->isCodeExpired($row['created'])) {
                 if (Securimage::$_captchaId !== null) {
-                    return array('code' => re($row['code']), 'code_disp' => re($row['code_display'])); // return an array when using captchaId
+                    return array('code' => stringParser::decode($row['code']), 'code_disp' => stringParser::decode($row['code_display'])); // return an array when using captchaId
                 } else {
-                    return re($row['code']);
+                    return stringParser::decode($row['code']);
                 }
             }
         }
@@ -1254,7 +1254,7 @@ class Securimage {
     protected function clearCodeFromDatabase() {
         global $sql;
         $id = empty(Securimage::$_captchaId) ? visitorIp() : Securimage::$_captchaId;
-        $sql->delete("DELETE FROM `{prefix_captcha}` WHERE `id` = ? AND `namespace` = ?;",array(md5($id),up($this->namespace)));
+        $sql->delete("DELETE FROM `{prefix_captcha}` WHERE `id` = ? AND `namespace` = ?;",array(md5($id),stringParser::encode($this->namespace)));
         $qry = $sql->select("SELECT `id` FROM `{prefix_captcha}` WHERE `created` < ".(time()-(30*30)).";");
         foreach($qry as $get) {
             $sql->delete("DELETE FROM `{prefix_captcha}` WHERE `id` = ?;",array($get['id']));

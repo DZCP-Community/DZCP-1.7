@@ -33,8 +33,8 @@ if(defined('_UserMenu')) {
                     }
 
                     $index = show($dir."/msg_show", array("answermsg" => $answermsg,
-                                                          "titel" => re($get['titel']),
-                                                          "nachricht" => bbcode($get['nachricht']),
+                                                          "titel" => stringParser::decode($get['titel']),
+                                                          "nachricht" => bbcode::parse_html($get['nachricht']),
                                                           "answer" => $answer,
                                                           "sendnews" => $sendnews,
                                                           "delete" => $delete));
@@ -57,8 +57,8 @@ if(defined('_UserMenu')) {
                     $answermsg = show(_msg_sended_msg, array("nick" => autor($get['an'])));
                     $answer = _back;
                     $index = show($dir."/msg_show", array("answermsg" => $answermsg,
-                                                          "titel" => re($get['titel']),
-                                                          "nachricht" => bbcode($get['nachricht']),
+                                                          "titel" => stringParser::decode($get['titel']),
+                                                          "nachricht" => bbcode::parse_html($get['nachricht']),
                                                           "answer" => $answer,
                                                           "sendnews" => "",
                                                           "delete" => ""));
@@ -67,12 +67,12 @@ if(defined('_UserMenu')) {
             case 'answer':
                 $get = $sql->fetch("SELECT * FROM `{prefix_messages}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
                 if($get['von'] == $userid || $get['an'] == $userid) {
-                    $titel = (preg_match("#RE:#is",re($get['titel'])) ? re($get['titel']) : "RE: ".re($get['titel']));
+                    $titel = (preg_match("#RE:#is",stringParser::decode($get['titel'])) ? stringParser::decode($get['titel']) : "RE: ".stringParser::decode($get['titel']));
                     $index = show($dir."/answer", array("von" => $userid,
                                                         "an" => $get['von'],
                                                         "titel" => $titel,
                                                         "nick" => autor($get['von']),
-                                                        "zitat" => zitat(autor($get['von']),re($get['nachricht']))));
+                                                        "zitat" => bbcode::zitat(autor($get['von']),stringParser::decode($get['nachricht']))));
                 }
             break;
             case 'pn':
@@ -105,7 +105,7 @@ if(defined('_UserMenu')) {
                                . "`titel`      = ?,"
                                . "`nachricht`  = ?,"
                                . "`see`        = 1;",
-                    array($userid,intval($_POST['an']),up($_POST['titel']),up($_POST['eintrag'])));
+                    array($userid,intval($_POST['an']),stringParser::encode($_POST['titel']),stringParser::encode($_POST['eintrag'])));
                     $sql->update("UPDATE `{prefix_userstats}` SET `writtenmsg` = (writtenmsg+1) WHERE `user` = ?;",array($userid));
                     $index = info(_msg_answer_done, "?action=msg");
                 }
@@ -162,7 +162,7 @@ if(defined('_UserMenu')) {
                 foreach($qry as $get) {
                     $users .= show(_to_users, array("id" => $get['id'],
                                                     "selected" => "",
-                                                    "nick" => re($get['nick'])));
+                                                    "nick" => stringParser::decode($get['nick'])));
                 }
 
                 $qry = $sql->select("SELECT userbuddy.`buddy`,user.`nick` "
@@ -174,7 +174,7 @@ if(defined('_UserMenu')) {
                 foreach($qry as $get) {
                     $buddys .= show(_to_buddys, array("id" => $get['buddy'],
                                                       "selected" => "",
-                                                      "nick" => re($get['nick'])));
+                                                      "nick" => stringParser::decode($get['nick'])));
                 }
 
                 $index = show($dir."/new", array("von" => $userid,
@@ -208,7 +208,7 @@ if(defined('_UserMenu')) {
                     foreach($qry as $get) {
                         $selected = isset($_POST['users']) && $get['id'] == $_POST['users'] ? 'selected="selected"' : '';
                         $users .= show(_to_users, array("id" => $get['id'],
-                                                        "nick" => re($get['nick']),
+                                                        "nick" => stringParser::decode($get['nick']),
                                                         "selected" => $selected));
                     }
 
@@ -221,13 +221,13 @@ if(defined('_UserMenu')) {
                     foreach($qry as $get) {
                         $selected = isset($_POST['buddys']) && $get['buddy'] == $_POST['buddys'] ? 'selected="selected"' : '';
                         $buddys .= show(_to_buddys, array("id" => $get['buddy'],
-                                                          "nick" => re($get['nick']),
+                                                          "nick" => stringParser::decode($get['nick']),
                                                           "selected" => $selected));
                     }
 
                     $index = show($dir."/new", array("von" => $userid,
-                                                     "posttitel" => re($_POST['titel']),
-                                                     "posteintrag" => re($_POST['eintrag']),
+                                                     "posttitel" => stringParser::decode($_POST['titel']),
+                                                     "posteintrag" => stringParser::decode($_POST['eintrag']),
                                                      "postto" => $_POST['buddys']."".$_POST['users'],
                                                      "buddys" => $buddys,
                                                      "users" => $users,
@@ -240,7 +240,7 @@ if(defined('_UserMenu')) {
                                . "`an` = ?, "
                                . "`titel` = ?, "
                                . "`nachricht` = ?,"
-                               . "`see` = 1;",array($userid,$to,up($_POST['titel']),up($_POST['eintrag'])));
+                               . "`see` = 1;",array($userid,$to,stringParser::encode($_POST['titel']),stringParser::encode($_POST['eintrag'])));
 
                     $sql->update("UPDATE `{prefix_userstats}` SET `writtenmsg` = (writtenmsg+1) WHERE `user` = ?;",array($userid));
                     $index = info(_msg_answer_done, "?action=msg");
@@ -255,7 +255,7 @@ if(defined('_UserMenu')) {
                 if($sql->rowCount()) {
                     foreach($qry as $get) {
                         $absender = !$get['von'] ? _msg_bot : autor($get['von']);
-                        $titel = show(_msg_in_title, array("titel" => re($get['titel'])));
+                        $titel = show(_msg_in_title, array("titel" => stringParser::decode($get['titel'])));
                         $delete = _delete;
                         $date = date("d.m.Y H:i", $get['datum'])._uhr;
                         $new = !$get['readed'] && !$get['see_u'] ? _newicon : '';
@@ -280,7 +280,7 @@ if(defined('_UserMenu')) {
                                   . "ORDER BY datum DESC;", array($userid));
                 $postausgang = "";
                 foreach($qry as $get) {
-                    $titel = show(_msg_out_title, array("titel" => re($get['titel'])));
+                    $titel = show(_msg_out_title, array("titel" => stringParser::decode($get['titel'])));
                     $delete = _msg_delete_sended;
                     $date = date("d.m.Y H:i", $get['datum'])._uhr;
                     $readed = !$get['readed'] ? _noicon : _yesicon;

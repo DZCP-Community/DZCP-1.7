@@ -19,12 +19,12 @@ if(defined('_Away')) {
         if($get['end'] < time()) 
             $status = _away_status_done;
 
-        $edit = empty($get['lastedit']) ? "&nbsp;" : bbcode(re($get['lastedit']));
+        $edit = empty($get['lastedit']) ? "&nbsp;" : bbcode::parse_html($get['lastedit']);
         $index = show($dir."/info", array("nick" => autor($get['userid']),
                                           "von" => date("d.m.Y",$get['start']),
                                           "bis" => date("d.m.Y",$get['end']),
-                                          "text" => bbcode(re($get['reason'])),
-                                          "titel" => re($get['titel']),
+                                          "text" => bbcode::parse_html($get['reason']),
+                                          "titel" => stringParser::decode($get['titel']),
                                           "edit" => $edit,
                                           "status" => $status,
                                           "addnew" => date("d.m.Y",$get['date'])." "._away_on." ".date("H:i",$get['date'])._uhr));

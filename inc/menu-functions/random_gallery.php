@@ -22,7 +22,7 @@ function random_gallery() {
         if(!empty($imgArr[0])) {
             $gallery = show("menu/random_gallery", array("image" => $imgArr[0],
                                                          "id"    => $get['id'],
-                                                         "kat"   => re($get['kat'])));
+                                                         "kat"   => stringParser::decode($get['kat'])));
         }
     }
 

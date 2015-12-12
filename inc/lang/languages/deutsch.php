@@ -1986,7 +1986,7 @@ define('_editor_add_head', 'Neue Seite hinzuf&uuml;gen');
 define('_inhalt', 'Inhalt');
 define('_allow', 'Erlauben');
 define('_deny', 'Verbieten');
-define('_editor_allow_html', 'HTML erlauben?');
+define('_editor_allow_html', 'HTML/BBCODE erlauben?');
 define('_editor_allow_php', 'PHP-Code erlauben?');
 define('_empty_editor_inhalt', 'Du musst einen Text schreiben!');
 define('_site_added', 'Die Seite wurde erfolgreich eingetragen!');

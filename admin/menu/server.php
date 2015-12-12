@@ -28,8 +28,8 @@ switch ($do) {
             }
         }
 
-        $show = show($dir."/server_edit", array("sip" => re($get['ip']),
-                                                "sname" => re($get['name']),
+        $show = show($dir."/server_edit", array("sip" => stringParser::decode($get['ip']),
+                                                "sname" => stringParser::decode($get['name']),
                                                 "id" => $_GET['id'],
                                                 "sport" => $get['port'],
                                                 "qport" => $get['qport'],
@@ -49,8 +49,8 @@ switch ($do) {
             $cache->delete('server_'.$cache_hash);
 
             $sql->update("UPDATE `{prefix_server}` SET `ip` = ?, `port` = ?, `qport` = ?, `name` = ?, `custom_icon`= ?, `icon` = '', `game` = ?, `pwd` = ? WHERE `id` = ?;",
-                    array(up($_POST['ip']),intval($_POST['port']),up($_POST['qport']),up($_POST['name']),up($_POST['custom_game_icon']),
-                         ($_POST['status'] != 'lazy' ? up($_POST['status']) : $get['game']),up($_POST['pwd']),intval($_GET['id'])));
+                    array(stringParser::encode($_POST['ip']),intval($_POST['port']),stringParser::encode($_POST['qport']),stringParser::encode($_POST['name']),stringParser::encode($_POST['custom_game_icon']),
+                         ($_POST['status'] != 'lazy' ? stringParser::encode($_POST['status']) : $get['game']),stringParser::encode($_POST['pwd']),intval($_GET['id'])));
 
             $show = info(_server_admin_edited, "?admin=server");
         }
@@ -83,7 +83,7 @@ switch ($do) {
             $show = error(_empty_servername);
         } else {
             $sql->insert("INSERT INTO `{prefix_server}` SET `ip` = ?, `port` = ?, `qport` = ?, `name` = ?, `pwd` = ?, `custom_icon`= ?, `game` = ?;",
-                array(up($_POST['ip']),intval($_POST['port']),up($_POST['qport']),up($_POST['name']),up($_POST['pwd']),up($_POST['custom_game_icon']),up($_POST['status'])));
+                array(stringParser::encode($_POST['ip']),intval($_POST['port']),stringParser::encode($_POST['qport']),stringParser::encode($_POST['name']),stringParser::encode($_POST['pwd']),stringParser::encode($_POST['custom_game_icon']),stringParser::encode($_POST['status'])));
 
             $show = info(_server_admin_added, "?admin=server");
         }
@@ -110,7 +110,7 @@ switch ($do) {
             
             //Get Icon from runned Server Query
             if(!$icon && !empty($get['icon'])) {
-                $game_icon_inp = GameQ::search_game_icon(re($get['icon']),false);
+                $game_icon_inp = GameQ::search_game_icon(stringParser::decode($get['icon']),false);
                 if($game_icon_inp['found']) {
                     $gameicon = show(_gameicon_blank, array('icon' => $game_icon_inp['image']));
                 }
@@ -122,11 +122,11 @@ switch ($do) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $menu = ($get['navi'] ? show(_server_menu_icon_no, array("id" => $get['id'])) : show(_server_menu_icon_yes, array("id" => $get['id'])));
             $show_servers .= show($dir."/server_show", array("gameicon" => $gameicon,
-                                                             "serverip" => re($get['ip']).":".$get['port'],
-                                                             "serverpwd" => re($get['pwd']),
+                                                             "serverip" => stringParser::decode($get['ip']).":".$get['port'],
+                                                             "serverpwd" => stringParser::decode($get['pwd']),
                                                              "menu" => $menu,
                                                              "edit" => $edit,
-                                                             "name" => re($get['name']),
+                                                             "name" => stringParser::decode($get['name']),
                                                              "class" => $class,
                                                              "delete" => $delete));
         }

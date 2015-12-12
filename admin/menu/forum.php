@@ -18,8 +18,8 @@ $where = $where.': '._config_forum_head;
           foreach($qryk as $getk) {
             if(!empty($getk['kattopic']))
             {
-              $subkat = show(_config_forum_subkats, array("topic" => re($getk['kattopic']),
-                                                          "subtopic" => re($getk['subtopic']),
+              $subkat = show(_config_forum_subkats, array("topic" => stringParser::decode($getk['kattopic']),
+                                                          "subtopic" => stringParser::decode($getk['subtopic']),
                                                           "id" => $getk['id']));
 
               $edit = show("page/button_edit_single", array("id" => $getk['id'],
@@ -38,7 +38,7 @@ $where = $where.': '._config_forum_head;
                                                                       "edit" => $edit));
             }
 
-            $skathead = show(_config_forum_subkathead, array("kat" => re($getk['name'])));
+            $skathead = show(_config_forum_subkathead, array("kat" => stringParser::decode($getk['name'])));
             $add = show(_config_forum_subkats_add, array("id" => $_GET['id']));
 
             $show = show($dir."/forum_show_subkats", array("head" => _config_forum_head,
@@ -52,7 +52,7 @@ $where = $where.': '._config_forum_head;
         } else {
           $qry = $sql->select("SELECT * FROM `{prefix_forumkats}` ORDER BY `kid`;");
             foreach($qry as $get) {
-          $kat = show(_config_forum_kats_titel, array("kat" => re($get['name']),
+          $kat = show(_config_forum_kats_titel, array("kat" => stringParser::decode($get['name']),
                                                       "id" => $get['id']));
 
           $edit = show("page/button_edit_single", array("id" => $get['id'],
@@ -91,7 +91,7 @@ $where = $where.': '._config_forum_head;
           $qry = $sql->select("SELECT * FROM `{prefix_forumkats}` ORDER BY `kid`;");
             foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => $get['kid']+1,
-                                                    "what" => _nach.' '.re($get['name']),
+                                                    "what" => _nach.' '.stringParser::decode($get['name']),
                                                     "sel" => ""));
           }
 
@@ -112,7 +112,7 @@ $where = $where.': '._config_forum_head;
 
             $sql->update("UPDATE `{prefix_forumkats}` SET `kid` = kid+1 WHERE kid ".$sign." ?;",array(intval($_POST['kid'])));
             $sql->insert("INSERT INTO `{prefix_forumkats}` SET `kid` = ?, `name` = ?, `intern` = ?",
-                    array(intval($_POST['kid']),up($_POST['kat']),intval($_POST['intern'])));
+                    array(intval($_POST['kid']),stringParser::encode($_POST['kat']),intval($_POST['intern'])));
 
             $show = info(_config_forum_kat_added, "?admin=forum");
           } else {
@@ -134,7 +134,7 @@ $where = $where.': '._config_forum_head;
                   if($get['name'] != $getpos['name'])
                   {
                     $positions .= show(_select_field, array("value" => $getpos['kid']+1,
-                                                            "what" => _nach.' '.re($getpos['name'])));
+                                                            "what" => _nach.' '.stringParser::decode($getpos['name'])));
                   }
                 }
 
@@ -150,7 +150,7 @@ $where = $where.': '._config_forum_head;
                                                      "public" => _config_forum_public,
                                                      "intern" => _config_forum_intern,
                                                      "value" => _button_value_edit,
-                                                     "kat" => re($get['name'])));
+                                                     "kat" => stringParser::decode($get['name'])));
           }
         } elseif($do == "editkat") {
           if(empty($_POST['kat']))
@@ -168,7 +168,7 @@ $where = $where.': '._config_forum_head;
             }
 
 
-            $sql->update("UPDATE `{prefix_forumkats}` SET `name`    = '".up($_POST['kat'])."', ".$kid." `intern`  = '".intval($_POST['intern'])."' WHERE id = '".intval($_GET['id'])."'");
+            $sql->update("UPDATE `{prefix_forumkats}` SET `name`    = '".stringParser::encode($_POST['kat'])."', ".$kid." `intern`  = '".intval($_POST['intern'])."' WHERE id = '".intval($_GET['id'])."'");
 
             $show = info(_config_forum_kat_edited, "?admin=forum");
           }
@@ -176,7 +176,7 @@ $where = $where.': '._config_forum_head;
           $qry = $sql->select("SELECT * FROM `{prefix_forumsubkats}` WHERE sid = " . (int) $_GET['id']." ORDER BY pos");
             foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => $get['pos']+1,
-                                                    "what" => _nach.' '.re($get['kattopic']),
+                                                    "what" => _nach.' '.stringParser::decode($get['kattopic']),
                                                     "sel" => ""));
           }
           $show = show($dir."/skatform", array("head" => _config_forum_add_skat,
@@ -199,7 +199,7 @@ $where = $where.': '._config_forum_head;
             else  $sign = "> ";
 
             $sql->update("UPDATE `{prefix_forumsubkats}` SET `pos` = pos+1 WHERE `pos` ".$sign." '".intval($_POST['order'])."'");
-            $sql->insert("INSERT INTO `{prefix_forumsubkats}` SET `sid` = '".intval($_GET['id'])."', `pos` = '".intval($_POST['order'])."', `kattopic` = '".up($_POST['skat'])."', `subtopic` = '".up($_POST['stopic'])."'");
+            $sql->insert("INSERT INTO `{prefix_forumsubkats}` SET `sid` = '".intval($_GET['id'])."', `pos` = '".intval($_POST['order'])."', `kattopic` = '".stringParser::encode($_POST['skat'])."', `subtopic` = '".stringParser::encode($_POST['stopic'])."'");
 
             $show = info(_config_forum_skat_added, "?admin=forum&show=subkats&amp;id=".$_GET['id']."");
           }
@@ -211,16 +211,16 @@ $where = $where.': '._config_forum_head;
               if($get['kattopic'] != $getpos['kattopic'])
               {
                 $positions .= show(_select_field, array("value" => $getpos['pos']+1,
-                                                        "what" => _nach.' '.re($getpos['kattopic'])));
+                                                        "what" => _nach.' '.stringParser::decode($getpos['kattopic'])));
               }
             }
 
           $show = show($dir."/skatform", array("head" => _config_forum_edit_skat,
                                                "fkat" => _config_forum_skatname,
                                                "fstopic" => _config_forum_stopic,
-                                               "skat" => re($get['kattopic']),
+                                               "skat" => stringParser::decode($get['kattopic']),
                                                "what" => "editskat",
-                                               "stopic" => re($get['subtopic']),
+                                               "stopic" => stringParser::decode($get['subtopic']),
                                                "id" => $_GET['id'],
                                                "sid" => $get['sid'],
                                                "tposition" => _position,
@@ -246,9 +246,9 @@ $where = $where.': '._config_forum_head;
             }
 
             $sql->update("UPDATE `{prefix_forumsubkats}`
-                       SET `kattopic` = '".up($_POST['skat'])."',
+                       SET `kattopic` = '".stringParser::encode($_POST['skat'])."',
                            ".$order."
-                           `subtopic` = '".up($_POST['stopic'])."'
+                           `subtopic` = '".stringParser::encode($_POST['stopic'])."'
                        WHERE id = '".intval($_GET['id'])."'");
 
             $show = info(_config_forum_skat_edited, "?admin=forum&show=subkats&amp;id=".$_POST['sid']."");

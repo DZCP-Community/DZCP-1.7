@@ -17,12 +17,12 @@ function newsticker() {
         foreach($qry as $get) {
             if(settings::get('allowhover') == 1) {
                 $getkat = $sql->fetch("SELECT `kategorie` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']));
-                $info = 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['titel'])).'\', \''._datum.';'._autor.';'._news_admin_kat.';'._comments_head.'\', \''.
-                        date("d.m.Y H:i", $get['datum'])._uhr.';'.fabo_autor($get['autor']).';'.jsconvert(re($getkat['kategorie'])).';'.
+                $info = 'onmouseover="DZCP.showInfo(\''.jsconvert(stringParser::decode($get['titel'])).'\', \''._datum.';'._autor.';'._news_admin_kat.';'._comments_head.'\', \''.
+                        date("d.m.Y H:i", $get['datum'])._uhr.';'.fabo_autor($get['autor']).';'.jsconvert(stringParser::decode($getkat['kategorie'])).';'.
                         cnt("{prefix_newscomments}","WHERE `news` = ?","id",array($get['id'])).'\')" onmouseout="DZCP.hideInfo()"';
             }
 
-            $news .= '<a href="../news/?action=show&amp;id='.$get['id'].'" '.$info.'>'.re($get['titel']).'</a> | ';
+            $news .= '<a href="../news/?action=show&amp;id='.$get['id'].'" '.$info.'>'.stringParser::decode($get['titel']).'</a> | ';
         }
     }
 

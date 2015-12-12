@@ -65,11 +65,11 @@ if(defined('_Clanwars')) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $game = squad($getm['icon']);
             $flagge = flag($getm['gcountry']);
-            $gegner = show(_cw_details_gegner, array("gegner" => re(cut($getm['clantag']." - ".$getm['gegner'], settings::get('l_clanwars'))),
+            $gegner = show(_cw_details_gegner, array("gegner" =>stringParser::decode(cut($getm['clantag']." - ".$getm['gegner'], settings::get('l_clanwars'))),
                                                      "url" => '?action=details&amp;id='.$getm['id']));
 
             $details = show(_cw_show_details, array("id" => $getm['id']));
-            $squad = show(_member_squad_squadlink, array("squad" => re($get['name']),
+            $squad = show(_member_squad_squadlink, array("squad" => stringParser::decode($get['name']),
                                                          "id" => $get['id'],
                                                          "shown" => $shown));
 
@@ -77,9 +77,9 @@ if(defined('_Clanwars')) {
                                                         "img" => $img,
                                                         "flagge" => $flagge,
                                                         "gegner" => $gegner,
-                                                        "xonx" => re($getm['xonx']),
-                                                        "liga" => re($getm['liga']),
-                                                        "gametype" => re($getm['gametype']),
+                                                        "xonx" => stringParser::decode($getm['xonx']),
+                                                        "liga" => stringParser::decode($getm['liga']),
+                                                        "gametype" => stringParser::decode($getm['gametype']),
                                                         "class" => $class,
                                                         "result" => cw_result_nopic($getm['punkte'], $getm['gpunkte']),
                                                         "details" => $details));
@@ -144,7 +144,7 @@ if(defined('_Clanwars')) {
     foreach($qry as $get) {
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
         $img = squad($get['icon']);
-        $legende .= show(_cw_legende, array("game" => re($get['game']), "img" => $img, "class" => $class));
+        $legende .= show(_cw_legende, array("game" => stringParser::decode($get['game']), "img" => $img, "class" => $class));
     }
 
     $legende = show($dir."/legende", array("legende" => $legende));

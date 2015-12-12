@@ -12,7 +12,7 @@ if($sql->rowCount()) {
     if($get['reg']) 
         $first = date("d.m.Y H:i", $get['datum'])."h "._from." ".autor($get['reg']);
     else 
-        $first = date("d.m.Y H:i", $get['datum'])."h "._from." ".autor($get['reg'],'',re($get['nick']),re($get['email']));
+        $first = date("d.m.Y H:i", $get['datum'])."h "._from." ".autor($get['reg'],'',stringParser::decode($get['nick']),stringParser::decode($get['email']));
 }
 
 $get = $sql->fetch("SELECT `email`,`reg`,`nick`,`datum` FROM `{prefix_gb}` ORDER BY `datum` DESC LIMIT 1;");
@@ -21,7 +21,7 @@ if($sql->rowCount()) {
     if($get['reg']) 
         $last = date("d.m.Y H:i", $get['datum'])."h "._from." ".autor($get['reg']);
     else 
-        $last = date("d.m.Y H:i", $get['datum'])."h "._from." ".autor($get['reg'],'',re($get['nick']),re($get['email']));
+        $last = date("d.m.Y H:i", $get['datum'])."h "._from." ".autor($get['reg'],'',stringParser::decode($get['nick']),stringParser::decode($get['email']));
 }
 
 $stats = show($dir."/gb", array("nposter" => cnt("{prefix_gb}"," WHERE `reg` = 0")."/".cnt("{prefix_gb}"," WHERE `reg` != 0"),

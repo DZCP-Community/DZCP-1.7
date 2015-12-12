@@ -24,7 +24,7 @@ if(!empty($_GET['word'])) {
             . "FROM `{prefix_glossar}` "
             . "WHERE `word` = ? OR `word` LIKE ? "
             . "ORDER BY `word`;",
-            array(up($_GET['word']),'%'.up($a).'%'));
+            array(stringParser::encode($_GET['word']),'%'.stringParser::encode($a).'%'));
 } else if(!empty($_GET['bst']) && $_GET['bst'] != 'all') {
     $_GET['bst'] = trim($_GET['bst']);
     $a = $_GET['bst'];
@@ -32,7 +32,7 @@ if(!empty($_GET['word'])) {
             . "FROM `{prefix_glossar}` "
             . "WHERE `word` LIKE ? "
             . "ORDER BY `word`;",
-            array('%'.up($a).'%'));
+            array('%'.stringParser::encode($a).'%'));
 } else {
     $qry = $sql->select("SELECT * "
             . "FROM `{prefix_glossar}` "
@@ -45,9 +45,9 @@ foreach($qry as $get) {
         $class = 'highlightSearchTarget';
     }
 
-    $show .= show($dir."/glossar_show", array("word" => re($get['word']),
+    $show .= show($dir."/glossar_show", array("word" => stringParser::decode($get['word']),
                                               "class" => $class,
-                                              "glossar" => bbcode(re($get['glossar']))));
+                                              "glossar" => bbcode::parse_html($get['glossar'])));
 }
 
 $show = (empty($show) ? show(_no_entrys_found, array("colspan" => "2")) : $show); //No Entrys

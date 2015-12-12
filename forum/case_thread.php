@@ -87,7 +87,7 @@ if(defined('_Forum')) {
                                               "br2" => "",
                                               "tgl" => $toggle,
                                                                     "display" => $display,
-                                              "question1" => re($getv['titel']),
+                                              "question1" => stringParser::decode($getv['titel']),
                                               "a1" => voteanswer("a1", $getv['id']),
                                               "a2" => voteanswer("a2", $getv['id']),
                                               "a3" => voteanswer("a3", $getv['id']),
@@ -126,14 +126,14 @@ if(defined('_Forum')) {
                                           "what" => _button_value_edit,
                                           "dowhat" => $dowhat,
                                           "error" => "",
-                                          "posttopic" => re($get['topic']),
-                                          "postsubtopic" => re($get['subtopic']),
-                                          "postnick" => re($get['t_nick']),
+                                          "posttopic" => stringParser::decode($get['topic']),
+                                          "postsubtopic" => stringParser::decode($get['subtopic']),
+                                          "postnick" => stringParser::decode($get['t_nick']),
                                           "postemail" => $get['t_email'],
                                           "posthp" => $get['t_hp'],
                                           "admin" => $admin,
                                           "vote" => $vote,
-                                          "posteintrag" => bbcode($get['t_text'],false,true)));
+                                          "posteintrag" => bbcode::parse_html($get['t_text'],false,true)));
     } else {
       $index = error(_error_wrong_permissions, 1);
     }
@@ -199,7 +199,7 @@ if(defined('_Forum')) {
           $vote = show($dir."/form_vote", array("head" => _votes_admin_head,
                                               "value" => _button_value_add,
                                               "what" => "&amp;do=add",
-                                              "question1" => re($_POST['question']),
+                                              "question1" => stringParser::decode($_POST['question']),
                                               "a1" => $_POST['a1'],
                                               "closed" => $closed,
                         "tgl" => "expand",
@@ -240,10 +240,10 @@ if(defined('_Forum')) {
                                             "dowhat" => $dowhat,
                                             "posthp" => $_POST['hp'],
                                               "postemail" => $_POST['email'],
-                                              "postnick" => re($_POST['nick']),
-                                              "posteintrag" => re($_POST['eintrag']),
-                                            "posttopic" => re($_POST['topic']),
-                                            "postsubtopic" => re($_POST['subtopic']),
+                                              "postnick" => stringParser::decode($_POST['nick']),
+                                              "posteintrag" => stringParser::decode($_POST['eintrag']),
+                                            "posttopic" => stringParser::decode($_POST['topic']),
+                                            "postsubtopic" => stringParser::decode($_POST['subtopic']),
                                               "error" => $error,
                                             "admin" => $admin,
                                                 "vote" => $vote,
@@ -257,18 +257,18 @@ if(defined('_Forum')) {
        $vid = $gett['vote'];
 
         $sql->update("UPDATE `{prefix_votes}`
-                   SET `titel`  = '".up($_POST['question'])."',
+                   SET `titel`  = '".stringParser::encode($_POST['question'])."',
                        `intern` = '".intval($_POST['intern'])."',
                        `closed` = '".intval($_POST['closed'])."'
                    WHERE id = '".$gett['vote']."'");
 
         $sql->update("UPDATE `{prefix_vote_results}`
-                    SET `sel` = '".up($_POST['a1'])."'
+                    SET `sel` = '".stringParser::encode($_POST['a1'])."'
                     WHERE what = 'a1'
                     AND vid = '".$gett['vote']."'");
 
         $sql->update("UPDATE `{prefix_vote_results}`
-                    SET `sel` = '".up($_POST['a2'])."'
+                    SET `sel` = '".stringParser::encode($_POST['a2'])."'
                     WHERE what = 'a2'
                     AND vid = '".$gett['vote']."'");
 
@@ -279,14 +279,14 @@ if(defined('_Forum')) {
             if(cnt(`{prefix_vote_results}`, " WHERE vid = '".$gett['vote']."' AND what = 'a".$i."'") != 0)
             {
               $sql->update("UPDATE `{prefix_vote_results}`
-                         SET `sel` = '".up($_POST['a'.$i.''])."'
+                         SET `sel` = '".stringParser::encode($_POST['a'.$i.''])."'
                          WHERE what = 'a".$i."'
                          AND vid = '".$gett['vote']."'");
             } else {
               $sql->insert("INSERT INTO `{prefix_vote_results}`
                          SET `vid` = '".$gett['vote']."',
                              `what` = 'a".$i."',
-                             `sel` = '".up($_POST['a'.$i.''])."'");
+                             `sel` = '".stringParser::encode($_POST['a'.$i.''])."'");
             }
           }
 
@@ -300,7 +300,7 @@ if(defined('_Forum')) {
         } elseif(empty($gett['vote']) && !empty($_POST['question'])) {
           $sql->insert("INSERT INTO `{prefix_votes}`
                      SET `datum`  = '".time()."',
-                         `titel`  = '".up($_POST['question'])."',
+                         `titel`  = '".stringParser::encode($_POST['question'])."',
                          `intern` = '".intval($_POST['intern'])."',
                          `forum`  = 1,
                          `von`    = '".intval($userid)."'");
@@ -309,68 +309,68 @@ if(defined('_Forum')) {
           $sql->insert("INSERT INTO `{prefix_vote_results}`
                     SET `vid`   = '".intval($vid)."',
                         `what`  = 'a1',
-                        `sel`   = '".up($_POST['a1'])."'");
+                        `sel`   = '".stringParser::encode($_POST['a1'])."'");
 
           $sql->insert("INSERT INTO `{prefix_vote_results}`
                      SET `vid`  = '".intval($vid)."',
                          `what` = 'a2',
-                         `sel`  = '".up($_POST['a2'])."'");
+                         `sel`  = '".stringParser::encode($_POST['a2'])."'");
 
           if(!empty($_POST['a3']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a3',
-                           `sel`  = '".up($_POST['a3'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a3'])."'");
           }
           if(!empty($_POST['a4']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a4',
-                           `sel`  = '".up($_POST['a4'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a4'])."'");
           }
           if(!empty($_POST['a5']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a5',
-                           `sel`  = '".up($_POST['a5'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a5'])."'");
           }
           if(!empty($_POST['a6']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a6',
-                           `sel`  = '".up($_POST['a6'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a6'])."'");
           }
           if(!empty($_POST['a7']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a7',
-                           `sel`  = '".up($_POST['a7'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a7'])."'");
           }
           if(!empty($_POST['a8']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a8',
-                           `sel`  = '".up($_POST['a8'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a8'])."'");
           }
           if(!empty($_POST['a9']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a9',
-                           `sel`  = '".up($_POST['a9'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a9'])."'");
           }
           if(!empty($_POST['a10']))
           {
             $sql->insert("INSERT INTO `{prefix_vote_results}`
                        SET `vid`  = '".intval($vid)."',
                            `what` = 'a10',
-                           `sel`  = '".up($_POST['a10'])."'");
+                           `sel`  = '".stringParser::encode($_POST['a10'])."'");
           }
         } else { $vid = ""; }
 
@@ -386,16 +386,16 @@ if(defined('_Forum')) {
                                            "time" => date("d.m.Y H:i", time())._uhr));
 
         $sql->update("UPDATE `{prefix_forumthreads}`
-                             SET `topic`    = '".up($_POST['topic'])."',
-                       `subtopic` = '".up($_POST['subtopic'])."',
-                       `t_nick`   = '".up($_POST['nick'])."',
-                       `t_email`  = '".up($_POST['email'])."',
+                             SET `topic`    = '".stringParser::encode($_POST['topic'])."',
+                       `subtopic` = '".stringParser::encode($_POST['subtopic'])."',
+                       `t_nick`   = '".stringParser::encode($_POST['nick'])."',
+                       `t_email`  = '".stringParser::encode($_POST['email'])."',
                        `t_hp`     = '".links($_POST['hp'])."',
-                       `t_text`   = '".up($_POST['eintrag'])."',
+                       `t_text`   = '".stringParser::encode($_POST['eintrag'])."',
                        `sticky`   = '".intval($_POST['sticky'])."',
                        `global`   = '".intval($_POST['global'])."',
                                             `vote`     = '".$vid."',
-                       `edited`   = '".up($editedby)."'
+                       `edited`   = '".stringParser::encode($editedby)."'
                    WHERE id = '".intval($_GET['id'])."'");
 
       $checkabo = $sql->select("SELECT s1.user,s1.fid,s2.nick,s2.id,s2.email FROM `{prefix_f_abo}` AS s1
@@ -406,9 +406,9 @@ if(defined('_Forum')) {
         {
           $gettopic = $sql->fetch("SELECT topic FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
 
-          $subj = show(re(settings::get('eml_fabo_tedit_subj')), array("titel" => $title));
+          $subj = show(stringParser::decode(settings::get('eml_fabo_tedit_subj')), array("titel" => $title));
 
-           $message = show(bbcode_email(settings::get('eml_fabo_tedit')), array("nick" => re($getabo['nick']),
+           $message = show(bbcode_email(settings::get('eml_fabo_tedit')), array("nick" => stringParser::decode($getabo['nick']),
                                                                 "postuser" => fabo_autor($userid),
                                                             "topic" => $gettopic['topic'],
                                                             "titel" => $title,
@@ -416,10 +416,10 @@ if(defined('_Forum')) {
                                                             "id" => intval($_GET['id']),
                                                             "entrys" => "1",
                                                             "page" => "1",
-                                                            "text" => bbcode($_POST['eintrag']),
+                                                            "text" => bbcode::parse_html($_POST['eintrag']),
                                                             "clan" => settings::get('clanname')));
 
-          sendMail(re($getabo['email']),$subj,$message);
+          sendMail(stringParser::decode($getabo['email']),$subj,$message);
         }
       }
 
@@ -584,7 +584,7 @@ if(defined('_Forum')) {
             $vote = show($dir."/form_vote", array("head" => _votes_admin_head,
                             "value" => _button_value_add,
                             "what" => "&amp;do=add",
-                            "question1" => re($_POST['question']),
+                            "question1" => stringParser::decode($_POST['question']),
                             "a1" => $_POST['a1'],
                             "closed" => $closed,
                             "br1" => "<!--",
@@ -624,11 +624,11 @@ if(defined('_Forum')) {
                                                                                             "dowhat" => $dowhat,
                                                                                             "posthp" => $_POST['hp'],
                                                 "postemail" => $_POST['email'],
-                                                "postnick" => re($_POST['nick']),
+                                                "postnick" => stringParser::decode($_POST['nick']),
                                                                                             "ip" => _iplog_info,
-                                                "posteintrag" => re($_POST['eintrag']),
-                                                                                            "posttopic" => re($_POST['topic']),
-                                                                                            "postsubtopic" => re($_POST['subtopic']),
+                                                "posteintrag" => stringParser::decode($_POST['eintrag']),
+                                                                                            "posttopic" => stringParser::decode($_POST['topic']),
+                                                                                            "postsubtopic" => stringParser::decode($_POST['subtopic']),
                                                 "error" => $error,
                                                                                             "admin" => $admin,
                                                 "vote" => $vote,
@@ -647,7 +647,7 @@ if(defined('_Forum')) {
 
                         $sql->insert("INSERT INTO `{prefix_votes}`
                                              SET `datum`  = '".time()."',
-                                                     `titel`  = '".up($_POST['question'])."',
+                                                     `titel`  = '".stringParser::encode($_POST['question'])."',
                                                      ".$ivote."
                                                      `forum`  = 1,
                                                      `von`    = '".intval($userid)."'");
@@ -657,81 +657,81 @@ if(defined('_Forum')) {
                         $sql->insert("INSERT INTO `{prefix_vote_results}`
                                             SET `vid`   = '".intval($vid)."',
                                                     `what`  = 'a1',
-                                                    `sel`   = '".up($_POST['a1'])."'");
+                                                    `sel`   = '".stringParser::encode($_POST['a1'])."'");
 
                         $sql->insert("INSERT INTO `{prefix_vote_results}`
                                              SET `vid`  = '".intval($vid)."',
                                                      `what` = 'a2',
-                                                     `sel`  = '".up($_POST['a2'])."'");
+                                                     `sel`  = '".stringParser::encode($_POST['a2'])."'");
 
                         if(!empty($_POST['a3']))
                         {
                             $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a3',
-                                                         `sel`  = '".up($_POST['a3'])."'");
+                                                         `sel`  = '".stringParser::encode($_POST['a3'])."'");
                         }
                         if(!empty($_POST['a4']))
                         {
                             $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a4',
-                                                         `sel`  = '".up($_POST['a4'])."'");
+                                                         `sel`  = '".stringParser::encode($_POST['a4'])."'");
                         }
                         if(!empty($_POST['a5']))
                         {
                             $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a5',
-                                                         `sel`  = '".up($_POST['a5'])."'");
+                                                         `sel`  = '".stringParser::encode($_POST['a5'])."'");
                         }
                         if(!empty($_POST['a6']))
                         {
                             $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a6',
-                                                         `sel`  = '".up($_POST['a6'])."'");
+                                                         `sel`  = '".stringParser::encode($_POST['a6'])."'");
                         }
                         if(!empty($_POST['a7']))
                         {
                             $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a7',
-                                                         `sel`  = '".up($_POST['a7'])."'");
+                                                         `sel`  = '".stringParser::encode($_POST['a7'])."'");
                         }
                         if(!empty($_POST['a8']))
                         {
                             $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a8',
-                                                         `sel`  = '".up($_POST['a8'])."'");
+                                                         `sel`  = '".stringParser::encode($_POST['a8'])."'");
                         }
                         if(!empty($_POST['a9']))
                         {
                             $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a9',
-                                                         `sel`  = '".up($_POST['a9'])."'");
+                                                         `sel`  = '".stringParser::encode($_POST['a9'])."'");
                         }
                         if(!empty($_POST['a10']))
                         {
                             $sql->insert("INSERT INTO `{prefix_vote_results}`
                                                  SET `vid`  = '".intval($vid)."',
                                                          `what` = 'a10',
-                                                         `sel`  = '".up($_POST['a10'])."'");
+                                                         `sel`  = '".stringParser::encode($_POST['a10'])."'");
                         }
             } else { $vid = ""; }
 
             $sql->insert("INSERT INTO `{prefix_forumthreads}`
                                  SET     `kid`      = '".intval($_GET['kid'])."',
                                                 `t_date`   = '".time()."',
-                                                `topic`    = '".up($_POST['topic'])."',
-                                                `subtopic` = '".up($_POST['subtopic'])."',
-                                                `t_nick`   = '".up($_POST['nick'])."',
-                                                `t_email`  = '".up($_POST['email'])."',
+                                                `topic`    = '".stringParser::encode($_POST['topic'])."',
+                                                `subtopic` = '".stringParser::encode($_POST['subtopic'])."',
+                                                `t_nick`   = '".stringParser::encode($_POST['nick'])."',
+                                                `t_email`  = '".stringParser::encode($_POST['email'])."',
                                                 `t_hp`     = '".links($_POST['hp'])."',
                                                 `t_reg`    = '".intval($userid)."',
-                                                `t_text`   = '".up($_POST['eintrag'])."',
+                                                `t_text`   = '".stringParser::encode($_POST['eintrag'])."',
                                                 `sticky`   = '".intval($_POST['sticky'])."',
                                                 `global`   = '".intval($_POST['global'])."',
                                                 `ip`       = '".$userip."',

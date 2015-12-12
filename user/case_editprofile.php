@@ -36,10 +36,10 @@ if(defined('_UserMenu')) {
                 case 'edit':
                     $check_user = false; $check_nick = false; $check_email = false;
                     if($sql->rows("SELECT `id` FROM `{prefix_users}` WHERE (`user`= ? OR `nick`= ? OR `email`= ?) AND `id` != ?;",
-                            array(up($_POST['user']),up($_POST['nick']),up($_POST['email']),$userid))) {
-                        $check_user  = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user` = ? AND `id` != ?;", array(up($_POST['user']),  $userid));
-                        $check_nick  = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `nick` = ? AND `id` != ?;", array(up($_POST['nick']),  $userid));
-                        $check_email = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `email`= ? AND `id` != ?;", array(up($_POST['email']), $userid));
+                            array(stringParser::encode($_POST['user']),stringParser::encode($_POST['nick']),stringParser::encode($_POST['email']),$userid))) {
+                        $check_user  = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user` = ? AND `id` != ?;", array(stringParser::encode($_POST['user']),  $userid));
+                        $check_nick  = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `nick` = ? AND `id` != ?;", array(stringParser::encode($_POST['nick']),  $userid));
+                        $check_email = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `email`= ? AND `id` != ?;", array(stringParser::encode($_POST['email']), $userid));
                     }
 
                     if(!isset($_POST['user']) || empty($_POST['user'])) {
@@ -62,7 +62,7 @@ if(defined('_UserMenu')) {
                         if (isset($_POST['pwd']) && !empty($_POST['pwd'])) {
                             if(pwd_encoder($_POST['pwd']) == pwd_encoder($_POST['cpwd'])) {
                                 $_SESSION['pwd'] = pwd_encoder($_POST['pwd']);
-                                $newpwd = "`pwd` = '".up($_SESSION['pwd'])."',";
+                                $newpwd = "`pwd` = '".stringParser::encode($_SESSION['pwd'])."',";
                                 $newpwd .= "`pwd_encoder` = ".settings::get('default_pwd_encoder').",";
                                 $index = info(_info_edit_profile_done, "?action=user&amp;id=" . $userid . "");
                             } else {
@@ -73,17 +73,20 @@ if(defined('_UserMenu')) {
                         $bday = ($_POST['t'] && $_POST['m'] && $_POST['j'] ? cal($_POST['t']) . "." . cal($_POST['m']) . "." . $_POST['j'] : 0);
                         $qrycustom = $sql->select("SELECT `feldname`,`type` FROM `{prefix_profile}`"); $customfields = '';
                         foreach($qrycustom as $getcustom) {
-                            $customfields .= " `".$getcustom['feldname']."` = '".($getcustom['type'] == 2 ? links($_POST[$getcustom['feldname']]) : up($_POST[$getcustom['feldname']]))."', ";
+                            $customfields .= " `".$getcustom['feldname']."` = '".($getcustom['type'] == 2 ? links($_POST[$getcustom['feldname']]) : stringParser::encode($_POST[$getcustom['feldname']]))."', ";
                         }
 
                         $sql->update("UPDATE `{prefix_users}` SET " . $newpwd . " " . $customfields . " `country` = ?,`user` = ?, `nick` = ?, `rlname` = ?, `sex` = ?,`status` = ?, "
                         ."`bday` = ?, `email` = ?, `nletter` = ?, `pnmail` = ?, `city` = ?, `gmaps_koord` = ?, `hp` = ?, `icq` = ?, `hlswid` = ?, `xboxid` = ?, `psnid` = ?,"
                         ."`originid` = ?, `battlenetid` = ?,`steamid` = ?,`skypename` = ?,`signatur` = ?,`beschreibung` = ?, `perm_gb` = ?, `perm_gallery` = ?, `startpage` = ?, `profile_access` = ?"
-                        ." WHERE id = ?;", array(up($_POST['land']),up($_POST['user']),up($_POST['nick']),up($_POST['rlname']),intval( $_POST['sex']),intval( $_POST['status']),
-                                (!$bday ? 0 : strtotime($bday)),up($_POST['email']),intval( $_POST['nletter']),intval( $_POST['pnmail']),up($_POST['city']),
-                                up($_POST['gmaps_koord']),up(links($_POST['hp'])),intval($_POST['icq']),up(trim($_POST['hlswid'])),up(trim($_POST['xboxid'])),
-                                up(trim($_POST['psnid'])),up(trim($_POST['originid'])),up(trim($_POST['battlenetid'])),up(trim($_POST['steamid'])),up(trim($_POST['skypename'])),
-                                up($_POST['sig']),up($_POST['ich']),up($_POST['visibility_gb']),up($_POST['visibility_gallery']),intval($_POST['startpage']),intval($_POST['visibility_profile']),$userid));
+                        ." WHERE id = ?;", array(stringParser::encode($_POST['land']),stringParser::encode($_POST['user']),stringParser::encode($_POST['nick']),stringParser::encode($_POST['rlname']),intval( $_POST['sex']),intval( $_POST['status']),
+                                (!$bday ? 0 : strtotime($bday)),stringParser::encode($_POST['email']),intval( $_POST['nletter']),intval( $_POST['pnmail']),stringParser::encode($_POST['city']),
+                                stringParser::encode($_POST['gmaps_koord']),stringParser::encode(links($_POST['hp'])),
+                            intval($_POST['icq']),stringParser::encode(trim($_POST['hlswid'])),stringParser::encode(trim($_POST['xboxid'])),
+                                stringParser::encode(trim($_POST['psnid'])),stringParser::encode(trim($_POST['originid'])),stringParser::encode(trim($_POST['battlenetid'])),
+                            stringParser::encode(trim($_POST['steamid'])),stringParser::encode(trim($_POST['skypename'])),
+                                stringParser::encode($_POST['sig']),stringParser::encode($_POST['ich']),stringParser::encode($_POST['visibility_gb']),
+                            stringParser::encode($_POST['visibility_gallery']),intval($_POST['startpage']),intval($_POST['visibility_profile']),$userid));
                         
                         $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($userid)));
                         dbc_index::setIndex('user_' . $get['id'], $get); //Update Cache
@@ -93,13 +96,13 @@ if(defined('_UserMenu')) {
                     if(!rootAdmin($userid)) {
                         $getdel = $sql->fetch("SELECT `id`,`nick`,`email`,`hp` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
                         $sql->update("UPDATE `{prefix_forumthreads}` SET `t_nick` = ?, `t_email` = ?, `t_hp` = ?, `t_reg` = 0, WHERE t_reg = ?;",
-                        array($getdel['nick'],$getdel['email'],up(links($getdel['hp'])),$getdel['id']));
+                        array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
                         $sql->update("UPDATE `{prefix_forumposts}` SET `nick` = ?, `email` = ?, `hp` = ?, WHERE `reg` = ?;",
-                        array($getdel['nick'],$getdel['email'],up(links($getdel['hp'])),$getdel['id']));
+                        array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
                         $sql->update("UPDATE `{prefix_newscomments}` SET `nick` = ?,`email` = ?, `hp` = ?, `reg` = 0, WHERE `reg` = ?;",
-                        array($getdel['nick'],$getdel['email'],up(links($getdel['hp'])),$getdel['id']));
+                        array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
                         $sql->update("UPDATE `{prefix_acomments}` SET `nick` = ?, `email` = ?, `hp` = ?, `reg` = 0, WHERE `reg` = ?;",
-                        array($getdel['nick'],$getdel['email'],up(links($getdel['hp'])),$getdel['id']));
+                        array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
                         $sql->delete("DELETE FROM `{prefix_messages}` WHERE `von` = ? OR   `an`  = ?;",array($getdel['id'],$getdel['id']));
                         $sql->update("UPDATE `{prefix_usergb}` SET `reg` = 0 WHERE `reg` = ?;",array($getdel['id']));
                         $sql->delete("DELETE FROM `{prefix_news}` WHERE `autor` = ?;",array($getdel['id']));
@@ -179,7 +182,7 @@ if(defined('_UserMenu')) {
                                 $edit = show(_gallery_editicon, array("id" => $getgl['id']));
                                 $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
                                 $gal .= show($dir . "/edit_gallery_show", array("picture" => img_size("inc/images/uploads/usergallery" . "/" . $userid . "_" . $getgl['pic']),
-                                                                                "beschreibung" => bbcode($getgl['beschreibung']),
+                                                                                "beschreibung" => bbcode::parse_html($getgl['beschreibung']),
                                                                                 "class" => $class,
                                                                                 "delete" => $delete,
                                                                                 "edit" => $edit));
@@ -248,17 +251,17 @@ if(defined('_UserMenu')) {
                                 case 'almgr_edit':
                                     $get = $sql->fetch("SELECT * FROM `{prefix_autologin}` WHERE `id` = ?;", array(intval($_GET['id'])));
                                     if($sql->rowCount()) {
-                                        $show = show($dir . "/edit_almgr_from", array("name" => re($get['name']),
-                                                                                      "id" => re($get['id']),
-                                                                                      "host" => re($get['host']),
-                                                                                      "ip" => re($get['ip']),
-                                                                                      "ssid" => re($get['ssid']),
-                                                                                      "pkey" => re($get['pkey'])));
+                                        $show = show($dir . "/edit_almgr_from", array("name" => stringParser::decode($get['name']),
+                                                                                      "id" => stringParser::decode($get['id']),
+                                                                                      "host" => stringParser::decode($get['host']),
+                                                                                      "ip" => stringParser::decode($get['ip']),
+                                                                                      "ssid" => stringParser::decode($get['ssid']),
+                                                                                      "pkey" => stringParser::decode($get['pkey'])));
                                     }
                                 break;
                                 case 'almgr_edit_save':
                                     if($sql->rows("SELECT id FROM `{prefix_autologin}` WHERE `id` = ?;", array(intval($_GET['id'])))) {
-                                        $sql->update("UPDATE `{prefix_autologin}` SET `name` = ? WHERE `id` = ?;", array(up($_POST['name']), intval($_GET['id'])));
+                                        $sql->update("UPDATE `{prefix_autologin}` SET `name` = ? WHERE `id` = ?;", array(stringParser::encode($_POST['name']), intval($_GET['id'])));
                                         $index = info(_almgr_editd, '../user/?action=editprofile&show=almgr');
                                     }
                                 break;
@@ -272,8 +275,8 @@ if(defined('_UserMenu')) {
                                         $almgr .= show($dir . "/edit_almgr_show", array("delete" => show(_almgr_deleteicon, array("id" => $get['id'])),
                                                                                         "edit" => show(_almgr_editicon, array("id" => $get['id'])),                                            
                                                                                         "class" => $class,
-                                                                                        "name" => re($get['name']),
-                                                                                        "host" => re($get['host']),
+                                                                                        "name" => stringParser::decode($get['name']),
+                                                                                        "host" => stringParser::decode($get['host']),
                                                                                         "ip" => $get['ip'],
                                                                                         "create" => date('d.m.Y',$get['date']),
                                                                                         "lused" => !$get['update'] ? '-' : date('d.m.Y',$get['update']),
@@ -332,11 +335,11 @@ if(defined('_UserMenu')) {
                                     $getcontent = $sql->fetch("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
                                     $custom_clan .= show(_profil_edit_custom, array("name" => pfields_name($getcustom['name']) . ":", 
                                                                                     "feldname" => $getcustom['feldname'],
-                                                                                    "value" => re($getcontent[$getcustom['feldname']])));
+                                                                                    "value" => stringParser::decode($getcontent[$getcustom['feldname']])));
                                 }
 
                                 $clan = show($dir . "/edit_clan", array("status" => $status,
-                                                                        "exclans" => re($get['ex']),
+                                                                        "exclans" => stringParser::decode($get['ex']),
                                                                         "custom_clan" => $custom_clan));
                             }
 
@@ -370,30 +373,30 @@ if(defined('_UserMenu')) {
                                                                                    "del" => convSpace(_confirm_del_account)));
 
                             $show = show($dir . "/edit_profil", array("country" => show_countrys($get['country']),
-                                                                      "city" => re($get['city']),
-                                                                      "v_steamid" => re($get['steamid']),
-                                                                      "skypename" => re($get['skypename']),
+                                                                      "city" => stringParser::decode($get['city']),
+                                                                      "v_steamid" => stringParser::decode($get['steamid']),
+                                                                      "skypename" => stringParser::decode($get['skypename']),
                                                                       "pnl" => $pnl,
                                                                       "pnm" => $pnm,
                                                                       "pwd" => "",
                                                                       "dropdown_age" => $dropdown_age,
                                                                       "ava" => $avatar,
-                                                                      "hp" => re($get['hp']),
+                                                                      "hp" => stringParser::decode($get['hp']),
                                                                       "gmaps" => $gmaps,
-                                                                      "nick" => re($get['nick']),
-                                                                      "name" => re($get['user']),
-                                                                      "gmaps_koord" => re($get['gmaps_koord']),
-                                                                      "rlname" => re($get['rlname']),
+                                                                      "nick" => stringParser::decode($get['nick']),
+                                                                      "name" => stringParser::decode($get['user']),
+                                                                      "gmaps_koord" => stringParser::decode($get['gmaps_koord']),
+                                                                      "rlname" => stringParser::decode($get['rlname']),
                                                                       "bdayday" => $bdayday,
                                                                       "bdaymonth" => $bdaymonth,
                                                                       "bdayyear" => $bdayyear,
                                                                       "sex" => $sex,
-                                                                      "email" => re($get['email']),
+                                                                      "email" => stringParser::decode($get['email']),
                                                                       "visibility_gb" => $perm_gb,
                                                                       "visibility_gallery" => $perm_gallery,
                                                                       "visibility_profile" => $perm_profile,
                                                                       "icqnr" => $icq,
-                                                                      "sig" => re($get['signatur']),
+                                                                      "sig" => stringParser::decode($get['signatur']),
                                                                       "hlswid" => $get['hlswid'],
                                                                       "xboxid" => $get['xboxid'],
                                                                       "psnid" => $get['psnid'],
@@ -410,7 +413,7 @@ if(defined('_UserMenu')) {
                                                                       "custom_contact" => getcustom(3),
                                                                       "custom_favos" => getcustom(4),
                                                                       "custom_hardware" => getcustom(5),
-                                                                      "ich" => re($get['beschreibung']),
+                                                                      "ich" => stringParser::decode($get['beschreibung']),
                                                                       "delete" => $delete));
                         break;
                     }

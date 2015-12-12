@@ -8,13 +8,13 @@ if(defined('_UserMenu')) {
     $where = _site_user_lostpwd;
     if (!$chkMe) {
         if ($do == "sended") {
-            $get = $sql->fetch("SELECT `id`,`user`,`level` FROM `{prefix_users}` WHERE `user` = ? AND `email` = ?;", array(up($_POST['user']), up($_POST['email'])));
+            $get = $sql->fetch("SELECT `id`,`user`,`level` FROM `{prefix_users}` WHERE `user` = ? AND `email` = ?;", array(stringParser::encode($_POST['user']), stringParser::encode($_POST['email'])));
             if ($sql->rowCount() && (isset($_POST['secure']) || $securimage->check($_POST['secure']))) {
                 $pwd = mkpwd();
                 $sql->update("UPDATE `{prefix_users}` SET `pwd` = ? WHERE `id` = ?;",array(md5($pwd),$get['id']));
                 setIpcheck("pwd(" . $get['id'] . ")");
-                $message = show(bbcode_email(re(settings::get('eml_pwd'))), array("user" => $get['user'], "pwd" => $pwd));
-                sendMail($_POST['email'], re(settings::get('eml_pwd_subj')), $message);
+                $message = show(bbcode_email(stringParser::decode(settings::get('eml_pwd'))), array("user" => $get['user'], "pwd" => $pwd));
+                sendMail($_POST['email'],stringParser::decode(settings::get('eml_pwd_subj')), $message);
                 $index = info(_lostpwd_valid, "../user/?action=login");
             } else {
                 setIpcheck("trypwd(" . $get['id'] . ")");

@@ -56,7 +56,7 @@ if(defined('_Forum')) {
       if(empty($_POST['suche']))
       {
         $gets = $sql->fetch("SELECT id FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['id'])."'");
-        $threadlink = show(_forum_thread_link, array("topic" => re(cut($get['topic'],settings::get('l_forumtopic'))),
+        $threadlink = show(_forum_thread_link, array("topic" =>stringParser::decode(cut($get['topic'],settings::get('l_forumtopic'))),
                                                      "id" => $get['id'],
                                                      "kid" => $gets['id'],
                                                      "sticky" => $sticky,
@@ -65,7 +65,7 @@ if(defined('_Forum')) {
                                                      "lpid" => $cntpage+1,
                                                      "page" => $pagenr));
       } else {
-        $threadlink = show(_forum_thread_search_link, array("topic" => re(cut($get['topic'],settings::get('l_forumtopic'))),
+        $threadlink = show(_forum_thread_search_link, array("topic" =>stringParser::decode(cut($get['topic'],settings::get('l_forumtopic'))),
                                                             "id" => $get['id'],
                                                             "sticky" => $sticky,
                                                             "hl" => $_POST['suche'],
@@ -79,7 +79,7 @@ if(defined('_Forum')) {
                    ORDER BY date DESC");
       if($sql->rowCount())
       {
-        $lpost = show(_forum_thread_lpost, array("nick" => autor($getlp['reg'], '', $getlp['nick'], re($getlp['email'])),
+        $lpost = show(_forum_thread_lpost, array("nick" => autor($getlp['reg'], '', $getlp['nick'], stringParser::decode($getlp['email'])),
                                                  "date" => date("d.m.y H:i", $getlp['date'])._uhr));
         $lpdate = $getlp['date'];
       } else {
@@ -90,7 +90,7 @@ if(defined('_Forum')) {
       $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
       $threads .= show($dir."/forum_show_threads", array("new" => check_new($get['lp']),
                                                          "topic" => $threadlink,
-                                                         "subtopic" => re(cut($get['subtopic'],settings::get('l_forumsubtopic'))),
+                                                         "subtopic" =>stringParser::decode(cut($get['subtopic'],settings::get('l_forumsubtopic'))),
                                                          "hits" => $get['hits'],
                                                          "replys" => cnt("{prefix_forumposts}", " WHERE sid = '".$get['id']."'"),
                                                          "class" => $class,
@@ -102,7 +102,7 @@ if(defined('_Forum')) {
     $gets = $sql->fetch("SELECT id,kattopic FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['id'])."'");
     $search = show($dir."/forum_skat_search", array("head_search" => _forum_head_skat_search,
                                                     "id" => $_GET['id'],
-                                                    "suchwort" => isset($_POST['suche']) ? re($_POST['suche']) : ''));
+                                                    "suchwort" => isset($_POST['suche']) ? stringParser::decode($_POST['suche']) : ''));
     $nav = nav($entrys,settings::get('m_fthreads'),"?action=show&amp;id=".$_GET['id']."");
 
     if(!empty($_POST['suche']))
@@ -131,12 +131,12 @@ if(defined('_Forum')) {
     $subkat = $sql->fetch("SELECT sid FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['id'])."'");
     $kat = $sql->fetch("SELECT name FROM `{prefix_forumkats}` WHERE id = '".$subkat['sid']."'");
 
-    $wheres = show(_forum_subkat_where, array("where" => re($gets['kattopic']),
+    $wheres = show(_forum_subkat_where, array("where" => stringParser::decode($gets['kattopic']),
                                               "id" => $gets['id']));
 
     $index = show($dir."/forum_show", array("head" => _forum_head,
                                             "where" => $wheres,
-                                            "mainkat" => re($kat['name']),
+                                            "mainkat" => stringParser::decode($kat['name']),
                                             "what" => $what,
                                             "search" => $search));
   }

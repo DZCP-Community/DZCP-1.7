@@ -13,13 +13,13 @@ $qry = $sql->select("SELECT `ip`,`port`,`clanname`,`clanurl`,`pwd`,`checked`,`sl
 if($sql->rowCount()) {
     foreach($qry as $get) {
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-        $serverlist .= show($dir."/serverliste_show", array("clanurl" => re($get['clanurl']),
+        $serverlist .= show($dir."/serverliste_show", array("clanurl" => stringParser::decode($get['clanurl']),
                                                             "slots" => $get['slots'],
                                                             "class" => $class,
-                                                            "serverip" => re($get['ip']),
+                                                            "serverip" => stringParser::decode($get['ip']),
                                                             "serverport" => $get['port'],
-                                                            "clanname" => re($get['clanname']),
-                                                            "serverpwd" => re($get['pwd'])));
+                                                            "clanname" => stringParser::decode($get['clanname']),
+                                                            "serverpwd" => stringParser::decode($get['pwd'])));
     }
 } else
     $serverlist = show(_no_entrys_yet, array("colspan" => "4"));

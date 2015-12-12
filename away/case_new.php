@@ -63,7 +63,7 @@ if(defined('_Away')) {
                 $time = mktime(23,59,59,$_POST['monat'],$_POST['tag'],$_POST['jahr']);
                 $sql->insert("INSERT INTO `{prefix_away}` SET `userid`= ?,`start`= ?,`end`= ?,"
                 . "`titel`= ?,`reason`= ?,`date`= ?;",
-                array(intval($userid),intval($abdata),intval($time),up($_POST['titel']),up($_POST['reason']),time()));
+                array(intval($userid),intval($abdata),intval($time),stringParser::encode($_POST['titel']),stringParser::encode($_POST['reason']),time()));
                 $index = info(_away_successful_added, "../away/");
             }
         }

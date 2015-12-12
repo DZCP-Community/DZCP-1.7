@@ -12,9 +12,9 @@ switch ($do) {
         $qry = $sql->select("SELECT `id`,`name`,`icon` FROM `{prefix_squads}` WHERE `status` = 1 ORDER BY `game` ASC;");
         $squads = "";
         foreach($qry as $get) {
-            $squads .= show(_select_field_ranking_add, array("what" => re($get['name']),
+            $squads .= show(_select_field_ranking_add, array("what" => stringParser::decode($get['name']),
                                                              "value" => $get['id'],
-                                                             "icon" => re($get['icon']),
+                                                             "icon" => stringParser::decode($get['icon']),
                                                              "sel" => ""));
         }
         
@@ -41,7 +41,7 @@ switch ($do) {
                                                                   . "`url` = ?, "
                                                                   . "`rank` = ?, "
                                                                   . "`postdate` = ?;",
-                    array(up($_POST['league']),up($_POST['squad']),links($_POST['url']),intval($_POST['rank']),time()));
+                    array(stringParser::encode($_POST['league']),stringParser::encode($_POST['squad']),links($_POST['url']),intval($_POST['rank']),time()));
             $show = info(_ranking_added, "?admin=rankings");
         }
     break;
@@ -50,7 +50,7 @@ switch ($do) {
         $qrys = $sql->select("SELECT * FROM `{prefix_squads}` WHERE `status` = 1 ORDER BY `game` ASC;");
         foreach($qrys as $gets) {
             $sel = ($get['squad'] == $gets['id']) ? 'selected="selected"' : '';
-            $squads .= show(_select_field_ranking_add, array("what" => re($gets['name']),
+            $squads .= show(_select_field_ranking_add, array("what" => stringParser::decode($gets['name']),
                                                              "value" => $gets['id'],
                                                              "icon" => $gets['icon'],
                                                              "sel" => $sel));
@@ -60,9 +60,9 @@ switch ($do) {
                                                   "do" => "editranking&amp;id=".$_GET['id']."",
                                                   "what" => _button_value_edit,
                                                   "squads" => $squads,
-                                                  "e_league" => re($get['league']),
+                                                  "e_league" => stringParser::decode($get['league']),
                                                   "e_rank" => $get['rank'],
-                                                  "e_url" => re($get['url'])));
+                                                  "e_url" => stringParser::decode($get['url'])));
     break;
     case 'editranking':
         if(empty($_POST['league']) || empty($_POST['url']) || empty($_POST['rank'])) {
@@ -82,7 +82,7 @@ switch ($do) {
                                                       . "`lastranking` = ?,"
                                                       . "`postdate` = ?"
                                                       . " WHERE id = ?;",
-                    array(up($_POST['league']),up($_POST['squad']),up(links($_POST['url'])),
+                    array(stringParser::encode($_POST['league']),stringParser::encode($_POST['squad']),stringParser::encode(links($_POST['url'])),
                         intval($_POST['rank']),intval($get['rank']),time(),intval($get['id'])));
             $show = info(_ranking_edited, "?admin=rankings");
         }
@@ -109,8 +109,8 @@ switch ($do) {
                                                             "del" => convSpace(_confirm_del_ranking)));
 
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-          $show .= show($dir."/rankings_show", array("squad" => re($get['name']),
-                                                      "league" => re($get['league']),
+          $show .= show($dir."/rankings_show", array("squad" => stringParser::decode($get['name']),
+                                                      "league" => stringParser::decode($get['league']),
                                                       "id" => $get['sqid'],
                                                       "class" => $class,
                                                       "edit" => $edit,

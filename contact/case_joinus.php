@@ -14,8 +14,8 @@ $qrysquads = $sql->select("SELECT `id`,`name`,`game` "
 $squads = '';
 foreach($qrysquads as $getsquads) {
     $squads .= show(_select_field_fightus, array("id" => $getsquads['id'],
-                                                 "squad" => re($getsquads['name']),
-                                                 "game" => re($getsquads['game'])));
+                                                 "squad" => stringParser::decode($getsquads['name']),
+                                                 "game" => stringParser::decode($getsquads['game'])));
 }
 
 if (!$sql->rowCount()) {

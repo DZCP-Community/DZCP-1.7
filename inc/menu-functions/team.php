@@ -71,7 +71,7 @@ function team($tID = '') {
     //Output
     $all = cnt("{prefix_squads}", "WHERE `navi` = 1");
     $team = show("menu/team", array("row" => settings::get('teamrow'),
-                                    "team" => cut(re($get['name']),settings::get('l_team')),
+                                    "team" => cut(stringParser::decode($get['name']),settings::get('l_team')),
                                     "id" => $get['id'],
                                     "next" => $next['id'],
                                     "last" => $last['id'],

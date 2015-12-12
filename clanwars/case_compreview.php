@@ -48,7 +48,7 @@ if(!$regCheck) {
     
     $onoff = "";
     $avatar = "";
-    $nick = show(_link_mailto, array("nick" => re($get_nick), "email" => $get_email));
+    $nick = show(_link_mailto, array("nick" => stringParser::decode($get_nick), "email" => $get_email));
 } else {
     $hp = "";
     $email = "";
@@ -63,9 +63,9 @@ $titel = show(_eintrag_titel, array("postid" => $get_id,
                                     "delete" => $delete));
 
 $index = show("page/comments_show", array("titel" => $titel,
-                                          "comment" => bbcode(re($_POST['comment']),true),
+                                          "comment" => bbcode::parse_html($_POST['comment'],true),
                                           "nick" => $nick,
-                                          "editby" => bbcode($editedby,true),
+                                          "editby" => bbcode::parse_html($editedby,true),
                                           "email" => $email,
                                           "hp" => $hp,
                                           "avatar" => useravatar($get_userid),

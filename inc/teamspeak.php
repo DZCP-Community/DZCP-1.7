@@ -353,7 +353,7 @@ class TS3Renderer {
         $out .= "<tr><td class=\"contentMainSecond\"><span class=\"fontBold\">Users:</span></td></tr>\n";
         $out .= "<tr><td class=\"contentMainFirst\">".(array_key_exists('players', self::$data) ? count(self::$data['players']) : '-')."<br /><br /></td></tr>\n";
         $out .= "<tr><td class=\"contentMainSecond\"><span class=\"fontBold\">Welcome Message:</span></td></tr>\n";
-        $out .= "<tr><td class=\"contentMainFirst\">".(!empty(self::$data['virtualserver_welcomemessage']) ? self::rep(self::$data['virtualserver_welcomemessage']) : '-')."<br /><br /></td></tr>";
+        $out .= "<tr><td class=\"contentMainFirst\">".(!empty(self::$data['virtualserver_welcomemessage']) ? bbcode::parse_ts3(self::rep(self::$data['virtualserver_welcomemessage'])) : '-')."<br /><br /></td></tr>";
         return $out;
     }
 
@@ -468,7 +468,7 @@ class TS3Renderer {
     private static function unescape($text) {
         $escapedChars = array("\t", "\v", "\r", "\n", "\f", "\s", "\p", "\/");
         $unEscapedChars = array('', '', '', '', '', ' ', '|', '/');
-        return str_replace($escapedChars, $unEscapedChars, $text);
+        return str_replace($escapedChars, $unEscapedChars, utf8_decode($text));
     }
 
     /**
@@ -507,7 +507,7 @@ class TS3Renderer {
 
     public static function rep($var) {
         $var = preg_replace("/\[(.*?)spacer(.*?)\]/","",$var);
-        return strtr($var, array(chr(194) => '','\/' => '/','\s' => ' ','\p' => '|','ö' => '','<' => '&lt;','>' => '&gt;','[URL]' => '','[/URL]' => ''));
+        return utf8_decode(strtr($var, array(chr(194) => '','\/' => '/','\s' => ' ','\p' => '|','ö' => '','<' => '&lt;','>' => '&gt;','[URL]' => '','[/URL]' => '')));
     }
 
     public static function time_convert($time, $ms = false) {

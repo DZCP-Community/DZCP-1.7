@@ -55,9 +55,9 @@ if(defined('_UserMenu')) {
                 } else {
                     $getperm = $sql->fetch("SELECT `perm_gb`,`id` FROM `{prefix_users}` WHERE `id` = ?;",array(intval($_GET['id'])));
                     if ($getperm['perm_gb']) {
-                        $nick = !isset($_POST['nick']) && $userid >= 1 ? data('nick',$userid) : up($_POST['nick']);
-                        $email = !isset($_POST['email']) && $userid >= 1 ? data('email',$userid) : up($_POST['email']);
-                        $hp = !isset($_POST['hp']) && $userid >= 1 ? data('hp',$userid) : up($_POST['hp']);
+                        $nick = !isset($_POST['nick']) && $userid >= 1 ? data('nick',$userid) : stringParser::encode($_POST['nick']);
+                        $email = !isset($_POST['email']) && $userid >= 1 ? data('email',$userid) : stringParser::encode($_POST['email']);
+                        $hp = !isset($_POST['hp']) && $userid >= 1 ? data('hp',$userid) : stringParser::encode($_POST['hp']);
                         $uid = $userid >= 1 ? intval($userid) : 0;
                         $sql->insert("INSERT INTO `{prefix_usergb}` "
                                    . "SET `user`       = ?, "
@@ -68,7 +68,7 @@ if(defined('_UserMenu')) {
                                        . "`reg`        = ?, "
                                        . "`nachricht`  = ?, "
                                        . "`ip`         = ?;",
-                                array(intval($_GET['id']),$nick,$email,$hp,$uid,up($_POST['eintrag']),$userip));
+                                array(intval($_GET['id']),$nick,$email,$hp,$uid,stringParser::encode($_POST['eintrag']),$userip));
 
                         setIpcheck("mgbid(".$getperm['id'].")");
                         $index = info(_usergb_entry_successful, "?action=user&amp;id=".$_GET['id']."&show=gb");
@@ -80,11 +80,11 @@ if(defined('_UserMenu')) {
                     $addme = ''; $params = array();
                     if(!intval($_POST['reg'])) {
                          $addme = " `nick` = ?, `email` = ?, `hp` = ?,";
-                         array_push($params, up($_POST['nick']),up($_POST['email']),up(links($_POST['hp'])));
+                         array_push($params, stringParser::encode($_POST['nick']),stringParser::encode($_POST['email']),stringParser::encode(links($_POST['hp'])));
                     }
 
                     $editedby = show(_edited_by, array("autor" => autor($userid), "time" => date("d.m.Y H:i", time())._uhr));
-                    array_push($params, up($_POST['eintrag']), intval($_POST['reg']),up($editedby), intval($_GET['gbid']));
+                    array_push($params, stringParser::encode($_POST['eintrag']), intval($_POST['reg']),stringParser::encode($editedby), intval($_GET['gbid']));
                     $sql->update("UPDATE `{prefix_usergb}` SET".$addme." `nachricht` = ?, `reg` = ?, `editby` = ? WHERE id = ?;",$params);
                     $index = info(_gb_edited, "?action=user&show=gb&id=".$_GET['id']);
                 } else {

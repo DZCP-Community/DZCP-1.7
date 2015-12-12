@@ -18,14 +18,14 @@ function n_wars() {
     if($sql->rowCount()) {
         foreach($qry as $get) {
             if(settings::get('allowhover') == 1 || settings::get('allowhover') == 2)
-                $info = 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['name'])).' vs. '.jsconvert(re($get['gegner'])).'\', \''.
+                $info = 'onmouseover="DZCP.showInfo(\''.jsconvert(stringParser::decode($get['name'])).' vs. '.jsconvert(stringParser::decode($get['gegner'])).'\', \''.
                     _datum.';'._cw_xonx.';'._cw_maps.';'._comments_head.'\', \''.date("d.m.Y H:i", $get['datum'])._uhr.';'.
-                    jsconvert(re($get['xonx'])).';'.jsconvert(re($get['maps'])).';'.
+                    jsconvert(stringParser::decode($get['xonx'])).';'.jsconvert(stringParser::decode($get['maps'])).';'.
                     cnt("{prefix_cw_comments}","WHERE `cw` = ?","id",array($get['id'])).'\')" onmouseout="DZCP.hideInfo()"';
 
             $nwars .= show("menu/next_wars", array("id" => $get['id'],
-                                                   "clantag" => cut(re($get['clantag']),settings::get('l_nwars')),
-                                                   "icon" => re($get['icon']),
+                                                   "clantag" => cut(stringParser::decode($get['clantag']),settings::get('l_nwars')),
+                                                   "icon" => stringParser::decode($get['icon']),
                                                    "info" => $info,
                                                    "datum" => date("d.m.:", $get['datum'])));
         }

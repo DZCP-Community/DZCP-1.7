@@ -106,7 +106,7 @@
 
 			editor.dom.setOuterHTML(get('media_type'), self.getMediaTypeHTML(editor));
 
-			self.setDefaultDialogsettings::get(editor);
+//			self.setDefaultDialogsettings::get(editor);
 			self.data = clone(tinyMCEPopup.getWindowArg('data'));
 			self.dataToForm();
 			self.preview();

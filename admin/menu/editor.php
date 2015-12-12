@@ -19,13 +19,13 @@ switch($do) {
         $thiskat = ''; $position = '';
         foreach($qry as $get) {
             if($thiskat != $get['kat']) {
-                $position .= '<option class="dropdownKat" value="lazy">'.re($get['katname']).'</option>
-                              <option value="'.re($get['placeholder']).'-1">-> '._admin_first.'</option>';
+                $position .= '<option class="dropdownKat" value="lazy">'.stringParser::decode($get['katname']).'</option>
+                              <option value="'.stringParser::decode($get['placeholder']).'-1">-> '._admin_first.'</option>';
             }
 
             $thiskat = $get['kat'];
             $sel = ($get['editor'] == (isset($_GET['id']) ? $_GET['id'] : 0)) ? 'selected="selected"' : '';
-            $position .= empty($get['name']) ? '' : '<option value="'.re($get['placeholder']).'-'.($get['pos']+1).'" '.$sel.'>'._nach.' -> '.navi_name(re($get['name'])).'</option>';
+            $position .= empty($get['name']) ? '' : '<option value="'.stringParser::decode($get['placeholder']).'-'.($get['pos']+1).'" '.$sel.'>'._nach.' -> '.navi_name(stringParser::decode($get['name'])).'</option>';
         }
 
         $show = show($dir."/form_editor", array("head" => _editor_add_head,
@@ -73,13 +73,13 @@ switch($do) {
             $thiskat = ''; $position = '';
             foreach($qry as $get) {
                 if($thiskat != $get['kat']) {
-                    $position .= '<option class="dropdownKat" value="lazy">'.re($get['katname']).'</option>
-                    <option value="'.re($get['placeholder']).'-1">-> '._admin_first.'</option>';
+                    $position .= '<option class="dropdownKat" value="lazy">'.stringParser::decode($get['katname']).'</option>
+                    <option value="'.stringParser::decode($get['placeholder']).'-1">-> '._admin_first.'</option>';
                 }
 
                 $thiskat = $get['kat'];
                 $sel = ($get['kat'] == $kat_ && ($get['pos']+1) == $pos_) ? 'selected="selected"' : '';
-                $position .= empty($get['name']) ? '' : '<option value="'.re($get['placeholder']).'-'.($get['pos']+1).'" '.$sel.'>'._nach.' -> '.navi_name(re($get['name'])).'</option>';
+                $position .= empty($get['name']) ? '' : '<option value="'.stringParser::decode($get['placeholder']).'-'.($get['pos']+1).'" '.$sel.'>'._nach.' -> '.navi_name(stringParser::decode($get['name'])).'</option>';
             }
 
             $show = show($dir."/form_editor", array("head" => _editor_add_head,
@@ -95,11 +95,11 @@ switch($do) {
                                                     "nein" => _no,
                                                     "name" => _editor_linkname,
                                                     "position" => $position,
-                                                    "n_name" => re($_POST['name']),
+                                                    "n_name" => stringParser::decode($_POST['name']),
                                                     "wichtig" => _navi_wichtig,
                                                     "titel" => _titel,
-                                                    "e_titel" => re($_POST['titel']),
-                                                    "e_inhalt" => re($_POST['inhalt']),
+                                                    "e_titel" => stringParser::decode($_POST['titel']),
+                                                    "e_inhalt" => stringParser::decode($_POST['inhalt']),
                                                     "allow_html" => _editor_allow_html,
                                                     "inhalt" => _inhalt,
                                                     "do" => "addsite"));
@@ -107,7 +107,7 @@ switch($do) {
             $_POST['html'] = (isset($_POST['html']) ? $_POST['html'] : 0);
             $_POST['php'] = (isset($_POST['php']) ? $_POST['php'] : 0);
             $sql->insert("INSERT INTO `{prefix_sites}` SET `titel` = ?, `text` = ?, `html` = ?, `php` = ?;",
-                    array(up($_POST['titel']),up($_POST['inhalt']),intval($_POST['html']),(php_code_enabled ? intval($_POST['php']) : 0)));
+                    array(stringParser::encode($_POST['titel']),stringParser::encode($_POST['inhalt']),intval($_POST['html']),(php_code_enabled ? intval($_POST['php']) : 0)));
 
             $insert_id = $sql->lastInsertId();
             $sign = (isset($_POST['pos']) && ($_POST['pos'] == "1" || $_POST['pos'] == "2")) ? ">= " : "> ";
@@ -117,7 +117,7 @@ switch($do) {
 
             $sql->update("UPDATE `{prefix_navi}` SET `pos` = (pos+1) WHERE `pos` ".$sign." ?;",array(intval($pos)));
             $sql->insert("INSERT INTO `{prefix_navi}` SET `pos` = ?, `kat` = ?, `name` = ?, `url` = ?, `shown` = 1, `type` = 3, `editor` = ?, `wichtig` = 0;",
-                    array(intval($pos),up($kat),up($_POST['name']),up($url),intval($insert_id)));
+                    array(intval($pos),stringParser::encode($kat),stringParser::encode($_POST['name']),stringParser::encode($url),intval($insert_id)));
 
             $show = info(_site_added, "?admin=editor");
         }
@@ -133,13 +133,13 @@ switch($do) {
         $thiskat = ''; $position = '';
         foreach($qry as $get) {
             if($thiskat != $get['kat']) {
-                $position .= '<option class="dropdownKat" value="lazy">'.re($get['katname']).'</option>
-                  <option value="'.re($get['placeholder']).'-1">-> '._admin_first.'</option>';
+                $position .= '<option class="dropdownKat" value="lazy">'.stringParser::decode($get['katname']).'</option>
+                  <option value="'.stringParser::decode($get['placeholder']).'-1">-> '._admin_first.'</option>';
             }
 
             $thiskat = $get['kat'];
             $sel = ($get['editor'] == $_GET['id']) ? 'selected="selected"' : '';
-            $position .= empty($get['name']) ? '' : '<option value="'.re($get['placeholder']).'-'.($get['pos']+1).'" '.$sel.'>'._nach.' -> '.navi_name(re($get['name'])).'</option>';
+            $position .= empty($get['name']) ? '' : '<option value="'.stringParser::decode($get['placeholder']).'-'.($get['pos']+1).'" '.$sel.'>'._nach.' -> '.navi_name(stringParser::decode($get['name'])).'</option>';
         }
 
         $getn = $sql->fetch("SELECT `name` FROM `{prefix_navi}` WHERE `editor` = ?;",array(intval($_GET['id'])));
@@ -151,14 +151,14 @@ switch($do) {
                                                 "bbcode" => _bbcode,
                                                 "preview" => _preview,
                                                 "titel" => _titel,
-                                                "e_titel" => re($gets['titel']),
-                                                "e_inhalt" => re($gets['text']),
+                                                "e_titel" => stringParser::decode($gets['titel']),
+                                                "e_inhalt" => stringParser::decode($gets['text']),
                                                 "checked" => $checked,
                                                 "checked_php" => $checked_php,
                                                 "disabled_php" => (php_code_enabled ? '' : ' disabled'),
                                                 "pos" => _position,
                                                 "name" => _editor_linkname,
-                                                "n_name" => re($getn['name']),
+                                                "n_name" => stringParser::decode($getn['name']),
                                                 "position" => $position,
                                                 "ja" => _yes,
                                                 "nein" => _no,
@@ -190,13 +190,13 @@ switch($do) {
             $thiskat = ''; $position = '';
             foreach($qry as $get) {
                 if($thiskat != $get['kat']) {
-                    $position .= '<option class="dropdownKat" value="lazy">'.re($get['katname']).'</option>'
-                            . '<option value="'.re($get['placeholder']).'-1">-> '._admin_first.'</option>';
+                    $position .= '<option class="dropdownKat" value="lazy">'.stringParser::decode($get['katname']).'</option>'
+                            . '<option value="'.stringParser::decode($get['placeholder']).'-1">-> '._admin_first.'</option>';
                 }
 
                 $thiskat = $get['kat'];
                 $sel = (isset($_GET['id']) && $get['editor'] == $_GET['id']) ? 'selected="selected"' : '';
-                $position .= empty($get['name']) ? '' : '<option value="'.re($get['placeholder']).'-'.($get['pos']+1).'" '.$sel.'>'._nach.' -> '.navi_name(re($get['name'])).'</option>';
+                $position .= empty($get['name']) ? '' : '<option value="'.stringParser::decode($get['placeholder']).'-'.($get['pos']+1).'" '.$sel.'>'._nach.' -> '.navi_name(stringParser::decode($get['name'])).'</option>';
             }
 
             $show = show($dir."/form_editor", array("head" => _editor_edit_head,
@@ -212,11 +212,11 @@ switch($do) {
                                                     "nein" => _no,
                                                     "name" => _editor_linkname,
                                                     "position" => $position,
-                                                    "n_name" => re($_POST['name']),
+                                                    "n_name" => stringParser::decode($_POST['name']),
                                                     "wichtig" => _navi_wichtig,
                                                     "titel" => _titel,
-                                                    "e_titel" => re($_POST['titel']),
-                                                    "e_inhalt" => re($_POST['inhalt']),
+                                                    "e_titel" => stringParser::decode($_POST['titel']),
+                                                    "e_inhalt" => stringParser::decode($_POST['inhalt']),
                                                     "allow_html" => _editor_allow_html,
                                                     "inhalt" => _inhalt,
                                                     "do" => "editsite&amp;id=".$_GET['id'].""));
@@ -224,7 +224,7 @@ switch($do) {
             $_POST['html'] = isset($_POST['html']) ? $_POST['html'] : 0;
             $_POST['php'] = isset($_POST['php']) ? $_POST['php'] : 0;
             $sql->update("UPDATE `{prefix_sites}` SET `titel` = ?,`text` = ?,`html` = ?, `php` = ? WHERE `id` = ?;",
-                    array(up($_POST['titel']),up($_POST['inhalt']),intval($_POST['html']),(php_code_enabled ? intval($_POST['php']) : 0),intval($_GET['id'])));
+                    array(stringParser::encode($_POST['titel']),stringParser::encode($_POST['inhalt']),intval($_POST['html']),(php_code_enabled ? intval($_POST['php']) : 0),intval($_GET['id'])));
 
             $sign = (isset($_POST['pos']) && ($_POST['pos'] == "1" || $_POST['pos'] == "2")) ? ">= " : "> ";
             $kat = preg_replace('/-(\d+)/','',$_POST['pos']);
@@ -233,7 +233,7 @@ switch($do) {
             $url = "../sites/?show=".$_GET['id'];
             $sql->update("UPDATE `{prefix_navi}` SET `pos` = (pos+1) WHERE `pos` ".$sign." ?;",array(intval($pos)));
             $sql->update("UPDATE `{prefix_navi}` SET `pos` = ?, `kat` = ?, `name` = ?,`url` = ? WHERE `editor` = ?;",
-                    array(intval($pos),up($kat),up($_POST['name']),up($url),intval($_GET['id'])));
+                    array(intval($pos),stringParser::encode($kat),stringParser::encode($_POST['name']),stringParser::encode($url),intval($_GET['id'])));
 
             $show = info(_site_edited, "?admin=editor");
         }
@@ -256,7 +256,7 @@ switch($do) {
                                                               "title" => _button_title_del,
                                                               "del" => convSpace(_confirm_del_site)));
 
-            $show .= show($dir."/editor_show", array("name" => "<a href='../sites/?show=".$get['id']."'>".re($get['titel'])."</a>",
+            $show .= show($dir."/editor_show", array("name" => "<a href='../sites/?show=".$get['id']."'>".stringParser::decode($get['titel'])."</a>",
                                                       "del" => $delete,
                                                       "edit" => $edit,
                                                       "class" => $class));

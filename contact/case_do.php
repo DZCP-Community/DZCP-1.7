@@ -43,7 +43,7 @@ switch($_GET['what']) {
                            . "`an` = ?, "
                            . "`titel` = ?, "
                            . "`nachricht` = ?;",
-                        array(time(),intval($get['id']),up(_contact_title),up($text)));
+                        array(time(),intval($get['id']),stringParser::encode(_contact_title),stringParser::encode($text)));
             }
 
             $qry = $sql->select("SELECT s2.`user` FROM `{prefix_permissions}` AS `s1` "
@@ -57,7 +57,7 @@ switch($_GET['what']) {
                            . "`an` = ?, "
                            . "`titel` = ?, "
                            . "`nachricht` = ?;",
-                        array(time(),intval($get['user']),re(_contact_title),up($text)));
+                        array(time(),intval($get['user']),stringParser::decode(_contact_title),stringParser::encode($text)));
             }
 
             $index = info(_contact_sended, "../news/");
@@ -80,7 +80,7 @@ switch($_GET['what']) {
             if (intval($_POST['squad']) != 0) {
                 $qrysquads = $sql->fetch("SELECT `name` FROM `{prefix_squads}` WHERE `id` = ?;",array(intval($_POST['squad'])));
             } else {
-                $qrysquads = array('name' => up(_contact_joinus_no_squad_aviable));
+                $qrysquads = array('name' => stringParser::encode(_contact_joinus_no_squad_aviable));
             }
 
             $icq = preg_replace("=-=Uis","",$_POST['icq']);
@@ -91,7 +91,7 @@ switch($_GET['what']) {
                                                      "email" => $email,
                                                      "age" => $_POST['age'],
                                                      "text" => $_POST['text'],
-                                                     "squad" => re($qrysquads['name']),
+                                                     "squad" => stringParser::decode($qrysquads['name']),
                                                      "nick" => $_POST['nick']));
 
             $qry = $sql->select("SELECT s1.id FROM `{prefix_users}` AS `s1` "
@@ -109,7 +109,7 @@ switch($_GET['what']) {
                         . "`an` = ?, "
                         . "`titel` = ?, "
                         . "`nachricht` = ?;",
-                array(time(),intval($get['id']),up(_contact_title_joinus),up($text)));
+                array(time(),intval($get['id']),stringParser::encode(_contact_title_joinus),stringParser::encode($text)));
           }
 
           $qry = $sql->select("SELECT s2.`user` FROM `{prefix_permissions}` AS `s1` "
@@ -124,7 +124,7 @@ switch($_GET['what']) {
                         . "`an` = ?, "
                         . "`titel` = ?, "
                         . "`nachricht` = ?;",
-                array(time(),intval($get['user']),up(_contact_title_joinus),up($text)));
+                array(time(),intval($get['user']),stringParser::encode(_contact_title_joinus),stringParser::encode($text)));
           }
 
           $index = info(_contact_joinus_sended, "../news/");
@@ -160,7 +160,7 @@ switch($_GET['what']) {
                                                      "text" => $_POST['text'],
                                                      "clan" => $_POST['clan'],
                                                      "hp" => $hp,
-                                                     "squad" => re($get['name']),
+                                                     "squad" => stringParser::decode($get['name']),
                                                      "game" => $_POST['game'],
                                                      "us" => $_POST['us'],
                                                      "to" => $_POST['to'],
@@ -189,7 +189,7 @@ switch($_GET['what']) {
                         . "`an` = ?, "
                         . "`titel` = ?, "
                         . "`nachricht` = ?;",
-                array(time(),intval($get['user']),up(_contact_title_fightus),up($msg)));
+                array(time(),intval($get['user']),stringParser::encode(_contact_title_fightus),stringParser::encode($msg)));
             }
 
             $qry = $sql->select("SELECT s3.`user` FROM `{prefix_permissions}` AS `s1` "
@@ -206,7 +206,7 @@ switch($_GET['what']) {
                         . "`an` = ?, "
                         . "`titel` = ?, "
                         . "`nachricht` = ?;",
-                array(time(),intval($get['user']),up(_contact_title_fightus),up($msg)));
+                array(time(),intval($get['user']),stringParser::encode(_contact_title_fightus),stringParser::encode($msg)));
           }
           
           $index = info(_contact_fightus_sended, "../news/");

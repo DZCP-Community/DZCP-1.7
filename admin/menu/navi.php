@@ -14,13 +14,13 @@ if(_adminMenu != 'true') exit;
         foreach($qry as $get) {
           if($thiskat != $get['kat']) {
             $position .= '
-              <option class="dropdownKat" value="lazy">'.re($get['katname']).'</option>
-              <option value="'.re($get['placeholder']).'-1">-> '._admin_first.'</option>
+              <option class="dropdownKat" value="lazy">'.stringParser::decode($get['katname']).'</option>
+              <option value="'.stringParser::decode($get['placeholder']).'-1">-> '._admin_first.'</option>
             ';
           }
           $thiskat = $get['kat'];
 
-          $position .= empty($get['name']) ? '' : '<option value="'.re($get['placeholder']).'-'.($get['pos']+1).'">'._nach.' -> '.navi_name(re($get['name'])).'</option>';
+          $position .= empty($get['name']) ? '' : '<option value="'.stringParser::decode($get['placeholder']).'-'.($get['pos']+1).'">'._nach.' -> '.navi_name(stringParser::decode($get['name'])).'</option>';
         }
 
         $show = show($dir."/form_navi", array("do" => "addnavi",
@@ -59,9 +59,9 @@ if(_adminMenu != 'true') exit;
 
           $sql->insert("INSERT INTO `{prefix_navi}`
                       SET `pos`       = '".intval($pos)."',
-                          `kat`       = '".up($kat)."',
-                          `name`      = '".up($_POST['name'])."',
-                          `url`       = '".up($_POST['url'])."',
+                          `kat`       = '".stringParser::encode($kat)."',
+                          `name`      = '".stringParser::encode($_POST['name'])."',
+                          `url`       = '".stringParser::encode($_POST['url'])."',
                           `shown`     = '1',
                           `target`    = '".intval($_POST['target'])."',
                           `internal`  = '".intval($_POST['internal'])."',
@@ -87,14 +87,14 @@ if(_adminMenu != 'true') exit;
          foreach($qry as $get) {
           if($thiskat != $get['kat']) {
             $position .= '
-              <option class="dropdownKat" value="lazy">'.re($get['katname']).'</option>
-              <option value="'.re($get['placeholder']).'-1">-> '._admin_first.'</option>
+              <option class="dropdownKat" value="lazy">'.stringParser::decode($get['katname']).'</option>
+              <option value="'.stringParser::decode($get['placeholder']).'-1">-> '._admin_first.'</option>
             ';
           }
           $thiskat = $get['kat'];
           $sel[$i] = ($get['id'] == $_GET['id']) ? 'selected="selected"' : '';
 
-          $position .= empty($get['name']) ? '' : '<option value="'.re($get['placeholder']).'-'.($get['pos']+1).'" '.$sel[$i].'>'._nach.' -> '.navi_name(re($get['name'])).'</option>';
+          $position .= empty($get['name']) ? '' : '<option value="'.stringParser::decode($get['placeholder']).'-'.($get['pos']+1).'" '.$sel[$i].'>'._nach.' -> '.navi_name(stringParser::decode($get['name'])).'</option>';
 
           $i++;
         }
@@ -103,10 +103,10 @@ if(_adminMenu != 'true') exit;
 
         if($get['type'] == "1")
         {
-          $name = re($get['name']);
+          $name = stringParser::decode($get['name']);
           $read = "readonly";
         } else {
-          $name = re($get['name']);
+          $name = stringParser::decode($get['name']);
           $read = "";
         }
 
@@ -148,9 +148,9 @@ if(_adminMenu != 'true') exit;
 
         $sql->update("UPDATE `{prefix_navi}`
                     SET `pos`       = '".intval($pos)."',
-                        `kat`       = '".up($kat)."',
-                        `name`      = '".up($_POST['name'])."',
-                        `url`       = '".up($_POST['url'])."',
+                        `kat`       = '".stringParser::encode($kat)."',
+                        `name`      = '".stringParser::encode($_POST['name'])."',
+                        `url`       = '".stringParser::encode($_POST['url'])."',
                         `target`    = '".intval($_POST['target'])."',
                         `shown`     = '".intval($_POST['sichtbar'])."',
                         `internal`  = '".intval($_POST['internal'])."',
@@ -179,8 +179,8 @@ if(_adminMenu != 'true') exit;
                                                    "visible" => _menu_visible,
                                                    "what" => _menu_edit_kat,
                                                    "menu_kat_info" => _menu_kat_info,
-                                                   "n_name" => re($get['name']),
-                                                   "n_placeholder" => str_replace('nav_', '', re($get['placeholder'])),
+                                                   "n_name" => stringParser::decode($get['name']),
+                                                   "n_placeholder" => str_replace('nav_', '', stringParser::decode($get['placeholder'])),
                                                    "sel_user" => ($get['level'] == 1 ? ' selected="selected"' : ''),
                                                    "sel_trial" => ($get['level'] == 2 ? ' selected="selected"' : ''),
                                                    "sel_member" => ($get['level'] == 3 ? ' selected="selected"' : ''),
@@ -194,8 +194,8 @@ if(_adminMenu != 'true') exit;
                                                    ));
       } else if($do == 'updatekat') {
         $sql->update("UPDATE `{prefix_navi_kats}`
-            SET `name`        = '".up($_POST['name'])."',
-                `placeholder` = 'nav_".up($_POST['placeholder'])."',
+            SET `name`        = '".stringParser::encode($_POST['name'])."',
+                `placeholder` = 'nav_".stringParser::encode($_POST['placeholder'])."',
                 `level`       = '".intval($_POST['level'])."'
             WHERE `id` = '".intval($_GET['id'])."'");
 
@@ -227,8 +227,8 @@ if(_adminMenu != 'true') exit;
                                                    ));
       } else if($do == 'insertkat') {
         $sql->insert("INSERT INTO `{prefix_navi_kats}`
-            SET `name`        = '".up($_POST['name'])."',
-                `placeholder` = 'nav_".up($_POST['placeholder'])."',
+            SET `name`        = '".stringParser::encode($_POST['name'])."',
+                `placeholder` = 'nav_".stringParser::encode($_POST['placeholder'])."',
                 `level`       = '".intval($_POST['intern'])."'");
 
         $show = info(_menukat_inserted, '?admin=navi');
@@ -251,7 +251,7 @@ if(_adminMenu != 'true') exit;
             $edit = "&nbsp;";
             $type = _navi_space;
           } else {
-            $type = re($get['name']);
+            $type = stringParser::decode($get['name']);
             $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                           "action" => "admin=navi&amp;do=edit",
                                                           "title" => _button_title_edit));
@@ -278,7 +278,7 @@ if(_adminMenu != 'true') exit;
                                                   "id" => $get['id'],
                                                   "set" => $set,
                                                   "url" => cut($get['url'],34),
-                                                  "kat" => re($get['katname']),
+                                                  "kat" => stringParser::decode($get['katname']),
                                                   "shown" => $shown,
                                                   "edit" => $edit,
                                                   "del" => $delete));
@@ -291,7 +291,7 @@ if(_adminMenu != 'true') exit;
         foreach($qry as $get) {
           $class = ($color % 2) ? 'contentMainFirst' : 'contentMainSecond'; $color++;
 
-          $type = re($get['name']);
+          $type = stringParser::decode($get['name']);
           if($get['placeholder'] == 'nav_admin') {
             $edit = '';
             $delete = '';
@@ -304,11 +304,11 @@ if(_adminMenu != 'true') exit;
                                                               "title" => _button_title_del,
                                                               "del" => convSpace(_confirm_del_menu)));
           }
-          $show_kats .= show($dir."/navi_kats", array("name" => re($get['name']),
+          $show_kats .= show($dir."/navi_kats", array("name" => stringParser::decode($get['name']),
                                                       "intern" => (empty($get['intern']) ? _noicon : _yesicon),
                                                       "id" => $get['id'],
                                                       "set" => (empty($get['intern']) ? 1 : 0),
-                                                      "placeholder" => str_replace('nav_', '', re($get['placeholder'])),
+                                                      "placeholder" => str_replace('nav_', '', stringParser::decode($get['placeholder'])),
                                                       "class" => $class,
                                                       "edit" => $edit,
                                                       "del" => $delete));

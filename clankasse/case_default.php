@@ -17,7 +17,7 @@ if(defined('_Ck')) {
             $betrag = str_replace(',', '.', $get['betrag']);
             $pm = show((!$get['pm'] ? _clankasse_plus : _clankasse_minus),
                         array("betrag" => $betrag,"w" => str_replace(array('EUR','USD'), array('&euro;','$'),
-                    re($get_settings['k_waehrung']))));
+                    stringParser::decode($get_settings['k_waehrung']))));
 
             $edit = ""; $delete = "";
             if(permission("clankasse")) {
@@ -35,8 +35,8 @@ if(defined('_Ck')) {
             $show .= show($dir."/clankasse_show", array("betrag" => $pm,
                                                         "id" => $get['id'],
                                                         "class" => $class,
-                                                        "for" => re($get['member']),
-                                                        "transaktion" => re($get['transaktion']),
+                                                        "for" => stringParser::decode($get['member']),
+                                                        "transaktion" => stringParser::decode($get['transaktion']),
                                                         "delete" => $delete,
                                                         "edit" => $edit,
                                                         "datum" => date("d.m.Y",$get['datum'])));
@@ -49,7 +49,7 @@ if(defined('_Ck')) {
         $ges = str_replace(".",",",round(($getp - $getc),2));
         $gesamt = show(($getp < $getc ? _clankasse_summe_minus : _clankasse_summe_plus),
             array("summe" => $ges, "w" => str_replace(array('EUR','USD'), array('&euro;','$'),
-                    re($get_settings['k_waehrung']))));
+                    stringParser::decode($get_settings['k_waehrung']))));
 
         $qrys = $sql->select("SELECT tbl1.`id`,tbl1.`nick`,tbl2.`user`,tbl2.`payed` "
                 . "FROM `{prefix_users}` AS `tbl1` "

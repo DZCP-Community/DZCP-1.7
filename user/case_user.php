@@ -19,21 +19,21 @@ if(defined('_UserMenu')) {
 
             $sex = $get['sex'] == 1 ? _male : ($get['sex'] == 2 ? _female : '-');
             $hp = empty($get['hp']) ? "-" : "<a href=\"" . $get['hp'] . "\" target=\"_blank\">" . $get['hp'] . "</a>";
-            $email = empty($get['email']) ? "-" : CryptMailto(re($get['email']), _user_mailto_texttop);
+            $email = empty($get['email']) ? "-" : CryptMailto(stringParser::decode($get['email']), _user_mailto_texttop);
             $pn = show(_pn_write, array("id" => $_GET['id'], "nick" => $get['nick']));
-            $hlsw = empty($get['hlswid']) ? "-" : show(_hlswicon, array("id" => re($get['hlswid']), "img" => "1", "css" => ""));
-            $xboxu = empty($get['xboxid']) ? "-" : show(_xboxicon, array("id" => str_replace(" ", "%20", trim(re($get['xboxid']))), "img" => "1", "css" => ""));
-            $xboxuser = empty($get['xboxid']) ? _noxboxavatar : show(_xboxpic, array("id" => str_replace(" ", "%20", trim(re($get['xboxid']))), "img" => "1", "css" => ""));
-            $psnu = empty($get['psnid']) ? "-" : show(_psnicon, array("id" => str_replace(" ", "%20", trim(re($get['psnid']))), "img" => "1", "css" => ""));
-            $originu = empty($get['originid']) ? '-' : show(_originicon, array("id" => str_replace(" ", "%20", trim(re($get['originid']))), "img" => "1", "css" => ""));
-            $battlenetu = empty($get['battlenetid']) ? '-' : show(_battleneticon, array("id" => str_replace(" ", "%20", trim(re($get['battlenetid']))), "img" => "1", "css" => ""));
+            $hlsw = empty($get['hlswid']) ? "-" : show(_hlswicon, array("id" => stringParser::decode($get['hlswid']), "img" => "1", "css" => ""));
+            $xboxu = empty($get['xboxid']) ? "-" : show(_xboxicon, array("id" => str_replace(" ", "%20", trim(stringParser::decode($get['xboxid']))), "img" => "1", "css" => ""));
+            $xboxuser = empty($get['xboxid']) ? _noxboxavatar : show(_xboxpic, array("id" => str_replace(" ", "%20", trim(stringParser::decode($get['xboxid']))), "img" => "1", "css" => ""));
+            $psnu = empty($get['psnid']) ? "-" : show(_psnicon, array("id" => str_replace(" ", "%20", trim(stringParser::decode($get['psnid']))), "img" => "1", "css" => ""));
+            $originu = empty($get['originid']) ? '-' : show(_originicon, array("id" => str_replace(" ", "%20", trim(stringParser::decode($get['originid']))), "img" => "1", "css" => ""));
+            $battlenetu = empty($get['battlenetid']) ? '-' : show(_battleneticon, array("id" => str_replace(" ", "%20", trim(stringParser::decode($get['battlenetid']))), "img" => "1", "css" => ""));
             $bday = (!$get['bday'] || empty($get['bday'])) ? "-" : date('d.m.Y', $get['bday']);
 
             $icq = "-";
             $icqnr = '';
             if (!empty($get['icq'])) {
-                $icq = show(_icqstatus, array("uin" => re($get['icq'])));
-                $icqnr = re($get['icq']);
+                $icq = show(_icqstatus, array("uin" => stringParser::decode($get['icq'])));
+                $icqnr = stringParser::decode($get['icq']);
             }
 
             $status = ($get['status'] == 1 || ($get['level'] != 1 && isset($_GET['sq']))) ? _aktiv_icon : _inaktiv_icon;
@@ -75,11 +75,11 @@ if(defined('_UserMenu')) {
                                   array($get['id']));
                     if (!empty($getcontent[$getcustom['feldname']])) {
                         if ($getcustom['type'] == 2) {
-                            $custom_clan .= show(_profil_custom_url, array("name" => pfields_name(re($getcustom['name'])), "value" => re($getcontent[$getcustom['feldname']])));
+                            $custom_clan .= show(_profil_custom_url, array("name" => pfields_name(stringParser::decode($getcustom['name'])), "value" => stringParser::decode($getcontent[$getcustom['feldname']])));
                         } else if ($getcustom['type'] == 3) {
-                            $custom_clan .= show(_profil_custom_mail, array("name" => pfields_name(re($getcustom['name'])), "value" => CryptMailto(re($getcontent[$getcustom['feldname']]), _link_mailto)));
+                            $custom_clan .= show(_profil_custom_mail, array("name" => pfields_name(stringParser::decode($getcustom['name'])), "value" => CryptMailto(stringParser::decode($getcontent[$getcustom['feldname']]), _link_mailto)));
                         } else {
-                            $custom_clan .= show(_profil_custom, array("name" => pfields_name(re($getcustom['name'])), "value" => re($getcontent[$getcustom['feldname']])));
+                            $custom_clan .= show(_profil_custom, array("name" => pfields_name(stringParser::decode($getcustom['name'])), "value" => stringParser::decode($getcontent[$getcustom['feldname']])));
                         }
                     }
                 }
@@ -117,7 +117,7 @@ if(defined('_UserMenu')) {
                         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst";
                         $color++;
                         $gal .= show($dir . "/profil_gallery_show", array("picture" => img_size("inc/images/uploads/usergallery" . "/" . $qryperm['id'] . "_" . $getgl['pic']),
-                                                                          "beschreibung" => bbcode($getgl['beschreibung']),
+                                                                          "beschreibung" => bbcode::parse_html($getgl['beschreibung']),
                                                                           "class" => $class));
                     }
 
@@ -141,8 +141,8 @@ if(defined('_UserMenu')) {
 
                 $membergb = '';
                 foreach($qrygb as $getgb) {
-                    $gbhp = $getgb['hp'] ? show(_hpicon, array("hp" => re($getgb['hp']))) : "";
-                    $gbemail = $getgb['email'] ? CryptMailto(re($getgb['email']), _emailicon) : "";
+                    $gbhp = $getgb['hp'] ? show(_hpicon, array("hp" => stringParser::decode($getgb['hp']))) : "";
+                    $gbemail = $getgb['email'] ? CryptMailto(stringParser::decode($getgb['email']), _emailicon) : "";
                     $edit = ""; $delete = "";
                     if (permission('editusers') || $_GET['id'] == $userid) {
                         $edit = show("page/button_edit_single", array("id" => $get['id'],
@@ -157,15 +157,15 @@ if(defined('_UserMenu')) {
 
                     if (!$getgb['reg']) {
                         $www = "";
-                        $hp = $getgb['hp'] ? show(_hpicon_forum, array("hp" => re($getgb['hp']))) : "";
-                        $email = $getgb['email'] ? '<br />' . CryptMailto(re($getgb['email']), _emailicon_forum) : "";
+                        $hp = $getgb['hp'] ? show(_hpicon_forum, array("hp" => stringParser::decode($getgb['hp']))) : "";
+                        $email = $getgb['email'] ? '<br />' . CryptMailto(stringParser::decode($getgb['email']), _emailicon_forum) : "";
                         $onoff = "";
                         $avatar = "";
-                        $nick = CryptMailto(re($getgb['email']), _link_mailto, array("nick" => re($getgb['nick'])));
+                        $nick = CryptMailto(stringParser::decode($getgb['email']), _link_mailto, array("nick" => stringParser::decode($getgb['nick'])));
                     } else {
                         $www = data("hp", $getgb['reg']);
                         $hp = empty($www) ? '' : show(_hpicon_forum, array("hp" => $www));
-                        $email = '<br />' . CryptMailto(re(data("email", $getgb['reg'])), _emailicon_forum);
+                        $email = '<br />' . CryptMailto(stringParser::decode(data("email", $getgb['reg'])), _emailicon_forum);
                         $onoff = onlinecheck($getgb['reg']);
                         $nick = autor($getgb['reg']);
                     }
@@ -178,10 +178,10 @@ if(defined('_UserMenu')) {
 
                     $posted_ip = ($chkMe == 4 || permission('ipban') ? $getgb['ip'] : _logged);
                     $membergb .= show("page/comments_show", array("titel" => $titel,
-                                                                  "comment" => bbcode($getgb['nachricht']),
+                                                                  "comment" => bbcode::parse_html($getgb['nachricht']),
                                                                   "nick" => $nick,
                                                                   "hp" => $hp,
-                                                                  "editby" => bbcode($getgb['editby']),
+                                                                  "editby" => bbcode::parse_html($getgb['editby']),
                                                                   "email" => $email,
                                                                   "avatar" => useravatar($getgb['reg']),
                                                                   "onoff" => $onoff,
@@ -237,12 +237,12 @@ if(defined('_UserMenu')) {
                     $favos_head = show(_profil_head_cont, array("what" => _profil_favos));
                 }
 
-                $rlname = $get['rlname'] ? re($get['rlname']) : "-";
+                $rlname = $get['rlname'] ? stringParser::decode($get['rlname']) : "-";
                 $skypename = $get['skypename'] ? "<a href=\"skype:" . $get['skypename'] . "?chat\"><img src=\"http://mystatus.skype.com/smallicon/" . $get['skypename'] . "\" style=\"border: none;\" width=\"16\" height=\"16\" alt=\"" . $get['skypename'] . "\"/></a>" : "-";
-                $steam = (!empty($get['steamid']) && steam_enable ? '<div id="infoSteam_' . md5(re($get['steamid'])) . '"><div style="width:100%;text-align:center"><img src="../inc/images/ajax-loader-mini.gif" alt="" /></div><script language="javascript" type="text/javascript">DZCP.initDynLoader("infoSteam_' . md5(re($get['steamid'])) . '","steam","&steamid=' . re($get['steamid']) . '",true);</script></div>' : '-');
+                $steam = (!empty($get['steamid']) && steam_enable ? '<div id="infoSteam_' . md5(stringParser::decode($get['steamid'])) . '"><div style="width:100%;text-align:center"><img src="../inc/images/ajax-loader-mini.gif" alt="" /></div><script language="javascript" type="text/javascript">DZCP.initDynLoader("infoSteam_' . md5(stringParser::decode($get['steamid'])) . '","steam","&steamid=' . stringParser::decode($get['steamid']) . '",true);</script></div>' : '-');
 
-                $city = re($get['city']);
-                $beschreibung = bbcode($get['beschreibung']);
+                $city = stringParser::decode($get['city']);
+                $beschreibung = bbcode::parse_html($get['beschreibung']);
                 $show = show($dir."/profil_show", array("hardware_head" => $hardware_head,
                                                         "country" => flag($get['country']),
                                                         "city" => (empty($city) ? '-' : $city),
@@ -255,11 +255,11 @@ if(defined('_UserMenu')) {
                                                         "regdatum" => date("d.m.Y H:i", $get['regdatum']) . _uhr,
                                                         "lastvisit" => date("d.m.Y H:i", userstats("lastvisit", $_GET['id'])) . _uhr,
                                                         "hp" => $hp,
-                                                        "xfire" => re($get['hlswid']),
-                                                        "xboxx" => re($get['xboxid']),
-                                                        "psnn" => re($get['psnid']),
-                                                        "originn" => re($get['originid']),
-                                                        "battlenett" => re($get['battlenetid']),
+                                                        "xfire" => stringParser::decode($get['hlswid']),
+                                                        "xboxx" => stringParser::decode($get['xboxid']),
+                                                        "psnn" => stringParser::decode($get['psnid']),
+                                                        "originn" => stringParser::decode($get['originid']),
+                                                        "battlenett" => stringParser::decode($get['battlenetid']),
                                                         "buddyadd" => $buddyadd,
                                                         "nick" => autor($get['id']),
                                                         "rlname" => $rlname,
@@ -323,9 +323,9 @@ if(defined('_UserMenu')) {
                             if ($get['reg'] != 0) {
                                 $form = show("page/editor_regged", array("nick" => autor($get['reg']), "von" => _autor));
                             } else {
-                                $form = show("page/editor_notregged", array("postemail" => re($get['email']),
-                                                                            "posthp" => re($get['hp']),
-                                                                            "postnick" => re($get['nick'])));
+                                $form = show("page/editor_notregged", array("postemail" => stringParser::decode($get['email']),
+                                                                            "posthp" => stringParser::decode($get['hp']),
+                                                                            "postnick" => stringParser::decode($get['nick'])));
                             }
 
                             $index = show($dir . "/usergb_edit", array("whaturl" => "edit&gbid=" . $_GET['gbid'],
@@ -333,10 +333,10 @@ if(defined('_UserMenu')) {
                                                                        "reg" => $get['reg'],
                                                                        "id" => $_GET['id'],
                                                                        "form" => $form,
-                                                                       "postemail" => re($get['email']),
+                                                                       "postemail" => stringParser::decode($get['email']),
                                                                        "posthp" => $get['hp'],
-                                                                       "postnick" => re($get['nick']),
-                                                                       "posteintrag" => re($get['nachricht']),
+                                                                       "postnick" => stringParser::decode($get['nick']),
+                                                                       "posteintrag" => stringParser::decode($get['nachricht']),
                                                                        "error" => ''));
                         } else {
                             $index = error(_error_edit_post, 1);

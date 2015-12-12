@@ -76,21 +76,21 @@ if(!$ajaxJob && auto_db_optimize && settings::get('db_optimize') < time()) {
 cookie::init('dzcp_'.settings::get('prev'));
 
 //-> SteamAPI
-SteamAPI::set('apikey',re(settings::get('steam_api_key')));
+SteamAPI::set('apikey', stringParser::decode(settings::get('steam_api_key')));
 
 //-> GameQ
 spl_autoload_register(array('GameQ', 'auto_load'));
 
 //-> Language auslesen
-$language = (cookie::get('language') != false ? (file_exists(basePath.'/inc/lang/languages/'.cookie::get('language').'.php') ? cookie::get('language') : re(settings::get('language'))) : re(settings::get('language')));
+$language = (cookie::get('language') != false ? (file_exists(basePath.'/inc/lang/languages/'.cookie::get('language').'.php') ? cookie::get('language') :stringParser::decode(settings::get('language'))) :stringParser::decode(settings::get('language')));
 
 //-> einzelne Definitionen
 $isSpider = isSpider();
 $subfolder = basename(dirname(dirname(GetServerVars('PHP_SELF')).'../'));
 $httphost = GetServerVars('HTTP_HOST').(empty($subfolder) ? '' : '/'.$subfolder);
 $domain = str_replace('www.','',$httphost);
-$pagetitle = re(settings::get('pagetitel'));
-$sdir = re(settings::get('tmpdir'));
+$pagetitle =stringParser::decode(settings::get('pagetitel'));
+$sdir =stringParser::decode(settings::get('tmpdir'));
 $useronline = 1800;
 $reload = 3600 * 24;
 $picformat = array("jpg", "gif", "png");
@@ -99,6 +99,7 @@ $maxpicwidth = 90;
 $maxadmincw = 10;
 $maxfilesize = @ini_get('upload_max_filesize');
 $UserAgent = trim(GetServerVars('HTTP_USER_AGENT'));
+$use_glossar = true; //Enable Glossar global
 
 //JavaScript
 javascript::set('AnchorMove','');
@@ -340,12 +341,12 @@ if(session_id()) {
     if($sql->rows("SELECT `id` FROM `{prefix_iptodns}` WHERE `update` <= ? AND `sessid` = ?;",array(time(),session_id()))) {
         $bot = SearchBotDetect();
         $sql->update("UPDATE `{prefix_iptodns}` SET `time` = ?, `update` = ?, `ip` = ?, `agent` = ?, `dns` = ?, `bot` = ?, `bot_name` = ?, `bot_fullname` = ? WHERE `sessid` = ?;",
-        array((time()+10*60),(time()+60),$userip,up($UserAgent),up($userdns),($bot['bot'] ? 1 : 0),up($bot['name']),up($bot['fullname']),session_id()));
+        array((time()+10*60),(time()+60),$userip,stringParser::encode($UserAgent),stringParser::encode($userdns),($bot['bot'] ? 1 : 0),stringParser::encode($bot['name']),stringParser::encode($bot['fullname']),session_id()));
         unset($bot);
     } else if(!$sql->rows("SELECT `id` FROM `{prefix_iptodns}` WHERE `sessid` = ?;",array(session_id()))) {
         $bot = SearchBotDetect();
         $sql->insert("INSERT INTO `{prefix_iptodns}` SET `sessid` = ?, `time` = ?, `ip` = ?, `agent` = ?, `dns` = ?, `bot` = ?, `bot_name` = ?, `bot_fullname` = ?;",
-        array(session_id(),(time()+10*60),$userip,up($UserAgent),up($userdns),($bot['bot'] ? 1 : 0),up($bot['name']),up($bot['fullname'])));
+        array(session_id(),(time()+10*60),$userip,stringParser::encode($UserAgent),stringParser::encode($userdns),($bot['bot'] ? 1 : 0),stringParser::encode($bot['name']),stringParser::encode($bot['fullname'])));
         unset($bot);
     }
     
@@ -361,16 +362,16 @@ if(session_id()) {
     /*
      * Pruft ob mehrere Session IDs von der gleichen DNS kommen, sollte der Useragent keinen Bot Tag enthalten, wird ein Spambot angenommen.
      */
-    $get_sb = $sql->select("SELECT `id`,`ip`,`bot`,`agent` FROM `{prefix_iptodns}` WHERE `dns` LIKE ?;",array(up($userdns)));
+    $get_sb = $sql->select("SELECT `id`,`ip`,`bot`,`agent` FROM `{prefix_iptodns}` WHERE `dns` LIKE ?;",array(stringParser::encode($userdns)));
     if($sql->rowCount() >= 3 && !validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[127].[0].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[10].[0-255].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[172].[16-31].[0-255].[0-255]')) {
-        if(!$get_sb['bot'] && !isSpider(re($get_sb['agent']))) {
+        if(!$get_sb['bot'] && !isSpider(stringParser::decode($get_sb['agent']))) {
             if(!$sql->rows("SELECT `id` FROM `{prefix_ipban}` WHERE `ip` = ? LIMIT 1;",array($userip))) {
                 $data_array = array();
                 $data_array['confidence'] = ''; $data_array['frequency'] = ''; $data_array['lastseen'] = '';
-                $data_array['banned_msg'] = up('SpamBot detected by System * No BotAgent *');
+                $data_array['banned_msg'] = stringParser::encode('SpamBot detected by System * No BotAgent *');
                 $data_array['agent'] = $get_sb['agent'];
                 $sql->insert("INSERT INTO `{prefix_ipban}` SET `time` = ?, `ip` = ?, `data` = ?, `typ` = 3;",array(time(),$get_sb['ip'],serialize($data_array)));
                 check_ip(); // IP Prufung * No IPV6 Support *
@@ -393,26 +394,26 @@ function SearchBotDetect() {
         foreach($qry as $botdata) {
             switch ($botdata['type']) {
                 case 1:
-                    if(preg_match(re($botdata['regexpattern']), $UserAgent, $matches)) {
-                        return array('fullname' => re($botdata['name'])." V".trim($matches[1]), 'name' =>re($botdata['name']), 'bot' => true); 
+                    if(preg_match(stringParser::decode($botdata['regexpattern']), $UserAgent, $matches)) {
+                        return array('fullname' => stringParser::decode($botdata['name'])." V".trim($matches[1]), 'name' =>stringParser::decode($botdata['name']), 'bot' => true); 
                     }
                 break;
                 case 2:
-                    if(preg_match(re($botdata['regexpattern']), $UserAgent, $matches)) {
+                    if(preg_match(stringParser::decode($botdata['regexpattern']), $UserAgent, $matches)) {
                         list($majorVer, $minorVer) = explode(".", $matches[1]);
-                        return array('fullname' => re($botdata['name'])." V".trim($majorVer).'.'.trim($minorVer), 'name' =>re($botdata['name']), 'bot' => true); 
+                        return array('fullname' => stringParser::decode($botdata['name'])." V".trim($majorVer).'.'.trim($minorVer), 'name' =>stringParser::decode($botdata['name']), 'bot' => true); 
                     } 
                 break;
                 case 3:
-                    if(preg_match(re($botdata['regexpattern']), $UserAgent, $matches)) {
+                    if(preg_match(stringParser::decode($botdata['regexpattern']), $UserAgent, $matches)) {
                         list($majorVer, $minorVer, $build) = explode(".", $matches[1]);
-                        return array('fullname' => re($botdata['name'])." V".trim($majorVer).'.'.trim($minorVer).'.'.trim($build), 'name' =>re($botdata['name']), 'bot' => true); 
+                        return array('fullname' => stringParser::decode($botdata['name'])." V".trim($majorVer).'.'.trim($minorVer).'.'.trim($build), 'name' =>stringParser::decode($botdata['name']), 'bot' => true); 
                     } 
                 break;
                 default:
-                     if(preg_match(re($botdata['regexpattern']), $UserAgent)) {
+                     if(preg_match(stringParser::decode($botdata['regexpattern']), $UserAgent)) {
                         if(empty($botdata['name_extra'])) $botdata['name_extra'] = $botdata['name'];
-                        return array('fullname' => re($botdata['name_extra']), 'name' => re($botdata['name']), 'bot' => true); 
+                        return array('fullname' => stringParser::decode($botdata['name_extra']), 'name' => stringParser::decode($botdata['name']), 'bot' => true); 
                     }
                 break;
             }
@@ -602,64 +603,6 @@ function rootAdmin($userid=0) {
     return in_array($userid, $rootAdmins);
 }
 
-//-> PHP-Code farbig anzeigen
-function highlight_text($txt) {
-    while(preg_match("=\[php\](.*)\[/php\]=Uis",$txt)!=FALSE) {
-        $res = preg_match("=\[php\](.*)\[/php\]=Uis",$txt,$matches);
-        $src = $matches[1];
-        $src = str_replace('<?php','',$src);
-        $src = str_replace('<?php','',$src);
-        $src = str_replace('?>','',$src);
-        $src = str_replace("&#39;", "'", $src);
-        $src = str_replace("&#34;", "\"", $src);
-        $src = str_replace("&amp;","&",$src);
-        $src = str_replace("&lt;","<",$src);
-        $src = str_replace("&gt;",">",$src);
-        $src = str_replace('<?php','&#60;?',$src);
-        $src = str_replace('?>','?&#62;',$src);
-        $src = str_replace("&quot;","\"",$src);
-        $src = str_replace("&nbsp;"," ",$src);
-        $src = str_replace("&nbsp;"," ",$src);
-        $src = str_replace("<p>","\n",$src);
-        $src = str_replace("</p>","",$src);
-        $l = explode("<br />", $src);
-        $src = preg_replace("#\<br(.*?)\>#is","\n",$src);
-        $src = '<?php'.$src.' ?>';
-        $colors = array('#111111' => 'string', '#222222' => 'comment', '#333333' => 'keyword', '#444444' => 'bg',     '#555555' => 'default', '#666666' => 'html');
-
-        foreach ($colors as $color => $key) {
-            ini_set('highlight.' . $key, $color);
-        }
-
-        // Farben ersetzen & highlighten
-        $src = preg_replace('!style="color: (#\d{6})"!e','"class=\"".$prefix.$colors["\1"]."\""',highlight_string($src, TRUE));
-
-        // PHP-Tags komplett entfernen
-        $src = str_replace('&lt;?php','',$src);
-        $src = str_replace('?&gt;','',$src);
-        $src = str_replace('&amp;</span><span class="comment">#60;?','&lt;?',$src);
-        $src = str_replace('?&amp;</span><span class="comment">#62;','?&gt;',$src);
-        $src = str_replace('&amp;#60;?','&lt;?',$src);
-        $src = str_replace('?&amp;#62;','?&gt;',$src);
-        $src = str_replace(":", "&#58;", $src);
-        $src = str_replace("(", "&#40;", $src);
-        $src = str_replace(")", "&#41;", $src);
-        $src = str_replace("^", "&#94;", $src);
-
-        // Zeilen zaehlen
-        $lines = "";
-        for ($i = 1; $i <= count($l) + 1; $i++) {
-            $lines .= $i . ".<br />";
-        }
-
-        // Ausgabe
-        $code = '<div class="codeHead">&nbsp;&nbsp;&nbsp;Code:</div><div class="code"><table style="width:100%;padding:0px" cellspacing="0"><tr><td class="codeLines">'.$lines.'</td><td class="codeContent">'.$src.'</td></table></div>';
-        $txt = preg_replace("=\[php\](.*)\[/php\]=Uis",$code,$txt,1);
-    }
-
-    return $txt;
-}
-
 function regexChars($txt) {
     $search  = array('"', '\\', '<', '>', '/',
     '.', ':', '^', '$', '|',
@@ -676,369 +619,21 @@ function regexChars($txt) {
     return str_replace($search,$replace,strip_tags($txt));
 }
 
-//-> Glossarfunktion
-$use_glossar = true; //Global
-function glossar_load_index() {
-    global $sql,$use_glossar;
-    if (!$use_glossar) { return false; }
-    $gl_words = array(); $gl_desc = array();
-    foreach($sql->select("SELECT `word`,`glossar` FROM `{prefix_glossar}`;") as $getglossar) {
-        $gl_words[] = re($getglossar['word']);
-        $gl_desc[]  = $getglossar['glossar'];
-    }
-
-    dbc_index::setIndex('glossar', array('gl_words' => $gl_words, 'gl_desc' => $gl_desc));
-}
-
-function glossar($txt) {
-    global $gl_words,$gl_desc,$use_glossar,$ajaxJob;
-    if (!$use_glossar || $ajaxJob) {
-        return $txt;
-    }
-
-    if (!dbc_index::issetIndex('glossar')) {
-        glossar_load_index();
-    }
-
-    $gl_words = dbc_index::getIndexKey('glossar', 'gl_words');
-    $gl_desc = dbc_index::getIndexKey('glossar', 'gl_desc');
-    $txt = str_replace(array('&#93;','&#91;'),array(']','['),$txt);
-
-    // mark words
-    if(count($gl_words) >= 1) {
-        foreach($gl_words as $gl_word) {
-            $w = addslashes(regexChars(html_entity_decode($gl_word)));
-            $search  = array(' '.$w.' ', '>'.$w.'<', '>'.$w.' ',' '.$w.'<');
-            $replace = array(' <tmp|'.$w.'|tmp> ','> <tmp|'.$w.'|tmp> <','> <tmp|'.$w.'|tmp> ',' <tmp|'.$w.'|tmp> <');
-            $txt = str_ireplace($search, $replace, $txt);
-        }
-
-        // replace words
-        for($g=0;$g<=count($gl_words)-1;$g++) {
-            $desc = regexChars($gl_desc[$g]);
-            $info = 'onmouseover="DZCP.showInfo(\''.jsconvert($desc).'\')" onmouseout="DZCP.hideInfo()"';
-            $w = regexChars(html_entity_decode($gl_words[$g]));
-            $r = "<a class=\"glossar\" href=\"../glossar/?word=".$gl_words[$g]."\" ".$info.">".$gl_words[$g]."</a>";
-            $txt = str_ireplace('<tmp|'.$w.'|tmp>', $r, $txt);
-        }
-
-        unset($w,$r,$info,$desc,$gl_word);
-    }
-
-    return str_replace(array(']','['),array('&#93;','&#91;'),$txt);
-}
-
-function bbcodetolow($founds) {
-    return "[".strtolower($founds[1])."]".trim($founds[2])."[/".strtolower($founds[3])."]";
-}
-
-//-> Replaces
-function replace($txt,$type=false,$no_vid_tag=false) {
-    $txt = str_replace("&#34;","\"",$txt);
-    if ($type) {
-        $txt = preg_replace("#<img src=\"(.*?)\" mce_src=\"(.*?)\"(.*?)\>#i", "<img src=\"$2\" alt=\"\">", $txt);
-    }
-
-    $txt = preg_replace_callback("/\[(.*?)\](.*?)\[\/(.*?)\]/","bbcodetolow",$txt);
-    $var = array("/\[url\](.*?)\[\/url\]/",
-                 "/\[img\](.*?)\[\/img\]/",
-                 "/\[url\=(http\:\/\/)?(.*?)\](.*?)\[\/url\]/",
-                 "/\[b\](.*?)\[\/b\]/",
-                 "/\[i\](.*?)\[\/i\]/",
-                 "/\[u\](.*?)\[\/u\]/",
-                 "/\[color=(.*?)\](.*?)\[\/color\]/");
-
-    $repl = array("<a href=\"$1\" target=\"_blank\">$1</a>",
-                  "<img src=\"$1\" class=\"content\" alt=\"\" />",
-                  "<a href=\"http://$2\" target=\"_blank\">$3</a>",
-                  "<b>$1</b>",
-                  "<i>$1</i>",
-                  "<u>$1</u>",
-                  "<span style=\"color:$1\">$2</span>");
-
-    $txt = preg_replace($var,$repl,$txt);
-    $txt = preg_replace_callback("#\<img(.*?)\>#", create_function('$img','if(preg_match("#class#i",$img[1])) return "<img".$img[1].">"; else return "<img class=\"content\"".$img[1].">";'), $txt);
-
-    if(!$no_vid_tag) {
-        $txt = preg_replace_callback("/\[youtube\](?:http?s?:\/\/)?(?:www\.)?youtu(?:\.be\/|be\.com\/watch\?v=)([A-Z0-9\-_]+)(?:&(.*?))?\[\/youtube\]/i",
-                create_function('$match','return \'<object width="425" height="344"><param name="movie" value="//www.youtube.com/v/\'.trim($match[1]).\'?hl=de_DE&amp;version=3&amp;rel=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="//www.youtube.com/v/\'.trim($match[1]).\'?hl=de_DE&amp;version=3&amp;rel=0" type="application/x-shockwave-flash" width="425" height="344" allowscriptaccess="always" allowfullscreen="true"></embed></object>\';'), $txt);
-    }
-
-    $txt = str_replace("\"","&#34;",$txt);
-    return preg_replace("#(\w){1,1}(&nbsp;)#Uis","$1 ",$txt);
-}
-
-/**
- * DZCP V1.7.0
- * Führt den BBCode des TS3 Servers aus.
- *
- * @param string $string
- * @return string
- */
-function parse_ts3($string='') {
-    $string = (string)$string;
-    if(empty($string)) return $string;
-    
-    $string=preg_replace("^\[b\](.*)\[/b\]^isU", "<b>$1</b>", $string);
-    $string=preg_replace("^\[i\](.*)\[/i\]^isU", "<i>$1</i>", $string);
-    $string=preg_replace("^\[u\](.*)\[/u\]^isU", "<u>$1</u>", $string);
-    $string=preg_replace("^\[url\](.*)\[/url\]^isU", "<a href=\"$1\">$1</a>", $string);
-    $string=preg_replace("^\[url=(.*)\](.*)\[/url\]^isU", "<a href=\"$1\">$2</a>", $string);
-    $string=preg_replace("^\[color=(.*)\](.*)\[/color\]^isU", "<font color=\"$1\">$2</font>", $string);
-    $string=preg_replace("^\[img\](.*)\[/img\]^isU", "<img src=\"$1\" alt=\"$1\" />", $string);
-
-        // Remove the trash made by previous
-      #  $string = preg_replace(self::$lineBreaks_search, self::$lineBreaks_replace, $string);
-
-        // Parse bbcode
-      #  $string = preg_replace(self::$simple_search, self::$simple_replace, $string);
-
-    // Parse [list] tags
-    $string = preg_replace('/\[list\](.*?)\[\/list\]/sie', '"<ul>\n".self::process_list_items("$1")."\n</ul>"', $string);
-    return preg_replace('/\[list\=(disc|circle|square|decimal|decimal-leading-zero|lower-roman|upper-roman|lower-greek|lower-alpha|lower-latin|upper-alpha|upper-latin|hebrew|armenian|georgian|cjk-ideographic|hiragana|katakana|hiragana-iroha|katakana-iroha|none)\](.*?)\[\/list\]/sie',
-           '"<ol style=\"list-style-type: $1;\">\n".self::process_list_items("$2")."\n</ol>"', $string);
-}
-
-//-> Badword Filter
-function BadwordFilter($txt) {
-    $words = explode(",",trim(re(settings::get('badwords'))));
-    foreach($words as $word)
-    { $txt = preg_replace("#".$word."#i", str_repeat("*", strlen($word)), $txt); }
-    return $txt;
-}
-
-//-> Funktion um Bestimmte Textstellen zu markieren
-function hl($text, $word) {
-    if(!empty($_GET['hl']) && $_SESSION['search_type'] == 'text') {
-        if($_SESSION['search_con'] == 'or') {
-            $words = explode(" ",$word);
-            for($x=0;$x<count($words);$x++)
-                $ret['text'] = preg_replace("#".$words[$x]."#i",'<span class="fontRed" title="'.$words[$x].'">'.$words[$x].'</span>',$text);
-        }
-        else
-            $ret['text'] = preg_replace("#".$word."#i",'<span class="fontRed" title="'.$word.'">'.$word.'</span>',$text);
-
-        if(!preg_match("#<span class=\"fontRed\" title=\"(.*?)\">#", $ret['text']))
-            $ret['class'] = 'class="commentsRight"';
-        else
-            $ret['class'] = 'class="highlightSearchTarget"';
-    } else {
-        $ret['text'] = $text;
-        $ret['class'] = 'class="commentsRight"';
-    }
-
-    return $ret;
-}
-
 //-> Leerzeichen mit + ersetzen (w3c)
 function convSpace($string) {
     return str_replace(" ","+",$string);
-}
-
-/* START # from wordpress under GBU GPL license
-   URL autolink function */
-function _make_url_clickable_cb($matches) {
-    $ret = '';
-    $url = $matches[2];
-    if (empty($url)) {
-        return $matches[0];
-    }
-    // removed trailing [.,;:] from URL
-    if ( in_array(substr($url, -1), array('.', ',', ';', ':')) === true ) {
-        $ret = substr($url, -1);
-        $url = substr($url, 0, strlen($url)-1);
-    }
-
-    return $matches[1] . "<a href=\"$url\" rel=\"nofollow\">$url</a>" . $ret;
-}
-
-function _make_web_ftp_clickable_cb($matches) {
-    $ret = '';
-    $dest = $matches[2];
-    $dest = 'http://' . $dest;
-    if (empty($dest)) {
-        return $matches[0];
-    }
-
-    // removed trailing [,;:] from URL
-    if ( in_array(substr($dest, -1), array('.', ',', ';', ':')) === true ) {
-        $ret = substr($dest, -1);
-        $dest = substr($dest, 0, strlen($dest)-1);
-    }
-
-    return $matches[1] . "<a href=\"$dest\" rel=\"nofollow\">$dest</a>" . $ret;
-}
-
-function _make_email_clickable_cb($matches) {
-    $email = $matches[2] . '@' . $matches[3];
-    return $matches[1] . "<a href=\"mailto:$email\">$email</a>";
-}
-
-function make_clickable($ret) {
-    $ret = ' ' . $ret;
-    // in testing, using arrays here was found to be faster
-    $ret = preg_replace_callback('#([\s>])([\w]+?://[\w\\x80-\\xff\#$%&~/.\-;:=,?@\[\]+]*)#is', '_make_url_clickable_cb', $ret);
-    $ret = preg_replace_callback('#([\s>])((www|ftp)\.[\w\\x80-\\xff\#$%&~/.\-;:=,?@\[\]+]*)#is', '_make_web_ftp_clickable_cb', $ret);
-    $ret = preg_replace_callback('#([\s>])([.0-9a-z_+-]+)@(([0-9a-z-]+\.)+[0-9a-z]{2,})#i', '_make_email_clickable_cb', $ret);
-
-    // this one is not in an array because we need it to run last, for cleanup of accidental links within links
-    $ret = preg_replace("#(<a( [^>]+?>|>))<a [^>]+?>([^>]+?)</a></a>#i", "$1$3</a>", $ret);
-    return trim($ret);
-}
-
-/* END # from wordpress under GBU GPL license */
-
-//Diverse BB-Codefunktionen
-function bbcode($txt, $tinymce=false, $no_vid=false, $ts=false, $nolink=false) {
-    $txt = stringParser::decode($txt);
-    if (!$no_vid && settings::get('urls_linked') && !$nolink) {
-        $txt = make_clickable($txt);
-    }
-
-    $txt = str_replace("\\","\\\\",$txt);
-    $txt = str_replace("\\n","<br />",$txt);
-    $txt = BadwordFilter($txt);
-
-    if($tinymce != false) {
-        $txt = replace($txt,$tinymce,$no_vid);
-    }
-    
-    $txt = highlight_text($txt);
-   
-    if(!$ts) {
-        $allowable_tags = "<br><object><em><param><embed><strong><iframe><hr><table><tr><td><div>"
-        . "<span><a><b><font><i><u><p><ul><ol><li><br /><img><blockquote>";
-        $txt = strip_tags($txt, $allowable_tags);
-    }
-
-    $txt = smileys($txt);
-    
-    if (!$no_vid) {
-        $txt = glossar($txt);
-    }
-    
-    return str_replace(array("&#34;","<p></p>"),array("\"","<p>&nbsp;</p>"),$txt);
-}
-
-function bbcode_nletter($txt) {
-    $txt = nl2br(trim(stripslashes($txt)));
-    return '<style type="text/css">p { margin: 0px; padding: 0px; }</style>'.$txt;
-}
-
-function bbcode_nletter_plain($txt) {
-    $txt = preg_replace("#\<\/p\>#Uis","\r\n",$txt);
-    $txt = preg_replace("#\<br(.*?)\>#Uis","\r\n",$txt);
-    $txt = str_replace("p { margin: 0px; padding: 0px; }","",$txt);
-    $txt = convert_feed($txt);
-    $txt = str_replace("&amp;#91;","[",$txt);
-    $txt = str_replace("&amp;#93;","]",$txt);
-    return strip_tags($txt);
-}
-
-function convert_feed($txt) {
-    global $charset;
-    $txt = stripslashes($txt);
-    $txt = str_replace("&Auml;","Ae",$txt);
-    $txt = str_replace("&auml;","ae",$txt);
-    $txt = str_replace("&Uuml;","Ue",$txt);
-    $txt = str_replace("&uuml;","ue",$txt);
-    $txt = str_replace("&Ouml;","Oe",$txt);
-    $txt = str_replace("&ouml;","oe",$txt);
-    $txt = htmlentities($txt, ENT_QUOTES, $charset);
-    $txt = str_replace("&amp;","&",$txt);
-    $txt = str_replace("&lt;","<",$txt);
-    $txt = str_replace("&gt;",">",$txt);
-    $txt = str_replace("&#60;","<",$txt);
-    $txt = str_replace("&#62;",">",$txt);
-    $txt = str_replace("&#34;","\"",$txt);
-    $txt = str_replace("&nbsp;"," ",$txt);
-    $txt = str_replace("&szlig;","ss",$txt);
-    $txt = preg_replace("#&(.*?);#is","",$txt);
-    $txt = str_replace("&","&amp;",$txt);
-    $txt = str_replace("", "\"",$txt);
-    $txt = str_replace("", "\"",$txt);
-    return strip_tags($txt);
 }
 
 function bbcode_html($txt,$tinymce=0) {
     $txt = str_replace("&lt;","<",$txt);
     $txt = str_replace("&gt;",">",$txt);
     $txt = str_replace("&quot;","\"",$txt);
-    $txt = BadwordFilter($txt);
-    $txt = replace($txt,$tinymce);
-    $txt = highlight_text($txt);
-    $txt = smileys($txt);
-    $txt = glossar($txt);
     return str_replace("&#34;","\"",$txt);
 }
 
 function bbcode_email($txt) {
-    $txt = bbcode($txt);
-    $txt = str_replace("&#91;","[",$txt);
-    return str_replace("&#93;","]",$txt);
-}
-
-/**
- * DZCP V1.7.0
- * Textteil in ein Zitat setzen * blockquote *
- *
- * @param string $nick,string $zitat,
- * @return string (html-code)
- */
-function zitat($nick,$zitat) {
-    $zitat = str_replace(chr(145), chr(39), $zitat);
-    $zitat = str_replace(chr(146), chr(39), $zitat);
-    $zitat = str_replace("'", "&#39;", $zitat);
-    $zitat = str_replace(chr(147), chr(34), $zitat);
-    $zitat = str_replace(chr(148), chr(34), $zitat);
-    $zitat = str_replace(chr(10), " ", $zitat);
-    $zitat = str_replace(chr(13), " ", $zitat);
-    $zitat = preg_replace("#[\n\r]+#", "<br />", $zitat);
-    return '<br /><br /><br /><blockquote><b>'.$nick.' '._wrote.':</b><br />'.re($zitat).'</blockquote>';
-}
-
-/**
- * DZCP V1.7.0
- * Decodiert Strings und Texte von UTF8.
- * Auslesen von Werten aus der Datenbank.
- *
- * @param string $txt
- * @return string
- */
-function re($txt = '') {
-    return stringParser::decode($txt);
-}
-
-/**
- * DZCP V1.7.0
- * BBCODE in Smileys umwandeln
- * @param string $txt
- * @return string
- */
-function smileys($txt) {
-    if(!dbc_index::issetIndex('smileys')) {
-        $smileys = get_files(basePath.'/inc/images/smileys',false,true);
-        dbc_index::setIndex('smileys', $smileys);
-    } else $smileys = dbc_index::getIndex('smileys');
-
-    foreach($smileys as $smiley) {
-        $bbc = preg_replace("=.gif=Uis","",$smiley);
-        if(preg_match("=:".$bbc.":=Uis",$txt)!=FALSE)
-            $txt = preg_replace("=:".$bbc.":=Uis","<img src=\"../inc/images/smileys/".$bbc.".gif\" alt=\"\" />", $txt);
-    }
-
-    $var = array("/\ :D/","/\ :P/","/\ ;\)/","/\ :\)/","/\ :-\)/","/\ :\(/","/\ :-\(/","/\ ;-\)/");
-    $repl = array(" <img src=\"../inc/images/smileys/grin.gif\" alt=\"\" />",
-                  " <img src=\"../inc/images/smileys/zunge.gif\" alt=\"\" />",
-                  " <img src=\"../inc/images/smileys/zwinker.gif\" alt=\"\" />",
-                  " <img src=\"../inc/images/smileys/smile.gif\" alt=\"\" />",
-                  " <img src=\"../inc/images/smileys/smile.gif\" alt=\"\" />",
-                  " <img src=\"../inc/images/smileys/traurig.gif\" alt=\"\" />",
-                  " <img src=\"../inc/images/smileys/traurig.gif\" alt=\"\" />",
-                  " <img src=\"../inc/images/smileys/zwinker.gif\" alt=\"\" />");
-
-    $txt = preg_replace($var,$repl, $txt);
-    return str_replace(" ^^"," <img src=\"../inc/images/smileys/^^.gif\" alt=\"\" />", $txt);
+    return str_replace(array("&#91;","&#93;"),
+            array("[","]"),bbcode::parse_html($txt));
 }
 
 //-> Flaggen ausgeben
@@ -1335,18 +930,6 @@ function spChars($txt) {
 
 /**
  * DZCP V1.7.0
- * Codiert Strings und Texte in UTF8.
- * Schreiben von Werten in die Datenbank.
- *
- * @param string $txt
- * @return uft8 string
- */
-function up($txt = '') {
-    return stringParser::encode($txt);
-}
-
-/**
- * DZCP V1.7.0
  * Gibt Informationen uber Server und Ausfuhrungsumgebung zuruck
  *
  * @param string $var
@@ -1354,9 +937,9 @@ function up($txt = '') {
  */
 function GetServerVars($var) {
     if (array_key_exists($var, $_SERVER) && !empty($_SERVER[$var])) {
-        return up($_SERVER[$var]);
+        return stringParser::encode($_SERVER[$var]);
     } else if (array_key_exists($var, $_ENV) && !empty($_ENV[$var])) {
-        return up($_ENV[$var]);
+        return stringParser::encode($_ENV[$var]);
     }
 
     return false;
@@ -1456,25 +1039,25 @@ function orderby_nav() {
 function updateCounter() {
     global $sql,$reload,$userip;
     $datum = time();
-    $get_agent = $sql->fetch("SELECT `id`,`agent`,`bot` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array(up($userip)));
+    $get_agent = $sql->fetch("SELECT `id`,`agent`,`bot` FROM `{prefix_iptodns}` WHERE `ip` = ?;",array(stringParser::encode($userip)));
     if($sql->rowCount()) {
-        if(!$get_agent['bot'] && !isSpider(re($get_agent['agent']))) {
+        if(!$get_agent['bot'] && !isSpider(stringParser::decode($get_agent['agent']))) {
             if($sql->rows("SELECT id FROM `{prefix_counter_ips}` WHERE datum+? <= ? OR FROM_UNIXTIME(datum,'%d.%m.%Y') != ?;",array($reload,time(),date("d.m.Y")))) {
                 $sql->delete("DELETE FROM `{prefix_counter_ips}` WHERE datum+? <= ? OR FROM_UNIXTIME(datum,'%d.%m.%Y') != ?;",array($reload,time(),date("d.m.Y")));
             }
 
-            $get = $sql->fetch("SELECT `datum` FROM `{prefix_counter_ips}` WHERE `ip` = ? AND FROM_UNIXTIME(datum,'%d.%m.%Y') = ?;",array(up($userip),date("d.m.Y")));
+            $get = $sql->fetch("SELECT `datum` FROM `{prefix_counter_ips}` WHERE `ip` = ? AND FROM_UNIXTIME(datum,'%d.%m.%Y') = ?;",array(stringParser::encode($userip),date("d.m.Y")));
             if($sql->rowCount()) {
                 $sperrzeit = $get['datum']+$reload;
                 if($sperrzeit <= time()) {
-                    $sql->delete("DELETE FROM `{prefix_counter_ips}` WHERE `ip` = ?;",array(up($userip)));
+                    $sql->delete("DELETE FROM `{prefix_counter_ips}` WHERE `ip` = ?;",array(stringParser::encode($userip)));
                     if ($sql->rows("SELECT `id` FROM `{prefix_counter}` WHERE `today` = '" . date("j.n.Y") . "';",array(date("j.n.Y")))) {
                         $sql->update("UPDATE `{prefix_counter}` SET `visitors` = (visitors+1) WHERE `today` = ?;",array(date("j.n.Y")));
                     } else {
                         $sql->insert("INSERT INTO `{prefix_counter}` SET `visitors` = 1 WHERE `today` = ?;",array(date("j.n.Y")));
                     }
 
-                    $sql->insert("INSERT INTO `{prefix_counter_ips}` SET `ip` = ?, `datum` = ?;",array(up($userip),intval($datum)));
+                    $sql->insert("INSERT INTO `{prefix_counter_ips}` SET `ip` = ?, `datum` = ?;",array(stringParser::encode($userip),intval($datum)));
                 }
             } else {
                 if($sql->rows("SELECT `id` FROM `{prefix_counter}` WHERE `today` = ?;",array(date("j.n.Y")))) {
@@ -1483,7 +1066,7 @@ function updateCounter() {
                     $sql->insert("INSERT INTO `{prefix_counter}` SET `visitors` = 1, `today` = ?;",array(date("j.n.Y")));
                 }
 
-                $sql->insert("INSERT INTO `{prefix_counter_ips}` SET `ip` = ?, `datum` = ?;",array(up($userip),intval($datum)));
+                $sql->insert("INSERT INTO `{prefix_counter_ips}` SET `ip` = ?, `datum` = ?;",array(stringParser::encode($userip),intval($datum)));
             }
         }
     }
@@ -1509,14 +1092,14 @@ function update_online($where='') {
         $get = $sql->fetch("SELECT `id` FROM `{prefix_counter_whoison}` WHERE `ip` = ?;",array($userip));
         if($sql->rowCount()) {
             $sql->update("UPDATE `{prefix_counter_whoison}` SET `whereami` = ?, `online` = ?, `login` = ?  WHERE `id` = ?;",
-            array(up($where),(time()+$useronline),(!$chkMe ? 0 : 1),$get['id']));
+            array(stringParser::encode($where),(time()+$useronline),(!$chkMe ? 0 : 1),$get['id']));
         } else {
             $sql->insert("INSERT INTO `{prefix_counter_whoison}` SET `ip` = ?, `online` = ?, `whereami` = ?, `login` = ?;",
-            array($userip,(time()+$useronline),up($where),(!$chkMe ? 0 : 1)));
+            array($userip,(time()+$useronline),stringParser::encode($where),(!$chkMe ? 0 : 1)));
         }
         
         if($chkMe) {
-            $sql->update("UPDATE `{prefix_users}` SET `time` = ?, `whereami` = ? WHERE `id` = ?;",array(time(),up($where),intval($userid)));
+            $sql->update("UPDATE `{prefix_users}` SET `time` = ?, `whereami` = ? WHERE `id` = ?;",array(time(),stringParser::encode($where),intval($userid)));
         }
     }
 }
@@ -1613,13 +1196,13 @@ function update_user_status_preview() {
     ## User aus der Datenbank suchen ##
     $get = $sql->fetch("SELECT `id`,`time` FROM `{prefix_users}` "
             . "WHERE `id` = ? AND `sessid` = ? AND `ip` = ? AND level != 0;",
-            array(intval($_SESSION['id']),session_id(),up($userip)));
+            array(intval($_SESSION['id']),session_id(),stringParser::encode($userip)));
 
     if($sql->rowCount()) {
         ## Schreibe Werte in die Server Sessions ##
         $_SESSION['lastvisit']  = $get['time'];
 
-        if(re(data($get['id'], "ip")) != $_SESSION['ip'])
+        if(stringParser::decode(data($get['id'], "ip")) != $_SESSION['ip'])
             $_SESSION['lastvisit'] = data($get['id'], "time");
 
         if(empty($_SESSION['lastvisit']))
@@ -2010,7 +1593,7 @@ function startpage() {
         return 'user/?action=userlobby';
     }
 
-    $page = $get['level'] <= $chkMe ? re($get['url']) : 'user/?action=userlobby';
+    $page = $get['level'] <= $chkMe ? stringParser::decode($get['url']) : 'user/?action=userlobby';
     return (!empty($page) ? $page : 'news/');
 }
 
@@ -2024,12 +1607,12 @@ function autor($uid=0, $class="", $nick="", $email="", $cut="", $add="") {
         if($sql->rowCount()) {
             dbc_index::setIndex('user_'.$get['id'], $get);
         } else {
-            $nickname = (!empty($cut)) ? cut(re($nick), $cut) : re($nick);
+            $nickname = (!empty($cut)) ? cut(stringParser::decode($nick), $cut) : stringParser::decode($nick);
             return CryptMailto($email,_user_link_noreg,array("nick" => $nickname, "class" => $class));
         }
     }
 
-    $nickname = (!empty($cut)) ? cut(re(dbc_index::getIndexKey('user_'.intval($uid), 'nick')), $cut) : re(dbc_index::getIndexKey('user_'.intval($uid), 'nick'));
+    $nickname = (!empty($cut)) ? cut(stringParser::decode(dbc_index::getIndexKey('user_'.intval($uid), 'nick')), $cut) :stringParser::decode(dbc_index::getIndexKey('user_'.intval($uid), 'nick'));
     return show(_user_link, array("id" => $uid,
                                   "country" => flag(dbc_index::getIndexKey('user_'.intval($uid), 'country')),
                                   "class" => $class,
@@ -2053,11 +1636,11 @@ function autorcolerd($uid, $class="", $cut="") {
         return autor($uid,$class,'','',$cut);
     }
     
-    $nickname = (!empty($cut)) ? cut(re(dbc_index::getIndexKey('user_'.intval($uid), 'nick')), $cut) : re(dbc_index::getIndexKey('user_'.intval($uid), 'nick'));
+    $nickname = (!empty($cut)) ? cut(stringParser::decode(dbc_index::getIndexKey('user_'.intval($uid), 'nick')), $cut) :stringParser::decode(dbc_index::getIndexKey('user_'.intval($uid), 'nick'));
     return show(_user_link_colerd, array("id" => $uid,
                                          "country" => flag(dbc_index::getIndexKey('user_'.intval($uid), 'country')),
                                          "class" => $class,
-                                         "color" => re($get['color']),
+                                         "color" => stringParser::decode($get['color']),
                                          "nick" => $nickname));
 }
 
@@ -2068,12 +1651,12 @@ function cleanautor($uid, $class="", $nick="", $email="") {
         if($sql->rowCount()) {
             dbc_index::setIndex('user_' . $get['id'], $get);
         } else {
-            return CryptMailto($email, _user_link_noreg, array("nick" => re($nick), "class" => $class));
+            return CryptMailto($email, _user_link_noreg, array("nick" => stringParser::decode($nick), "class" => $class));
         }
     }
 
     return show(_user_link_preview, array("id" => $uid, "country" => flag(dbc_index::getIndexKey('user_'.intval($uid), 'country')),
-                                          "class" => $class, "nick" => re(dbc_index::getIndexKey('user_'.intval($uid), 'nick'))));
+                                          "class" => $class, "nick" =>stringParser::decode(dbc_index::getIndexKey('user_'.intval($uid), 'nick'))));
 }
 
 function rawautor($uid) {
@@ -2083,12 +1666,12 @@ function rawautor($uid) {
         if($sql->rowCount()) {
             dbc_index::setIndex('user_' . $get['id'], $get);
         } else {
-            return rawflag('') . " " . jsconvert(re($uid));
+            return rawflag('') . " " . jsconvert(stringParser::decode($uid));
         }
     }
 
     return rawflag(dbc_index::getIndexKey('user_'.intval($uid), 'country'))." ".
-    jsconvert(re(dbc_index::getIndexKey('user_'.intval($uid), 'nick')));
+    jsconvert(stringParser::decode(dbc_index::getIndexKey('user_'.intval($uid), 'nick')));
 }
 
 //-> Nickausgabe ohne Profillink oder Emaillink fr das ForenAbo
@@ -2098,10 +1681,10 @@ function fabo_autor($uid,$tpl=_user_link_fabo) {
         $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($uid)));
         if($sql->rowCount()) {
             dbc_index::setIndex('user_' . $get['id'], $get);
-            return show($tpl, array("id" => $uid, "nick" => re($get['nick'])));
+            return show($tpl, array("id" => $uid, "nick" => stringParser::decode($get['nick'])));
         }
     } else {
-        return show($tpl, array("id" => $uid, "nick" => re(dbc_index::getIndexKey('user_'.intval($uid), 'nick'))));
+        return show($tpl, array("id" => $uid, "nick" =>stringParser::decode(dbc_index::getIndexKey('user_'.intval($uid), 'nick'))));
     }
     
     return '';
@@ -2219,7 +1802,6 @@ function sendMail($mailto,$subject,$content) {
         $mail->AddAddress(preg_replace('/(\\n+|\\r+|%0A|%0D)/i', '',$mailto));
         $mail->Subject = $subject;
         $mail->msgHTML($content);
-        $mail->AltBody = bbcode_nletter_plain($content);
         $mail->setLanguage(($language=='deutsch')?'de':'en', basePath.'/inc/lang/sendmail/');
         return $mail->Send();
     }
@@ -2239,8 +1821,8 @@ function check_msg_emal() {
                 if($get['pnmail']) {
                     $sql->update("UPDATE `{prefix_messages}` SET `sendmail` = 1 WHERE `id` = ?;",array($get['mid']));
                     $subj = show(settings::get('eml_pn_subj'), array("domain" => $httphost));
-                    $message = show(bbcode_email(settings::get('eml_pn')), array("nick" => re($get['nick']), "domain" => $httphost, "titel" => $get['titel'], "clan" => settings::get('clanname')));
-                    sendMail(re($get['email']), $subj, $message);
+                    $message = show(bbcode_email(settings::get('eml_pn')), array("nick" => stringParser::decode($get['nick']), "domain" => $httphost, "titel" => $get['titel'], "clan" => settings::get('clanname')));
+                    sendMail(stringParser::decode($get['email']), $subj, $message);
                 }
             }
         }
@@ -2746,7 +2328,7 @@ function getBoardPermissions($checkID = 0, $pos = 0) {
     if($sql->rowCount()) {
         foreach($qry as $get) {
             unset($kats, $fkats, $break);
-            $kats = (empty($katbreak) ? '' : '<div style="clear:both">&nbsp;</div>').'<table class="hperc" cellspacing="1"><tr><td class="contentMainTop"><b>'.re($get["name"]).'</b></td></tr></table>';
+            $kats = (empty($katbreak) ? '' : '<div style="clear:both">&nbsp;</div>').'<table class="hperc" cellspacing="1"><tr><td class="contentMainTop"><b>'.stringParser::decode($get["name"]).'</b></td></tr></table>';
             $katbreak = 1; $break = 0; $fkats = '';
 
             $qry2 = $sql->select("SELECT `kattopic`,`id` FROM `{prefix_forumsubkats}` WHERE `sid` = ? ORDER BY `kattopic` ASC;",array($get['id'],));
@@ -2754,7 +2336,7 @@ function getBoardPermissions($checkID = 0, $pos = 0) {
                 foreach($qry2 as $get2) {
                     $br = ($break % 2) ? '<br />' : ''; $break++;
                     $chk = ($sql->rows("SELECT `id` FROM `{prefix_f_access}` WHERE `".(empty($pos) ? 'user' : 'pos')."` = ? AND ".(empty($pos) ? 'user' : 'pos')." != 0 AND `forum` = ?;",array(intval($checkID),$get2['id'])) ? ' checked="checked"' : '');
-                    $fkats .= '<input type="checkbox" class="checkbox" id="board_'.$get2['id'].'" name="board['.$get2['id'].']" value="'.$get2['id'].'"'.$chk.' /><label for="board_'.$get2['id'].'"> '.re($get2['kattopic']).'</label> '.$br;
+                    $fkats .= '<input type="checkbox" class="checkbox" id="board_'.$get2['id'].'" name="board['.$get2['id'].']" value="'.$get2['id'].'"'.$chk.' /><label for="board_'.$get2['id'].'"> '.stringParser::decode($get2['kattopic']).'</label> '.$br;
                 }
             }
 
@@ -2883,7 +2465,7 @@ final class stringParser {
      * @param utf8 string $txt
      */
     public static function decode($txt='')
-    { global $charset; return trim(stripslashes(spChars(@html_entity_decode(utf8_decode($txt), ENT_COMPAT, $charset),true))); }
+    { global $charset; return trim(stripslashes(spChars(html_entity_decode(utf8_decode($txt), ENT_COMPAT, $charset),true))); }
 }
 
 //-> Speichert Ruckgaben der MySQL Datenbank zwischen um SQL-Queries einzusparen
@@ -3133,7 +2715,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
         echo show("errors/wmodus", array("tmpdir" => $tmpdir,
                                          "java_vars" => $java_vars,
                                          "dir" => $designpath,
-                                         "title" => strip_tags(re($title)),
+                                         "title" => strip_tags(stringParser::decode($title)),
                                          "login" => $login));
     } else {
         if(!$isSpider) {
@@ -3162,10 +2744,10 @@ function page($index='',$title='',$where='',$index_templ='index') {
         //misc vars
         $lang = $language;
         $template_switch = show("menu/tmp_switch", array("templates" => $tmpldir));
-        $clanname = re(settings::get("clanname"));
+        $clanname =stringParser::decode(settings::get("clanname"));
         $headtitle = show(_index_headtitle, array("clanname" => $clanname));
         $rss = $clanname;
-        $title = re(strip_tags($title));
+        $title =stringParser::decode(strip_tags($title));
         $notification = notification::get();
         $notification_tr = notification::get_tr();
 
@@ -3173,7 +2755,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
             $index = error(_error_have_to_be_logged, 1);
         }
 
-        $where = preg_replace_callback("#autor_(.*?)$#",create_function('$id', 'return re(data("nick","$id[1]"));'),$where);
+        $where = preg_replace_callback("#autor_(.*?)$#",create_function('$id', 'returnstringParser::decode(data("nick","$id[1]"));'),$where);
         $index = empty($index) ? '' : (!$check_msg ? '' : $check_msg).'<table class="mainContent" cellspacing="1">'.$index.'</table>';
         update_online($where); //Update Stats
 
@@ -3231,5 +2813,446 @@ function page($index='',$title='',$where='',$index_templ='index') {
         } //Debug save to file
         $output = view_error_reporting || DebugConsole::get_warning_enable() ? DebugConsole::show_logs().$index : $index; //Debug Console + Index Out
         gz_output($output); // OUTPUT BUFFER END
+    }
+}
+
+//###################################
+//BBCodeParser Class
+//###################################
+class bbcode {
+    private static $string = '';
+    private static $vid_count = 0;
+    private static $gl_words = array();
+    private static $gl_desc = array();
+    private static $use_glossar = true;
+    private static $js_include = false;
+    private static $simple_search = array(
+      '/\[b\](.*?)\[\/b\]/is',
+      '/\[i\](.*?)\[\/i\]/is',
+      '/\[u\](.*?)\[\/u\]/is',
+      '/\[s\](.*?)\[\/s\]/is',
+      '/\[size\=(.*?)\](.*?)\[\/size\]/is',
+      '/\[color\=(.*?)\](.*?)\[\/color\]/is',
+      '/\[center\](.*?)\[\/center\]/is',
+      '/\[font\=(.*?)\](.*?)\[\/font\]/is',
+      '/\[align\=(left|center|right)\](.*?)\[\/align\]/is',
+
+      '/\[left\](.*?)\[\/left\]/is',
+      '/\[right\](.*?)\[\/right\]/is',
+
+      '/\[url\](.*?)\[\/url\]/is',
+      '/\[url\=(.*?)\](.*?)\[\/url\]/is',
+      '/\[mail\=(.*?)\](.*?)\[\/mail\]/is',
+      '/\[mail\](.*?)\[\/mail\]/is',
+      '/\[img\](.*?)\[\/img\]/is',
+      '/\[img\=(\d*?)x(\d*?)\](.*?)\[\/img\]/is',
+      '/\[img (.*?)\](.*?)\[\/img\]/ise',
+
+      '/\[quote\](.*?)\[\/quote\]/is',
+      '/\[quote\=(.*?)\](.*?)\[\/quote\]/is',
+
+      '/\[sub\](.*?)\[\/sub\]/is',
+      '/\[sup\](.*?)\[\/sup\]/is',
+      '/\[p\](.*?)\[\/p\]/is',
+
+      '/\[bull \/\]/i',
+      '/\[copyright \/\]/i',
+      '/\[registered \/\]/i',
+      '/\[tm \/\]/i');
+
+    private static $simple_replace = array(
+      '<strong>$1</strong>',
+      '<em>$1</em>',
+      '<u>$1</u>',
+      '<del>$1</del>',
+      '<span style="font-size: $1;">$2</span>',
+      '<span style="color: $1;">$2</span>',
+      '<div style="text-align: center;">$1</div>',
+      '<span style="font-family: $1;">$2</span>',
+      '<div style="text-align: $1;">$2</div>',
+
+      '<div style="text-align: left;">$2</div>',
+      '<div style="text-align: right;">$2</div>',
+
+      '<a href="$1">$1</a>',
+      '<a href="$1">$2</a>',
+      '<a href="mailto:$1">$2</a>',
+      '<a href="mailto:$1">$1</a>',
+      '<img src="$1" alt="" />',
+      '<img height="$2" width="$1" alt="" src="$3" />',
+      '"<img " . str_replace("&#039;", "\"",str_replace("&quot;", "\"", "$1")) . " src=\"$2\" />"',
+
+      '<blockquote>$1</blockquote>',
+      '<blockquote><strong>$1 wrote:</strong> $2</blockquote>',
+
+      '<sub>$1</sub>',
+      '<sup>$1</sup>',
+      '<p>$1</p>',
+
+      '&bull;',
+      '&copy;',
+      '&reg;',
+      '&trade;');
+
+    private static $lineBreaks_search = array(
+      '/\[list(.*?)\](.+?)\[\/list\]/sie',
+      '/\[\/list\]\s*\<br \/\>/i',
+      '/\[\/code\]\s*\<br \/\>/i',
+      '/\[\/quote\]\s*\<br \/\>/i',
+      '/\[\/p\]\s*\<br \/\>/i',
+      '/\[\/center\]\s*\<br \/\>/i',
+      '/\[\/align\]\s*\<br \/\>/i');
+
+    private static $lineBreaks_replace = array(
+      "'[list$1]'.str_replace('<br />', '', '$2').'[/list]'",
+      "[/list]",
+      "[/code]",
+      "[/quote]",
+      "[/p]",
+      "[/center]",
+      "[/align]");
+
+    private static $vid_search = array(
+            "/\[googlevideo\](.*?)\[\/googlevideo\]/",
+            "/\[myvideo\](.*?)\[\/myvideo\]/",
+            "/\[youtube\](?:http?s?:\/\/)?(?:www\.)?youtu(?:\.be\/|be\.com\/watch\?v=)([A-Z0-9\-_]+)(?:&(.*?))?\[\/youtube\]/i",
+            "/\[divx\](.*?)\[\/divx\]/",
+            "/\[vimeo\]([0-9]{0,})\[\/vimeo\]/",
+            "/\[golem\](.*?)\[\/golem\]/");
+
+    private static $vid_replace = array(
+            "<embed id=VideoPlayback src=http://video.google.de/googleplayer.swf?docid=-$1&hl=de&fs=true style=width:425px;height:344px allowFullScreen=true allowScriptAccess=always type=application/x-shockwave-flash> </embed>",
+
+            "<object wmode=\"opaque\" style=\"width: 425px; height: 344px;\" type=\"application/x-shockwave-flash\" data=\"http://www.myvideo.de/movie/$1\"> "
+        . "</param><param name=\"wmode\" value=\"opaque\"><param name=\"movie\" value=\"http://www.myvideo.de/movie/$1\"><param name=\"AllowFullscreen\" value=\"true\"></object>",
+
+            "<object width=\"425\" height=\"344\" wmode=\"opaque\"><param name=\"movie\" value=\"http://www.youtube.com/v/$1&hl=de_DE&fs=1&color1=0x3a3a3a&color2=0x999999&border=0\">"
+        . "</param><param name=\"allowFullScreen\" value=\"true\"></param><param name=\"allowscriptaccess\" value=\"always\"></param><param name=\"wmode\" value=\"opaque\">"
+        . "<embed src=\"http://www.youtube.com/v/$1&hl=de_DE&fs=1&color1=0x3a3a3a&color2=0x999999&border=0\" type=\"application/x-shockwave-flash\" allowscriptaccess=\"always\" "
+        . "allowfullscreen=\"true\" width=\"425\" height=\"344\"></embed></object>",
+
+            "<object width=\"425\" height=\"344\" wmode=\"opaque\" codebase=\"http://go.divx.com/plugin/DivXBrowserPlugin.cab\">"
+        . "<param name=\"custommode\" value=\"none\" /><param name=\"autoPlay\" value=\"false\" /><param name=\"src\" value=\"$1\" />"
+        . "<embed type=\"video/divx\" src=\"$1\" custommode=\"none\" width=\"425\" height=\"344\" autoPlay=\"false\" pluginspage=\"http://go.divx.com/plugin/download/\"></embed></object>",
+
+            "<object width=\"425\" height=\"344\" wmode=\"opaque\"><param name=\"allowfullscreen\" value=\"true\" />"
+        . "</param><param name=\"wmode\" value=\"opaque\"><param name=\"allowscriptaccess\" value=\"always\" /><param name=\"movie\" value=\"http://www.vimeo.com/moogaloop.swf?clip_id=$1&server=www.vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1\" /><embed src=\"http://www.vimeo.com/moogaloop.swf?clip_id=\\1&server=www.vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1\" type=\"application/x-shockwave-flash\" allowfullscreen=\"true\" allowscriptaccess=\"always\" width=\"425\" height=\"344\"></embed></object>",
+
+            "<object width=\"480\" height=\"270\" wmode=\"opaque\"></param><param name=\"wmode\" value=\"opaque\">"
+        . "<param name=\"movie\" value=\"http://video.golem.de/player/videoplayer.swf?id=$1&autoPl=false\"></param><param name=\"allowFullScreen\" value=\"true\">"
+        . "</param><param name=\"AllowScriptAccess\" value=\"always\"><embed src=\"http://video.golem.de/player/videoplayer.swf?id=$1&autoPl=false\" "
+        . "type=\"application/x-shockwave-flash\" allowfullscreen=\"true\" AllowScriptAccess=\"always\" width=\"480\" height=\"270\"></embed></object>");
+    
+    private static function glossar_load_index() {
+        global $sql;
+        foreach($sql->select("SELECT `word`,`glossar` FROM `{prefix_glossar}`;") as $getglossar) {
+            self::$gl_words[] = stringParser::decode($getglossar['word']);
+            self::$gl_desc[]  = stringParser::decode($getglossar['glossar']);
+        }
+
+        dbc_index::setIndex('glossar', array('gl_words' => self::$gl_words, 'gl_desc' => self::$gl_desc));
+    }
+
+    private static function process_list_items($list_items) {
+        $result_list_items = array();
+
+        // Check for [li][/li] tags
+        preg_match_all("/\[li\](.*?)\[\/li\]/is", $list_items, $li_array);
+        $li_array = $li_array[1];
+        if (empty($li_array)) {
+            // we didn't find any [li] tags
+            $list_items_array = explode("[*]", $list_items);
+            foreach ($list_items_array as $li_text) {
+                $li_text = trim($li_text);
+                if (empty($li_text)) {
+                    continue;
+                }
+
+                $li_text = nl2br($li_text);
+                $result_list_items[] = '<li>'.$li_text.'</li>';
+            }
+        } else {
+            // we found [li] tags!
+            foreach ($li_array as $li_text) {
+                $li_text = nl2br($li_text);
+                $result_list_items[] = '<li>'.$li_text.'</li>';
+            }
+        }
+
+        return implode("\n", $result_list_items);
+    }
+
+    //Badword Filter
+    private static function badword_filter() {
+        $words = trim(stringParser::decode(settings::get('badwords')));
+        if(empty($words)) return;
+        $words = explode(",",$words);
+        if(count($words) >= 1) {
+            foreach($words as $word) { 
+                self::$string = preg_replace_callback("#".$word."#i",create_function('$matches','return str_repeat("*", strlen($matches[0]));'),self::$string);
+            }
+        }
+    }
+
+    private static function make_url_clickable($matches) {
+        $ret = '';
+        $url = $matches[2];
+
+        if ( empty($url) )
+            return $matches[0];
+        // removed trailing [.,;:] from URL
+        if ( in_array(substr($url, -1), array('.', ',', ';', ':')) === true )
+        {
+            $ret = substr($url, -1);
+            $url = substr($url, 0, strlen($url)-1);
+        }
+
+        return $matches[1] . "<a href=\"$url\" rel=\"nofollow\">$url</a>" . $ret;
+    }
+
+    private static function make_web_ftp_clickable($matches) {
+        $ret = '';
+        $dest = $matches[2];
+        $dest = 'http://' . $dest;
+
+        if ( empty($dest) )
+            return $matches[0];
+        // removed trailing [,;:] from URL
+        if ( in_array(substr($dest, -1), array('.', ',', ';', ':')) === true )
+        {
+            $ret = substr($dest, -1);
+            $dest = substr($dest, 0, strlen($dest)-1);
+        }
+
+        return $matches[1] . "<a href=\"$dest\" rel=\"nofollow\">$dest</a>" . $ret;
+    }
+
+    private static function make_email_clickable($matches) {
+        $email = $matches[2] . '@' . $matches[3];
+        return $matches[1] . "<a href=\"mailto:$email\">$email</a>";
+    }
+
+    private static function make_clickable() {
+        self::$string = preg_replace_callback('#([\s>])([\w]+?://[\w\\x80-\\xff\#$%&~/.\-;:=,?@\[\]+]*)#is', 'self::make_url_clickable', self::$string);
+        self::$string = preg_replace_callback('#([\s>])((www|ftp)\.[\w\\x80-\\xff\#$%&~/.\-;:=,?@\[\]+]*)#is', 'self::make_web_ftp_clickable', self::$string);
+        self::$string = preg_replace_callback('#([\s>])([.0-9a-z_+-]+)@(([0-9a-z-]+\.)+[0-9a-z]{2,})#i', 'self::make_email_clickable', self::$string);
+        self::$string = trim(preg_replace("#(<a( [^>]+?>|>))<a [^>]+?>([^>]+?)</a></a>#i", "$1$3</a>", self::$string));
+    }
+
+    //Smileys
+    private static function make_smileys() {
+        if(!dbc_index::issetIndex('smileys')) {
+            $smileys = get_files(basePath.'/inc/images/smileys',false,true);
+            dbc_index::setIndex('smileys', $smileys);
+        } else $smileys = dbc_index::getIndex('smileys');
+        
+        foreach($smileys as $smiley) {
+            $bbc = preg_replace("=.gif=Uis","",$smiley);
+            if(preg_match("=:".$bbc.":=Uis",self::$string)!=FALSE)
+                self::$string = preg_replace("=:".$bbc.":=Uis","<img src=\"../inc/images/smileys/".$bbc.".gif\" alt=\"\" />", self::$string);
+        }
+
+        $var = array("/\ :D/", "/\ :P/","/\ ;\)/", "/\ :\)/", "/\ :-\)/", "/\ :\(/", "/\ :-\(/","/\ ;-\)/","/\ ^^/");
+        $repl = array(' <img src="../inc/images/smileys/grin.gif" alt=":D" />',
+                      ' <img src="../inc/images/smileys/zunge.gif" alt=":P" />',
+                      ' <img src="../inc/images/smileys/zwinker.gif" alt="" />',
+                      ' <img src="../inc/images/smileys/smile.gif" alt="" />',
+                      ' <img src="../inc/images/smileys/smile.gif" alt="" />',
+                      ' <img src="../inc/images/smileys/traurig.gif" alt="" />',
+                      ' <img src="../inc/images/smileys/traurig.gif" alt="" />',
+                      ' <img src="../inc/images/smileys/zwinker.gif" alt="" />',
+                      ' <img src="../inc/images/smileys/^^.gif" alt="^^" />');
+        self::$string = preg_replace($var,$repl, self::$string);
+    }
+
+    private static function make_glossar() {
+        global $use_glossar,$ajaxJob;
+        if (!self::$use_glossar || $ajaxJob) {
+            return;
+        }
+        
+        if (!dbc_index::issetIndex('glossar')) {
+            self::glossar_load_index();
+        }
+        
+        self::$gl_words = dbc_index::getIndexKey('glossar', 'gl_words');
+        self::$gl_desc = dbc_index::getIndexKey('glossar', 'gl_desc'); 
+        $txt = str_replace(array('&#93;','&#91;'),array(']','['),self::$string);
+
+        // mark words
+        if(count(self::$gl_words) >= 1) {
+            foreach(self::$gl_words as $gl_word) {
+                $w = addslashes(regexChars(html_entity_decode($gl_word)));
+                $search  = array(' '.$w.' ', '>'.$w.'<', '>'.$w.' ',' '.$w.'<');
+                $replace = array(' <tmp|'.$w.'|tmp> ','> <tmp|'.$w.'|tmp> <','> <tmp|'.$w.'|tmp> ',' <tmp|'.$w.'|tmp> <');
+                $txt = str_ireplace($search, $replace, $txt);
+            }
+
+            // replace words
+            for($g=0;$g<=count(self::$gl_words)-1;$g++) {
+                $desc = regexChars(self::$gl_desc[$g]);
+                $info = 'onmouseover="DZCP.showInfo(\''.jsconvert($desc).'\')" onmouseout="DZCP.hideInfo()"';
+                $w = regexChars(html_entity_decode(self::$gl_words[$g]));
+                $r = "<a class=\"glossar\" href=\"../glossar/?word=".self::$gl_words[$g]."\" ".$info.">".self::$gl_words[$g]."</a>";
+                $txt = str_ireplace('<tmp|'.$w.'|tmp>', $r, $txt);
+            }
+
+            unset($w,$r,$info,$desc,$gl_word);
+        }
+
+        self::$string = str_replace(array(']','['),array('&#93;','&#91;'),$txt);
+    }
+
+    private static function bbcodetolow($founds)
+    { return "[".strtolower($founds[1])."]".trim($founds[2])."[/".strtolower($founds[3])."]"; }
+
+    public static function search_vid() {
+        self::$vid_count = 0;
+        foreach (self::$vid_search as $search) {
+            self::$string = preg_replace_callback($search,"self::callback_vid",self::$string);
+            self::$vid_count++;
+        }
+    }
+
+    private static function callback_vid($matches) {
+        $htmlCode = self::$vid_replace[self::$vid_count];
+        return str_replace('$1', $matches[1], $htmlCode);
+    }
+
+    /**
+     * Führt den allgemeinen BBCode aus.
+     *
+     * @param string $string
+     * @param boolean $htmlentities
+     * @param boolean $nolinks
+     * @return string
+     */
+    public static function parse_html($string='',$htmlentities=false, $nolinks=false) {
+        self::$string = stringParser::decode($string);
+        if(empty(self::$string)) return self::$string;
+        self::$string = $htmlentities ? htmlentities(self::$string) : self::$string;
+        self::$string = spChars(self::$string);
+
+        self::$string = preg_replace_callback("/\[(.*?)\](.*?)\[\/(.*?)\]/","self::bbcodetolow",self::$string);
+        self::$string = preg_replace_callback("#\<img(.*?)\>#", 
+                create_function('$img','if(preg_match("#class#i",$img[1])) return '
+                        . '"<img".$img[1].">"; else return "<img class=\"content\"".$img[1].">";'), 
+                self::$string);
+        
+        //Hide Tag
+        self::$string = (checkme() >= 1 ? str_replace(array('[hide]','[/hide]'),'',self::$string) : preg_replace("/\[hide\](.*?)\[\/hide\]/", "",self::$string));
+
+        // Badword Filter
+        self::badword_filter();
+
+        // Preappend http:// to url address if not present
+        if(settings::get('urls_linked') && !$nolinks) {
+            self::make_clickable();
+        }
+
+        self::$string = preg_replace_callback('/\[url\=([^(http)].+?)\](.*?)\[\/url\]/i',create_function('$matches','return \'[url=http://\'.$matches[1].\']\'.$matches[2].\'[/url]\';'),self::$string);
+        self::$string = preg_replace_callback('/\[url\]([^(http)].+?)\[\/url\]/i',create_function('$matches','return \'[url=http://\'.$matches[1].\']\'.$matches[1].\'[/url]\';'),self::$string);
+
+        // Remove \n line breaks
+        self::$string = str_replace( "\n", "", self::$string ); 
+
+        // Remove the trash made by previous
+        self::$string = preg_replace(self::$lineBreaks_search, self::$lineBreaks_replace, self::$string);
+
+        // Parse bbcode
+        self::$string = preg_replace(self::$simple_search, self::$simple_replace, self::$string);
+        
+        // Parse CodeTag
+        self::$string = preg_replace_callback('/\[code\](.*?)\[\/code\]/i', create_function('$matches','return \'<pre><code>\'.$matches[1].\'</code></pre>\';'), self::$string);
+
+        // Parse Movie Players
+        self::search_vid();
+
+        // Parse Smileys
+        self::make_smileys();
+
+        // Parse Glossar
+        if(self::$use_glossar) {
+            self::make_glossar();
+        }
+
+        // Parse [list] tags
+        self::$string = preg_replace('/\[list\](.*?)\[\/list\]/sie', '"<ul>\n".self::process_list_items("$1")."\n</ul>"', self::$string);
+        
+        return preg_replace('/\[list\=(disc|circle|square|decimal|decimal-leading-zero|lower-roman|upper-roman|lower-greek|lower-alpha|'
+                . 'lower-latin|upper-alpha|upper-latin|hebrew|armenian|georgian|cjk-ideographic|hiragana|katakana|hiragana-iroha|katakana-iroha|none)\](.*?)\[\/list\]/sie',
+                '"<ol style=\"list-style-type: $1;\">\n".self::process_list_items("$2")."\n</ol>"', self::$string);
+    }
+
+    public static function search_lineBreaks() {
+        self::$lineBreaks_count = 0;
+        foreach (self::$lineBreaks_search as $search) {
+            self::$string = preg_replace_callback($search,"self::callback_lineBreaks",self::$string);
+            self::$lineBreaks_count++;
+        }
+    }
+
+    private static function callback_lineBreaks($matches) {
+        $htmlCode = self::$lineBreaks_replace[self::$lineBreaks_count];
+        return str_replace('$1', $matches[1], $htmlCode);
+    }
+
+    /**
+     * Führt den BBCode des TS3 Servers aus.
+     *
+     * @param string $string
+     * @return string
+     */
+    public static function parse_ts3($string='') {
+        if(empty(self::$string)) return self::$string;
+
+        // Badword Filter
+        self::badword_filter();
+
+        self::$string = preg_replace('/\[url\=([^(http)].+?)\](.*?)\[\/url\]/i', '[url=http://$1]$2[/url]', self::$string);
+        self::$string = preg_replace('/\[url\]([^(http)].+?)\[\/url\]/i', '[url=http://$1]$1[/url]', self::$string);
+
+        // Remove the trash made by previous
+        self::$string = preg_replace(self::$lineBreaks_search, self::$lineBreaks_replace, self::$string);
+
+        // Parse bbcode
+        self::$string = preg_replace(self::$simple_search, self::$simple_replace, self::$string);
+
+        // Parse [list] tags
+        self::$string = preg_replace('/\[list\](.*?)\[\/list\]/sie', '"<ul>\n".self::process_list_items("$1")."\n</ul>"', self::$string);
+        return preg_replace('/\[list\=(disc|circle|square|decimal|decimal-leading-zero|lower-roman|upper-roman|lower-greek|lower-alpha|lower-latin|upper-alpha|upper-latin|hebrew|armenian|georgian|cjk-ideographic|hiragana|katakana|hiragana-iroha|katakana-iroha|none)\](.*?)\[\/list\]/sie',
+                '"<ol style=\"list-style-type: $1;\">\n".self::process_list_items("$2")."\n</ol>"', self::$string);
+    }
+
+    /**
+     * Textteil in ein Zitat setzen * blockquote *
+     * @param string $nick,string $zitat,
+     * @return string (html-code)
+     */
+    public static function zitat($nick,$zitat) {
+        $search  = array(chr(145),chr(146),"'",chr(147),chr(148),chr(10),chr(13));
+        $replace = array(chr(39),chr(39),"&#39;",chr(34),chr(34)," "," ");
+        $zitat = preg_replace("#[\n\r]+#", "<br />", str_replace($search, $replace, $zitat));
+        return '<br /><br /><br /><blockquote><b>'.$nick.' '._wrote.':</b><br />'.stringParser::decode($zitat).'</blockquote>';
+    }
+
+    public static function nletter($txt)
+    { return '<style type="text/css">p { margin: 0px; padding: 0px; }</style>'.$txt; }
+
+    public static function use_glossar($var=true)
+    { self::$use_glossar = $var; }
+    
+    /** 
+     * Generates version 1: MAC address 
+     */  
+    public static function uuid() {  
+      if (!function_exists('uuid_create'))  
+        return false;  
+
+      $context = $uuid = null;  
+      uuid_create($context);  
+      uuid_make($context, UUID_MAKE_V1);  
+      uuid_export($context, UUID_FMT_STR, $uuid);  
+      return trim($uuid);  
     }
 }

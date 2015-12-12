@@ -14,7 +14,7 @@ if(_adminMenu != 'true') exit;
         foreach($qry as $get) {
           $positions .= show(_select_field, array("value" => $get['pos']+1,
                                                   "sel" => "",
-                                                  "what" => _nach.' '.re($get['name'])));
+                                                  "what" => _nach.' '.stringParser::decode($get['name'])));
           $posname = $get['name'];
         }
 
@@ -74,7 +74,7 @@ if(_adminMenu != 'true') exit;
               else $sel = '';
 
               $positions .= show(_select_field, array("value" => $getpos['pos']+1,
-                                                      "what" => _nach.' '.re($getpos['name']),
+                                                      "what" => _nach.' '.stringParser::decode($getpos['name']),
                                                       "sel" => $sel));
             }
           }
@@ -111,7 +111,7 @@ if(_adminMenu != 'true') exit;
                                                       "link" => _links_link,
                                                       "slink" => $_POST['link'],
                                                       "beschreibung" => _beschreibung,
-                                                      "sbeschreibung" => re($_POST['beschreibung']),
+                                                      "sbeschreibung" => stringParser::decode($_POST['beschreibung']),
                                                       "site" => _sponsors_admin_site,
                                                       "addsite" => _sponsors_admin_addsite,
                                                       "schecked" => $schecked,
@@ -152,15 +152,15 @@ if(_adminMenu != 'true') exit;
                       WHERE pos ".$sign." '".intval($_POST['position'])."'");
 
           $sql->insert("INSERT INTO `{prefix_sponsoren}`
-                     SET `name`         = '".up($_POST['name'])."',
+                     SET `name`         = '".stringParser::encode($_POST['name'])."',
                                      `link`         = '".links($_POST['link'])."',
-                                     `beschreibung` = '".up($_POST['beschreibung'])."',
+                                     `beschreibung` = '".stringParser::encode($_POST['beschreibung'])."',
                                      `site`         = '".intval($_POST['site'])."',
                                      `slink`        = '".$_POST['slink']."',
                                      `banner`       = '".intval($_POST['banner'])."',
                          `blink`        = '".$_POST['blink']."',
                          `box`           = '".intval($_POST['box'])."',
-                         `xlink`         = '".up($_POST['xlink'])."',
+                         `xlink`         = '".stringParser::encode($_POST['xlink'])."',
                                      `pos`            = '".intval($_POST['position'])."'");
 
           $id = _insert_id();
@@ -230,7 +230,7 @@ if(_adminMenu != 'true') exit;
               else $sel = '';
 
               $positions .= show(_select_field, array("value" => $getpos['pos']+1,
-                                                      "what" => _nach.' '.re($getpos['name']),
+                                                      "what" => _nach.' '.stringParser::decode($getpos['name']),
                                                       "sel" => $sel));
               $posname = $getpos['name'];
             }
@@ -295,7 +295,7 @@ if(_adminMenu != 'true') exit;
                                                    "link" => _links_link,
                                                    "slink" => $get['link'],
                                                    "beschreibung" => _beschreibung,
-                                                   "sbeschreibung" => re($get['beschreibung']),
+                                                   "sbeschreibung" => stringParser::decode($get['beschreibung']),
                                                    "site" => _sponsors_admin_site,
                                                    "addsite" => _sponsors_admin_addsite,
                                                    "schecked" => $schecked,
@@ -346,7 +346,7 @@ if(_adminMenu != 'true') exit;
               else $sel = '';
 
               $positions .= show(_select_field, array("value" => $getpos['pos']+1,
-                                                      "what" => _nach.' '.re($getpos['name']),
+                                                      "what" => _nach.' '.stringParser::decode($getpos['name']),
                                                       "sel" => $sel));
               $posname = $getpos['name'];
             }
@@ -411,7 +411,7 @@ if(_adminMenu != 'true') exit;
                                                        "link" => _links_link,
                                                        "slink" => $_POST['link'],
                                                        "beschreibung" => _beschreibung,
-                                                       "sbeschreibung" => re($_POST['beschreibung']),
+                                                       "sbeschreibung" => stringParser::decode($_POST['beschreibung']),
                                                        "site" => _sponsors_admin_site,
                                                        "addsite" => _sponsors_admin_addsite,
                                                        "schecked" => $schecked,
@@ -460,15 +460,15 @@ if(_adminMenu != 'true') exit;
           else $newpos = "`pos` = '".intval($_POST['position'])."'";
 
             $sql->update("UPDATE `{prefix_sponsoren}`
-                       SET      `name`         = '".up($_POST['name'])."',
+                       SET      `name`         = '".stringParser::encode($_POST['name'])."',
                              `link`         = '".links($_POST['link'])."',
-                             `beschreibung` = '".up($_POST['beschreibung'])."',
+                             `beschreibung` = '".stringParser::encode($_POST['beschreibung'])."',
                              `site`         = '".intval($_POST['site'])."',
                              `slink`        = '".$_POST['slink']."',
                              `banner`       = '".intval($_POST['banner'])."',
                              `blink`        = '".$_POST['blink']."',
                              `box`           = '".intval($_POST['box'])."',
-                             `xlink`         = '".up($_POST['xlink'])."',
+                             `xlink`         = '".stringParser::encode($_POST['xlink'])."',
                              ".$newpos."
                        WHERE id = '".intval($_GET['id'])."'");
 
@@ -563,7 +563,7 @@ if(_adminMenu != 'true') exit;
 
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
 
-          $show .= show($dir."/sponsors_show", array("link" => cut(re($get['link']),40),
+          $show .= show($dir."/sponsors_show", array("link" => cut(stringParser::decode($get['link']),40),
                                                        "class" => $class,
                                                        "name" => $get['name'],
                                                        "edit" => $edit,

@@ -10,7 +10,7 @@ function teamspeak_show($sID = 0, $showID = 0) {
     $no_ajax = !empty($sID) && $sID != 0 ? true : false;
 
     if(!$no_ajax)
-        header("Content-Type: text/xml; charset=".$charset);
+        header("Content-Type: text/html; charset=".$charset);
 
     $sID = (!empty($_GET['sID']) && $sID == 0 ? intval($_GET['sID']) : $sID);
     $Show_sID = (!empty($_GET['show']) && $showID == 0 ? intval($_GET['show']) : $showID);
@@ -74,7 +74,7 @@ function teamspeak_show($sID = 0, $showID = 0) {
     if(!empty($Show_sID) && $Show_sID != 0 && $Show_sID == $get['id'])
     { $display = "show"; $moreicon = "collapse"; } else { $display = "none"; $moreicon = "expand"; }
     $klapp = show(_klapptext_server_link, array("link" => empty($results['ts3']['virtualserver_name']) ? 'Error on this V-Server!' : $results['ts3']['virtualserver_name'], "id" => $get['id'], "moreicon" => $moreicon));
-    $index = show($dir."/servers", array("id" => $get['id'], "user" => $users, "display" => $display, "klapp" => $klapp, "uchannels" => TS3Renderer::render(true), "info" => parse_ts3(TS3Renderer::welcome()), "userstats" => $userstats));
+    $index = show($dir."/servers", array("id" => $get['id'], "user" => $users, "display" => $display, "klapp" => $klapp, "uchannels" => TS3Renderer::render(true), "info" => TS3Renderer::welcome(), "userstats" => $userstats));
     if($no_ajax) return $index; else exit($index);
 }
 

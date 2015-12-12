@@ -123,9 +123,9 @@ switch ($action):
 
                 $text = show(_contact_text_sendnews, array("hp" => $hp,
                                                            "email" => $email,
-                                                           "titel" => up($_POST['titel']),
-                                                           "text" => up($_POST['text']),
-                                                           "info" => up($_POST['info']),
+                                                           "titel" => stringParser::encode($_POST['titel']),
+                                                           "text" => stringParser::encode($_POST['text']),
+                                                           "info" => stringParser::encode($_POST['info']),
                                                            "nick" => $nick));
 
                 $qry = $sql->select("SELECT `id`,`level` FROM `{prefix_users}`;");
@@ -133,7 +133,7 @@ switch ($action):
                     foreach($qry as $get) {
                         if($get['level'] == 4 || permission('news',$get['id'])) {
                             $sql->insert("INSERT INTO `{prefix_messages}` SET `datum` = ?, `von` = ?, `an` = ?, `titel` = ?, `nachricht` = ?, `sendnews` = ?, `senduser` = ?;",
-                            array(time(),$von_nick,intval($get['id']),up($titel),up($text),$sendnews,up($user)));
+                            array(time(),$von_nick,intval($get['id']),stringParser::encode($titel),stringParser::encode($text),$sendnews,stringParser::encode($user)));
                         }
                     }
                 }

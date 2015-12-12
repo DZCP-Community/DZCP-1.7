@@ -105,7 +105,7 @@ class GameQ_Protocols_Fear extends GameQ_Protocols_Gamespy2
         $result->add('game_mod_name_long', $this->is_mod ? $this->name_long : $mod_name_long);
         $result->add('game_mod_name_short', $this->is_mod ? $this->name_short : $mod_name_short);
         $result->add('game_hostname',htmlentities($this->server_data_stream['hostname'], ENT_QUOTES, "UTF-8"));
-        $result->add('game_map', re($this->server_data_stream['mapname']));
+        $result->add('game_map', stringParser::decode($this->server_data_stream['mapname']));
         $result->add('game_map_pic_dir', 'lithtech/'.$this->basic_game_dir.'/'.($this->is_mod || $is_mod_ml ? $this->server_data_stream['gsgamename'] : $this->basic_game_dir) );
         $result->add('game_type',ucfirst($this->server_data_stream['gametype']));
         $result->add('game_dir', !$this->is_mod && !$is_mod_ml ? $this->server_data_stream['gsgamename'] : $this->basic_game_dir);

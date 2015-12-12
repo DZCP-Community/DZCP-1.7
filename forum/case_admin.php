@@ -99,7 +99,7 @@ if(defined('_Forum')) {
                       ON s1.kid = s2.id
                       WHERE s1.id = '".intval($_GET['id'])."'");
 
-          $i_move = show(_forum_admin_do_move, array("kat" => re($getm['kattopic'])));
+          $i_move = show(_forum_admin_do_move, array("kat" => stringParser::decode($getm['kattopic'])));
           $index = info($i_move, "?action=showthread&amp;id=".$_GET['id']."");
         }
       }

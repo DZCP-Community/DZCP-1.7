@@ -17,13 +17,13 @@ function l_news() {
     if($sql->rowCount()) {
         foreach($qry as $get) {
             $getkat = $sql->fetch("SELECT `kategorie` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']));
-            $info = !settings::get('allowhover') == 1 ? '' : 'onmouseover="DZCP.showInfo(\''.jsconvert(re($get['titel'])).'\', \''.
+            $info = !settings::get('allowhover') == 1 ? '' : 'onmouseover="DZCP.showInfo(\''.jsconvert(stringParser::decode($get['titel'])).'\', \''.
                   _datum.';'._autor.';'._news_admin_kat.';'._comments_head.'\', \''.date("d.m.Y H:i", $get['datum'])._uhr.';'.
-                  fabo_autor($get['autor']).';'.jsconvert(re($getkat['kategorie'])).';'.
+                  fabo_autor($get['autor']).';'.jsconvert(stringParser::decode($getkat['kategorie'])).';'.
                   cnt('{prefix_newscomments}',"WHERE `news` = ?","id",array($get['id'])).'\')" onmouseout="DZCP.hideInfo()"';
 
             $l_news .= show("menu/last_news", array("id" => $get['id'],
-                                                    "titel" => cut(re($get['titel']),settings::get('l_lnews')),
+                                                    "titel" => cut(stringParser::decode($get['titel']),settings::get('l_lnews')),
                                                     "datum" => date("d.m.Y", $get['datum']),
                                                     "info" => $info));
         }

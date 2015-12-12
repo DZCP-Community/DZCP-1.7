@@ -1972,7 +1972,7 @@ define('_editor_add_head' , 'Insert site');
 define('_inhalt' , 'Content');
 define('_allow', 'Allow');
 define('_deny', 'Deny');
-define('_editor_allow_html' , 'allow HTML?');
+define('_editor_allow_html' , 'allow HTML/BBCODE?');
 define('_editor_allow_php', 'allow PHP-Code?');
 define('_empty_editor_inhalt' , 'You have to indicate a text!');
 define('_site_added' , 'The site was successfully registered!');

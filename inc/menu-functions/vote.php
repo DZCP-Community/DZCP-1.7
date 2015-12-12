@@ -23,21 +23,21 @@ function vote($ajax = false) {
                         $balken = show(_votes_balken, array("width" => $rawpercent));
 
                         $votebutton = "";
-                        $results .= show("menu/vote_results", array("answer" => re($getv['sel']),
+                        $results .= show("menu/vote_results", array("answer" => stringParser::decode($getv['sel']),
                                                                     "percent" => $percent,
                                                                     "stimmen" => $getv['stimmen'],
                                                                     "balken" => $balken));
                     } else {
                         $votebutton = '<input id="contentSubmitVote" type="submit" value="'._button_value_vote.'" class="voteSubmit" />';
-                        $results .= show("menu/vote_vote", array("id" => $getv['id'], "answer" => re($getv['sel'])));
+                        $results .= show("menu/vote_vote", array("id" => $getv['id'], "answer" => stringParser::decode($getv['sel'])));
                     }
                 } else {
                     $votebutton = '<input id="contentSubmitVote" type="submit" value="'._button_value_vote.'" class="voteSubmit" />';
-                    $results .= show("menu/vote_vote", array("id" => $getv['id'], "answer" => re($getv['sel'])));
+                    $results .= show("menu/vote_vote", array("id" => $getv['id'], "answer" => stringParser::decode($getv['sel'])));
                 }
             }
 
-            $vote = show("menu/vote", array("titel" => re($get['titel']),
+            $vote = show("menu/vote", array("titel" => stringParser::decode($get['titel']),
                                             "vid" => $get['id'],
                                             "results" => $results,
                                             "votebutton" => $votebutton,

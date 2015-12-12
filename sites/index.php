@@ -14,7 +14,7 @@ include(basePath."/inc/common.php");
 function phpParser($code,$php=false) {
     global $cache,$httphost,$chkMe,$designpath;
     global $userid,$do,$page,$action;
-    if($php) {
+    if($php && php_code_enabled) {
         ob_start(); unset($php);
         $dir = $designpath;
         $html = preg_replace_callback("/\[php\](.*?)\[\/php\]/",
@@ -51,18 +51,18 @@ default:
         if($sql->rowCount()) {
             $navi_access = !($chkMe >= $navi['level'] || admin_perms($userid));
         }
-                
+
         if(($get['internal'] && !$chkMe) || $navi_access) {
             $index = error(_error_wrong_permissions, 1);
         } else {
-            $where = re($get['titel']);
+            $where = stringParser::decode($get['titel']);
             if($get['html']) {
-                $inhalt = bbcode_html(phpParser(re($get['text']),$get['php']));
+                $inhalt = bbcode::parse_html(stringParser::encode(phpParser(stringParser::decode($get['text']),$get['php'])));
             } else { 
-                $inhalt = bbcode(phpParser(re($get['text']),$get['php']));
+                $inhalt = phpParser(stringParser::decode($get['text']),$get['php']);
             }
 
-            $index = show($dir."/sites", array("titel" => re($get['titel']), "inhalt" => $inhalt));
+            $index = show($dir."/sites", array("titel" => stringParser::decode($get['titel']), "inhalt" => $inhalt));
         }
     } else {
         $index = error(_sites_not_available,1);
@@ -71,12 +71,12 @@ break;
 case 'preview';
     header("Content-type: text/html; charset=utf-8");
     if(isset($_POST['html'])) {
-        $inhalt = bbcode_html(phpParser($_POST['inhalt'],isset($_POST['php']) && permission('phpexecute')),true);
+        $inhalt = bbcode::parse_html(stringParser::encode(phpParser(stringParser::decode($_POST['inhalt']),(isset($_POST['php']) && permission('phpexecute')))));
     } else {
-        $inhalt = bbcode(phpParser($_POST['inhalt'],isset($_POST['php']) && permission('phpexecute')),true);
+        $inhalt = phpParser(stringParser::decode($_POST['inhalt']),(isset($_POST['php']) && permission('phpexecute')));
     }
 
-    $index = show($dir."/sites", array("titel" => re($_POST['titel']), "inhalt" => $inhalt));
+    $index = show($dir."/sites", array("titel" => stringParser::decode($_POST['titel']), "inhalt" => $inhalt));
     exit(utf8_encode('<table class="mainContent" cellspacing="1"'.$index.'</table>'));
 break;
 endswitch;

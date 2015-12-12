@@ -178,7 +178,7 @@ class GameQ_Protocols_Mohwf extends GameQ_Protocols_Bf3
         $result->add('game_mod_name_long', $this->is_mod ? $this->name_long : $mod_name_long);
         $result->add('game_mod_name_short', $this->is_mod ? $this->name_short : $mod_name_short);
         $result->add('game_hostname',htmlentities($this->server_data_stream['hostname'], ENT_QUOTES, "UTF-8"));
-        $result->add('game_map', re($this->server_data_stream['map']));
+        $result->add('game_map', stringParser::decode($this->server_data_stream['map']));
         $result->add('game_map_pic_dir', 'frostbite/'.$this->basic_game_dir.'/'.strtolower($this->is_mod || $is_mod_ml ? $this->server_data_stream['gamevariant'] : $this->basic_game_dir).'/'.strtolower(str_ireplace('0', '', $this->server_data_stream['gametype'])));
         $result->add('game_type',ucfirst($game_type));
         $result->add('game_dir', 'frostbite/'.!$this->is_mod && !$is_mod_ml ? $this->server_data_stream['gamevariant'] : $this->basic_game_dir);

@@ -11,23 +11,23 @@ $i = $entrys-($page - 1)*settings::get('maxshoutarchiv');
 $qry = $sql->select("SELECT * FROM `{prefix_shoutbox}` "
         . "ORDER BY `datum` DESC LIMIT ".($page - 1)*settings::get('maxshoutarchiv').",".settings::get('maxshoutarchiv').";");
 foreach($qry as $get) {
-    $is_num = preg_match("#\d#", re($get['email']));
-    if($is_num && !check_email(re($get['email']))) 
-        $nick = autor(re($get['email']));
+    $is_num = preg_match("#\d#", stringParser::decode($get['email']));
+    if($is_num && !check_email(stringParser::decode($get['email']))) 
+        $nick = autor(stringParser::decode($get['email']));
     else if($chkMe == 4 || permission('ipban'))
-        $nick = '<a href="mailto:'.re($get['email']).'" title="'.re($get['nick']).'">'.cut(re($get['nick']), settings::get('l_shoutnick')).'</a>';
+        $nick = '<a href="mailto:'.stringParser::decode($get['email']).'" title="'.stringParser::decode($get['nick']).'">'.cut(stringParser::decode($get['nick']), settings::get('l_shoutnick')).'</a>';
     else
-        $nick = cut(re($get['nick']), settings::get('l_shoutnick'));
+        $nick = cut(stringParser::decode($get['nick']), settings::get('l_shoutnick'));
     
     $del = permission("shoutbox") ? "<a href='../shout/?action=admin&amp;do=delete&amp;id=".$get['id']."'>"
            . "<img src='../inc/images/delete_small.gif' border='0' alt=''></a>" : "";
 
-    $posted_ip = ($chkMe == 4 || permission('ipban') ? re($get['ip']) : _logged);
-    $email = ($chkMe == 4 || permission('ipban') ? re($get['email']) : "");
+    $posted_ip = ($chkMe == 4 || permission('ipban') ? stringParser::decode($get['ip']) : _logged);
+    $email = ($chkMe == 4 || permission('ipban') ? stringParser::decode($get['email']) : "");
     $class = ($color % 2) ? "contentMainTop" : "contentMainFirst"; $color++;
     $show .= show($dir."/shout_part", array("nick" => $nick,
                                             "datum" => date("j.m.Y H:i", $get['datum'])._uhr,
-                                            "text" => bbcode(re($get['text'])),
+                                            "text" => bbcode::parse_html($get['text']),
                                             "class" => $class,
                                             "del" => $del,
                                             "ip" => $posted_ip,

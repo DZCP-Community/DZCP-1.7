@@ -17,9 +17,9 @@ if(_adminMenu != 'true') exit;
                                                           "title" => _button_title_del,
                                                           "del" => convSpace(_confirm_del_kat)));
         
-        $img = show(_config_newskats_img, array("img" => re($get['katimg'])));
+        $img = show(_config_newskats_img, array("img" => stringParser::decode($get['katimg'])));
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-        $kats .= show($dir."/newskats_show", array("mainkat" => re($get['kategorie']),
+        $kats .= show($dir."/newskats_show", array("mainkat" => stringParser::decode($get['kategorie']),
                                                    "class" => $class,
                                                    "img" => $img,
                                                    "delete" => $delete,
@@ -62,7 +62,7 @@ if(_adminMenu != 'true') exit;
         {
           $show = error(_config_empty_katname,1);
         } else {
-          $sql->insert("INSERT INTO `{prefix_newskat}` SET `katimg` = ?, `kategorie` = ?;",array(up($_POST['img']),up($_POST['kat'])));
+          $sql->insert("INSERT INTO `{prefix_newskat}` SET `katimg` = ?, `kategorie` = ?;",array(stringParser::encode($_POST['img']),stringParser::encode($_POST['kat'])));
           $show = info(_config_newskats_added, "?admin=news");
         }
       } elseif($do == "edit") {
@@ -80,7 +80,7 @@ if(_adminMenu != 'true') exit;
 
         $show = show($dir."/newskatform", array("head" => _config_newskats_edit_head,
                                                 "nkat" => _config_katname,
-                                                "kat" => re($get['kategorie']),
+                                                "kat" => stringParser::decode($get['kategorie']),
                                                 "value" => _button_value_edit,
                                                 "id" => $_GET['id'],
                                                 "do" => $do,
@@ -93,9 +93,9 @@ if(_adminMenu != 'true') exit;
           $show = error(_config_empty_katname,1);
         } else {
           if($_POST['img'] == "lazy") $katimg = "";
-          else $katimg = "`katimg` = '".up($_POST['img'])."',";
+          else $katimg = "`katimg` = '".stringParser::encode($_POST['img'])."',";
 
-          $sql->update("UPDATE `{prefix_newskat}` SET ".$katimg." `kategorie` = ? WHERE id = ?;",array(up($_POST['kat']),intval($_GET['id'])));
+          $sql->update("UPDATE `{prefix_newskat}` SET ".$katimg." `kategorie` = ? WHERE id = ?;",array(stringParser::encode($_POST['kat']),intval($_GET['id'])));
 
           $show = info(_config_newskats_edited, "?admin=news");
         }

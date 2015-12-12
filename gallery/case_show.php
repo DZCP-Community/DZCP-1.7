@@ -51,8 +51,8 @@ if(!permission('galleryintern') && $get['intern']) {
         $end = $end."</tr>";
     }
 
-    $index = show($dir."/show", array("gallery" => re($get['kat']),
+    $index = show($dir."/show", array("gallery" => stringParser::decode($get['kat']),
                                       "show" => $show,
-                                      "beschreibung" => bbcode(re($get['beschreibung'])),
+                                      "beschreibung" => bbcode::parse_html($get['beschreibung']),
                                       "end" => $end));
 }

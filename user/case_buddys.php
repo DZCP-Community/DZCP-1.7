@@ -27,7 +27,7 @@ if(defined('_UserMenu')) {
                                . "`von` = 0, "
                                . "`an` = ?, "
                                . "`titel` = ?, "
-                               . "`nachricht` = ?;",array(intval($_POST['users']),up($title),up($msg)));
+                               . "`nachricht` = ?;",array(intval($_POST['users']),stringParser::encode($title),stringParser::encode($msg)));
 
                     $index = info(_add_buddy_successful, "?action=buddys");
                 }
@@ -50,7 +50,7 @@ if(defined('_UserMenu')) {
                                . "`von` = 0, "
                                . "`an` = ?, "
                                . "`titel` = ?, "
-                               . "`nachricht` = ?;",array(intval($user),up($title),up($msg)));
+                               . "`nachricht` = ?;",array(intval($user),stringParser::encode($title),stringParser::encode($msg)));
 
                     $index = info(_add_buddy_successful, "?action=buddys");
                 }
@@ -67,7 +67,7 @@ if(defined('_UserMenu')) {
                                . "`von` = 0, "
                                . "`an` = ?, "
                                . "`titel` = ?, "
-                               . "`nachricht` = ?;",array(intval($_GET['id']),up($title),up($msg)));
+                               . "`nachricht` = ?;",array(intval($_GET['id']),stringParser::encode($title),stringParser::encode($msg)));
 
                     $index = info(_buddys_delete_successful, "../user/?action=buddys");
                 }
@@ -76,7 +76,7 @@ if(defined('_UserMenu')) {
                 $qry = $sql->select("SELECT `buddy` FROM `{prefix_userbuddys}` WHERE `user` = ?;",array($userid));
                 $too = ""; $buddys = ""; $usersNL=array();
                 foreach($qry as $get) {
-                    $pn = show(_pn_write, array("id" => $get['buddy'], "nick" => re(data("nick",$get['buddy']))));
+                    $pn = show(_pn_write, array("id" => $get['buddy'], "nick" =>stringParser::decode(data("nick",$get['buddy']))));
                     $delete = show(_buddys_delete, array("id" => $get['buddy']));
                     $too = $sql->rows("SELECT `id` FROM `{prefix_userbuddys}` where `user` = ? AND `buddy` = ?;",array($get['buddy'],$userid)) ? _buddys_yesicon : _buddys_noicon;
                     $usersNL[$get['buddy']] = true;
@@ -94,7 +94,7 @@ if(defined('_UserMenu')) {
                 $users = "";
                 foreach($qry as $get) {
                     if(!array_key_exists($get['id'], $usersNL) && $get['id'] != $userid) {
-                        $users .= show(_to_users, array("id" => $get['id'], "nick" => re(data("nick",$get['id']))));
+                        $users .= show(_to_users, array("id" => $get['id'], "nick" =>stringParser::decode(data("nick",$get['id']))));
                     }
                 }
 

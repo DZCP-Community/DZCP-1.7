@@ -10,9 +10,9 @@ if(defined('_Ck')) {
             case 'new':
                 $qry = $sql->select("SELECT kat FROM `{prefix_clankasse_kats}`;"); $trans = '';
                 foreach($qry as $get) {
-                    $trans .= show(_select_field, array("value" => re($get['kat']),
+                    $trans .= show(_select_field, array("value" => stringParser::decode($get['kat']),
                                                         "sel" => "",
-                                                        "what" => re($get['kat'])));
+                                                        "what" => stringParser::decode($get['kat'])));
                 }
 
                 $dropdown_date = show(_dropdown_date, array("day" => dropdown("day",date("d",time())),
@@ -22,7 +22,7 @@ if(defined('_Ck')) {
                 $index = show($dir."/new", array("thisyear" => date("Y"),
                                                  "dropdown_date" => $dropdown_date,
                                                  "trans" => $trans,
-                                                 "w" => str_replace(array('EUR','USD'), array('&euro;','$'),re(settings::get("k_waehrung")))));
+                                                 "w" => str_replace(array('EUR','USD'), array('&euro;','$'),stringParser::decode(settings::get("k_waehrung")))));
             break;
             case 'add':
                 if(!$_POST['t'] OR !$_POST['m'])
@@ -36,8 +36,8 @@ if(defined('_Ck')) {
                     $datum = mktime(0,0,0,$_POST['m'],$_POST['t'],$_POST['j']);
                     $sql->insert("INSERT INTO `{prefix_clankasse}` SET `datum` = ?, "
                         . "`member` = ?,`transaktion` = ?,`pm` = ?,`betrag` = ?;",
-                        array(intval($datum),up($_POST['member']),up($_POST['transaktion']),
-                            intval($_POST['pm']),up($betrag)));
+                        array(intval($datum),stringParser::encode($_POST['member']),stringParser::encode($_POST['transaktion']),
+                            intval($_POST['pm']),stringParser::encode($betrag)));
 
                     $index = info(_clankasse_saved, "../clankasse/");
                 }
@@ -58,7 +58,7 @@ if(defined('_Ck')) {
                         $index = error(_error_clankasse_empty_transaktion, 1);
                     else {
                         $sql->update("UPDATE `{prefix_clankasse}` SET `datum` = ?, `transaktion` = ?, `pm` = ?,`betrag` = ? WHERE `id` = ?;",
-                            array(intval($_POST['datum']),up($_POST['transaktion']),intval($_POST['pm']),up($_POST['betrag']),intval($_POST['id'])));
+                            array(intval($_POST['datum']),stringParser::encode($_POST['transaktion']),intval($_POST['pm']),stringParser::encode($_POST['betrag']),intval($_POST['id'])));
                         $index = info(_clankasse_edited, "../clankasse/");
                     }
                 }
@@ -73,9 +73,9 @@ if(defined('_Ck')) {
                     $qryk = $sql->select("SELECT * FROM `{prefix_clankasse_kats}`;"); $trans = '';
                     foreach($qryk as $getk) {
                         $sel = ($getk['kat'] == $get['transaktion'] ? 'selected="selected"' : '');
-                        $trans .= show(_select_field, array("value" => re($getk['kat']),
+                        $trans .= show(_select_field, array("value" => stringParser::decode($getk['kat']),
                                                             "sel" => $sel,
-                                                            "what" => re($getk['kat'])));
+                                                            "what" => stringParser::decode($getk['kat'])));
                     }
 
                     $index = show($dir."/edit", array("dropdown_date" => $dropdown_date,
@@ -83,9 +83,9 @@ if(defined('_Ck')) {
                                                       "psel" => (!$get['pm'] ? 'selected="selected"' : ''),
                                                       "msel" => ($get['pm'] == 1 ? 'selected="selected"' : ''),
                                                       "trans" => $trans,
-                                                      "w" => str_replace(array('EUR','USD'), array('&euro;','$'),re(settings::get("k_waehrung"))),
-                                                      "evonan" => re($get['member']),
-                                                      "sum" => re($get['betrag'])));
+                                                      "w" => str_replace(array('EUR','USD'), array('&euro;','$'),stringParser::decode(settings::get("k_waehrung"))),
+                                                      "evonan" => stringParser::decode($get['member']),
+                                                      "sum" => stringParser::decode($get['betrag'])));
                 }
             break;
             case 'editck':
@@ -99,7 +99,7 @@ if(defined('_Ck')) {
                     $betrag = preg_replace("#,#iUs",".",$_POST['betrag']);
                     $datum = mktime(0,0,0,$_POST['m'],$_POST['t'],$_POST['j']);
                     $sql->update("UPDATE `{prefix_clankasse}` SET `datum` = ?, `member` = ?,`transaktion` = ?, `pm` = ?, `betrag` = ? WHERE `id` = ?;",
-                        array(intval($datum),up($_POST['member']),up($_POST['transaktion']),intval($_POST['pm']),up($betrag),intval($_GET['id'])));
+                        array(intval($datum),stringParser::encode($_POST['member']),stringParser::encode($_POST['transaktion']),intval($_POST['pm']),stringParser::encode($betrag),intval($_GET['id'])));
 
                     $index = info(_clankasse_edited, "../clankasse/");
                 }

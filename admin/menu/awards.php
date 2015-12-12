@@ -11,9 +11,9 @@ switch ($do) {
     case 'new':
         $qry = $sql->select("SELECT `id`,`name`,`game`,`icon` FROM `{prefix_squads}` ORDER BY `game` ASC;"); $squads = "";
         foreach($qry as $get) {
-            $squads .= show(_awards_admin_add_select_field_squads, array("name" => re($get['name']),
-                                                                         "game" => re($get['game']),
-                                                                         "icon" => re($get['icon']),
+            $squads .= show(_awards_admin_add_select_field_squads, array("name" => stringParser::decode($get['name']),
+                                                                         "game" => stringParser::decode($get['game']),
+                                                                         "icon" => stringParser::decode($get['icon']),
                                                                          "id" => $get['id']));
         }
 
@@ -37,9 +37,9 @@ switch ($do) {
         foreach($qrym as $gets) {
             $sel = $get['squad'] == $gets['id'] ? 'selected="selected"' : '';
             $squads .= show(_awards_admin_edit_select_field_squads, array("id" => $gets['id'],
-                                                                          "name" => re($gets['name']),
-                                                                          "game" => re($gets['game']),
-                                                                          "icon" => re($gets['icon']),
+                                                                          "name" => stringParser::decode($gets['name']),
+                                                                          "game" => stringParser::decode($gets['game']),
+                                                                          "icon" => stringParser::decode($gets['icon']),
                                                                           "sel" => $sel));
         }
 
@@ -52,10 +52,10 @@ switch ($do) {
                                                 "what" => _button_value_edit,
                                                 "squads" => $squads,
                                                 "dropdown_date" => $dropdown_date,
-                                                "award_event" => re($get['event']),
-                                                "award_url" => re($get['url']),
-                                                "award_place" => re($get['place']),
-                                                "award_prize" => re($get['prize'])));
+                                                "award_event" => stringParser::decode($get['event']),
+                                                "award_url" => stringParser::decode($get['url']),
+                                                "award_place" => stringParser::decode($get['place']),
+                                                "award_prize" => stringParser::decode($get['prize'])));
     break;
     case 'add':
         if(empty($_POST['event']) || empty($_POST['url'])) {
@@ -70,8 +70,8 @@ switch ($do) {
             $datum = mktime(0,0,0,$_POST['m'],$_POST['t'],$_POST['j']);
             $sql->insert("INSERT INTO `{prefix_awards}` SET `date` = ?,"
             . "`postdate` = ?,`squad` = ?,`event` = ?,`url` = ?,`place` = ?,`prize` = ?;",
-                array(intval($datum),time(),intval($_POST['squad']),up($_POST['event']),
-                    up(links($_POST['url'])),up($place),up($prize)));
+                array(intval($datum),time(),intval($_POST['squad']),stringParser::encode($_POST['event']),
+                    stringParser::encode(links($_POST['url'])),stringParser::encode($place),stringParser::encode($prize)));
 
             $show = info(_awards_admin_added, "?admin=awards");
         }
@@ -89,8 +89,8 @@ switch ($do) {
             $datum = mktime(0,0,0,$_POST['m'],$_POST['t'],$_POST['j']);
             $sql->update("UPDATE `{prefix_awards}` SET `date` = ?, `squad` = ?, "
             . "`event` = ?, `url` = ?, `place` = ?, `prize` = ? WHERE id = ?;",
-                array(intval($datum),intval($_POST['squad']),up($_POST['event']),
-                    up(links($_POST['url'])),up($place),up($prize),intval($_GET['id'])));
+                array(intval($datum),intval($_POST['squad']),stringParser::encode($_POST['event']),
+                    stringParser::encode(links($_POST['url'])),stringParser::encode($place),stringParser::encode($prize),intval($_GET['id'])));
 
             $show = info(_awards_admin_edited, "?admin=awards");
         }
@@ -116,7 +116,7 @@ switch ($do) {
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/awards_show", array("datum" => date("d.m.Y",$get['date']),
-                                                     "award" => re($get['event']),
+                                                     "award" => stringParser::decode($get['event']),
                                                      "id" => $get['squad'],
                                                      "class" => $class,
                                                      "edit" => $edit,

@@ -11,13 +11,13 @@ if($sql->rowCount()) {
     foreach($qry as $get) {
         if($get['banner']) {
             $banner = show(_links_bannerlink, array("id" => $get['id'],
-                                                    "banner" => re($get['text'])));
+                                                    "banner" => stringParser::decode($get['text'])));
         } else {
             $banner = show(_links_textlink, array("id" => $get['id'],
-                                                  "text" => str_replace('http://','',re($get['url']))));
+                                                  "text" => str_replace('http://','',stringParser::decode($get['url']))));
         }
 
-        $show .= show($dir."/links_show", array("beschreibung" => bbcode(re($get['beschreibung'])),
+        $show .= show($dir."/links_show", array("beschreibung" => bbcode::parse_html($get['beschreibung']),
                                                 "hits" => $get['hits'],
                                                 "banner" => $banner));
     }

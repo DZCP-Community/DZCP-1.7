@@ -15,17 +15,17 @@ foreach($qry as $get) {
         }
 
         $banner = show(_sponsors_bannerlink, array("id" => $get['id'],
-                                                   "title" => str_replace('http://', '', re($get['link'])),
+                                                   "title" => str_replace('http://', '', stringParser::decode($get['link'])),
                                                    "banner" => "../banner/sponsors/site_".$get['id'].".".$end));
     } else {
         $banner = show(_sponsors_bannerlink, array("id" => $get['id'],
-                                                   "title" => str_replace('http://', '', re($get['link'])),
+                                                   "title" => str_replace('http://', '', stringParser::decode($get['link'])),
                                                    "banner" => $get['slink']));
     }
 
     $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
     $show .= show($dir."/sponsors_show", array("class" => $class,
-                                               "beschreibung" => bbcode($get['beschreibung']),
+                                               "beschreibung" => bbcode::parse_html($get['beschreibung']),
                                                "hits" => $get['hits'],
                                                "banner" => $banner));
 }

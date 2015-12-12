@@ -18,12 +18,12 @@ switch ($do) {
         $navigation = ''; $thiskat = '';
         foreach($qrynav as $getnav) {
             if($thiskat != $getnav['kat']) {
-                $navigation .= '<option class="dropdownKat" value="lazy">'.re($getnav['katname']).'</option>
-                                <option value="'.re($getnav['placeholder']).'-1">-> '._admin_first.'</option>';
+                $navigation .= '<option class="dropdownKat" value="lazy">'.stringParser::decode($getnav['katname']).'</option>
+                                <option value="'.stringParser::decode($getnav['placeholder']).'-1">-> '._admin_first.'</option>';
             }
 
             $thiskat = $getnav['kat'];
-            $navigation .= empty($getnav['name']) ? '' : '<option value="'.re($getnav['placeholder']).'-'.($getnav['pos']+1).'">'._nach.' -> '.navi_name(re($getnav['name'])).'</option>';
+            $navigation .= empty($getnav['name']) ? '' : '<option value="'.stringParser::decode($getnav['placeholder']).'-'.($getnav['pos']+1).'">'._nach.' -> '.navi_name(stringParser::decode($getnav['name'])).'</option>';
         }
 
         $qry = $sql->select("SELECT * FROM `{prefix_squads}` ORDER BY pos");
@@ -31,7 +31,7 @@ switch ($do) {
         foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => $get['pos']+1,
                                                     "sel" => "",
-                                                    "what" => _nach.' '.re($get['name'])));
+                                                    "what" => _nach.' '.stringParser::decode($get['name'])));
         }
 
         $files = get_files(basePath.'/inc/images/gameicons/custom/',false,true,$picformat);
@@ -90,10 +90,10 @@ switch ($do) {
 
             $sql->update("UPDATE `{prefix_squads}` SET `pos` = pos+1 WHERE pos ".$sign." '".intval($_POST['position'])."'");
             $sql->insert("INSERT INTO `{prefix_squads}`
-                SET `name`         = '".up($_POST['squad'])."',
-                    `game`         = '".up($_POST['game'])."',
-                    `icon`         = '".up($_POST['icon'])."',
-                    `beschreibung` = '".up($_POST['beschreibung'])."',
+                SET `name`         = '".stringParser::encode($_POST['squad'])."',
+                    `game`         = '".stringParser::encode($_POST['game'])."',
+                    `icon`         = '".stringParser::encode($_POST['icon'])."',
+                    `beschreibung` = '".stringParser::encode($_POST['beschreibung'])."',
                     `shown`        = '".(isset($_POST['show']) ? intval($_POST['show']) : 0)."',
                     `navi`         = '".intval($_POST['roster'])."',
                     `team_show`    = '".intval($_POST['team_show'])."',
@@ -114,8 +114,8 @@ switch ($do) {
                 $sql->update("UPDATE `{prefix_navi}` SET `pos` = pos+1 WHERE pos ".$signnav." '".intval($pos)."'");
                 $sql->insert("INSERT INTO `{prefix_navi}`
                     SET `pos`   = '".intval($pos)."',
-                        `kat`       = '".up($kat)."',
-                        `name`      = '".up($_POST['squad'])."',
+                        `kat`       = '".stringParser::encode($kat)."',
+                        `name`      = '".stringParser::encode($_POST['squad'])."',
                         `url`       = '../squads/?action=shows&amp;id=".$insert_id."',
                         `shown`     = '1',
                         `type`      = '2'");
@@ -168,14 +168,14 @@ switch ($do) {
             else $newpos = "`pos` = '".intval($_POST['position'])."',";
 
             if($_POST['icon'] == "lazy") $newicon = "";
-            else $newicon = "`icon` = '".up($_POST['icon'])."',";
+            else $newicon = "`icon` = '".stringParser::encode($_POST['icon'])."',";
 
             $sql->update("UPDATE `{prefix_squads}`
-                SET `name`          = '".up($_POST['squad'])."',
-                    `game`          = '".up($_POST['game'])."',
+                SET `name`          = '".stringParser::encode($_POST['squad'])."',
+                    `game`          = '".stringParser::encode($_POST['game'])."',
                     ".$newpos."
                     ".$newicon."
-                    `beschreibung` = '".up($_POST['beschreibung'])."',
+                    `beschreibung` = '".stringParser::encode($_POST['beschreibung'])."',
                     `shown`        = '".(isset($_POST['show']) ? intval($_POST['show']) : 0)."',
                     `navi`         = '".intval($_POST['roster'])."',
                     `team_show`    = '".intval($_POST['team_show'])."',
@@ -195,8 +195,8 @@ switch ($do) {
 
                     $sql->update("UPDATE `{prefix_navi}` SET pos = pos+1 WHERE pos ".$sign." '".intval($pos)."'");
                     $sql->update("UPDATE `{prefix_navi}` SET `pos` = '".intval($pos)."',
-                                                   `kat`       = '".up($kat)."',
-                                                   `name`      = '".up($_POST['squad'])."',
+                                                   `kat`       = '".stringParser::encode($kat)."',
+                                                   `name`      = '".stringParser::encode($_POST['squad'])."',
                                                    `url`       = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'
                                                WHERE id = '".intval($get['id'])."'");
                 } else {
@@ -210,8 +210,8 @@ switch ($do) {
 
                     $sql->insert("INSERT INTO `{prefix_navi}`
                         SET `pos`       = '".intval($pos)."',
-                            `kat`       = '".up($kat)."',
-                            `name`      = '".up($_POST['squad'])."',
+                            `kat`       = '".stringParser::encode($kat)."',
+                            `name`      = '".stringParser::encode($_POST['squad'])."',
                             `url`       = '../squads/?action=shows&amp;id=".intval($_GET['id'])."',
                             `shown`     = '1',
                             `type`      = '2'");
@@ -311,7 +311,7 @@ switch ($do) {
 
                 $sel = $getpos['pos'] == $mp['pos'] ? 'selected="selected"' : '' ;
                 $positions .= show(_select_field, array("value" => $getpos['pos']+1,
-                                                        "what" => _nach.' '.re($getpos['name']),
+                                                        "what" => _nach.' '.stringParser::decode($getpos['name']),
                                                         "sel" => $sel));
             }
         }
@@ -321,13 +321,13 @@ switch ($do) {
         $i = 1; $thiskat = ''; $navigation = '';
         foreach($qrynav as $getnav) {
             if($thiskat != $getnav['kat']) {
-                $navigation .= '<option class="dropdownKat" value="lazy">'.re($getnav['katname']).'</option>
-                <option value="'.re($getnav['placeholder']).'-1">-> '._admin_first.'</option>';
+                $navigation .= '<option class="dropdownKat" value="lazy">'.stringParser::decode($getnav['katname']).'</option>
+                <option value="'.stringParser::decode($getnav['placeholder']).'-1">-> '._admin_first.'</option>';
             }
 
             $thiskat = $getnav['kat'];
             $sel[$i] = ($getnav['url'] == '../squads/?action=shows&amp;id='.intval($_GET['id'])) ? 'selected="selected"' : '';
-            $navigation .= empty($getnav['name']) ? '' : '<option value="'.re($getnav['placeholder']).'-'.($getnav['pos']+1).'" '.$sel[$i].'>'._nach.' -> '.navi_name(re($getnav['name'])).'</option>';
+            $navigation .= empty($getnav['name']) ? '' : '<option value="'.stringParser::decode($getnav['placeholder']).'-'.($getnav['pos']+1).'" '.$sel[$i].'>'._nach.' -> '.navi_name(stringParser::decode($getnav['name'])).'</option>';
             $i++;
         }
 
@@ -382,7 +382,7 @@ switch ($do) {
                                                 "image" => $image,
                                                 "logoimage" => $logoimage,
                                                 "desc" => _dl_besch,
-                                                "beschreibung" => re($get['beschreibung']),
+                                                "beschreibung" => stringParser::decode($get['beschreibung']),
                                                 "cstatus" => $status,
                                                 "first" => _admin_first,
                                                 "info" => _admin_squad_show_info,
@@ -399,14 +399,14 @@ switch ($do) {
                                                 "teams" => _admin_squads_teams,
                                                 "show" => _show,
                                                 "dontshow" => _dont_show,
-                                                "ssquad" => re($get['name']),
+                                                "ssquad" => stringParser::decode($get['name']),
                                                 "selj" => $team_joinus,
                                                 "self" => $team_fightus,
                                                 "allow" => _allow,
                                                 "deny" => _deny,
                                                 "squads_joinus" => _squads_joinus,
                                                 "squads_fightus" => _squads_fightus,
-                                                "sgame" => re($get['game']),
+                                                "sgame" => stringParser::decode($get['game']),
                                                 "positions" => $positions,
                                                 "check_show" => _button_value_show,
                                                 "game" => _member_admin_game));
@@ -426,8 +426,8 @@ switch ($do) {
 
             $icon = show(_gameicon, array("icon" => $get['icon']));
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-            $squads .= show($dir."/squads_show", array("squad" => '<a href="../squads/?action=shows&amp;id='.$get['id'].'" style="display:block">'.re($get['name']).'</a>',
-                    "game" => re($get['game']),
+            $squads .= show($dir."/squads_show", array("squad" => '<a href="../squads/?action=shows&amp;id='.$get['id'].'" style="display:block">'.stringParser::decode($get['name']).'</a>',
+                    "game" => stringParser::decode($get['game']),
                     "icon" => $icon,
                     "edit" => $edit,
                     "class" => $class,

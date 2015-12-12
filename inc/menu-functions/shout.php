@@ -16,15 +16,15 @@ function shout($ajax = 0) {
             $delete = '<a href="../shout/?action=admin&amp;do=delete&amp;id='.$get['id'].'" onclick="return(DZCP.del(\''.
                 _confirm_del_shout.'\'))"><img src="../inc/images/delete_small.gif" title="'._button_title_del.'" alt="'._button_title_del.'" /></a>';
 
-        if(preg_match("#\d#", re($get['email'])) && !check_email(re($get['email'])))
-            $nick = autor(re($get['email']), "navShout",'','',settings::get('l_shoutnick'));
+        if(preg_match("#\d#", stringParser::decode($get['email'])) && !check_email(stringParser::decode($get['email'])))
+            $nick = autor(stringParser::decode($get['email']), "navShout",'','',settings::get('l_shoutnick'));
         else
-            $nick = CryptMailto(re($get['email']),_email_navShout,array('nick' => $get['nick'], 'nick_cut' => cut($get['nick'], settings::get('l_shoutnick'))));
+            $nick = CryptMailto(stringParser::decode($get['email']),_email_navShout,array('nick' => $get['nick'], 'nick_cut' => cut($get['nick'], settings::get('l_shoutnick'))));
 
         $class = ($color % 2) ? "navShoutContentFirst" : "navShoutContentSecond"; $color++;
         $show .= show("menu/shout_part", array("nick" => $nick,
                                                "datum" => date("j.m.Y H:i", $get['datum'])._uhr,
-                                               "text" => bbcode(wrap(re($get['text']), settings::get('l_shouttext')),false,false,false,true),
+                                               "text" => bbcode::parse_html(wrap(stringParser::decode($get['text']), settings::get('l_shouttext')),false,false,false),
                                                "class" => $class,
                                                "del" => $delete));
         $i++;

@@ -23,12 +23,12 @@ if(defined('_Clanwars')) {
 foreach($qry as $get) {
       $img = squad($get['icon']);
       $flagge = flag($get['gcountry']);
-      $gegner = show(_cw_details_gegner, array("gegner" => re(cut($get['clantag']." - ".$get['gegner'], settings::get('l_clanwars'))),
+      $gegner = show(_cw_details_gegner, array("gegner" =>stringParser::decode(cut($get['clantag']." - ".$get['gegner'], settings::get('l_clanwars'))),
                                                "url" => '?action=details&amp;id='.$get['id']));
 
       $details = show(_cw_show_details, array("id" => $get['id']));
       $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-      $squad = show(_member_squad_squadlink, array("squad" => re($get['name']),
+      $squad = show(_member_squad_squadlink, array("squad" => stringParser::decode($get['name']),
                                                    "id" => intval($_GET['id'])));
       $icon = show(_gameicon, array("icon" => $get['icon']));
 
@@ -36,9 +36,9 @@ foreach($qry as $get) {
                                                                        "img" => $img,
                                                                        "flagge" => $flagge,
                                                    "gegner" => $gegner,
-                                                 "xonx" => re($get['xonx']),
-                                                 "liga" => re($get['liga']),
-                                                                       "gametype" => re($get['gametype']),
+                                                 "xonx" => stringParser::decode($get['xonx']),
+                                                 "liga" => stringParser::decode($get['liga']),
+                                                                       "gametype" => stringParser::decode($get['gametype']),
                                                  "class" => $class,
                                                  "result" => cw_result_nopic($get['punkte'], $get['gpunkte']),
                                                                        "details" => $details));
@@ -131,7 +131,7 @@ foreach($qry as $get) {
     foreach($qry as $get) {
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
           $img = squad($get['icon']);
-          $legende .= show(_awards_legende, array("game" => re($get['game']),
+          $legende .= show(_awards_legende, array("game" => stringParser::decode($get['game']),
                                                                       "img" => $img,
                                                                       "class" => $class));
       }

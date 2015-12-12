@@ -174,3 +174,8 @@ function sql_backup() {
     unset($data);
     return $sql_backup;
 }
+
+function bbcode_nletter($txt) {
+    $txt = nl2br(trim(stripslashes($txt)));
+    return '<style type="text/css">p { margin: 0px; padding: 0px; }</style>'.$txt;
+}

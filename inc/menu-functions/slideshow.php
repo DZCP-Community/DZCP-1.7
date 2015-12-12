@@ -15,9 +15,9 @@ function slideshow() {
             if(empty($get['desc']) && !$get['showbez'])
                 $slideroverlay = '';
             else if(!empty($get['desc']) && !$get['showbez'])
-                $slideroverlay = '<div class="slideroverlay"><span>'.bbcode(wrap(re($get['desc']))).'</span></div>';
+                $slideroverlay = '<div class="slideroverlay"><span>'.bbcode::parse_html(wrap(stringParser::decode($get['desc']))).'</span></div>';
             else
-                $slideroverlay = '<div class="slideroverlay"><h2>'.bbcode(wrap(re($get['bez']))).'</h2><span>'.bbcode(wrap(re($get['desc']))).'</span></div>';
+                $slideroverlay = '<div class="slideroverlay"><h2>'.bbcode::parse_html(wrap(stringParser::decode($get['bez']))).'</h2><span>'.bbcode::parse_html(wrap(stringParser::decode($get['desc']))).'</span></div>';
 
             $image = '';
             foreach($picformat as $endung) {
@@ -29,7 +29,7 @@ function slideshow() {
 
             $pic .= show("menu/slideshowbild", array("image" => "<img src=\"".$image."\" alt=\"\" />",
                                                      "link" => "'".$get['url']."'",
-                                                     "bez" => cut(re($get['bez']),32),
+                                                     "bez" => cut(stringParser::decode($get['bez']),32),
                                                      "text" => $slideroverlay,
                                                      "target" => $get['target']));
 

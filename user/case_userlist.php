@@ -20,7 +20,7 @@ if(defined('_UserMenu')) {
                               . "WHERE `nick` LIKE ? AND `level` != 0 "
                               . orderby_sql(array("nick","bday"), 'ORDER BY `nick`')." "
                               . "LIMIT ".$limit_sql.";",
-                    array('%'.up($_GET['search']).'%'));
+                    array('%'.stringParser::encode($_GET['search']).'%'));
         break;
         case 'newreg':
             $qry = $sql->select("SELECT ".$select_sql." "
@@ -83,11 +83,11 @@ if(defined('_UserMenu')) {
 
     $userliste = '';
     foreach($qry as $get) {
-        $hlsw = empty($get['hlswid']) ? "-" : show(_hlswicon, array("id" => re($get['hlswid']), "img" => "1", "css" => ""));
-        $xboxu = empty($get['xboxid']) ? "-" : show(_xboxicon, array("id" => re($get['xboxid']), "img" => "1", "css" => ""));
-        $psnu = empty($get['psnid']) ? "-" : show(_psnicon, array("id" => re($get['psnid']), "img" => "1", "css" => ""));
-        $originu = empty($get['originid']) ? "-" : show(_originicon, array("id" => re($get['originid']), "img" => "1", "css" => ""));
-        $battlenetu = empty($get['battlenetid']) ? "-" : show(_battleneticon, array("id" => re($get['battlenetid']), "img" => "1", "css" => ""));
+        $hlsw = empty($get['hlswid']) ? "-" : show(_hlswicon, array("id" => stringParser::decode($get['hlswid']), "img" => "1", "css" => ""));
+        $xboxu = empty($get['xboxid']) ? "-" : show(_xboxicon, array("id" => stringParser::decode($get['xboxid']), "img" => "1", "css" => ""));
+        $psnu = empty($get['psnid']) ? "-" : show(_psnicon, array("id" => stringParser::decode($get['psnid']), "img" => "1", "css" => ""));
+        $originu = empty($get['originid']) ? "-" : show(_originicon, array("id" => stringParser::decode($get['originid']), "img" => "1", "css" => ""));
+        $battlenetu = empty($get['battlenetid']) ? "-" : show(_battleneticon, array("id" => stringParser::decode($get['battlenetid']), "img" => "1", "css" => ""));
         $skypename = empty($get['skypename']) ? "-" : "<a href=\"skype:".$get['skypename']."?chat\"><img src=\"http://mystatus.skype.com/smallicon/".$get['skypename']."\" style=\"border: none;\" width=\"16\" height=\"16\" alt=\"".$get['skypename']."\"/></a>";
         $hp = empty($get['hp']) ? "-" : show(_hpicon, array("hp" => $get['hp']));
 

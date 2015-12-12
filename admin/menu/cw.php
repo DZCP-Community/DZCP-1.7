@@ -15,8 +15,8 @@ switch ($do) {
                 . "ORDER BY `game` ASC;"); 
         $squads = '';
         foreach($qry as $get) {
-            $squads .= show(_cw_add_select_field_squads, array("name" => re($get['name']),
-                                                               "game" => re($get['game']),
+            $squads .= show(_cw_add_select_field_squads, array("name" => stringParser::decode($get['name']),
+                                                               "game" => stringParser::decode($get['game']),
                                                                "id" => $get['id'],
                                                                "icon" => $get['icon']));
         }
@@ -60,7 +60,7 @@ switch ($do) {
     case 'edit':
         $get = $sql->fetch("SELECT * FROM `{prefix_clanwars}` "
                 . "WHERE `id` = ?;",array(intval($_GET['id'])));
-        list($xonx1,$xonx2) = explode('on', re($get['xonx']));
+        list($xonx1,$xonx2) = explode('on', stringParser::decode($get['xonx']));
         $qrym = $sql->select("SELECT `id`,`name`,`game`,`icon` "
                 . "FROM `{prefix_squads}` "
                 . "WHERE `status` = 1 "
@@ -69,10 +69,10 @@ switch ($do) {
         foreach($qrym as $gets) {
             $sel = ($get['squad_id'] == $gets['id'] ? 'selected="selected"' : '');
             $squads .= show(_cw_edit_select_field_squads, array("id" => $gets['id'],
-                                                                "name" => re($gets['name']),
-                                                                "game" => re($gets['game']),
+                                                                "name" => stringParser::decode($gets['name']),
+                                                                "game" => stringParser::decode($gets['game']),
                                                                 "sel" => $sel,
-                                                                "icon" => re($gets['icon'])));
+                                                                "icon" => stringParser::decode($gets['icon'])));
         }
 
         $dropdown_date = show(_dropdown_date, array("day" => dropdown("day",date("d",$get['datum'])),
@@ -86,21 +86,21 @@ switch ($do) {
         $show = show($dir."/form_cw", array("head" => _cw_admin_head_edit,
                                             "do" => "editcw&amp;id=".$_GET['id']."",
                                             "what" => _button_value_edit,
-                                            "cw_clantag" => re($get['clantag']),
-                                            "cw_gegner" => re($get['gegner']),
-                                            "cw_url" => link(re($get['url'])),
+                                            "cw_clantag" => stringParser::decode($get['clantag']),
+                                            "cw_gegner" => stringParser::decode($get['gegner']),
+                                            "cw_url" => link(stringParser::decode($get['url'])),
                                             "cw_xonx1" => $xonx1,
                                             "cw_xonx2" => $xonx2,
-                                            "cw_maps" => re($get['maps']),
-                                            "cw_matchadmins" => re($get['matchadmins']),
-                                            "cw_lineup" => re($get['lineup']),
-                                            "cw_glineup" => re($get['glineup']),
-                                            "cw_servername" => re($get['servername']),
-                                            "cw_serverip" => re($get['serverip']),
-                                            "cw_serverpwd" => re($get['serverpwd']),
+                                            "cw_maps" => stringParser::decode($get['maps']),
+                                            "cw_matchadmins" => stringParser::decode($get['matchadmins']),
+                                            "cw_lineup" => stringParser::decode($get['lineup']),
+                                            "cw_glineup" => stringParser::decode($get['glineup']),
+                                            "cw_servername" => stringParser::decode($get['servername']),
+                                            "cw_serverip" => stringParser::decode($get['serverip']),
+                                            "cw_serverpwd" => stringParser::decode($get['serverpwd']),
                                             "cw_punkte" => $get['punkte'],
                                             "cw_gpunkte" => $get['gpunkte'],
-                                            "cw_bericht" => re($get['bericht']),
+                                            "cw_bericht" => stringParser::decode($get['bericht']),
                                             "day" => date("d", $get['datum']),
                                             "dropdown_date" => $dropdown_date,
                                             "dropdown_time" => $dropdown_time,
@@ -110,8 +110,8 @@ switch ($do) {
                                             "minute" => date("i", $get['datum']),
                                             "countrys" => show_countrys($get['gcountry']),
                                             "squads" => $squads,
-                                            "cw_liga" => re($get['liga']),
-                                            "cw_gametype" => re($get['gametype'])));
+                                            "cw_liga" => stringParser::decode($get['liga']),
+                                            "cw_gametype" => stringParser::decode($get['gametype'])));
     break;
     case 'add':
         if(empty($_POST['gegner']) || empty($_POST['clantag']) || empty($_POST['t'])) {
@@ -130,10 +130,10 @@ switch ($do) {
                     . "`gametype` = ?, `punkte` = ?, `gpunkte` = ?, `maps` = ?, `serverip` = ?, `servername` = ?, "
                     . "`serverpwd` = ?, `lineup` = ?, `glineup` = ?, `matchadmins` = ?, `bericht` = ?;",
                     array(intval($datum),intval($_POST['squad']),
-                        up($_POST['clantag']),up($_POST['gegner']),up(links($_POST['url'])),up($_POST['gametype']),
-                        intval($_POST['punkte']),intval($_POST['gpunkte']),up($_POST['maps']),up($_POST['serverip']),
-                        up($_POST['servername']),up($_POST['serverpwd']),up($_POST['lineup']),up($_POST['match_admins']),
-                        up($_POST['bericht'])));
+                        stringParser::encode($_POST['clantag']),stringParser::encode($_POST['gegner']),stringParser::encode(links($_POST['url'])),stringParser::encode($_POST['gametype']),
+                        intval($_POST['punkte']),intval($_POST['gpunkte']),stringParser::encode($_POST['maps']),stringParser::encode($_POST['serverip']),
+                        stringParser::encode($_POST['servername']),stringParser::encode($_POST['serverpwd']),stringParser::encode($_POST['lineup']),stringParser::encode($_POST['match_admins']),
+                        stringParser::encode($_POST['bericht'])));
 
             //Logo Upload
             $cwid = $sql->lastInsertId();
@@ -181,10 +181,10 @@ switch ($do) {
             $kid = ($_POST['land'] == "lazy" ? "" : "`gcountry` = '".$_POST['land']."',");
             $sql->update("UPDATE `{prefix_clanwars}` SET ".$xonx." ".$kid." `datum` = ?,`squad_id` = ?, `clantag` = ?, `gegner` = ?,`url` = ?, `liga` = ?, `gametype` = ?,`punkte` = ?,
             `gpunkte` = ?,`maps` = ?,`serverip` = ?,`servername` = ?,`serverpwd` = ?,`lineup` = ?,`glineup` = ?,`matchadmins` = ?,`bericht` = ? WHERE id = ?;",
-                array(intval($datum),intval($_POST['squad']),up($_POST['clantag']),up($_POST['gegner']),up(links($_POST['url'])),
-                    up($_POST['liga']),up($_POST['gametype']),intval($_POST['punkte']),intval($_POST['gpunkte']),up($_POST['maps']),
-                    up($_POST['serverip']),up($_POST['servername']),up($_POST['serverpwd']),up($_POST['lineup']),up($_POST['glineup']),
-                    up($_POST['match_admins']),up($_POST['bericht']),intval($_GET['id'])));
+                array(intval($datum),intval($_POST['squad']),stringParser::encode($_POST['clantag']),stringParser::encode($_POST['gegner']),stringParser::encode(links($_POST['url'])),
+                    stringParser::encode($_POST['liga']),stringParser::encode($_POST['gametype']),intval($_POST['punkte']),intval($_POST['gpunkte']),stringParser::encode($_POST['maps']),
+                    stringParser::encode($_POST['serverip']),stringParser::encode($_POST['servername']),stringParser::encode($_POST['serverpwd']),stringParser::encode($_POST['lineup']),stringParser::encode($_POST['glineup']),
+                    stringParser::encode($_POST['match_admins']),stringParser::encode($_POST['bericht']),intval($_GET['id'])));
 
             //Logo Upload
             $cwid = intval($_GET['id']);
@@ -260,7 +260,7 @@ switch ($do) {
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/clanwars_show", array("class" => $class,
-                                                       "cw" => re($get['clantag'])." - ".re($get['gegner']),
+                                                       "cw" => stringParser::decode($get['clantag'])." - ".stringParser::decode($get['gegner']),
                                                        "datum" => date("d.m.Y H:i",$get['datum'])._uhr,
                                                        "top" => $top,
                                                        "id" => $get['id'],
@@ -272,7 +272,7 @@ switch ($do) {
         $squads .= show(_cw_edit_select_field_squads, array("name" => _all, "sel" => "", "id" => "?admin=cw"));
         foreach($qry as $get) {
             $sel = (isset($_GET['squad']) && $get['id'] == intval($_GET['squad']) ? ' class="dropdownKat"' : '');
-            $squads .= show(_cw_edit_select_field_squads, array("name" => re($get['name']), "sel" => $sel, "id" => "?admin=cw&amp;squad=".$get['id']));
+            $squads .= show(_cw_edit_select_field_squads, array("name" => stringParser::decode($get['name']), "sel" => $sel, "id" => "?admin=cw&amp;squad=".$get['id']));
         }
 
         if(empty($show)) {

@@ -87,7 +87,7 @@ while($i <= 31 && checkdate($monat, $i, $jahr)) {
             if($sql->rowCount()) {
                 $infoCW = '';
                 foreach($qry as $get) {
-                    $infoCW .= '&lt;img src=../inc/images/cw.gif class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_cw.re($get['gegner'])).'<br />';
+                    $infoCW .= '&lt;img src=../inc/images/cw.gif class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_cw.stringParser::decode($get['gegner'])).'<br />';
                 }
                 
                 $info = ' onmouseover="DZCP.showInfo(\''.$infoCW.'\')" onmouseout="DZCP.hideInfo()"';
@@ -100,7 +100,7 @@ while($i <= 31 && checkdate($monat, $i, $jahr)) {
             if($sql->rowCount()) {
                 $infoEvent = '';
                 foreach($qry as $get) {
-                    $infoEvent .='&lt;img src=../inc/images/event.png class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_event.re($get['title'])).'<br />';
+                    $infoEvent .='&lt;img src=../inc/images/event.png class=icon alt= /&gt;'.'&nbsp;'.jsconvert(_kal_event.stringParser::decode($get['title'])).'<br />';
                 }
 
                 $info = ' onmouseover="DZCP.showInfo(\''.$infoEvent.'\')" onmouseout="DZCP.hideInfo()"';

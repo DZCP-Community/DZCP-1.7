@@ -17,7 +17,7 @@ require(basePath."/inc/bbcode.php");
 if(!$sql->rows("SELECT `id` FROM `{prefix_ipban}` WHERE `ip` = ? LIMIT 1;",array($userip))) {
     $data_array = array();
     $data_array['confidence'] = ''; $data_array['frequency'] = ''; $data_array['lastseen'] = '';
-    $data_array['banned_msg'] = up('SpamBot detected by System * Bot Trap *');
+    $data_array['banned_msg'] = stringParser::encode('SpamBot detected by System * Bot Trap *');
     $sql->insert("INSERT INTO `{prefix_ipban}` SET `time` = ?, `ip` = ?, `data` = ?, `typ` = 3;",
             array(time(),$userip,serialize($data_array)));
     check_ip(); // IP Prufung * No IPV6 Support *

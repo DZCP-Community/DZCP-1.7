@@ -477,7 +477,9 @@ var DZCP = {
 
       var url = prevURL;
       $.post(url, $('#' + form).serialize() + addpars, function(req) {
-        $('#previewDIV').html(req).hide().fadeIn("fast"); DZCP.resizeImages();
+        $('#previewDIV').html(req).hide().fadeIn("fast"); 
+		DZCP.resizeImages();
+		SyntaxHighlighter.all();
       });
     },
 
@@ -618,4 +620,4 @@ var DZCP = {
 
 // load global events
 $(document).ready(function() { if(DZCP.jQueryCheck(true)) { DZCP.init(); }});
-$(window).load(function() { if(DZCP.jQueryCheck(false)) { DZCP.resizeImages(); DZCP.GoToAnchor(); }});
+$(window).load(function() { if(DZCP.jQueryCheck(false)) { DZCP.resizeImages(); DZCP.GoToAnchor(); SyntaxHighlighter.all(); }});

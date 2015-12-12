@@ -32,7 +32,7 @@ switch ($action):
                 $display = "none";
             }
 
-            $squad = show(_member_squad_squadlink, array("squad" => re($get['name']),
+            $squad = show(_member_squad_squadlink, array("squad" => stringParser::decode($get['name']),
                                                          "id" => $get['id'],
                                                          "shown" => $shown));
 
@@ -57,11 +57,11 @@ switch ($action):
                 else
                     $replace = $getm['place'];
 
-                $event = show(_awards_event, array("event" => re($getm['event']), "url" => $getm['url']));
+                $event = show(_awards_event, array("event" => stringParser::decode($getm['event']), "url" => $getm['url']));
                 $awards .= show($dir."/awards_show", array("class" => $class,
                                                            "date" => date("d.m.Y", $getm['date']),
                                                            "place" => $replace,
-                                                           "prize" => re($getm['prize']),
+                                                           "prize" => stringParser::decode($getm['prize']),
                                                            "event" => $event));
             }
 
@@ -85,7 +85,7 @@ switch ($action):
         foreach($qry as $get) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $img = squad($get['icon']);
-            $legende .= show(_awards_legende, array("game" => re($get['game']), "img" => $img, "class" => $class));
+            $legende .= show(_awards_legende, array("game" => stringParser::decode($get['game']), "img" => $img, "class" => $class));
         }
 
         $legende = show($dir."/legende", array("legende" => $legende));
@@ -146,8 +146,8 @@ switch ($action):
                 }
             }
 
-            $squad = show(_member_squad_squadlink, array("squad" => re($get['name']), "id" => $get['id']));
-            $img = show(_gameicon, array("icon" => re($get['icon'])));
+            $squad = show(_member_squad_squadlink, array("squad" => stringParser::decode($get['name']), "id" => $get['id']));
+            $img = show(_gameicon, array("icon" => stringParser::decode($get['icon'])));
             $qrym = $sql->select("SELECT s1.`id`,s1.`squad`,s1.`date`,s1.`place`,s1.`prize`,s1.`url`,s1.`event`,s2.`icon`,s2.`name` "
                                . "FROM `{prefix_awards}` AS `s1` "
                                . "LEFT JOIN `{prefix_squads}` AS `s2` "
@@ -202,7 +202,7 @@ switch ($action):
         foreach($qry as $get) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $img = squad($get['icon']);
-            $legende .= show(_awards_legende, array("game" => re($get['game']),
+            $legende .= show(_awards_legende, array("game" => stringParser::decode($get['game']),
                                                     "img" => $img,
                                                     "class" => $class));
         }

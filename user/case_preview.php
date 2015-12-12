@@ -29,7 +29,7 @@ if(defined('_UserMenu')) {
         $get_nick = $_POST['nick'];
 
         $onoff = ""; $avatar = "";
-        $nick = CryptMailto($get_email,_link_mailto,array("nick" => re($get_nick)));
+        $nick = CryptMailto($get_email,_link_mailto,array("nick" => stringParser::decode($get_nick)));
     } else {
         $get_hp = data('hp');
         $email = data('email');
@@ -47,7 +47,7 @@ if(defined('_UserMenu')) {
 
     $posted_ip = $chkMe == 4 || permission('ipban') ? visitorIp() : _logged;
     $index .= show("page/comments_show", array("titel" => $titel,
-                                             "comment" => bbcode(re($_POST['eintrag']),1),
+                                             "comment" => bbcode::parse_html(stringParser::decode($_POST['eintrag']),1),
                                              "nick" => $get_nick,
                                              "hp" => $gbhp,
                                              "editby" => $editby,

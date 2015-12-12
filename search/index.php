@@ -43,7 +43,7 @@ default:
   }
 
   foreach($qry as $get) {
-    $fkats .= '<li><label class="searchKat" style="text-align:center">'.re($get['name']).'</label></li>';
+    $fkats .= '<li><label class="searchKat" style="text-align:center">'.stringParser::decode($get['name']).'</label></li>';
 
     $showt = "";
     $qrys = $sql->select("SELECT * FROM `{prefix_forumsubkats}`
@@ -58,7 +58,7 @@ default:
         if(preg_match("#k_".$gets['id']."\|#",$strkat)) $kcheck = 'checked="checked"';
         else  $kcheck = '';
 
-        $fkats .= '<li><label class="search" for="k_'.$gets['id'].'"><input type="checkbox" class="chksearch" name="k_'.$gets['id'].'" id="k_'.$gets['id'].'" '.$kcheck.' onclick="DZCP.hideForumFirst()" value="true" />&nbsp;&nbsp;'.re($gets['kattopic']).'</label></li>';
+        $fkats .= '<li><label class="search" for="k_'.$gets['id'].'"><input type="checkbox" class="chksearch" name="k_'.$gets['id'].'" id="k_'.$gets['id'].'" '.$kcheck.' onclick="DZCP.hideForumFirst()" value="true" />&nbsp;&nbsp;'.stringParser::decode($gets['kattopic']).'</label></li>';
       }
     }
   }
@@ -206,7 +206,7 @@ default:
                          ORDER BY date DESC");
             if($sql->rowCount())
             {
-              $lpost = show(_forum_thread_lpost, array("nick" => autor($getlp['reg'], '', $getlp['nick'], re($getlp['email'])),
+              $lpost = show(_forum_thread_lpost, array("nick" => autor($getlp['reg'], '', $getlp['nick'], stringParser::decode($getlp['email'])),
                                                        "date" => date("d.m.y H:i", $getlp['date'])._uhr));
               $lpdate = $getlp['date'];
             } else {
@@ -214,7 +214,7 @@ default:
               $lpdate = "";
             }
 
-            $threadlink = show(_forum_thread_search_link, array("topic" => cut(re($get['topic']),settings::get('l_forumtopic')),
+            $threadlink = show(_forum_thread_search_link, array("topic" => cut(stringParser::decode($get['topic']),settings::get('l_forumtopic')),
                                                                 "id" => $get['id'],
                                                                 "sticky" => $sticky,
                                                                 "hl" => $_GET['search'],
@@ -226,7 +226,7 @@ default:
 
             $results .= show($dir."/forum_search_results", array("new" => check_new($get['lp']),
                                                                  "topic" => $threadlink,
-                                                                 "subtopic" => cut(re($get['subtopic']),settings::get('l_forumsubtopic')),
+                                                                 "subtopic" => cut(stringParser::decode($get['subtopic']),settings::get('l_forumsubtopic')),
                                                                  "hits" => $get['hits'],
                                                                  "replys" => cnt("{prefix_forumposts}", " WHERE sid = '".$get['id']."'"),
                                                                  "class" => $class,
@@ -293,20 +293,20 @@ default:
 break;
 case 'site';
     $qry = $sql->select("SELECT * FROM `{prefix_news}`
-             WHERE (titel LIKE '%".up($_GET['searchword'])."%' AND titel != '') OR (text LIKE '%".up($_GET['searchword'])."%' AND `text` != '')
+             WHERE (titel LIKE '%".stringParser::encode($_GET['searchword'])."%' AND titel != '') OR (text LIKE '%".stringParser::encode($_GET['searchword'])."%' AND `text` != '')
              ORDER BY titel ASC");
     foreach($qry as $get) {
     $class = ($color % 2) ? "contentMainFirst" : "contentMainSecond"; $color++;
     $shownews .= show($dir."/search_show", array("class" => $class,
                                                "type" => 'news',
                                                "href" => '../news/index.php?action=show&amp;id='.$get['id'],
-                                               "titel" => re($get['titel'])
+                                               "titel" => stringParser::decode($get['titel'])
                                               ));
   }
 
   unset($class);
   $qry = $sql->select("SELECT * FROM `{prefix_artikel}`
-             WHERE (titel LIKE '%".up($_GET['searchword'])."%' AND titel != '') OR (text LIKE '%".up($_GET['searchword'])."%' AND `text` != '')
+             WHERE (titel LIKE '%".stringParser::encode($_GET['searchword'])."%' AND titel != '') OR (text LIKE '%".stringParser::encode($_GET['searchword'])."%' AND `text` != '')
              ORDER BY titel ASC");
     foreach($qry as $get) {
     $class = ($color % 2) ? "contentMainFirst" : "contentMainSecond"; $color++;
@@ -314,13 +314,13 @@ case 'site';
                                                "href" => '../artikel/index.php?action=show&amp;id='.$get['id'],
                                                "class" => $class,
                                                "type" => 'artikel',
-                                               "titel" => re($get['titel'])
+                                               "titel" => stringParser::decode($get['titel'])
                                               ));
   }
 
   unset($class);
   $qry = $sql->select("SELECT * FROM `{prefix_sites}`
-             WHERE (titel LIKE '%".up($_GET['searchword'])."%' AND titel != '') OR (text LIKE '%".up($_GET['searchword'])."%' AND `text` != '')
+             WHERE (titel LIKE '%".stringParser::encode($_GET['searchword'])."%' AND titel != '') OR (text LIKE '%".stringParser::encode($_GET['searchword'])."%' AND `text` != '')
              ORDER BY titel ASC");
   foreach($qry as $get) {
     $class = ($color % 2) ? "contentMainFirst" : "contentMainSecond"; $color++;
@@ -328,7 +328,7 @@ case 'site';
                                                "href" => '../sites/?show='.$get['id'],
                                                "class" => $class,
                                                "type" => 'site',
-                                               "titel" => re($get['titel'])
+                                               "titel" => stringParser::decode($get['titel'])
                                               ));
   }
 

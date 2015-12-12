@@ -19,9 +19,9 @@ if(defined('_Forum')) {
         $form = show("page/editor_notregged", array("nickhead" => _nick,
                                                     "emailhead" => _email,
                                                     "hphead" => _hp,
-                                                    "postemail" => re($get['email']),
-                                                                                    "posthp" => re($get['hp']),
-                                                                                    "postnick" => re($get['nick'])));
+                                                    "postemail" => stringParser::decode($get['email']),
+                                                                                    "posthp" => stringParser::decode($get['hp']),
+                                                                                    "postnick" => stringParser::decode($get['nick'])));
       }
 
       $dowhat = show(_forum_dowhat_edit_post, array("id" => $_GET['id']));
@@ -44,7 +44,7 @@ if(defined('_Forum')) {
                                         "eintraghead" => _eintrag,
                                         "error" => "",
                                         "what" => _button_value_edit,
-                                        "posteintrag" => re($get['text'])));
+                                        "posteintrag" => stringParser::decode($get['text'])));
     } else {
       $index = error(_error_wrong_permissions, 1);
     }
@@ -94,9 +94,9 @@ if(defined('_Forum')) {
                                           "kid" => $_GET['kid'],
                                           "br1" => "<!--",
                                           "br2" => "-->",
-                                                                            "postemail" => re($get['email']),
-                                                                            "postnick" => re($get['nick']),
-                                                                              "posteintrag" => re($_POST['eintrag']),
+                                                                            "postemail" => stringParser::decode($get['email']),
+                                                                            "postnick" => stringParser::decode($get['nick']),
+                                                                              "posteintrag" => stringParser::decode($_POST['eintrag']),
                                                                                "error" => $error,
                                                                            "eintraghead" => _eintrag));
       } else {
@@ -106,11 +106,11 @@ if(defined('_Forum')) {
                                            "time" => date("d.m.Y H:i", time())._uhr));
 
         $sql->update("UPDATE `{prefix_forumposts}`
-                   SET `nick`   = '".up($_POST['nick'])."',
-                       `email`  = '".up($_POST['email'])."',
-                       `text`   = '".up($_POST['eintrag'])."',
+                   SET `nick`   = '".stringParser::encode($_POST['nick'])."',
+                       `email`  = '".stringParser::encode($_POST['email'])."',
+                       `text`   = '".stringParser::encode($_POST['eintrag'])."',
                        `hp`     = '".links($_POST['hp'])."',
-                       `edited` = '".up($editedby)."'
+                       `edited` = '".stringParser::encode($editedby)."'
                    WHERE id = '".intval($_GET['id'])."'");
 
       $checkabo = $sql->select("SELECT s1.user,s1.fid,s2.nick,s2.id,s2.email FROM {prefix_f_abo} AS s1
@@ -126,9 +126,9 @@ if(defined('_Forum')) {
             if($entrys == "0") $pagenr = "1";
             else $pagenr = ceil($entrys/settings::get('m_fposts'));
 
-          $subj = show(re(settings::get('eml_fabo_pedit_subj')), array("titel" => $title));
+          $subj = show(stringParser::decode(settings::get('eml_fabo_pedit_subj')), array("titel" => $title));
 
-           $message = show(bbcode_email(settings::get('eml_fabo_pedit')), array("nick" => re($getabo['nick']),
+           $message = show(bbcode_email(settings::get('eml_fabo_pedit')), array("nick" => stringParser::decode($getabo['nick']),
                                                                "postuser" => fabo_autor($userid),
                                                             "topic" => $gettopic['topic'],
                                                             "titel" => $title,
@@ -136,10 +136,10 @@ if(defined('_Forum')) {
                                                             "id" => $getp['sid'],
                                                             "entrys" => $entrys+1,
                                                             "page" => $pagenr,
-                                                            "text" => bbcode($_POST['eintrag']),
+                                                            "text" => bbcode::parse_html($_POST['eintrag']),
                                                             "clan" => settings::get('clanname')));
 
-          sendMail(re($getabo['email']),$subj,$message);
+          sendMail(stringParser::decode($getabo['email']),$subj,$message);
         }
       }
         $entrys = cnt("{prefix_forumposts}", " WHERE `sid` = ".$getp['sid']);
@@ -188,14 +188,14 @@ if(defined('_Forum')) {
             if($getzitat['reg'] == "0") $nick = $getzitat['nick'];
             else                        $nick = autor($getzitat['reg']);
 
-            $zitat = zitat($nick, $getzitat['text']);
+            $zitat = bbcode::zitat($nick, $getzitat['text']);
           } elseif(isset($_GET['zitatt'])) {
             $getzitat = $sql->fetch("SELECT t_nick,t_reg,t_text FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['zitatt'])."'");
 
             if($getzitat['t_reg'] == "0") $nick = $getzitat['t_nick'];
             else                          $nick = data("nick",$getzitat['t_reg']);
 
-            $zitat = zitat($nick, $getzitat['t_text']);
+            $zitat = bbcode::zitat($nick, $getzitat['t_text']);
           } else {
             $zitat = "";
           }
@@ -209,7 +209,7 @@ if(defined('_Forum')) {
                       ORDER BY date DESC");
           if($sql->rowCount())
           {
-            if(data("signatur",$getl['reg'])) $sig = _sig.bbcode(data("signatur",$getl['reg']));
+            if(data("signatur",$getl['reg'])) $sig = _sig.bbcode::parse_html(data("signatur",$getl['reg']));
             else                               $sig = "";
 
             if($getl['reg'] != "0") $userposts = show(_forum_user_posts, array("posts" => userstats("forumposts",$getl['reg'])));
@@ -218,7 +218,7 @@ if(defined('_Forum')) {
             if($getl['reg'] == "0") $onoff = "";
             else                    $onoff = onlinecheck($getl['reg']);
 
-            $text = bbcode($getl['text']);
+            $text = bbcode::parse_html($getl['text']);
 
             if($chkMe == 4 || permission('ipban')) $posted_ip = $getl['ip'];
             else              $posted_ip = _logged;
@@ -233,7 +233,7 @@ if(defined('_Forum')) {
             {
               $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".$getl['reg']."'");
 
-              $email = CryptMailto(re($getu['email']),_emailicon_forum);
+              $email = CryptMailto(stringParser::decode($getu['email']),_emailicon_forum);
               $pn = _forum_pn_preview;
               if(empty($getu['icq']) || $getu['icq'] == 0) $icq = "";
                   else {
@@ -246,12 +246,12 @@ if(defined('_Forum')) {
             } else {
               $icq = "";
               $pn = "";
-              $email = CryptMailto(re($getl['email']),_emailicon_forum);
+              $email = CryptMailto(stringParser::decode($getl['email']),_emailicon_forum);
               if(empty($getl['hp'])) $hp = "";
               else $hp = show(_hpicon_forum, array("hp" => $getl['hp']));
             }
 
-            $lastpost = show($dir."/forum_posts_show", array("nick" => cleanautor($getl['reg'], '', $getl['nick'], re($getl['email'])),
+            $lastpost = show($dir."/forum_posts_show", array("nick" => cleanautor($getl['reg'], '', $getl['nick'], stringParser::decode($getl['email'])),
                                                              "postnr" => "",
                                                              "text" => $text,
                                                              "status" => getrank($getl['reg']),
@@ -277,7 +277,7 @@ if(defined('_Forum')) {
                         WHERE kid = '".intval($_GET['kid'])."'
                         AND id = '".intval($_GET['id'])."'");
 
-            if(data("signatur",$gett['t_reg'])) $sig = _sig.bbcode(data("signatur",$gett['t_reg']));
+            if(data("signatur",$gett['t_reg'])) $sig = _sig.bbcode::parse_html(data("signatur",$gett['t_reg']));
             else $sig = "";
 
             if($gett['t_reg'] != "0")
@@ -288,8 +288,8 @@ if(defined('_Forum')) {
             else                      $onoff = onlinecheck($gett['t_reg']);
 
             $ftxt = hl($gett['t_text'], (isset($_GET['hl']) ? $_GET['hl'] : ''));
-            if(isset($_GET['hl'])) $text = bbcode($ftxt['text']);
-            else $text = bbcode($gett['t_text']);
+            if(isset($_GET['hl'])) $text = bbcode::parse_html($ftxt['text']);
+            else $text = bbcode::parse_html($gett['t_text']);
 
             if($chkMe == 4 || permission('ipban')) $posted_ip = $gett['ip'];
             else                 $posted_ip = _logged;
@@ -305,7 +305,7 @@ if(defined('_Forum')) {
               $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}`
                           WHERE id = '".$gett['t_reg']."'");
 
-              $email = CryptMailto(re($getu['email']),_emailicon_forum);
+              $email = CryptMailto(stringParser::decode($getu['email']),_emailicon_forum);
               $pn = show(_pn_write_forum, array("id" => $gett['t_reg'],
                                                                               "nick" => $getu['nick']));
               if(empty($getu['icq']) || $getu['icq'] == 0) $icq = "";
@@ -320,7 +320,7 @@ if(defined('_Forum')) {
               $icq = "";
               $pn = "";
 
-              $email = CryptMailto(re($gett['email']),_emailicon_forum);
+              $email = CryptMailto(stringParser::decode($gett['email']),_emailicon_forum);
               if(empty($gett['t_hp'])) $hp = "";
               else $hp = show(_hpicon_forum, array("hp" => $gett['t_hp']));
             }
@@ -358,7 +358,7 @@ if(defined('_Forum')) {
                                                         "hphead" => _hp));
           }
 
-          $title = re($gett['topic']).' - '.$title;
+          $title = stringParser::decode($gett['topic']).' - '.$title;
           $index = show($dir."/post", array("titel" => _forum_new_post_head,
                                             "nickhead" => _nick,
                                             "emailhead" => _email,
@@ -438,7 +438,7 @@ if(defined('_Forum')) {
                                             ORDER BY date DESC");
                     if($sql->rowCount())
                     {
-                        if(data("signatur",$getl['reg'])) $sig = _sig.bbcode(data("signatur",$getl['reg']));
+                        if(data("signatur",$getl['reg'])) $sig = _sig.bbcode::parse_html(data("signatur",$getl['reg']));
                         else $sig = "";
 
                         if($getl['reg'] != "0") $userposts = show(_forum_user_posts, array("posts" => userstats("forumposts",$getl['reg'])));
@@ -448,8 +448,8 @@ if(defined('_Forum')) {
                         else $onoff = onlinecheck($getl['reg']);
 
                         $ftxt = hl($getl['text'], $_GET['hl']);
-                        if($_GET['hl']) $text = bbcode($ftxt['text']);
-                        else $text = bbcode($getl['text']);
+                        if($_GET['hl']) $text = bbcode::parse_html($ftxt['text']);
+                        else $text = bbcode::parse_html($getl['text']);
 
                         if($chkMe == 4 || permission('ipban')) $posted_ip = $getl['ip'];
                         else $posted_ip = _logged;
@@ -465,7 +465,7 @@ if(defined('_Forum')) {
                         {
                             $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".$getl['reg']."'");
                             
-                            $email = CryptMailto(re($getu['email']),_emailicon_forum);
+                            $email = CryptMailto(stringParser::decode($getu['email']),_emailicon_forum);
                             $pn = show(_pn_write_forum, array("id" => $getl['reg'],
                                                                                                 "nick" => $getu['nick']));
                             if(empty($getu['icq']) || $getu['icq'] == 0) $icq = "";
@@ -479,12 +479,12 @@ if(defined('_Forum')) {
                         } else {
                             $icq = "";
                             $pn = "";
-                            $email = CryptMailto(re($getl['email']),_emailicon_forum);
+                            $email = CryptMailto(stringParser::decode($getl['email']),_emailicon_forum);
                             if(empty($getl['hp'])) $hp = "";
                             else $hp = show(_hpicon_forum, array("hp" => $getl['hp']));
                         }
 
-                        $nick = autor($getl['reg'], '', $getl['nick'], re($getl['email']));
+                        $nick = autor($getl['reg'], '', $getl['nick'], stringParser::decode($getl['email']));
                         if(!empty($_GET['hl']) && $_SESSION['search_type'] == 'autor')
                         {
                             if(preg_match("#".$_GET['hl']."#i",$nick)) $ftxt['class'] = 'class="highlightSearchTarget"';
@@ -515,7 +515,7 @@ if(defined('_Forum')) {
                                                 WHERE kid = '".intval($get_threadkid['kid'])."'
                                                 AND id = '".intval($_GET['id'])."'");
 
-                        if(data("signatur",$gett['t_reg'])) $sig = _sig.bbcode(data("signatur",$gett['t_reg']));
+                        if(data("signatur",$gett['t_reg'])) $sig = _sig.bbcode::parse_html(data("signatur",$gett['t_reg']));
                         else $sig = "";
 
                         if($gett['t_reg'] != "0") $userposts = show(_forum_user_posts, array("posts" => userstats("forumposts",$gett['t_reg'])));
@@ -525,8 +525,8 @@ if(defined('_Forum')) {
                         else $onoff = onlinecheck($gett['t_reg']);
 
                         $ftxt = hl($gett['t_text'], $_GET['hl']);
-                        if($_GET['hl']) $text = bbcode($ftxt['text']);
-                        else $text = bbcode($gett['t_text']);
+                        if($_GET['hl']) $text = bbcode::parse_html($ftxt['text']);
+                        else $text = bbcode::parse_html($gett['t_text']);
 
                         if($chkMe == 4 || permission('ipban')) $posted_ip = $gett['ip'];
                         else $posted_ip = _logged;
@@ -535,7 +535,7 @@ if(defined('_Forum')) {
                         {
                             $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".$gett['t_reg']."'");
 
-                            $email = CryptMailto(re($getu['email']),_emailicon_forum);
+                            $email = CryptMailto(stringParser::decode($getu['email']),_emailicon_forum);
                             $pn = show(_pn_write_forum, array("id" => $gett['t_reg'], "nick" => $getu['nick']));
                             if(empty($getu['icq']) || $getu['icq'] == 0) $icq = "";
                             else {
@@ -548,7 +548,7 @@ if(defined('_Forum')) {
                         } else {
                             $icq = "";
                             $pn = "";
-                            $email = CryptMailto(re($gett['t_email']),_emailicon_forum);
+                            $email = CryptMailto(stringParser::decode($gett['t_email']),_emailicon_forum);
                             if(empty($gett['t_hp'])) $hp = "";
                             else $hp = show(_hpicon_forum, array("hp" => $gett['t_hp']));
                         }
@@ -602,8 +602,8 @@ if(defined('_Forum')) {
                                                                                         "kid" => $_GET['kid'],
                                                                                         "postemail" => $_POST['email'],
                                                                                         "posthp" => $_POST['hp'],
-                                                                                        "postnick" => re($_POST['nick']),
-                                                                                        "posteintrag" => re($_POST['eintrag']),
+                                                                                        "postnick" => stringParser::decode($_POST['nick']),
+                                                                                        "posteintrag" => stringParser::decode($_POST['eintrag']),
                                                                                         "error" => $error,
                                                                                         "eintraghead" => _eintrag));
                 } else {
@@ -646,7 +646,7 @@ if(defined('_Forum')) {
 
                             $text = show(_forum_spam_text, array("autor" => $fautor,
                                                                                                      "ltext" => addslashes($getdp['text']),
-                                                                                                     "ntext" => up($_POST['eintrag'])));
+                                                                                                     "ntext" => stringParser::encode($_POST['eintrag'])));
 
                                                     $sql->update("UPDATE `{prefix_forumthreads}`
                                                                                          SET `lp` = '".time()."'
@@ -663,7 +663,7 @@ if(defined('_Forum')) {
 
                             $text = show(_forum_spam_text, array("autor" => $fautor,
                                                                                                      "ltext" => addslashes($gettdp['t_text']),
-                                                                                                     "ntext" => up($_POST['eintrag'])));
+                                                                                                     "ntext" => stringParser::encode($_POST['eintrag'])));
 
                             $sql->update("UPDATE `{prefix_forumthreads}`
                                                  SET `lp`   = '".time()."',
@@ -674,11 +674,11 @@ if(defined('_Forum')) {
                                          SET `kid`   = '".intval($get_threadkid['kid'])."',
                                                  `sid`   = '".intval($_GET['id'])."',
                                                  `date`  = '".time()."',
-                                                 `nick`  = '".up($_POST['nick'])."',
-                                                 `email` = '".up($_POST['email'])."',
+                                                 `nick`  = '".stringParser::encode($_POST['nick'])."',
+                                                 `email` = '".stringParser::encode($_POST['email'])."',
                                                  `hp`    = '".links($_POST['hp'])."',
-                                                 `reg`   = '".up($userid)."',
-                                                 `text`  = '".up($_POST['eintrag'])."',
+                                                 `reg`   = '".stringParser::encode($userid)."',
+                                                 `text`  = '".stringParser::encode($_POST['eintrag'])."',
                                                  `ip`    = '".$userip."'");
 
                     $sql->update("UPDATE `{prefix_forumthreads}`
@@ -709,7 +709,7 @@ if(defined('_Forum')) {
 
                             $subj = show(settings::get('eml_fabo_npost_subj'), array("titel" => $title));
 
-                            $message = show(bbcode_email(settings::get('eml_fabo_npost')), array("nick" => re($getabo['nick']),
+                            $message = show(bbcode_email(settings::get('eml_fabo_npost')), array("nick" => stringParser::decode($getabo['nick']),
                                                                             "postuser" => fabo_autor($userid),
                                                                             "topic" => $gettopic['topic'],
                                                                             "titel" => $title,
@@ -717,10 +717,10 @@ if(defined('_Forum')) {
                                                                             "id" => intval($_GET['id']),
                                                                             "entrys" => $entrys+1,
                                                                             "page" => $pagenr,
-                                                                            "text" => bbcode($_POST['eintrag']),
+                                                                            "text" => bbcode::parse_html($_POST['eintrag']),
                                                                             "clan" => settings::get('clanname')));
 
-                            sendMail(re($getabo['email']),$subj,$message);
+                            sendMail(stringParser::decode($getabo['email']),$subj,$message);
                         }
                     }
 

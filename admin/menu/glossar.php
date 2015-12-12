@@ -26,7 +26,7 @@ switch ($do) {
             }
         } else {
             $sql->insert("INSERT INTO `{prefix_glossar}` SET `word` = ?, `glossar` = ?;",
-                    array(up($_POST['link']),up($_POST['beschreibung'])));
+                    array(stringParser::encode($_POST['link']),stringParser::encode($_POST['beschreibung'])));
             $show = info(_admin_glossar_added,'?admin=glossar');
         }
     break;
@@ -34,8 +34,8 @@ switch ($do) {
         $get = $sql->fetch("SELECT `id`,`word`,`glossar` FROM `{prefix_glossar}` WHERE `id` = ?;",
                 array(intval($_GET['id'])));
         $show = show($dir."/form_glossar", array("head" => _admin_glossar_edit,
-                                                 "llink" => re($get['word']),
-                                                 "lbeschreibung" => re($get['glossar']),
+                                                 "llink" => stringParser::decode($get['word']),
+                                                 "lbeschreibung" => stringParser::decode($get['glossar']),
                                                  "do" => "update&amp;id=".$get['id'],
                                                  "value" => _button_value_edit));
     break;
@@ -50,7 +50,7 @@ switch ($do) {
             }
         } else {
           $sql->update("UPDATE `{prefix_glossar}` SET `word` = ?, `glossar` = ? WHERE `id` = ?;",
-                  array(up($_POST['link']),up($_POST['beschreibung']),intval($_GET['id'])));
+                  array(stringParser::encode($_POST['link']),stringParser::encode($_POST['beschreibung']),intval($_GET['id'])));
           $show = info(_admin_glossar_edited,'?admin=glossar');
         }
     break;
@@ -73,11 +73,11 @@ switch ($do) {
                                                               "del" => convSpace(_confirm_del_entry)));
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-            $show .= show($dir."/glossar_show", array("word" => re($get['word']),
+            $show .= show($dir."/glossar_show", array("word" => stringParser::decode($get['word']),
                                                        "class" => $class,
                                                        "edit" => $edit,
                                                        "delete" => $delete,
-                                                       "glossar" => bbcode(re($get['glossar']))));
+                                                       "glossar" => bbcode::parse_html($get['glossar'])));
         }
 
         if (empty($show)) {

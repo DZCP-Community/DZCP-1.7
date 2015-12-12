@@ -25,13 +25,13 @@ function custom_content($kid=1) {
             if(!empty($getcontent[$getcustom['feldname']])) {
                 switch($getcustom['type']) {
                     case 2:
-                        $custom_content .= show(_profil_custom_url, array("name" => re(pfields_name($getcustom['name'])), "value" => re($getcontent[$getcustom['feldname']])));
+                        $custom_content .= show(_profil_custom_url, array("name" =>stringParser::decode(pfields_name($getcustom['name'])), "value" => stringParser::decode($getcontent[$getcustom['feldname']])));
                         break;
                     case 3:
-                        $custom_content .= show(_profil_custom_mail, array("name" => re(pfields_name($getcustom['name'])), "value" => CryptMailto(re($getcontent[$getcustom['feldname']]),_link_mailto)));
+                        $custom_content .= show(_profil_custom_mail, array("name" =>stringParser::decode(pfields_name($getcustom['name'])), "value" => CryptMailto(stringParser::decode($getcontent[$getcustom['feldname']]),_link_mailto)));
                         break;
                     default:
-                        $custom_content .= show(_profil_custom, array("name" => re(pfields_name($getcustom['name'])), "value" => re($getcontent[$getcustom['feldname']])));
+                        $custom_content .= show(_profil_custom, array("name" =>stringParser::decode(pfields_name($getcustom['name'])), "value" => stringParser::decode($getcontent[$getcustom['feldname']])));
                         break;
                 }
 
@@ -50,9 +50,9 @@ function getcustom($kid=1,$user=0) {
     $qrycustom = $sql->select("SELECT `feldname`,`name` FROM `{prefix_profile}` WHERE `kid` = ? AND `shown` = 1 ORDER BY id ASC",array($kid)); $custom = "";
     foreach($qrycustom as $getcustom) {
         $getcontent = $sql->fetch("SELECT `".$getcustom['feldname']."` FROM `{prefix_users}` WHERE `id` = ? LIMIT 1;",array($set_id));
-        $custom .= show(_profil_edit_custom, array("name" => re(pfields_name($getcustom['name'])) . ":",
+        $custom .= show(_profil_edit_custom, array("name" =>stringParser::decode(pfields_name($getcustom['name'])) . ":",
                                                    "feldname" => $getcustom['feldname'],
-                                                   "value" => re($getcontent[$getcustom['feldname']])));
+                                                   "value" => stringParser::decode($getcontent[$getcustom['feldname']])));
     }
                             
     return $custom;
@@ -81,6 +81,6 @@ if (file_exists(basePath . "/user/case_" . $action . ".php")) {
 }
 
 ## INDEX OUTPUT ##
-$whereami = preg_replace_callback("#autor_(.*?)$#",create_function('$id', 'return re(data("nick","$id[1]"));'),$where);
+$whereami = preg_replace_callback("#autor_(.*?)$#",create_function('$id', 'returnstringParser::decode(data("nick","$id[1]"));'),$where);
 $title = $pagetitle." - ".$whereami."";
 page($index, $title, $where);

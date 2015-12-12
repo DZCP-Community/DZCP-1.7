@@ -17,15 +17,15 @@ switch($do) {
                     }
                 } else {
                     $sql->insert("INSERT INTO `{prefix_gbcomments}` SET `gbe` = ?, `datum` = ?, `reg` = ?,`comment` = ?,`ip` = ?;",
-                        array($get['id'],time(),$userid,up($_POST['eintrag']),up(visitorIp())));
+                        array($get['id'],time(),$userid,stringParser::encode($_POST['eintrag']),stringParser::encode(visitorIp())));
                     $index = info(_gb_comment_added, "../gb/");
                 }
             }
 
             if(empty($index)) {
                 $where = $where.': '._gb_addcomment_new;
-                $gbhp = (!empty($get['hp']) ? show(_hpicon, array("hp" => re($get['hp']))) : '');
-                $gbemail = (!empty($get['email']) ? CryptMailto(re($get['email'])) : '');
+                $gbhp = (!empty($get['hp']) ? show(_hpicon, array("hp" => stringParser::decode($get['hp']))) : '');
+                $gbemail = (!empty($get['email']) ? CryptMailto(stringParser::decode($get['email'])) : '');
                 $gbtitel = show(_gb_titel, array("postid" => "?",
                                                  "nick" => data($get['reg'], "nick"),
                                                  "edit" => "",
@@ -38,7 +38,7 @@ switch($do) {
                                                  "zeit" => date("H:i", $get['datum']),
                                                  "hp" => $gbhp));
 
-                $entry = show($dir."/gb_show", array("comments" => '', "gbtitel" => $gbtitel, "nachricht" => show(re($get['nachricht']),array(),array('gb_addcomment_from' => _gb_addcomment_from)), "editby" => re($get['editby']), "ip" => $get['ip']));
+                $entry = show($dir."/gb_show", array("comments" => '', "gbtitel" => $gbtitel, "nachricht" => show(stringParser::decode($get['nachricht']),array(),array('gb_addcomment_from' => _gb_addcomment_from)), "editby" => stringParser::decode($get['editby']), "ip" => $get['ip']));
                 $index = show($dir."/gb_addcomment", array("notification_page" => notification::get(), "entry" => $entry, "id" => $_GET['id'], "ed" => ""));
             }
         } else
@@ -76,7 +76,7 @@ switch($do) {
             if($get['reg'] != 0) {
                 $form = show("page/editor_regged", array("nick" => autor($get['reg'])));
             } else {
-                $form = show("page/editor_notregged", array("postemail" => $get['email'], "posthp" => re($get['hp']), "postnick" => re($get['nick'])));
+                $form = show("page/editor_notregged", array("postemail" => $get['email'], "posthp" => stringParser::decode($get['hp']), "postnick" => stringParser::decode($get['nick'])));
             }
             
             $where = $where.': '._gb_addcomment_edit;
@@ -84,7 +84,7 @@ switch($do) {
                                                  "ed" => "&edit=".$get['id']."&postid=".$_GET['postid'],
                                                  "id" => $get['id'],
                                                  "form" => $form,
-                                                 "posteintrag" => re($get['comment'])));
+                                                 "posteintrag" => stringParser::decode($get['comment'])));
         } else
             $index = error(_error_edit_post);
     break;
@@ -94,7 +94,7 @@ switch($do) {
             if($get['reg'] != 0) {
                 $form = show("page/editor_regged", array("nick" => autor($get['reg'])));
             } else {
-                $form = show("page/editor_notregged", array("postemail" => re($get['email']), "posthp" => re($get['hp']), "postnick" => re($get['nick'])));
+                $form = show("page/editor_notregged", array("postemail" => stringParser::decode($get['email']), "posthp" => stringParser::decode($get['hp']), "postnick" => stringParser::decode($get['nick'])));
             }
             
             $where = $where.': '._gb_edit_head;
@@ -105,7 +105,7 @@ switch($do) {
                                              "id" => $get['id'],
                                              "form" => $form,
                                              "eintraghead" => _gb_edit_head,
-                                             "posteintrag" => re($get['nachricht']),
+                                             "posteintrag" => stringParser::decode($get['nachricht']),
                                              "notification_page" => ""));
         } else
             $index = error(_error_edit_post);
@@ -114,12 +114,12 @@ switch($do) {
         if(intval($_POST['reg']) == userid() || permission('gb')) {
             $addme = ''; $params = array();
             if(!intval($_POST['reg'])) {
-                $params = array(up($_POST['nick']),up($_POST['email']),up($_POST['hp']));
+                $params = array(stringParser::encode($_POST['nick']),stringParser::encode($_POST['email']),stringParser::encode($_POST['hp']));
                 $addme = "`nick` = ?, `email` = ?, `hp` = ?,";
             }
 
             $editedby = show(_edited_by, array("autor" => autor(), "time" => date("d.m.Y H:i", time())._uhr));
-            array_merge($params,array(up($_POST['eintrag']),intval($_POST['reg']),up(addslashes($editedby)),intval($_GET['id'])));
+            array_merge($params,array(stringParser::encode($_POST['eintrag']),intval($_POST['reg']),stringParser::encode(addslashes($editedby)),intval($_GET['id'])));
             $sql->update("UPDATE `{prefix_gb}` SET ".$addme." `nachricht`  = ?, `reg` = ?, `editby` = ? WHERE `id` = ?;",$params);
             $index = info(_gb_edited, "../gb/");
         } else
@@ -130,7 +130,8 @@ switch($do) {
         if($get['reg'] == userid() || permission('gb')) {
             $editedby = show(_edited_by, array("autor" => autor(), "time" => date("d.m.Y H:i", time())._uhr));
             $sql->update("UPDATE `{prefix_gbcomments}` SET `nick` = ?, `email` = ?, `hp` = ?, `comment` = ?, `editby` = ? WHERE `id` = ?;",
-                array(up($_POST['nick']),up($_POST['email']),up($_POST['hp']),up($_POST['eintrag']),up(addslashes($editedby)),intval($_GET['id'])));
+                array(stringParser::encode($_POST['nick']),stringParser::encode($_POST['email']),stringParser::encode($_POST['hp']),
+                    stringParser::encode($_POST['eintrag']),stringParser::encode(addslashes($editedby)),intval($_GET['id'])));
             
             $index = info(_gb_comment_edited, "../gb/");
         } else

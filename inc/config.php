@@ -68,7 +68,7 @@ define('captcha_sox_binary_path', 'sox');
 
 define('count_clicks_expires', (48*60*60)); // Wie Lange die IPs fur den Click-Counter gespeichert bleiben.
 
-define('php_code_enabled', false); // Erlaubt es auf "Adminbereich: Seiten erstellen/verwalten", PHP Code zu verwenden. * Nur Aktivieren wenn es gebracht wird! *
+define('php_code_enabled', true); // Erlaubt es auf "Adminbereich: Seiten erstellen/verwalten", PHP Code zu verwenden. * Nur Aktivieren wenn es gebracht wird! *
 
 
 //

@@ -16,10 +16,10 @@ switch ($do) {
             }
 
             $sql->insert("INSERT INTO `{prefix_gallery}` SET `kat` = ?,`intern` = ?,`beschreibung` = ?,`datum` = ?;",
-                array(up($_POST['gallery']),intval($_POST['intern']),up($_POST['beschreibung']),time()));
+                array(stringParser::encode($_POST['gallery']),intval($_POST['intern']),stringParser::encode($_POST['beschreibung']),time()));
 
             $show = show($dir."/form_gallery_step2", array("head" => _gallery_admin_head,
-                                                           "what" => re($_POST['gallery']),
+                                                           "what" => stringParser::decode($_POST['gallery']),
                                                            "addfile" => $addfile,
                                                            "id" => _insert_id(),
                                                            "do" => "add",
@@ -81,13 +81,13 @@ switch ($do) {
                                                       "beschr" => _beschreibung,
                                                       "value" => _button_value_edit,
                                                       "id" => $get['id'],
-                                                      "e_gal" => re($get['kat']),
+                                                      "e_gal" => stringParser::decode($get['kat']),
                                                       "e_intern" => $get['intern'] ? 'checked="checked"' : '',
-                                                      "e_beschr" => re($get['beschreibung'])));
+                                                      "e_beschr" => stringParser::decode($get['beschreibung'])));
     break;
     case 'editgallery':
         $sql->update("UPDATE `{prefix_gallery}` SET `kat` = ?, `intern` = ?, `beschreibung` = ? WHERE `id` = ?;",
-            array(up($_POST['gallery']),intval($_POST['intern']),up($_POST['beschreibung']),intval($_GET['id'])));
+            array(stringParser::encode($_POST['gallery']),intval($_POST['intern']),stringParser::encode($_POST['beschreibung']),intval($_GET['id'])));
 
         $show = info(_gallery_edited, "?admin=gallery");
     break;
@@ -102,7 +102,7 @@ switch ($do) {
                                                      "count" => _gallery_count_new,
                                                      "gallery" => _subgallery_head,
                                                      "value" => _error_fwd,
-                                                     "gal" => re($get['kat']),
+                                                     "gal" => stringParser::decode($get['kat']),
                                                      "id" => $get['id'],
                                                      "option" => $option));
     break;
@@ -114,7 +114,7 @@ switch ($do) {
         }
 
         $show = show($dir."/form_gallery_step2", array("head" => _gallery_admin_edit,
-                                                       "what" => re($get['kat']),
+                                                       "what" => stringParser::decode($get['kat']),
                                                        "do" => "editpics",
                                                        "addfile" => $addfile,
                                                        "id" => $get['id'],
@@ -182,14 +182,14 @@ switch ($do) {
             $cntpics = $cnt == 1 ? _gallery_image : _gallery_images;
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-            $show .= show($dir."/gallery_show", array("link" => re($get['kat']),
+            $show .= show($dir."/gallery_show", array("link" => stringParser::decode($get['kat']),
                                                      "class" => $class,
                                                      "del" => $del,
                                                      "edit" => $edit,
                                                      "new" => $new,
                                                      "images" => $cntpics,
                                                      "id" => $get['id'],
-                                                     "beschreibung" => bbcode($get['beschreibung']),
+                                                     "beschreibung" => bbcode::parse_html($get['beschreibung']),
                                                      "cnt" => $cnt));
         }
 

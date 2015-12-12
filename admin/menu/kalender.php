@@ -17,7 +17,7 @@ switch ($do) {
             } else {
               $time = mktime($_POST['h'],$_POST['min'],0,$_POST['m'],$_POST['t'],$_POST['j']);
               $sql->insert("INSERT INTO `{prefix_events}` SET `datum` = ?, `title` = ?, `event` = ?;",
-                      array(intval($time),up($_POST['title']),up($_POST['event'])));
+                      array(intval($time),stringParser::encode($_POST['title']),stringParser::encode($_POST['event'])));
 
               $show = info(_kalender_successful_added,"?admin=kalender");
             }
@@ -60,8 +60,8 @@ switch ($do) {
                                                   "beschreibung" => _beschreibung,
                                                   "what" => _button_value_edit,
                                                   "do" => "editevent&amp;id=".$_GET['id'],
-                                                  "k_event" => re($get['title']),
-                                                  "k_beschreibung" => re($get['event']),
+                                                  "k_event" => stringParser::decode($get['title']),
+                                                  "k_beschreibung" => stringParser::decode($get['event']),
                                                   "head" => _kalender_admin_head_edit));
     break;
     case 'editevent':
@@ -72,7 +72,7 @@ switch ($do) {
       } else {
         $time = mktime($_POST['h'],$_POST['min'],0,$_POST['m'],$_POST['t'],$_POST['j']);
         $sql->update("UPDATE `{prefix_events}` SET `datum` = ?, `title` = ?, `event` = ? WHERE `id` = ?;",
-                array(intval($time),up($_POST['title']),up($_POST['event']),intval($_GET['id'])));
+                array(intval($time),stringParser::encode($_POST['title']),stringParser::encode($_POST['event']),intval($_GET['id'])));
 
         $show = info(_kalender_successful_edited,"?admin=kalender");
       }
@@ -95,7 +95,7 @@ switch ($do) {
 
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
           $show .= show($dir."/kalender_show", array("datum" => date("d.m.y H:i", $get['datum'])._uhr,
-                                                      "event" => re($get['title']),
+                                                      "event" => stringParser::decode($get['title']),
                                                       "time" => $get['datum'],
                                                       "class" => $class,
                                                       "edit" => $edit,

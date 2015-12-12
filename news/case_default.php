@@ -34,7 +34,7 @@ if(defined('_News')) {
 
             $klapp = "";
             if ($get['klapptext']) {
-                $klapp = show(_news_klapplink, array("klapplink" => re($get['klapplink']),
+                $klapp = show(_news_klapplink, array("klapplink" => stringParser::decode($get['klapplink']),
                                                      "which" => "expand",
                                                      "id" => $get['id']));
             }
@@ -44,21 +44,21 @@ if(defined('_News')) {
             $links1 = "";
             if(!empty($get['url1'])) {
                 $rel = _related_links;
-                $links1 = show(_news_link, array("link" => re($get['link1']),
+                $links1 = show(_news_link, array("link" => stringParser::decode($get['link1']),
                                                  "url" => $get['url1']));
             }
 
             $links2 = "";
             if(!empty($get['url2'])) {
               $rel = _related_links;
-              $links2 = show(_news_link, array("link" => re($get['link2']),
+              $links2 = show(_news_link, array("link" => stringParser::decode($get['link2']),
                                                "url" => $get['url2']));
             }
 
             $links3 = "";
             if(!empty($get['url3'])) {
                 $rel = _related_links;
-                $links3 = show(_news_link, array("link" => re($get['link3']),
+                $links3 = show(_news_link, array("link" => stringParser::decode($get['link3']),
                                                  "url" => $get['url3']));
             }
 
@@ -71,7 +71,7 @@ if(defined('_News')) {
             }
 
             $intern = $get['intern'] ? _votes_intern : "";
-            $newsimage = '../inc/images/newskat/'.re($sql->fetch("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']),'katimg'));
+            $newsimage = '../inc/images/newskat/'.stringParser::decode($sql->fetch("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']),'katimg'));
             foreach($picformat as $tmpendung) {
                 if(file_exists(basePath."/inc/images/uploads/news/".$get['id'].".".$tmpendung)) {
                     $newsimage = '../inc/images/uploads/news/'.$get['id'].'.'.$tmpendung;
@@ -79,7 +79,7 @@ if(defined('_News')) {
                 }
             }
 
-            $show_sticky .= show($dir."/news_show", array("titel" => re($get['titel']),
+            $show_sticky .= show($dir."/news_show", array("titel" => stringParser::decode($get['titel']),
                                                           "kat" => $newsimage,
                                                           "id" => $get['id'],
                                                           "comments" => $comments,
@@ -92,9 +92,9 @@ if(defined('_News')) {
                                                           "ndatum" => _datum,
                                                           "ncomments" => _news_kommentare.":",
                                                           "klapp" => $klapp,
-                                                          "more" => bbcode($get['klapptext']),
+                                                          "more" => bbcode::parse_html($get['klapptext']),
                                                           "viewed" => $viewed,
-                                                          "text" => bbcode(re($get['text'])),
+                                                          "text" => bbcode::parse_html($get['text']),
                                                           "datum" => date("d.m.y H:i", $get['datum'])._uhr,
                                                           "links" => $links,
                                                           "autor" => autor($get['autor'])));
@@ -118,7 +118,7 @@ if(defined('_News')) {
 
             $klapp = "";
             if ($get['klapptext']) {
-                $klapp = show(_news_klapplink, array("klapplink" => re($get['klapplink']),
+                $klapp = show(_news_klapplink, array("klapplink" => stringParser::decode($get['klapplink']),
                     "which" => "expand",
                     "id" => $get['id']));
             }
@@ -127,21 +127,21 @@ if(defined('_News')) {
             $links1 = "";
             if(!empty($get['url1'])) {
                 $rel = _related_links;
-                $links1 = show(_news_link, array("link" => re($get['link1']),
+                $links1 = show(_news_link, array("link" => stringParser::decode($get['link1']),
                                                  "url" => $get['url1']));
             }
 
             $links2 = "";
             if(!empty($get['url2'])) {
               $rel = _related_links;
-              $links2 = show(_news_link, array("link" => re($get['link2']),
+              $links2 = show(_news_link, array("link" => stringParser::decode($get['link2']),
                                                "url" => $get['url2']));
             }
 
             $links3 = "";
             if(!empty($get['url3'])) {
                 $rel = _related_links;
-                $links3 = show(_news_link, array("link" => re($get['link3']),
+                $links3 = show(_news_link, array("link" => stringParser::decode($get['link3']),
                                                  "url" => $get['url3']));
             }
 
@@ -154,7 +154,7 @@ if(defined('_News')) {
             }
 
             $intern = $get['intern'] ? _votes_intern : "";
-            $newsimage = '../inc/images/newskat/'.re($sql->fetch("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']),'katimg'));
+            $newsimage = '../inc/images/newskat/'.stringParser::decode($sql->fetch("SELECT `katimg` FROM `{prefix_newskat}` WHERE `id` = ?;",array($get['kat']),'katimg'));
             foreach($picformat as $tmpendung) {
                 if(file_exists(basePath."/inc/images/uploads/news/".$get['id'].".".$tmpendung)) {
                     $newsimage = '../inc/images/uploads/news/'.$get['id'].'.'.$tmpendung;
@@ -162,7 +162,7 @@ if(defined('_News')) {
                 }
             }
 
-            $show .= show($dir."/news_show", array("titel" => re($get['titel']),
+            $show .= show($dir."/news_show", array("titel" => stringParser::decode($get['titel']),
                                                    "kat" => $newsimage,
                                                    "id" => $get['id'],
                                                    "comments" => $comments,
@@ -175,9 +175,9 @@ if(defined('_News')) {
                                                    "ndatum" => _datum,
                                                    "ncomments" => _news_kommentare.":",
                                                    "klapp" => $klapp,
-                                                   "more" => bbcode($get['klapptext']),
+                                                   "more" => bbcode::parse_html($get['klapptext']),
                                                    "viewed" => $viewed,
-                                                   "text" => bbcode($get['text']),
+                                                   "text" => bbcode::parse_html($get['text']),
                                                    "datum" => date("d.m.y H:i", $get['datum'])._uhr,
                                                    "links" => $links,
                                                    "autor" => autor($get['autor'])));

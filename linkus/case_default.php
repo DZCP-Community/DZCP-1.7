@@ -10,7 +10,7 @@ $qry = $sql->select("SELECT * FROM `{prefix_linkus}` ORDER BY `banner` DESC;");
 if($sql->rowCount()) {
     foreach($qry as $get) {
         $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-        $banner = show(_linkus_bannerlink, array("id" => $get['id'], "banner" => re($get['text'])));
+        $banner = show(_linkus_bannerlink, array("id" => $get['id'], "banner" => stringParser::decode($get['text'])));
         $edit = ""; $delete = "";
         if(permission("links")) {
             $edit = show("page/button_edit", array("id" => $get['id'],
@@ -23,11 +23,11 @@ if($sql->rowCount()) {
         }
 
         $show .= show($dir."/linkus_show", array("class" => $class,
-                                                 "beschreibung" => re($get['beschreibung']),
+                                                 "beschreibung" => stringParser::decode($get['beschreibung']),
                                                  "cnt" => $color,
                                                  "banner" => $banner,
-                                                 "besch" => re($get['beschreibung']),
-                                                 "url" => re($get['url'])));
+                                                 "besch" => stringParser::decode($get['beschreibung']),
+                                                 "url" => stringParser::decode($get['url'])));
     }
 }
 

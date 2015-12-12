@@ -24,13 +24,13 @@ if(defined('_UserMenu')) {
 
     if ($do == "add" && !$chkMe && isIP(visitorIp())) {
         $check_user = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `user`= ?;",
-                      array(up($_POST['user'])));
+                      array(stringParser::encode($_POST['user'])));
 
         $check_nick = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `nick`= ?;",
-                      array(up($_POST['nick'])));
+                      array(stringParser::encode($_POST['nick'])));
 
         $check_email = $sql->rows("SELECT `id` FROM `{prefix_users}` WHERE `email`= ?;",
-                       array(up($_POST['email'])));
+                       array(stringParser::encode($_POST['email'])));
 
         $_POST['user'] = trim($_POST['user']); $_POST['nick'] = trim($_POST['nick']);
 
@@ -99,15 +99,16 @@ if(defined('_UserMenu')) {
                    . "`level`    = 1, "
                    . "`time`     = ".time().", "
                    . "`status`   = 1;",
-            array(up(trim($_POST['user'])),up(trim($_POST['nick'])),up(trim($_POST['email'])),visitorIp(),up($pwd),settings::get('default_pwd_encoder')));
+            array(stringParser::encode(trim($_POST['user'])),stringParser::encode(trim($_POST['nick'])),stringParser::encode(trim($_POST['email'])),
+                visitorIp(),stringParser::encode($pwd),settings::get('default_pwd_encoder')));
 
             $insert_id = $sql->lastInsertId();
             $sql->insert("INSERT INTO `{prefix_permissions}` SET `user` = ?;",array($insert_id));
             $sql->insert("INSERT INTO `{prefix_userstats}` SET `user` = ?, `lastvisit` = ".time().";",array($insert_id));
 
             setIpcheck("reg(".$insert_id.")");
-            $message = show(bbcode_email(re(settings::get('eml_reg'))), array("user" => trim($_POST['user']), "pwd" => $mkpwd));
-            sendMail(trim($_POST['email']),re(settings::get('eml_reg_subj')),$message);
+            $message = show(bbcode_email(stringParser::decode(settings::get('eml_reg'))), array("user" => trim($_POST['user']), "pwd" => $mkpwd));
+            sendMail(trim($_POST['email']),stringParser::decode(settings::get('eml_reg_subj')),$message);
             $index = info(show($msg, array("email" => $_POST['email'])), "../user/?action=login");
         }
     }

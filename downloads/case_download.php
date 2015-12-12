@@ -14,11 +14,11 @@ else {
         if(!permission('dlintern') && $get['intern']) {
             $index = error(_error_no_access);
         } else {
-            $file = preg_replace("#added...#Uis", "files/", re($get['url']));
-            if(strpos(re($get['url']),"../") != 0) 
+            $file = preg_replace("#added...#Uis", "files/", stringParser::decode($get['url']));
+            if(strpos(stringParser::decode($get['url']),"../") != 0) 
                 $rawfile = @basename($file);
             else 
-                $rawfile = re($get['download']);
+                $rawfile = stringParser::decode($get['download']);
 
             $size = 0;
             if(file_exists($file)) {
@@ -72,7 +72,7 @@ else {
                                               "date" => $date,
                                               "lastdate" => $lastdate,
                                               "id" => $_GET['id'],
-                                              "dlname" => re($get['download']),
+                                              "dlname" => stringParser::decode($get['download']),
                                               "loaded" => $get['hits'],
                                               "traffic" => $traffic,
                                               "speed_modem" => $speed_modem,
@@ -85,7 +85,7 @@ else {
                                               "speed_dsl6016" => $speed_dsl6016,
                                               "speed_dsl16128" => $speed_dsl16128,
                                               "size" => $dlsize,
-                                              "besch" => bbcode(re($get['beschreibung'])),
+                                              "besch" => bbcode::parse_html($get['beschreibung']),
                                               "file" => $rawfile));
         }
     } else

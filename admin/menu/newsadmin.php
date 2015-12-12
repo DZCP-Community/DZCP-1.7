@@ -35,9 +35,10 @@ switch ($do) {
                 
                 $sql->insert("INSERT INTO `{prefix_news}` SET `autor` = ?,`kat` = ?,`titel` = ?,`text` = ?,`klapplink` = ?,`klapptext` = ?,"
                         . "`link1` = ?,`link2` = ?,`link3` = ?,`url1` = ?,`url2` = ?,`url3` = ?,`intern` = ?,".$timeshift."".$public."".$datum."`sticky` = ?;",
-                        array_merge(array(intval($userid),intval($_POST['kat']),up($_POST['titel']),up($_POST['newstext']),up($_POST['klapptitel']),
-                            up($_POST['morenews']),up($_POST['link1']),up($_POST['link2']),up($_POST['link3']),up(links($_POST['url1'])),up(links($_POST['url2'])),
-                            up(links($_POST['url3'])),(isset($_POST['intern']) ? 1 : 0)),$params,array(intval($stickytime))));
+                        array_merge(array(intval($userid),intval($_POST['kat']),stringParser::encode($_POST['titel']),stringParser::encode($_POST['newstext']),stringParser::encode($_POST['klapptitel']),
+                            stringParser::encode($_POST['morenews']),stringParser::encode($_POST['link1']),stringParser::encode($_POST['link2']),stringParser::encode($_POST['link3']),
+                            stringParser::encode(links($_POST['url1'])),stringParser::encode(links($_POST['url2'])),stringParser::encode(links($_POST['url3'])),(isset($_POST['intern']) ? 1 : 0)),
+                                $params,array(intval($stickytime))));
 
                 $picUploadError = false;
                 if(isset($_FILES['newspic']['tmp_name']) && !empty($_FILES['newspic']['tmp_name'])) {
@@ -86,7 +87,7 @@ switch ($do) {
             $sel = (isset($_POST['kat']) && $_POST['kat'] == $getk['id'] ? 'selected="selected"' : '');
             $kat .= show(_select_field, array("value" => $getk['id'],
                                               "sel" => $sel,
-                                              "what" => re($getk['kategorie'])));
+                                              "what" => stringParser::decode($getk['kategorie'])));
         }
 
         $dropdown_date = show(_dropdown_date, array("day" => dropdown("day",isset($_POST['t']) ? intval($_POST['t']) : date("d")),
@@ -215,17 +216,17 @@ switch ($do) {
                 if(!$picUploadError) {
                     $sql->update("UPDATE `{prefix_news}`
                         SET `kat`        = '".intval($_POST['kat'])."',
-                            `titel`      = '".up($_POST['titel'])."',
-                            `text`       = '".up($_POST['newstext'])."',
-                            `klapplink`  = '".up($_POST['klapptitel'])."',
-                            `klapptext`  = '".up($_POST['morenews'])."',
-                            `link1`      = '".up($_POST['link1'])."',
+                            `titel`      = '".stringParser::encode($_POST['titel'])."',
+                            `text`       = '".stringParser::encode($_POST['newstext'])."',
+                            `klapplink`  = '".stringParser::encode($_POST['klapptitel'])."',
+                            `klapptext`  = '".stringParser::encode($_POST['morenews'])."',
+                            `link1`      = '".stringParser::encode($_POST['link1'])."',
                             `url1`       = '".links($_POST['url1'])."',
-                            `link2`      = '".up($_POST['link2'])."',
+                            `link2`      = '".stringParser::encode($_POST['link2'])."',
                             `url2`       = '".links($_POST['url2'])."',
-                            `link3`      = '".up($_POST['link3'])."',
+                            `link3`      = '".stringParser::encode($_POST['link3'])."',
                             `intern`     = '".(isset($_POST['intern']) ? intval($_POST['intern']) : 0)."',
-                            `url3`       = '".up(links($_POST['url3']))."',
+                            `url3`       = '".stringParser::encode(links($_POST['url3']))."',
                             ".$timeshift."
                             ".$public."
                             ".$datum."
@@ -247,7 +248,7 @@ switch ($do) {
             $sel = ($get['kat'] == $getk['id'] ? 'selected="selected"' : '');
             $kat .= show(_select_field, array("value" => $getk['id'],
                                               "sel" => $sel,
-                                              "what" => re($getk['kategorie'])));
+                                              "what" => stringParser::decode($getk['kategorie'])));
         }
 
         $int = ($get['intern'] ? 'checked="checked"' : '');
@@ -297,16 +298,16 @@ switch ($do) {
                                               "kat" => $kat,
                                               "all_disabled" => "",
                                               "do" => "edit",
-                                              "titel" => re($get['titel']),
-                                              "newstext" => re($get['text']),
-                                              "morenews" => re($get['klapptext']),
-                                              "link1" => re($get['link1']),
-                                              "link2" => re($get['link2']),
-                                              "link3" => re($get['link3']),
-                                              "url1" => re($get['url1']),
-                                              "url2" => re($get['url2']),
-                                              "url3" => re($get['url3']),
-                                              "klapplink" => re($get['klapplink']),
+                                              "titel" => stringParser::decode($get['titel']),
+                                              "newstext" => stringParser::decode($get['text']),
+                                              "morenews" => stringParser::decode($get['klapptext']),
+                                              "link1" => stringParser::decode($get['link1']),
+                                              "link2" => stringParser::decode($get['link2']),
+                                              "link3" => stringParser::decode($get['link3']),
+                                              "url1" => stringParser::decode($get['url1']),
+                                              "url2" => stringParser::decode($get['url2']),
+                                              "url3" => stringParser::decode($get['url3']),
+                                              "klapplink" => stringParser::decode($get['klapplink']),
                                               "dropdown_date" => $dropdown_date,
                                               "dropdown_time" => $dropdown_time,
                                               "timeshift_date" => $timeshift_date,
@@ -382,7 +383,7 @@ switch ($do) {
                                                               "title" => _button_title_del,
                                                               "del" => convSpace(_confirm_del_news)));
 
-            $titel = show(_news_show_link, array("titel" => re(cut($get['titel'],settings::get('l_newsadmin'))), "id" => $get['id']));
+            $titel = show(_news_show_link, array("titel" =>stringParser::decode(cut($get['titel'],settings::get('l_newsadmin'))), "id" => $get['id']));
             $intern = ($get['intern'] ? _votes_intern : '');
             $sticky = ($get['sticky'] ? _news_sticky : '');
             $datum = empty($get['datum']) ? _no_public : date("d.m.y H:i", $get['datum'])._uhr;

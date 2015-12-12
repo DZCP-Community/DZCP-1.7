@@ -30,16 +30,16 @@ foreach($qrym as $getm) {
         $icqnr = $getm['icq'];
     }
 
-    $steam = (!empty($getm['steamid']) && steam_enable ? '<div id="infoSteam_'.md5(re($getm['steamid'])).'">'
+    $steam = (!empty($getm['steamid']) && steam_enable ? '<div id="infoSteam_'.md5(stringParser::decode($getm['steamid'])).'">'
             . '<div style="width:100%"><img src="../inc/images/ajax-loader-mini.gif" alt="" /></div>'
-            . '<script language="javascript" type="text/javascript">DZCP.initDynLoader("infoSteam_'.md5(re($getm['steamid'])).'","steam","&steamid='.
-            re($getm['steamid']).'",true);</script></div>' : '-');
+            . '<script language="javascript" type="text/javascript">DZCP.initDynLoader("infoSteam_'.md5(stringParser::decode($getm['steamid'])).'","steam","&steamid='.
+            stringParser::decode($getm['steamid']).'",true);</script></div>' : '-');
     
     $class = ($color % 2) ? "contentMainFirst" : "contentMainSecond"; $color++;
     $nick = autor($getm['user'],'','','','','&amp;sq='.$getm['squad']);
 
     if(!empty($getm['rlname'])) {
-        $real = explode(" ", re($getm['rlname']));
+        $real = explode(" ", stringParser::decode($getm['rlname']));
         
         if(!isset($real[1]))
             $real[1] = "";
@@ -49,7 +49,7 @@ foreach($qrym as $getm) {
 
     $member .= show($dir."/squads_member", array("icqs" => $icq,
                                                  "icq" => $icqnr,
-                                                 "emails" => CryptMailto(re($getm['email'])),
+                                                 "emails" => CryptMailto(stringParser::decode($getm['email'])),
                                                  "id" => $getm['user'],
                                                  "steam" => $steam,
                                                  "class" => $class,
@@ -59,18 +59,18 @@ foreach($qrym as $getm) {
                                                  "pic" => userpic($getm['id'],60,80)));
 }
 
-$squad = re($get['name']); $style = '';
+$squad = stringParser::decode($get['name']); $style = '';
 foreach($picformat AS $end) {
     if(file_exists(basePath.'/inc/images/squads/'.intval($get['id']).'.'.$end)) {
         $style = 'padding:0;';
-        $squad = '<img src="../inc/images/squads/'.intval($get['id']).'.'.$end.'" alt="'.re($get['name']).'" />';
+        $squad = '<img src="../inc/images/squads/'.intval($get['id']).'.'.$end.'" alt="'.stringParser::decode($get['name']).'" />';
         break;
     }
 }
 
-$where = $where." - ".re($get['name']);
+$where = $where." - ".stringParser::decode($get['name']);
 $index = show($dir."/squads_full", array("member" => (empty($member) ? _member_squad_no_entrys : $member),
-                                         "desc" => empty($get['beschreibung']) ? '' : '<tr><td class="contentMainSecond">'.bbcode(re($get['beschreibung'])).'</td></tr>',
+                                         "desc" => empty($get['beschreibung']) ? '' : '<tr><td class="contentMainSecond">'.bbcode::parse_html(stringParser::decode($get['beschreibung'])).'</td></tr>',
                                          "squad" => $squad,
                                          "style" => $style,
                                          "id"   => intval($_GET['id'])));

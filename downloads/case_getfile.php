@@ -10,11 +10,11 @@ if(settings::get("reg_dl") && !$chkMe)
     $index = error(_error_unregistered,1);
 else {
     $get = $sql->fetch("SELECT `url`,`id` FROM `{prefix_downloads}` WHERE `id` = ?;",array(intval($_GET['id'])));
-    $file = preg_replace("#added...#Uis", "", re($get['url']));
-    if(preg_match("=added...=Uis",re($get['url'])) != FALSE)
+    $file = preg_replace("#added...#Uis", "", stringParser::decode($get['url']));
+    if(preg_match("=added...=Uis",stringParser::decode($get['url'])) != FALSE)
         $dlFile = "files/".$file;
     else
-        $dlFile = re($get['url']);
+        $dlFile = stringParser::decode($get['url']);
 
     if(count_clicks('download',$get['id']))
         $sql->update("UPDATE `{prefix_downloads}` SET `hits` = (hits+1), `last_dl` = ? WHERE `id` = ?;",array(time(),$get['id']));

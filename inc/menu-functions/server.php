@@ -92,7 +92,7 @@ function server($serverID = 0) {
 
                 $game_icon_inp = GameQ::search_game_icon($game_icon);
                 if($game_icon_inp['found'] && stristr($icon_basic_inp['image'], 'unknown') === FALSE && empty($get['icon'])) {
-                    $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(up($game_icon),$get['id']));
+                    $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(stringParser::encode($game_icon),$get['id']));
                 }
                 
                 $game_icon = $game_icon_inp['image'];
@@ -101,7 +101,7 @@ function server($serverID = 0) {
                 if(!empty($server['game_mod'])) {
                     $icon_mod_inp = GameQ::search_game_icon($icon_mod);
                     if($icon_mod_inp['found']) {
-                        $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(up($icon_mod),$get['id']));
+                        $sql->update("UPDATE `{prefix_server}` SET `icon` = ? WHERE `id` = ?;",array(stringParser::encode($icon_mod),$get['id']));
                     }
                     
                     $icon_mod = $icon_mod_inp['image'];
@@ -120,7 +120,7 @@ function server($serverID = 0) {
                 }
 
                 if(!empty($server['game_hostname']))
-                    $sql->update("UPDATE `{prefix_server}` SET `name` = ? WHERE `id` = ?;",array(up($server['game_hostname']),$get['id'])); //Update Hostname to DB
+                    $sql->update("UPDATE `{prefix_server}` SET `name` = ? WHERE `id` = ?;",array(stringParser::encode($server['game_hostname']),$get['id'])); //Update Hostname to DB
             } else  {
                 //Server Status
                 $server['game_hostname'] =  $get['name'];
@@ -153,16 +153,16 @@ function server($serverID = 0) {
             $image_pwd = ($server['game_password'] ? '<img src="../inc/images/closed.png" alt="" alt="" title="Server Password" class="icon" />' : ''); //Server Password
             $dedicated = ($server['game_dedicated'] ? '<img src="../inc/images/dedicated.png" alt="" title="Dedicated Server" class="icon" />' : ''); //Dedicated Server
             $os = ($server['game_os'] ? '<img src="../inc/images/'.$server['game_os'].'_os.png" alt="" title="'.($server['game_os'] == 'windows' ? 'Windows' : 'Linux').' Server" class="icon" />' : ''); //Server OS
-            $pwds = (!empty($get['pwd']) && permission("gs_showpw") && $server['game_password'] ? show(_server_pwd, array("pwd" => re($get['pwd']))) : '');
-            $gtype = (!empty($server['game_type']) ? show(_server_gtype, array("type" => re($server['game_type']))) : '');
-            $bots = (!empty($server['game_num_bot']) ? show(_server_bots, array("bots" => re($server['game_num_bot']))) : '');
+            $pwds = (!empty($get['pwd']) && permission("gs_showpw") && $server['game_password'] ? show(_server_pwd, array("pwd" => stringParser::decode($get['pwd']))) : '');
+            $gtype = (!empty($server['game_type']) ? show(_server_gtype, array("type" => stringParser::decode($server['game_type']))) : '');
+            $bots = (!empty($server['game_num_bot']) ? show(_server_bots, array("bots" => stringParser::decode($server['game_num_bot']))) : '');
 
-            $servername = jsconvert(re(cut($server['hostname'],($servermenu=settings::get('l_servernavi')))));
+            $servername = jsconvert(stringParser::decode(cut($server['hostname'],($servermenu=settings::get('l_servernavi')))));
             $servernameout = (!empty($server['game_hostname'])) ? $server['game_hostname'] : _navi_gsv_no_name_available;
 
-            $info = 'onmouseover="DZCP.showInfo(\''.$servernameout.'\', \'IP/Port:;;'._navi_gsv_game.':;Map:;'._navi_gsv_players_online.':;'._navi_gsv_on_the_game.':\', \''.$get['ip'].':'.$get['port'].';;'.jsconvert(re('<img src="'.(!empty($server['game_mod_name_short']) ? $icon_mod : $game_icon).'" alt=""  class="icon" />')).
-            ' '.(!empty($server['game_mod_name_long']) ? $server['game_mod_name_long'] : $server['game_name_long']).';'.(array_key_exists('game_maptitle', $server) ? $server['game_maptitle'] : (empty($server['game_map']) ? '-' : $server['game_map'])).';'.$server['game_num_players'].' / '.$server['game_max_players'].';'.jsconvert(re($players)).'\')" onmouseout="DZCP.hideInfo()"';
-            return show("menu/server", array("host" => cut(re($server['game_hostname']),$servermenu,true),
+            $info = 'onmouseover="DZCP.showInfo(\''.$servernameout.'\', \'IP/Port:;;'._navi_gsv_game.':;Map:;'._navi_gsv_players_online.':;'._navi_gsv_on_the_game.':\', \''.$get['ip'].':'.$get['port'].';;'.jsconvert(stringParser::decode('<img src="'.(!empty($server['game_mod_name_short']) ? $icon_mod : $game_icon).'" alt=""  class="icon" />')).
+            ' '.(!empty($server['game_mod_name_long']) ? $server['game_mod_name_long'] : $server['game_name_long']).';'.(array_key_exists('game_maptitle', $server) ? $server['game_maptitle'] : (empty($server['game_map']) ? '-' : $server['game_map'])).';'.$server['game_num_players'].' / '.$server['game_max_players'].';'.jsconvert(stringParser::decode($players)).'\')" onmouseout="DZCP.hideInfo()"';
+            return show("menu/server", array("host" => cut(stringParser::decode($server['game_hostname']),$servermenu,true),
                                              "ip" => $get['ip'],
                                              "map" =>  (array_key_exists('game_maptitle', $server) ? $server['game_maptitle'] : (empty($server['game_map']) ? '-' : $server['game_map'])),
                                              "image_map" => $image_map,

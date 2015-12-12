@@ -14,8 +14,8 @@ foreach($qry as $get) {
 
     $events .= show($dir."/event_show", array("edit" => $edit,
                                               "show_time" => date("H:i", $get['datum'])._uhr,
-                                              "show_event" => bbcode(re($get['event'])),
-                                              "show_title" => re($get['title'])));
+                                              "show_event" => bbcode::parse_html($get['event']),
+                                              "show_title" => stringParser::decode($get['title'])));
 }
 
 $head = show(_kalender_events_head, array("datum" => date("d.m.Y",$_GET['time'])));

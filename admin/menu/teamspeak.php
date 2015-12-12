@@ -32,7 +32,7 @@ switch ($do) {
     break;
     case 'delete':
         $get = $sql->fetch("SELECT `host_ip_dns`,`server_port` FROM `{prefix_teamspeak}` WHERE `id` = ? LIMIT 1;",array(intval($_GET['id'])));
-        $ip_port = TS3Renderer::tsdns(re($get['host_ip_dns']));
+        $ip_port = TS3Renderer::tsdns(stringParser::decode($get['host_ip_dns']));
         $host = ($ip_port != false && is_array($ip_port) ? $ip_port['ip'] : $get['host_ip_dns']);
         $port = ($ip_port != false && is_array($ip_port) ? $ip_port['port'] : $get['server_port']);
         $cache->delete('teamspeak_'.md5($host.':'.$port));
@@ -60,11 +60,11 @@ switch ($do) {
 
                 $sql->update("UPDATE `{prefix_teamspeak}` SET `host_ip_dns` = ?,`server_port` = ?,"
                     . "`query_port` = ?,`customicon` = ?,`showchannel` = ?,`default_server` = ? WHERE `id` = ?;",
-                    array(up($_POST['ip']),intval($_POST['port']),intval($_POST['sport']),intval($_POST['customicon']),
+                    array(stringParser::encode($_POST['ip']),intval($_POST['port']),intval($_POST['sport']),intval($_POST['customicon']),
                     intval($_POST['showchannel']),(isset($_POST['defaults']) ? '1' : '0'),intval($_GET['id'])));
 
-                $ip_port = TS3Renderer::tsdns(up($_POST['ip']));
-                $host = ($ip_port != false && is_array($ip_port) ? $ip_port['ip'] : up($_POST['ip']));
+                $ip_port = TS3Renderer::tsdns(stringParser::encode($_POST['ip']));
+                $host = ($ip_port != false && is_array($ip_port) ? $ip_port['ip'] : stringParser::encode($_POST['ip']));
                 $port = ($ip_port != false && is_array($ip_port) ? $ip_port['port'] : intval($_POST['port']));
                 $cache->delete('teamspeak_'.md5($host.':'.$port));
                 $show = info(_config_ts_updated,"?admin=teamspeak");
@@ -106,7 +106,7 @@ switch ($do) {
                 $_POST['port'] = (empty($_POST['port']) ? 9987 : $_POST['port']);
                 $sql->insert("INSERT INTO `{prefix_teamspeak}` SET `host_ip_dns` = ?,`server_port` = ?,`query_port` = ?,"
                     . "`customicon` = ?,`showchannel` = ?,`default_server` = ?,`show_navi` = 0;",
-                    array(up($_POST['ip']),intval($_POST['port']),intval($_POST['sport']),intval($_POST['customicon']),
+                    array(stringParser::encode($_POST['ip']),intval($_POST['port']),intval($_POST['sport']),intval($_POST['customicon']),
                         intval($_POST['showchannel']),(isset($_POST['defaults']) ? '1' : '0')));
 
                 $show = info(_config_ts_added,"?admin=teamspeak");
@@ -131,7 +131,7 @@ switch ($do) {
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $menu = (!$get['show_navi'] ? show(_teamspeak_menu_icon_yes, array("id" => $get['id'])) : show(_teamspeak_menu_icon_no, array("id" => $get['id'])));
             $default = ($get['default_server'] ? show(_teamspeak_default_icon_yes, array("id" => $get['id'])) : show(_teamspeak_default_icon_no, array("id" => $get['id'])));
-            $show .= show($dir."/teamspeak_show", array("serverip" => cut(re($get['host_ip_dns']),26,true),
+            $show .= show($dir."/teamspeak_show", array("serverip" => cut(stringParser::decode($get['host_ip_dns']),26,true),
                                                         "serverport" => $get['server_port'],
                                                         "serverqport" => $get['query_port'],
                                                         "menu" => $menu,

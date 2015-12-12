@@ -101,7 +101,7 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
         if(!$_SESSION['installer']) {
             $cacheHash = md5($template);
             if(template_cache && $config_cache['use_cache'] && dbc_index::useMem() && $cache->isExisting('tpl_'.$cacheHash)) {
-                $tpl = re($cache->get('tpl_'.$cacheHash));
+                $tpl = stringParser::decode($cache->get('tpl_'.$cacheHash));
                 if(show_dbc_debug) {
                     DebugConsole::insert_info('template::show()', 'Get Template-Cache: "' . 'tpl_' . $cacheHash . '"');
                 }
@@ -113,7 +113,7 @@ function show_runner($tpl="", $dir="", $array=array(), $array_lang_constant=arra
                     }
                     
                     if(template_cache && $config_cache['use_cache'] && dbc_index::useMem()) {
-                        $cache->set('tpl_'.$cacheHash,up($tpl),template_cache_time);
+                        $cache->set('tpl_'.$cacheHash,stringParser::encode($tpl),template_cache_time);
                         if (show_dbc_debug) {
                             DebugConsole::insert_loaded('template::show()', 'Set Template-Cache: "' . 'tpl_' . $cacheHash . '"');
                         }

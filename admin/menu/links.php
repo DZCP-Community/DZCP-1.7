@@ -29,7 +29,7 @@ switch ($do) {
                 $show = error(_links_empty_text, 1);
         } else {
             $sql->insert("INSERT INTO `{prefix_links}` SET `url` = ?, `text` = ?, `banner` = ?, `beschreibung` = ?;",
-                  array(links($_POST['link']),up($_POST['text']),up($_POST['banner']),up($_POST['beschreibung'])));
+                  array(links($_POST['link']),stringParser::encode($_POST['text']),stringParser::encode($_POST['banner']),stringParser::encode($_POST['beschreibung'])));
             $show = info(_link_added, "?admin=links");
         }
     break;
@@ -44,9 +44,9 @@ switch ($do) {
                                                "bchecked" => $bchecked,
                                                "tchecked" => $tchecked,
                                                "bnone" => $bnone,
-                                               "llink" => links(re($get['url'])),
-                                               "lbeschreibung" => re($get['beschreibung']),
-                                               "ltext" => re($get['text']),
+                                               "llink" => links(stringParser::decode($get['url'])),
+                                               "lbeschreibung" => stringParser::decode($get['beschreibung']),
+                                               "ltext" => stringParser::decode($get['text']),
                                                "what" => _button_value_edit,
                                                "do" => "editlink&amp;id=".$_GET['id'].""));
     break;
@@ -60,7 +60,7 @@ switch ($do) {
               $show = error(_links_empty_text, 1);
         } else {
             $sql->update("UPDATE `{prefix_links}` SET `url` = ?, `text` = ?, `banner` = ?, `beschreibung` = ? WHERE id = ?;",
-                    array(up(links($_POST['link'])),up($_POST['text']),up($_POST['banner']),up($_POST['beschreibung']),intval($_GET['id'])));
+                    array(stringParser::encode(links($_POST['link'])),stringParser::encode($_POST['text']),stringParser::encode($_POST['banner']),stringParser::encode($_POST['beschreibung']),intval($_GET['id'])));
             $show = info(_link_edited, "?admin=links");
         }
     break;
@@ -81,7 +81,7 @@ switch ($do) {
                                                               "del" => convSpace(_confirm_del_link)));
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
-            $show .= show($dir."/links_show", array("link" => cut(re($get['url']),40),
+            $show .= show($dir."/links_show", array("link" => cut(stringParser::decode($get['url']),40),
                                                     "class" => $class,
                                                     "edit" => $edit,
                                                     "delete" => $delete));

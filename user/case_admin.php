@@ -15,14 +15,14 @@ if(defined('_UserMenu')) {
             $posi = "";
             foreach($qrypos as $getpos) {
                 $sel = $sql->rows("SELECT `id` FROM `{prefix_userposis}` WHERE `posi` = ? AND `squad` = ? AND `user` = ?;",array($getpos['id'],$getsq['id'],intval($_GET['edit']))) ? 'selected="selected"' : '';
-                $posi .= show(_select_field_posis, array("value" => $getpos['id'], "sel" => $sel, "what" => re($getpos['position'])));
+                $posi .= show(_select_field_posis, array("value" => $getpos['id'], "sel" => $sel, "what" => stringParser::decode($getpos['position'])));
             }
 
             $check = $sql->rows("SELECT `id` FROM `{prefix_squaduser}` WHERE `user` = ? AND `squad` = ?;", array(intval($_GET['edit']),$getsq['id'])) ? 'checked="checked"' : '';
             $esquads .= show(_checkfield_squads, array("id" => $getsq['id'],
                                                        "check" => $check,
                                                        "eposi" => $posi,
-                                                       "squad" => re($getsq['name'])));
+                                                       "squad" => stringParser::decode($getsq['name'])));
         }
 
         $index = show($dir . "/admin_self", array("showpos" => getrank($_GET['edit']), "esquad" => $esquads, "eposi" => $posi));
@@ -38,7 +38,7 @@ if(defined('_UserMenu')) {
                 session_regenerate_id();
 
                 $_SESSION['id'] = intval($_GET['id']);
-                $_SESSION['pwd'] = re(data("pwd", intval($_GET['id'])));
+                $_SESSION['pwd'] =stringParser::decode(data("pwd", intval($_GET['id'])));
                 $_SESSION['ip'] = $userip;
 
                 $sql->update("UPDATE `{prefix_users}` SET `online` = 1, `sessid` = ?, `ip` = ? WHERE `id` = ?;",
@@ -127,7 +127,7 @@ if(defined('_UserMenu')) {
                         . "`level`  = ?, "
                         . "`banned`  = ? "
                         . "WHERE `id` = ?;",
-                        array(up($_POST['nick']),up($_POST['email']),up($_POST['loginname']),(isset($_POST['listck']) ? intval($_POST['listck']) : 0),
+                        array(stringParser::encode($_POST['nick']),stringParser::encode($_POST['email']),stringParser::encode($_POST['loginname']),(isset($_POST['listck']) ? intval($_POST['listck']) : 0),
                         intval($update_level),intval($update_banned),$edituser));
 
                 setIpcheck("upduser(" . $userid . "_" . $edituser . ")");
@@ -194,7 +194,7 @@ if(defined('_UserMenu')) {
                         $check = $sql->rows("SELECT `id` FROM `{prefix_userposis}` WHERE `posi` = ? AND `squad` = ? AND `user` = ?;", 
                         array($getpos['id'],$getsq['id'],intval($_GET['edit'])));
                         $sel = $check ? 'selected="selected"' : '';
-                        $posi .= show(_select_field_posis, array("value" => $getpos['id'], "sel" => $sel, "what" => re($getpos['position'])));
+                        $posi .= show(_select_field_posis, array("value" => $getpos['id'], "sel" => $sel, "what" => stringParser::decode($getpos['position'])));
                     }
 
                     $checksquser = $sql->rows("SELECT `squad` FROM `{prefix_squaduser}` WHERE `user` = ? AND `squad` = ?;", 
@@ -203,7 +203,7 @@ if(defined('_UserMenu')) {
                     $esquads .= show(_checkfield_squads, array("id" => $getsq['id'],
                                                                "check" => $check,
                                                                "eposi" => $posi,
-                                                               "squad" => re($getsq['name'])));
+                                                               "squad" => stringParser::decode($getsq['name'])));
                 }
 
                 $get_identy = show(_admin_user_get_identitat, array("id" => intval($_GET['edit'])));
@@ -224,9 +224,9 @@ if(defined('_UserMenu')) {
                                                               "selm" => $selm));
                 }
 
-                $index = show($dir . "/admin", array("enick" => re($get['nick']),
+                $index = show($dir . "/admin", array("enick" => stringParser::decode($get['nick']),
                                                      "user" => intval($_GET['edit']),
-                                                     "eemail" => re($get['email']),
+                                                     "eemail" => stringParser::decode($get['email']),
                                                      "eloginname" => $get['user'],
                                                      "esquad" => $esquads,
                                                      "editpwd" => $editpwd,

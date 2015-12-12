@@ -43,7 +43,7 @@ if(defined('_Forum')) {
     {
       $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".$pUId."'");
 
-      $email = CryptMailto(re($getu['email']),_emailicon_forum);
+      $email = CryptMailto(stringParser::decode($getu['email']),_emailicon_forum);
       $pn = _forum_pn_preview;
       if(empty($getu['icq']) || $getu['icq'] == 0) $icq = "";
       else {
@@ -53,7 +53,7 @@ if(defined('_Forum')) {
 
       if(empty($getu['hp'])) $hp = "";
       else $hp = show(_hpicon_forum, array("hp" => $getu['hp']));
-      if(data("signatur",$pUId)) $sig = _sig.bbcode(data("signatur",$pUId),true);
+      if(data("signatur",$pUId)) $sig = _sig.bbcode::parse_html(data("signatur",$pUId),true);
       else $sig = "";
       $onoff = onlinecheck($userid);
       $userposts = show(_forum_user_posts, array("posts" => userstats("forumposts",$pUId)+1));
@@ -73,9 +73,9 @@ if(defined('_Forum')) {
 
     $kat = $sql->fetch("SELECT name FROM `{prefix_forumkats}` WHERE id = '".$getw['sid']."'");
 
-    $wheres = show(_forum_post_where_preview, array("wherepost" => re($_POST['topic']),
-                                                    "wherekat" => re($getw['kattopic']),
-                                                    "mainkat" => re($kat['name']),
+    $wheres = show(_forum_post_where_preview, array("wherepost" => stringParser::decode($_POST['topic']),
+                                                    "wherekat" => stringParser::decode($getw['kattopic']),
+                                                    "mainkat" => stringParser::decode($kat['name']),
                                                     "tid" => $_GET['id'],
                                                     "kid" => $getw['kid']));
 
@@ -90,7 +90,7 @@ if(defined('_Forum')) {
                                              "admin" => "",
                                              "class" => 'class="commentsRight"',
                                              "nick" => cleanautor($pUId, '', $_POST['nick'], $_POST['email']),
-                                             "threadhead" => re($_POST['topic']),
+                                             "threadhead" => stringParser::decode($_POST['topic']),
                                              "titel" => $titel,
                                              "postnr" => "1",
                                              "pn" => $pn,
@@ -98,7 +98,7 @@ if(defined('_Forum')) {
                                              "hp" => $hp,
                                              "email" => $email,
                                              "posts" => $userposts,
-                                             "text" =>  bbcode(re($_POST['eintrag']),true).$editedby,
+                                             "text" =>  bbcode::parse_html($_POST['eintrag'],true).$editedby,
                                              "status" => getrank($pUId),
                                              "avatar" => useravatar($pUId),
                                              "edited" => $get['edited'],
@@ -154,7 +154,7 @@ if(defined('_Forum')) {
     {
       $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".intval($pUId)."'");
 
-      $email = CryptMailto(re($getu['email']),_emailicon_forum);
+      $email = CryptMailto(stringParser::decode($getu['email']),_emailicon_forum);
       $pn = _forum_pn_preview;
       if(empty($getu['icq']) || $getu['icq'] == 0) $icq = "";
       else {
@@ -164,7 +164,7 @@ if(defined('_Forum')) {
 
       if(empty($getu['hp'])) $hp = "";
       else $hp = show(_hpicon_forum, array("hp" => $getu['hp']));
-      if(data("signatur",$pUId)) $sig = _sig.bbcode(data("signatur",$pUId),true);
+      if(data("signatur",$pUId)) $sig = _sig.bbcode::parse_html(data("signatur",$pUId),true);
       else $sig = "";
     } else {
       $icq = "";
@@ -178,7 +178,7 @@ if(defined('_Forum')) {
                                                   "postnr" => "#".($i+($page-1)*settings::get('m_fposts')),
                                                   "p" => ($i+($page-1)*settings::get('m_fposts')),
                                                   "class" => 'class="commentsRight"',
-                                                  "text" => bbcode(re($_POST['eintrag']),true).$editedby,
+                                                  "text" => bbcode::parse_html($_POST['eintrag'],false).$editedby,
                                                   "pn" => $pn,
                                                   "icq" => $icq,
                                                   "hp" => $hp,

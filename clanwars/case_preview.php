@@ -8,19 +8,19 @@ if(defined('_Clanwars')) {
     header("Content-type: text/html; charset=utf-8");
     $get = $sql->fetch("SELECT * FROM `{prefix_squads}` WHERE `id` = ?;",array(intval($_POST['squad'])));
 
-    $show = show(_cw_details_squad, array("game" => re($get['game']),
-                                          "name" => re($get['name']),
+    $show = show(_cw_details_squad, array("game" => stringParser::decode($get['game']),
+                                          "name" => stringParser::decode($get['name']),
                                           "id" => $_POST['squad'],
                                           "img" => squad($get['icon'])));
     
-    $gegner = show(_cw_details_gegner_blank, array("gegner" => re($_POST['clantag']." - ".$_POST['gegner']),
+    $gegner = show(_cw_details_gegner_blank, array("gegner" => stringParser::decode($_POST['clantag']." - ".$_POST['gegner']),
                                                    "url" => links($_POST['url'])));
     
-    $server = show(_cw_details_server, array("servername" => re($_POST['servername']),
-                                             "serverip" => re($_POST['serverip'])));
+    $server = show(_cw_details_server, array("servername" => stringParser::decode($_POST['servername']),
+                                             "serverip" => stringParser::decode($_POST['serverip'])));
 
     $result = (!$_POST['punkte'] && !$_POST['gpunkte']) ?_cw_no_results : cw_result_details($_POST['punkte'], $_POST['gpunkte']);
-    $bericht = !empty($_POST['bericht']) ? bbcode(re($_POST['bericht']),true) : "&nbsp;";
+    $bericht = !empty($_POST['bericht']) ? bbcode::parse_html($_POST['bericht'],true) : "&nbsp;";
     
     $count = 0; $cw_screenshots = array();
     for ($zaehler = 1; $zaehler <= 20; $zaehler++) {
@@ -57,20 +57,20 @@ if(defined('_Clanwars')) {
                                          "logo_squad" => '_defaultlogo.jpg',
                                          "logo_gegner" => '_defaultlogo.jpg',
                                          "squad" => $show,
-                                         "squad_name" => re($get['name']),
-                                         "gametype" => re($_POST['gametype']),
-                                         "lineup" => preg_replace("#\,#","<br />", re($_POST['lineup'])),
-                                         "glineup" => preg_replace("#\,#","<br />", re($_POST['glineup'])),
-                                         "match_admins" => re($_POST['match_admins']),
+                                         "squad_name" => stringParser::decode($get['name']),
+                                         "gametype" => stringParser::decode($_POST['gametype']),
+                                         "lineup" => preg_replace("#\,#","<br />", stringParser::decode($_POST['lineup'])),
+                                         "glineup" => preg_replace("#\,#","<br />", stringParser::decode($_POST['glineup'])),
+                                         "match_admins" => stringParser::decode($_POST['match_admins']),
                                          "players" => $players,
                                          "edit" => "",
                                          "comments" => $comments,
-                                         "serverpwd" => show(_cw_serverpwd, array("cw_serverpwd" => re($_POST['serverpwd']))),
+                                         "serverpwd" => show(_cw_serverpwd, array("cw_serverpwd" => stringParser::decode($_POST['serverpwd']))),
                                          "cw_datum" => date("d.m.Y H:i",$datum)._uhr,
                                          "cw_gegner" => $gegner,
-                                         "cw_xonx" => re($xonx),
-                                         "cw_liga" => re($_POST['liga']),
-                                         "cw_maps" => re($_POST['maps']),
+                                         "cw_xonx" => stringParser::decode($xonx),
+                                         "cw_liga" => stringParser::decode($_POST['liga']),
+                                         "cw_maps" => stringParser::decode($_POST['maps']),
                                          "cw_server" => $server,
                                          "cw_result" => $result,
                                          "cw_bericht" => $bericht,

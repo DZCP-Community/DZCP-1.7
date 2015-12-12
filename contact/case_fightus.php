@@ -10,7 +10,7 @@ $squads = show(_select_field_fightus, array("id" => "0", "squad" => _contact_joi
 $qry = $sql->select("SELECT `id`,`name`,`game` FROM `{prefix_squads}` WHERE `status` = 1 AND `team_fightus` = 1 ORDER BY `name`;");
 $squads = '';
 foreach($qry as $get) {
-    $squads .= show(_select_field_fightus, array("id" => $get['id'], "squad" => re($get['name']), "game" => re($get['game'])));
+    $squads .= show(_select_field_fightus, array("id" => $get['id'], "squad" => stringParser::decode($get['name']), "game" => stringParser::decode($get['game'])));
 }
 
 $dropdown_date = show(_dropdown_date, array("day" => dropdown("day",date("d",time())),
