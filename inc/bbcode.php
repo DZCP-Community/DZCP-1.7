@@ -949,7 +949,7 @@ function GetServerVars($var) {
 function cnt($db, $where = "", $what = "id", $sql_std=array()) {
     global $sql;
     $cnt = $sql->fetch("SELECT COUNT(".$what.") AS `cnt` FROM `".$db."` ".$where.";",$sql_std,'cnt');
-    if($sql->rowCount()) {
+    if($sql->rowCount() >= 1) {
         return $cnt;
     }
 
@@ -975,7 +975,7 @@ function cnt_multi($db, $where = "", $whats = array('id'), $sql_std=array()) {
 function sum($db, $where = "", $what = "id", $sql_std=array()) {
     global $sql;
     $sum = $sql->fetch("SELECT SUM(".$what.") AS `sum` FROM `".$db."` ".$where.";",$sql_std,'sum');
-    if($sql->rowCount()) {
+    if($sql->rowCount() >= 1) {
         return $sum;
     }
 
@@ -2756,7 +2756,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
             $index = error(_error_have_to_be_logged, 1);
         }
 
-        $where = preg_replace_callback("#autor_(.*?)$#",create_function('$id', 'returnstringParser::decode(data("nick","$id[1]"));'),$where);
+        $where = preg_replace_callback("#autor_(.*?)$#",create_function('$id', 'return stringParser::decode(data("nick","$id[1]"));'),$where);
         $index = empty($index) ? '' : (!$check_msg ? '' : $check_msg).'<table class="mainContent" cellspacing="1">'.$index.'</table>';
         update_online($where); //Update Stats
 

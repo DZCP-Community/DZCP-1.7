@@ -652,7 +652,7 @@ if(defined('_Forum')) {
                                                      `forum`  = 1,
                                                      `von`    = '".intval($userid)."'");
 
-                        $vid = _insert_id();
+                        $vid = $sql->lastInsertId();
 
                         $sql->insert("INSERT INTO `{prefix_vote_results}`
                                             SET `vid`   = '".intval($vid)."',
@@ -738,7 +738,7 @@ if(defined('_Forum')) {
                                                 `lp`       = '".time()."',
                                                 `vote`     = '".$vid."',
                                                 `first`    = '1'");
-                $thisFID = _insert_id();
+                $thisFID = $sql->lastInsertId();
                 setIpcheck("fid(".$_GET['kid'].")");
 
                 $sql->update("UPDATE `{prefix_userstats}` SET `forumposts` = forumposts+1 WHERE `user` = '".$userid."'");

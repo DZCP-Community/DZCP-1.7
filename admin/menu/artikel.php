@@ -73,7 +73,7 @@ switch($do) {
                 if(isset($_FILES['artikelpic']['tmp_name']) && !empty($_FILES['artikelpic']['tmp_name'])) {
                     $endung = explode(".", $_FILES['artikelpic']['name']);
                     $endung = strtolower($endung[count($endung)-1]);
-                    move_uploaded_file($_FILES['artikelpic']['tmp_name'], basePath."/inc/images/uploads/artikel/"._insert_id().".".strtolower($endung));
+                    move_uploaded_file($_FILES['artikelpic']['tmp_name'], basePath."/inc/images/uploads/artikel/".$sql->lastInsertId().".".strtolower($endung));
                 }
             }
             

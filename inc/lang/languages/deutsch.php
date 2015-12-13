@@ -88,6 +88,10 @@ define("_forum_regs", 'Mitglieder');
 define("_forum_reg", 'Mitglied');
 define("_forum_ist", 'ist');
 define("_forum_sind", 'sind');
+define("_forum_total_posts", 'Beitr&auml;ge');
+define("_forum_total_topics", 'Themen');
+define("_forum_total_members", 'Mitglieder');
+define("_forum_newest_member", 'neuestes Mitglied');
 
 // Security Center
 define('_config_security', 'Security Center');

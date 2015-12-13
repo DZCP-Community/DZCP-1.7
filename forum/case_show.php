@@ -53,6 +53,7 @@ if(defined('_Forum')) {
       if($cntpage == "0") $pagenr = "1";
       else $pagenr = ceil($cntpage/settings::get('m_fposts'));
 
+      /*
       if(empty($_POST['suche']))
       {
         $gets = $sql->fetch("SELECT id FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['id'])."'");
@@ -72,11 +73,9 @@ if(defined('_Forum')) {
                                                             "closed" => $closed,
                                                             "lpid" => $cntpage+1,
                                                             "page" => $pagenr));
-      }
+      } */
 
-      $getlp = $sql->fetch("SELECT date,nick,reg,email FROM `{prefix_forumposts}`
-                   WHERE sid = '".$get['id']."'
-                   ORDER BY date DESC");
+      $getlp = $sql->fetch("SELECT date,nick,reg,email FROM `{prefix_forumposts}` WHERE sid = '".$get['id']."' ORDER BY date DESC");
       if($sql->rowCount())
       {
         $lpost = show(_forum_thread_lpost, array("nick" => autor($getlp['reg'], '', $getlp['nick'], stringParser::decode($getlp['email'])),
@@ -87,13 +86,15 @@ if(defined('_Forum')) {
         $lpdate = "";
       }
 
-      $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
+      $gets = $sql->fetch("SELECT `id` FROM `{prefix_forumsubkats}` WHERE `id` = ?;",array(intval($_GET['id'])));
       $threads .= show($dir."/forum_show_threads", array("new" => check_new($get['lp']),
-                                                         "topic" => $threadlink,
+                                                         "kid" => $gets['id'],
+                                                         "id" => $get['id'],
+                                                         "frompic" => "forum_read.gif",
+                                                         "topic" => stringParser::decode($get['topic']),
                                                          "subtopic" =>stringParser::decode(cut($get['subtopic'],settings::get('l_forumsubtopic'))),
                                                          "hits" => $get['hits'],
                                                          "replys" => cnt("{prefix_forumposts}", " WHERE sid = '".$get['id']."'"),
-                                                         "class" => $class,
                                                          "lpost" => $lpost,
                                                          "autor" => autor($get['t_reg'], '', $get['t_nick'], $get['t_email'])));
       $i--;
@@ -107,7 +108,7 @@ if(defined('_Forum')) {
 
     if(!empty($_POST['suche']))
     {
-      $what = show($dir."/search", array("head" => _forum_search_head,
+      $show = show($dir."/search", array("head" => _forum_search_head,
                                          "thread" => _forum_thread,
                                          "autor" => _autor,
                                          "lpost" => _forum_lpost,
@@ -117,7 +118,7 @@ if(defined('_Forum')) {
                                          "nav" => $nav));
     } else {
       $new = show(_forum_new_thread, array("id" => $_GET['id']));
-      $what = show($dir."/forum_show_thread", array("head_threads" => _forum_head_threads,
+      $show = show($dir."/forum_show_thread", array("head_threads" => _forum_head_threads,
                                                     "thread" => _forum_thread,
                                                     "autor" => _autor,
                                                     "lpost" => _forum_lpost,
@@ -128,16 +129,36 @@ if(defined('_Forum')) {
                                                     "new" => $new,));
     }
 
-    $subkat = $sql->fetch("SELECT sid FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['id'])."'");
+    $subkat = $sql->fetch("SELECT sid,kattopic FROM `{prefix_forumsubkats}` WHERE id = '".intval($_GET['id'])."'");
     $kat = $sql->fetch("SELECT name FROM `{prefix_forumkats}` WHERE id = '".$subkat['sid']."'");
 
-    $wheres = show(_forum_subkat_where, array("where" => stringParser::decode($gets['kattopic']),
-                                              "id" => $gets['id']));
+    $wheres = show(_forum_subkat_where, array("where" => stringParser::decode($gets['kattopic']),"id" => $gets['id']));
 
+    /* Wer ist online */
+    $qry = $sql->select('SELECT `position`,`color` FROM `{prefix_positions}`;'); $team_groups = '';
+    foreach($qry as $get) {
+        $team_groups .= show(_forum_team_groups, array('color' => stringParser::decode($get['color']), 'group' => stringParser::decode($get['position'])));
+    }
+
+    $counter_users = online_reg('Forum'); $counter_gast = online_guests('Forum');
+    $total_users=($counter_users+$counter_gast);
+    $forum_user_stats = show(_forum_online_info0,array('users' => strval($total_users),
+                                                       't_gast' => ($counter_gast == 1 ? _forum_gast : _forum_gaste),
+                                                       'regs'  => strval($counter_users), 
+                                                       't_regs' => ($counter_users == 1 ? _forum_reg : _forum_regs),
+                                                       'gast'  => strval($counter_gast),
+                                                       't_is' => ($total_users == 1 ? _forum_ist : _forum_sind),
+                                                       'timer' => strval(($useronline/60/60))));
+    
+    $online = show($dir."/online", array("nick" => '', "forum_online_info0" => $forum_user_stats, 'groups' => $team_groups));
+    
+    $where = $where.': '.stringParser::decode($subkat['kattopic']);
     $index = show($dir."/forum_show", array("head" => _forum_head,
                                             "where" => $wheres,
+                                            "title" => stringParser::decode($subkat['kattopic']),
                                             "mainkat" => stringParser::decode($kat['name']),
-                                            "what" => $what,
+                                            "show" => $show,
+                                            "online" => $online,    
                                             "search" => $search));
   }
 }

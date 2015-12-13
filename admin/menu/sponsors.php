@@ -163,7 +163,7 @@ if(_adminMenu != 'true') exit;
                          `xlink`         = '".stringParser::encode($_POST['xlink'])."',
                                      `pos`            = '".intval($_POST['position'])."'");
 
-          $id = _insert_id();
+          $id = $sql->lastInsertId();
 
           $tmp1 = $_FILES['sdata']['tmp_name'];
           $type1 = $_FILES['sdata']['type'];

@@ -117,7 +117,7 @@ switch ($do) {
             $sql->update("UPDATE `{prefix_positions}` SET `pid` = (pid+1) WHERE pid ".$sign." '".intval($_POST['pos'])."';");
             $sql->insert("INSERT INTO `{prefix_positions}` SET `pid` = '".intval($_POST['pos'])."', `position` = '".stringParser::encode($_POST['kat'])."', `color` = '".stringParser::encode($_POST['color'])."';");
             
-            $posID = _insert_id();
+            $posID = $sql->lastInsertId();
             $qry = $sql->show("SHOW FIELDS FROM `{prefix_permissions}`;"); $sql_update = '';
             foreach($qry as $get) {
                 if($get['Field'] != 'id' && $get['Field'] != 'user' && $get['Field'] != 'pos' && $get['Field'] != 'intforum') {

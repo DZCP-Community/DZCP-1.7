@@ -49,10 +49,30 @@ if(defined('_Forum')) {
                 $threads = cnt('{prefix_forumthreads}', " WHERE `kid` = ?","id",array($gets['id']));
                 $posts = cnt('{prefix_forumposts}', " WHERE `kid` = ?","id",array($gets['id']));
                 $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
+                
+                //Unreaded
+                $frompic = "read";
+                if($userid >= 1 && $_SESSION['lastvisit']) {
+                    //Check new Threads
+                    if($sql->rows("SELECT `id` FROM `{prefix_forumthreads}` "
+                            . "WHERE (`t_date` >= ? || `lp` >= ?) AND `t_reg` != ? AND `kid` = ?;",
+                            array($_SESSION['lastvisit'],$_SESSION['lastvisit'],$userid,$gets['id']))) {
+                        $frompic = "unread";
+                    }
+                    
+                    //Check new Posts
+                    if($sql->rows("SELECT `id` FROM `{prefix_forumposts}` "
+                            . "WHERE `date` >= ? AND `reg` != ? AND `kid` = ?;",
+                            array($_SESSION['lastvisit'],$userid,$gets['id']))) {
+                        $frompic = "unread";
+                    }
+                }
+
+                //Show
                 $showt .= show($dir."/kats_show", array("topic" => stringParser::decode($gets['kattopic']),
                                                         "subtopic" => stringParser::decode($gets['subtopic']),
                                                         "lpost" => $lpost,
-                                                        "frompic" => "forum_read.gif",
+                                                        "frompic" => $frompic,
                                                         "subforum" => "",
                                                         "new" => check_new($lpdate),
                                                         "threads" => $threads,
@@ -109,11 +129,12 @@ if(defined('_Forum')) {
         $nick = _forum_nobody_is_online;
     }
 
-    if(!($total_topics = sum("{prefix_forumposts}"))) { $total_topics = "0"; }
-    if(!($total_posts = sum("{prefix_forumthreads}"))) { $total_posts = "0"; }
-    
-    $stats = show($dir."/forum_stats", array("total_posts" => $total_posts, "total_topics" => $total_topics, 
-        "total_members" => 0, "newest_member" => "teasttt"));
+    /* Stats */
+    $stats = show($dir."/forum_stats", array("total_posts" => strval(cnt("{prefix_forumposts}")),
+                                             "total_topics" => strval(cnt("{prefix_forumthreads}")), 
+                                             "total_members" => strval(cnt("{prefix_users}","WHERE `banned` = 0 AND `level` >= 1")), 
+                                             "newest_member" => autor($sql->fetch("SELECT `id` FROM `{prefix_users}` WHERE `level` >= 1 AND "
+                                                     . "`banned` = 0 ORDER BY `regdatum` DESC;",array(),"id"))));
 
     /* Wer ist online */
     $qry = $sql->select('SELECT `position`,`color` FROM `{prefix_positions}`;'); $team_groups = '';
@@ -133,18 +154,6 @@ if(defined('_Forum')) {
     
     $online = show($dir."/online", array("nick" => $nick, "forum_online_info0" => $forum_user_stats, 'groups' => $team_groups));
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    $sql->rows("SELECT * FROM `{prefix_userstats}` WHERE `forumposts` >= 1");
-    
-    
     /* Index */
     $index = show($dir."/forum", array("head" => _forum_head,
                                        "threads" => $threads,

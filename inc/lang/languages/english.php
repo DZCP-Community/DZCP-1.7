@@ -88,6 +88,10 @@ define("_forum_regs", 'registered');
 define("_forum_reg", 'registered');
 define("_forum_ist", ''); //Not used
 define("_forum_sind", ''); //Not used
+define("_forum_total_posts", 'Total posts');
+define("_forum_total_topics", 'Total topics');
+define("_forum_total_members", 'Total members');
+define("_forum_newest_member", 'Our newest member');
 
 // Security Center
 define('_config_security', 'Security Center');

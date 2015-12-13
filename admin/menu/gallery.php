@@ -21,7 +21,7 @@ switch ($do) {
             $show = show($dir."/form_gallery_step2", array("head" => _gallery_admin_head,
                                                            "what" => stringParser::decode($_POST['gallery']),
                                                            "addfile" => $addfile,
-                                                           "id" => _insert_id(),
+                                                           "id" => $sql->lastInsertId(),
                                                            "do" => "add",
                                                            "dowhat" => _button_value_add,
                                                            "anzahl" => $_POST['anzahl'],

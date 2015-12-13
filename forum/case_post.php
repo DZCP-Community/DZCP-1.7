@@ -264,7 +264,7 @@ if(defined('_Forum')) {
                                                              "titel" => $titel,
                                                              "p" => ($page-1*settings::get('m_fposts')),
                                                              "ip" => $posted_ip,
-                                                             "edited" => $getl['edited'],
+                                                             "edited" => stringParser::decode($getl['edited']),
                                                              "posts" => $userposts,
                                                              "date" => _posted_by.date("d.m.y H:i", $getl['date'])._uhr,
                                                              "signatur" => $sig,
@@ -338,7 +338,7 @@ if(defined('_Forum')) {
                                                              "titel" => $titel,
                                                              "ip" => $posted_ip,
                                                              "p" => ($page-1*settings::get('m_fposts')),
-                                                             "edited" => $gett['edited'],
+                                                             "edited" => stringParser::decode($gett['edited']),
                                                              "posts" => $userposts,
                                                              "date" => _posted_by.date("d.m.y H:i", $gett['t_date'])._uhr,
                                                              "signatur" => $sig,
@@ -358,7 +358,7 @@ if(defined('_Forum')) {
                                                         "hphead" => _hp));
           }
 
-          $title = stringParser::decode($gett['topic']).' - '.$title;
+          $where = $where.' - '.stringParser::decode($gett['topic']);
           $index = show($dir."/post", array("titel" => _forum_new_post_head,
                                             "nickhead" => _nick,
                                             "emailhead" => _email,

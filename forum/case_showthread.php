@@ -285,7 +285,7 @@ if(defined('_Forum')) {
         $vote = '<tr><td>'.fvote($get['vote']).'</td></tr>';
       }
 
-      $where = stringParser::decode($getw['topic']).' - '.$where;
+      $where = $where.' - '.stringParser::decode($getw['topic']);
       $index = show($dir."/forum_posts", array("head" => _forum_head,
                                                "where" => $wheres,
                                                "admin" => $admin,

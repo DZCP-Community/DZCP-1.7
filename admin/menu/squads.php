@@ -102,7 +102,7 @@ switch ($do) {
                     `status`       = '".(isset($_POST['status']) ? intval($_POST['status']) : 0)."',
                     `pos`          = '".intval($_POST['position'])."'");
 
-            $insert_id = _insert_id();
+            $insert_id = $sql->lastInsertId();
 
             if($_POST['navi'] != "lazy") {
                 if($_POST['navi'] == "1" || "2") $signnav = ">= ";

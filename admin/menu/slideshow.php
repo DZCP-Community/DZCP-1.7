@@ -84,7 +84,7 @@ switch ($do) {
                 $tmpname = $_FILES['bild']['tmp_name'];
                 $endung = explode(".", $_FILES['bild']['name']);
                 $endung = strtolower($endung[count($endung)-1]);
-                @copy($tmpname, basePath."/inc/images/slideshow/"._insert_id().".".strtolower($endung));
+                @copy($tmpname, basePath."/inc/images/slideshow/".$sql->lastInsertId().".".strtolower($endung));
                 @unlink($tmpname);
             }
 
@@ -189,7 +189,7 @@ switch ($do) {
                 $tmpname = $_FILES['bild']['tmp_name'];
                 $endung = explode(".", $_FILES['bild']['name']);
                 $endung = strtolower($endung[count($endung)-1]);
-                @copy($tmpname, basePath."/inc/images/slideshow/"._insert_id().".".strtolower($endung));
+                @copy($tmpname, basePath."/inc/images/slideshow/".$sql->lastInsertId().".".strtolower($endung));
                 @unlink($tmpname);
             }
 

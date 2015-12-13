@@ -81,7 +81,7 @@ switch ($where) {
                          `intern` = '".intval($_POST['intern'])."',
                          `von`    = '".intval($userid)."'");
 
-          $vid = _insert_id();
+          $vid = $sql->lastInsertId();
 
           $sql->insert("INSERT INTO `{prefix_vote_results}`
                     SET `vid`   = '".intval($vid)."',
