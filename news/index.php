@@ -18,12 +18,12 @@ define('_News', true);
 ## SECTIONS ##
 //RSS News Feed erzeugen
 function feed() {
-    global $sql,$pagetitle,$charset;
+    global $sql,$pagetitle;
     if(!file_exists(basePath.'/rss.xml') || time() - filemtime(basePath.'/rss.xml') > feed_update_time) {
         $host = GetServerVars('HTTP_HOST');
         $pfad = preg_replace("#^(.*?)\/(.*?)#Uis","$1",dirname(GetServerVars('PHP_SELF')));
         $data = fopen("../rss.xml","w+");
-        $feed = '<?xml version="1.0" encoding="'.$charset.'" ?>';
+        $feed = '<?xml version="1.0" encoding="UTF-8" ?>';
         $feed .= "\r\n";
         $feed .= '<rss version="0.91">';
         $feed .= "\r\n";
@@ -77,7 +77,6 @@ function feed() {
 }
 
 function convert_feed($txt) {
-    global $charset;
     $txt = stripslashes($txt);
     $txt = str_replace("&Auml;","Ae",$txt);
     $txt = str_replace("&auml;","ae",$txt);
@@ -85,7 +84,7 @@ function convert_feed($txt) {
     $txt = str_replace("&uuml;","ue",$txt);
     $txt = str_replace("&Ouml;","Oe",$txt);
     $txt = str_replace("&ouml;","oe",$txt);
-    $txt = htmlentities($txt, ENT_QUOTES, $charset);
+    $txt = htmlentities($txt, ENT_QUOTES, 'UTF-8');
     $txt = str_replace("&amp;","&",$txt);
     $txt = str_replace("&lt;","<",$txt);
     $txt = str_replace("&gt;",">",$txt);

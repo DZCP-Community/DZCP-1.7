@@ -4,9 +4,6 @@
  * http://www.dzcp.de
  */
 
-$charset = 'iso-8859-1';
-header("Content-type: text/html; charset=".$charset);
-
 ## ADDED / REDEFINED FOR 1.7.0
 define('_config_c_cache' , 'Cache');
 define('_config_c_cache_provider' , 'Cache Provider');

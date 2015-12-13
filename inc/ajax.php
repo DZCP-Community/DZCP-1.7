@@ -56,9 +56,7 @@ ob_implicit_flush(false);
 
     $mod = isset($_GET['i']) ? $_GET['i'] : '';
     if($mod != 'securimage' && $mod != 'securimage_audio')
-        header("Content-Type: text/xml; charset=".(!defined('_charset') ? 'iso-8859-1' : _charset));
-    else if($mod == 'server' || $mod == 'teamspeak')
-        header("Content-type: application/x-www-form-urlencoded;charset=utf-8");
+        header("Content-Type: text/html; charset=utf-8");
 
     switch ($mod):
         case 'kalender':

@@ -563,7 +563,6 @@ $designpath = '../inc/_templates_/'.$tmpdir;
 
 //-> Languagefiles einlesen
 function lang($lng) {
-    global $charset;
     if(!file_exists(basePath."/inc/lang/languages/".$lng.".php")) {
         $files = get_files(basePath.'/inc/lang/languages/',false,true,array('php'));
         $lng = str_replace('.php','',$files[0]);
@@ -2456,16 +2455,18 @@ final class stringParser {
      *
      * @param string $txt
      */
-    public static function encode($txt='')
-    { global $charset; return utf8_encode(stripcslashes(spChars(htmlentities($txt, ENT_COMPAT, $charset)))); }
+    public static function encode($txt='') { 
+        return utf8_encode(stripcslashes(spChars(htmlentities($txt, ENT_COMPAT, 'UTF-8')))); 
+    }
 
     /**
      * Decodiert UTF8 Text in das aktuelle Charset der Seite.
      *
      * @param utf8 string $txt
      */
-    public static function decode($txt='')
-    { global $charset; return trim(stripslashes(spChars(html_entity_decode(utf8_decode($txt), ENT_COMPAT, $charset),true))); }
+    public static function decode($txt='') { 
+        return trim(stripslashes(spChars(html_entity_decode(utf8_decode($txt), ENT_COMPAT, 'UTF-8'),true))); 
+    }
 }
 
 //-> Speichert Ruckgaben der MySQL Datenbank zwischen um SQL-Queries einzusparen
@@ -2695,7 +2696,7 @@ class javascript {
 
 //-> Ausgabe des Indextemplates
 function page($index='',$title='',$where='',$index_templ='index') {
-    global $userid,$userip,$tmpdir,$chkMe,$charset,$dir,$view_error;
+    global $userid,$userip,$tmpdir,$chkMe,$dir,$view_error;
     global $designpath,$language,$menu_index,$isSpider;
 
     javascript::set('lng',($language=='deutsch'?'de':'en'));
@@ -2768,7 +2769,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
         //filter placeholders
         $dir = $designpath; //after template index autodetect!!!
         $blArr = array("[clanname]","[title]","[java_vars]","[template_switch]","[headtitle]","[login]",
-        "[index]","[rss]","[dir]","[charset]","[where]","[lang]","[notification]","[notification_tr]");
+        "[index]","[rss]","[dir]","[where]","[lang]","[notification]","[notification_tr]");
         $pholdervars = '';
         for($i=0;$i<=count($blArr)-1;$i++) {
             if (preg_match("#" . $blArr[$i] . "#", $pholder)) {
@@ -2825,7 +2826,6 @@ class bbcode {
     private static $gl_words = array();
     private static $gl_desc = array();
     private static $use_glossar = true;
-    private static $js_include = false;
     private static $simple_search = array(
       '/\[b\](.*?)\[\/b\]/is',
       '/\[i\](.*?)\[\/i\]/is',

@@ -69,6 +69,6 @@ if(defined('_Artikel')) {
                                               "ip" => $userip._only_for_admins));
 
     update_user_status_preview();
-    header('Content-Type: text/html; charset=utf-8');
+    header("Content-Type: text/html; charset=utf-8");
     exit(utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>'));
 }

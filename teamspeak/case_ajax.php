@@ -6,13 +6,10 @@
 if (!defined('_Teamspeak')) exit();
 
 function teamspeak_show($sID = 0, $showID = 0) {
-    global $dir,$sql,$charset,$config_cache,$cache;
+    global $dir,$sql,$config_cache,$cache;
     $no_ajax = !empty($sID) && $sID != 0 ? true : false;
-
-    if(!$no_ajax)
-        header("Content-Type: text/html; charset=".$charset);
-
     $sID = (!empty($_GET['sID']) && $sID == 0 ? intval($_GET['sID']) : $sID);
+
     $Show_sID = (!empty($_GET['show']) && $showID == 0 ? intval($_GET['show']) : $showID);
     $get = $sql->fetch("SELECT * FROM `{prefix_teamspeak}` WHERE `id` = ? LIMIT 1;",array(intval($sID)));
     $ip_port = TS3Renderer::tsdns($get['host_ip_dns']);
@@ -28,7 +25,7 @@ function teamspeak_show($sID = 0, $showID = 0) {
     }
 
     $cache_hash = md5($host.':'.$port);
-    if(!$config_cache['use_cache'] || !$cache->isExisting('teamspeak_'.$cache_hash)) {
+    if(true || !$config_cache['use_cache'] || !$cache->isExisting('teamspeak_'.$cache_hash)) {
         GameQ::addServers(array(array('id' => 'ts3' ,'type' => 'teamspeak3', 'host' => $host.':'.$port, 'query_port' => $get['query_port'])));
         GameQ::setOption('timeout', 6);
         $results = GameQ::requestData();
@@ -74,7 +71,7 @@ function teamspeak_show($sID = 0, $showID = 0) {
     if(!empty($Show_sID) && $Show_sID != 0 && $Show_sID == $get['id'])
     { $display = "show"; $moreicon = "collapse"; } else { $display = "none"; $moreicon = "expand"; }
     $klapp = show(_klapptext_server_link, array("link" => empty($results['ts3']['virtualserver_name']) ? 'Error on this V-Server!' : $results['ts3']['virtualserver_name'], "id" => $get['id'], "moreicon" => $moreicon));
-    $index = show($dir."/servers", array("id" => $get['id'], "user" => $users, "display" => $display, "klapp" => $klapp, "uchannels" => TS3Renderer::render(true), "info" => TS3Renderer::welcome(), "userstats" => $userstats));
+    $index = show($dir."/servers", array("id" => $get['id'], "user" => $users, "display" => $display, "klapp" => $klapp, "uchannels" => TS3Renderer::render(true), "info" => TS3Renderer::welcome(), "userstats" => utf8_encode($userstats)));
     if($no_ajax) return $index; else exit($index);
 }
 

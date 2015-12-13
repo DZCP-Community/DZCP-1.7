@@ -8,7 +8,7 @@
 function teamspeak($js = 0) {
     global $sql,$cache;
     
-    header('Content-Type: text/html; charset=iso-8859-1');
+    header("Content-Type: text/html; charset=utf-8");
     if(!fsockopen_support())
         return '<center style="margin:2px 0">'.error(_fopen,'0',false).'</center>';
 

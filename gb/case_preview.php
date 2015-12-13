@@ -7,7 +7,7 @@
 if (!defined('_GB')) exit();
 
 $regCheck = false;
-header("Content-type: application/x-www-form-urlencoded;charset=utf-8");
+header("Content-Type: text/html; charset=utf-8");
 if(isset($_GET['view']) ? ($_GET['view'] == 'comment' ? true : false) : false) {
     if(isset($_GET['edit']) && !empty($_GET['edit'])) {
         $get = $sql->fetch("SELECT `reg`,`datum` FROM `{prefix_gbcomments}` WHERE `id` = ?;",array(intval($_GET['edit'])));

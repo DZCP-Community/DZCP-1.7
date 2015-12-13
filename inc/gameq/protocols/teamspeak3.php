@@ -300,11 +300,8 @@ class GameQ_Protocols_Teamspeak3 extends GameQ_Protocols {
         // Set the result to a new result instance
         $result = new GameQ_Result();
 
-        foreach ($data AS $channel)
-        {
-            $channel['channel_name'] = htmlentities($channel['channel_name'], ENT_QUOTES, "UTF-8"); //Fix
-            foreach($channel AS $key => $value)
-            {
+        foreach ($data AS $channel) {
+            foreach($channel AS $key => $value) {
                 $result->addChannels($key, $value);
             }
         }
@@ -331,15 +328,12 @@ class GameQ_Protocols_Teamspeak3 extends GameQ_Protocols {
         // Set the result to a new result instance
         $result = new GameQ_Result();
 
-        foreach ($data AS $player)
-        {
+        foreach ($data AS $player) {
             // filter out query clients
             if ($player['client_type'] == 1)
                 continue;
 
-            $player['client_nickname'] = htmlentities($player['client_nickname'], ENT_QUOTES, "UTF-8"); //Fix
-            foreach ($player AS $key => $value)
-            {
+            foreach ($player AS $key => $value) {
                 $result->addPlayer($key, $value);
             }
         }

@@ -162,7 +162,7 @@ class TS3Renderer {
         if($cut) $channel['channel_name'] = (mb_strlen(self::rep($channel['channel_name'])) > (30 - ($ebene * 2)) ? 
                 cut(self::rep($channel['channel_name']),(30 - ($ebene * 2)),true) : self::rep($channel['channel_name']));
         return '<a href="javascript:DZCP.popup(\'../teamspeak/login.php?ts3&amp;cName='.base64_encode($joints).'\', \'600\', \'100\')"
-        class="navTeamspeak" style="font-weight:bold;white-space:nowrap" title="'.spChars($channel['channel_name']).'">'.$channel['channel_name'].'</a>'."\n";
+        class="navTeamspeak" style="font-weight:bold;white-space:nowrap" title="'.$channel['channel_name'].'">'.$channel['channel_name'].'</a>'."\n";
     }
 
     /**
@@ -288,20 +288,19 @@ class TS3Renderer {
             if(ts3viewer_icon_to_drive) {
                 $base_file = basePath.'/inc/images/tsviewer/custom_icons/'.$svid.'_'.$id.'.bin';
                 if(file_exists($base_file)) {
-                    self::$nf_pic_ids[$id] = true;
-                    $file_stream = file_get_contents($base_file);
-                    $image = 'data:image/png;base64,'.base64_encode(hextobin($file_stream));
+                    self::$nf_pic_ids[strval($id)] = true;
+                    $image = 'data:image/png;base64,'.base64_encode(hextobin(file_get_contents($base_file)));
                 }
             }
 
-            if(!$cache->isExisting($svid.'_'.$id) && !array_key_exists($id, self::$nf_pic_ids) && empty($image)) {
+            if(!$cache->isExisting($svid.'_'.$id) && !array_key_exists(strval($id), self::$nf_pic_ids) && empty($image)) {
                 // Sende Download-Anforderung zum TS3 Server
                 if(show_teamspeak_debug) {
                     DebugConsole::insert_info('TS3Renderer::icon()', 'Download Icon: "icon_'.$id.'"');
                 }
 
                 $ftInitDownload = self::ftInitDownload('/icon_'.$id,$cid);
-                if(!$ftInitDownload) { self::$nf_pic_ids[$id] = true; return ''; }
+                if(!$ftInitDownload) { self::$nf_pic_ids[strval($id)] = true; return ''; }
                 if(is_array($ftInitDownload) && array_key_exists('ftkey', $ftInitDownload) && $ftInitDownload['size']) {
                     if(show_teamspeak_debug)
                         DebugConsole::insert_info('TS3Renderer::icon()', 'Download Icon: "icon_'.$id.'" with FTKey: "'.$ftInitDownload['ftkey'].'"');
@@ -317,13 +316,15 @@ class TS3Renderer {
                         }
                         
                         $image = 'data:image/png;base64,'.base64_encode($file_stream);
-                        self::$nf_pic_ids[$id] = true;
+                        self::$nf_pic_ids[strval($id)] = true;
                     } else
-                        self::$nf_pic_ids[$id] = true;
+                        self::$nf_pic_ids[strval($id)] = true;
                 } else
-                    self::$nf_pic_ids[$id] = true;
-            } else {
+                    self::$nf_pic_ids[strval($id)] = true;
+            } else if(empty($image)) {
                 $image = ($cache->isExisting($svid.'_'.$id) ? 'data:image/png;base64,'.base64_encode(hextobin($cache->get($svid.'_'.$id))) : '');
+            } else if(!empty($image)) {
+                $cache->set($svid.'_'.$id,file_get_contents($base_file),(24*60*60));//24h
             }
         }
 

@@ -30,9 +30,7 @@ if(fsockopen_support()) {
         }
 
         $index = show($dir."/teamspeak", array("servers" => $index));
-    }
-    else
+    } else
         $index = error('<br /><center>'._no_ts_page.'</center><br />');
-}
-else
+} else
     $index = error(_fopen);

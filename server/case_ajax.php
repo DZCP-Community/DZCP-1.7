@@ -7,12 +7,9 @@
 if (!defined('_Server')) exit();
 
 function server_show($sID = 0, $showID = 0) {
-    global $dir,$picformat,$charset,$sql,$cache,$config_cache;
+    global $dir,$picformat,$sql,$cache,$config_cache;
     $no_ajax = !empty($sID) && $sID != 0 ? true : false;
-
-    if(!$no_ajax)
-        header("Content-Type: text/xml; charset=".$charset);
-
+            
     $sID = (!empty($_GET['sID']) && $sID == 0 ? intval($_GET['sID']) : $sID);
     $get = $sql->fetch("SELECT * FROM `{prefix_server}` WHERE `id` = ?;",array($sID));
     $cache_hash = md5($get['ip'].':'.$get['port'].'_'.$get['game']);
@@ -40,8 +37,7 @@ function server_show($sID = 0, $showID = 0) {
             
             $server = $cache->get('server_'.$cache_hash);
         }
-    }
-    else
+    } else
         $server = false;
 
     $show_score_td = ''; $show_deaths_td = ''; $show_skill_td = ''; $show_ranks_td = ''; $show_goal_td = ''; $show_honor_td = ''; $show_squad_td = ''; $cteam = '';

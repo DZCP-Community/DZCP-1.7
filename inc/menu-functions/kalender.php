@@ -8,7 +8,7 @@
 function kalender($month="",$year="",$js=false) {
     global $sql;
     
-    header('Content-Type: text/html; charset=iso-8859-1');
+    header("Content-Type: text/html; charset=utf-8");
     if(!$js) {
         $kalender = '<div style="width:100%;padding:10px 0;text-align:center"><img src="../inc/images/ajax_loading.gif" alt="" /></div>'.
                     "<script language=\"javascript\" type=\"text/javascript\">DZCP.initDynLoader('navKalender','kalender','',true);</script>";
