@@ -99,7 +99,6 @@ $maxpicwidth = 90;
 $maxadmincw = 10;
 $maxfilesize = @ini_get('upload_max_filesize');
 $UserAgent = trim(GetServerVars('HTTP_USER_AGENT'));
-$use_glossar = true; //Enable Glossar global
 
 //JavaScript
 javascript::set('AnchorMove','');
@@ -3066,7 +3065,7 @@ class bbcode {
     }
 
     private static function make_glossar() {
-        global $use_glossar,$ajaxJob;
+        global $ajaxJob;
         if (!self::$use_glossar || $ajaxJob) {
             return;
         }

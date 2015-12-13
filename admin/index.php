@@ -19,7 +19,7 @@ $settingsmenu = null;
 $contentmenu = null;
 $addonsmenu = null;
 $amenu = array();
-$use_glossar = false;
+bbcode::use_glossar(false);
 
 ## SECTIONS ##
 if (!isset($_SESSION['id']) || empty($_SESSION['id']) || !admin_perms($_SESSION['id'])) {

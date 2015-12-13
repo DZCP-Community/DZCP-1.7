@@ -13,7 +13,7 @@ include(basePath."/inc/common.php");
 ## SETTINGS ##
 $dir = "glossar";
 $where = _glossar;
-$use_glossar = false; //Disable Glossar Tags in Glossar
+bbcode::use_glossar(false);
 
 ## SECTIONS ##
 $a = '';
