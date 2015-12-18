@@ -182,7 +182,6 @@ if(defined('_Forum')) {
          unset($statsc);
     }
     
-    $counter_users = online_reg($where,true); $counter_gast = online_guests($where,true);
     $total_users=($counter_users+$counter_gast);
     $forum_user_stats = show(_forum_online_info0,array('users' => strval($total_users),
                                                        't_gast' => ($counter_gast == 1 ? _forum_gast : _forum_gaste),
