@@ -5,8 +5,7 @@
  */
 
 if(defined('_Forum')) {
-    update_online($where); //Update Stats
-    $qry = $sql->select("SELECT * FROM `{prefix_forumkats}` ORDER BY kid ASC;");
+    $qry = $sql->select("SELECT * FROM `{prefix_forumkats}` ORDER BY `kid` ASC;");
     foreach($qry as $get) {
         $showt = "";
         $qrys = $sql->select("SELECT * FROM `{prefix_forumsubkats}` WHERE `sid` = ? ORDER BY pos;",array($get['id']));
@@ -18,6 +17,7 @@ if(defined('_Forum')) {
                         . "WHERE `kid` = ? "
                         . "ORDER BY `lp` DESC;",
                         array($gets['id']));
+                
 		$getlp = $sql->fetch("SELECT s1.`kid`,s1.`id`,s1.`date`,s1.`nick`,s1.`reg`,s1.`email`,s2.`kid`,s2.`id`,s2.`t_date`,s2.`lp`,s2.`first` "
                         . "FROM `{prefix_forumposts}` AS `s1` "
                         . "LEFT JOIN `{prefix_forumthreads}` AS `s2` "
@@ -29,20 +29,44 @@ if(defined('_Forum')) {
                 if(cnt('{prefix_forumthreads}', " WHERE `kid` = ?","id",array($gets['id']))) {
                    $lpost = "";
                    if($getlt['first'] == 1) {
-                        $lpost .= show(_forum_thread_lpost, array("nick" => _from.' '.autor($getlt['t_reg'], '', $getlt['t_nick'], $getlt['t_email']).' ',
+                        //Check Unreaded
+                        $iconpic = "icon_topic_latest.gif";
+                        if($userid >= 1 && $_SESSION['lastvisit']) {
+                            //Check in Threads
+                            if($sql->rows("SELECT `id` FROM `{prefix_forumthreads}` "
+                                    . "WHERE (`t_date` >= ? || `lp` >= ?) AND `t_reg` != ? AND `id` = ?;",
+                                    array($_SESSION['lastvisit'],$_SESSION['lastvisit'],$userid,$getlt['id']))) {
+                                $iconpic = "icon_topic_newest.gif";
+                            }
+                        }
+                       
+                        $lpost .= show(_forum_thread_lpost, array("nick" => _from.' '.autor($getlt['t_reg'], '', 
+                                                                    stringParser::decode($getlt['t_nick']), 
+                                                                    stringParser::decode($getlt['t_email'])).' ',
                                                                   "post_link" => '?action=showthread&kid='.$getlt['kid'].'&id='.$getlt['id'],
-                                                                  "img" => 'icon_topic_latest.gif',
-                                                                  "title" => _forum_last_post,
+                                                                  "img" => $iconpic,
                                                                   "date" => date("F j, Y, g:i a", $getlt['t_date'])));
 
                       $lpdate = $getlt['t_date'];
                     } elseif(!$getlt['first']) {
-                        $lpost .= show(_forum_thread_lpost, array("nick" => _from.' '.autor($getlp['reg'], '', $getlp['nick'], $getlp['email']).' ',
+                        //Check Unreaded
+                        $iconpic = "icon_topic_latest.gif";
+                        if($userid >= 1 && $_SESSION['lastvisit']) {
+                            //Check in Posts
+                            if($sql->rows("SELECT `id` FROM `{prefix_forumposts}` "
+                                    . "WHERE `date` >= ? AND `reg` != ? AND `id` = ?;",
+                                    array($_SESSION['lastvisit'],$userid,$getlp['id']))) {
+                                $iconpic = "icon_topic_newest.gif";
+                            }
+                        }
+                        
+                        $lpost .= show(_forum_thread_lpost, array("nick" => _from.' '.autor($getlp['reg'], '', 
+                                                                    stringParser::decode($getlp['nick']), 
+                                                                    stringParser::decode($getlp['email'])).' ',
                                                                   "post_link" => '?action=showthread&kid='.$getlt['kid'].'&id='.$getlt['id'],
-                                                                  "img" => 'icon_topic_latest.gif',
-                                                                  "title" => _forum_last_post,
+                                                                  "img" => $iconpic,
                                                                   "date" => date("F j, Y, g:i a", $getlp['date'])));
-                      $lpdate = $getlp['date'];
+                        $lpdate = $getlp['date'];
                     }
                 }
 
@@ -91,6 +115,13 @@ if(defined('_Forum')) {
         }
     }
     
+    /* Stats */
+    $stats = show($dir."/forum_stats", array("total_posts" => strval(cnt("{prefix_forumposts}")),
+                                             "total_topics" => strval(cnt("{prefix_forumthreads}")), 
+                                             "total_members" => strval(cnt("{prefix_users}","WHERE `banned` = 0 AND `level` >= 1")), 
+                                             "newest_member" => autor($sql->fetch("SELECT `id` FROM `{prefix_users}` WHERE `level` >= 1 AND "
+                                                     . "`banned` = 0 ORDER BY `regdatum` DESC;",array(),"id"))));
+    
     $threads = show(_forum_cnt_threads, array("threads" => cnt("{prefix_forumthreads}")));
     $posts = show(_forum_cnt_posts, array("posts" => cnt("{prefix_forumposts}")+cnt("{prefix_forumthreads}")));
 
@@ -104,37 +135,11 @@ if(defined('_Forum')) {
                                                             "class" => $class));
         }
     } //end while
-
+    
     $top_posts = show($dir."/top_posts", array("head" => _forum_top_posts,
                                                "show" => $show_top,
                                                "nick" => _nick,
                                                "posts" => _forum_posts));
-
-    $qryo = $sql->select("SELECT `id` FROM `{prefix_users}` WHERE `whereami` = 'Forum' AND (time+".intval($useronline).") > ".time().";");
-    if($sql->rowCount()) {
-        $i=0; $check = 1; $nick = '';
-        $cnto = cnt('{prefix_users}', " WHERE (time+".intval($useronline).") > ".time()." AND `whereami` = 'Forum'");
-        foreach($qryo as $geto) {
-            if($i == 5) {
-                $end = "<br />";
-                $i=0;
-            }  else  {
-                $end = ($cnto == $check ? "" : ", ");
-            }
-            
-            $nick .= autorcolerd($geto['id']).$end;
-            $i++; $check++;
-        } //end while
-    } else {
-        $nick = _forum_nobody_is_online;
-    }
-
-    /* Stats */
-    $stats = show($dir."/forum_stats", array("total_posts" => strval(cnt("{prefix_forumposts}")),
-                                             "total_topics" => strval(cnt("{prefix_forumthreads}")), 
-                                             "total_members" => strval(cnt("{prefix_users}","WHERE `banned` = 0 AND `level` >= 1")), 
-                                             "newest_member" => autor($sql->fetch("SELECT `id` FROM `{prefix_users}` WHERE `level` >= 1 AND "
-                                                     . "`banned` = 0 ORDER BY `regdatum` DESC;",array(),"id"))));
 
     /* Wer ist online */
     $qry = $sql->select('SELECT `position`,`color` FROM `{prefix_positions}`;'); $team_groups = '';
@@ -142,7 +147,42 @@ if(defined('_Forum')) {
         $team_groups .= show(_forum_team_groups, array('color' => stringParser::decode($get['color']), 'group' => stringParser::decode($get['position'])));
     }
 
-    $counter_users = online_reg('Forum'); $counter_gast = online_guests('Forum');
+    update_online($where); //Update Where
+    $hash = md5($where);
+    if(!$cache->isExisting($hash)) {
+        $qryo = $sql->select("SELECT `id` FROM `{prefix_users}` WHERE `whereami` LIKE ? AND (time+".intval($useronline).") > ".time().";",array("%".$where."%"));
+        if($sql->rowCount()) {
+            $i=0; $check = 1; $nick = '';
+            $cnto = cnt('{prefix_users}', " WHERE (time+".intval($useronline).") > ".time()." AND `whereami` LIKE ?;",'id',array("%".$where."%"));
+            foreach($qryo as $geto) {
+                if($i == 5) {
+                    $end = "<br />";
+                    $i=0;
+                }  else  {
+                    $end = ($cnto == $check ? "" : ", ");
+                }
+
+                $nick .= autorcolerd($geto['id']).$end;
+                $i++; $check++;
+            } //end while
+        } else {
+            $nick = _forum_nobody_is_online;
+        }
+        
+        $counter_users = online_reg($where,true); 
+        $counter_gast = online_guests($where,true);
+        $cache->set($hash, array('user'=>$counter_users,
+                                 'gast'=>$counter_gast,
+                                 'nick'=>$nick), 30);
+    } else {
+         $statsc = $cache->get($hash);
+         $counter_gast = $statsc['gast'];
+         $counter_users = $statsc['user'];
+         $nick = $statsc['nick'];
+         unset($statsc);
+    }
+    
+    $counter_users = online_reg($where,true); $counter_gast = online_guests($where,true);
     $total_users=($counter_users+$counter_gast);
     $forum_user_stats = show(_forum_online_info0,array('users' => strval($total_users),
                                                        't_gast' => ($counter_gast == 1 ? _forum_gast : _forum_gaste),

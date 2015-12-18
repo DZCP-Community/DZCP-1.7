@@ -105,9 +105,9 @@ javascript::set('AnchorMove','');
 javascript::set('debug',(view_error_reporting && view_javascript_debug));
 
 //-> Global
-$action = isset($_GET['action']) ? $_GET['action'] : (isset($_POST['action']) ? $_POST['action'] : 'default');
-$page = isset($_GET['page']) ? intval($_GET['page']) : (isset($_POST['page']) ? $_POST['page'] : 1);
-$do = isset($_GET['do']) ? $_GET['do'] : (isset($_POST['do']) ? $_POST['do'] : '');
+$action = isset($_GET['action']) ? trim($_GET['action']) : (isset($_POST['action']) ? trim($_POST['action']) : 'default');
+$page = isset($_GET['page']) ? intval(trim($_GET['page'])) : (isset($_POST['page']) ? intval(trim($_POST['page'])) : 1);
+$do = isset($_GET['do']) ? trim($_GET['do']) : (isset($_POST['do']) ? trim($_POST['do']) : '');
 $index = ''; $show = ''; $color = 0;
 
 //-> Neue Kernel Funktionen einbinden, sofern vorhanden
@@ -297,9 +297,9 @@ function pwd_encoder($password,$encoder=-1) {
     switch ($encoder) {
         case 0: return md5($password);
         case 1: return sha1($password);
+        default:
         case 3: return hash('sha256', $password);
-        case 2:
-        default: return hash('sha512', $password);
+        case 2: return hash('sha512', $password);
     }
 }
 
@@ -1083,17 +1083,17 @@ function update_maxonline() {
 function update_online($where='') {
     global $sql,$useronline,$userip,$chkMe,$isSpider,$userid;
     if(!$isSpider && !empty($where) && !$sql->rows("SELECT `id` FROM `{prefix_iptodns}` WHERE `sessid` = ? AND `bot` = 1;",array(session_id()))) {
-        if($sql->rows("SELECT `id` FROM `{prefix_counter_whoison}` WHERE `online` < ?;",array(time()))) {
+        if($sql->rows("SELECT `id` FROM `{prefix_counter_whoison}` WHERE `online` < ?;",array(time()))) { //Cleanup
             $sql->delete("DELETE FROM `{prefix_counter_whoison}` WHERE `online` < ?;",array(time()));
         }
 
-        $get = $sql->fetch("SELECT `id` FROM `{prefix_counter_whoison}` WHERE `ip` = ?;",array($userip));
+        $get = $sql->fetch("SELECT `id` FROM `{prefix_counter_whoison}` WHERE `ip` = ? AND `ssid` = ?;",array($userip,session_id())); //Update Move
         if($sql->rowCount()) {
             $sql->update("UPDATE `{prefix_counter_whoison}` SET `whereami` = ?, `online` = ?, `login` = ?  WHERE `id` = ?;",
             array(stringParser::encode($where),(time()+$useronline),(!$chkMe ? 0 : 1),$get['id']));
         } else {
-            $sql->insert("INSERT INTO `{prefix_counter_whoison}` SET `ip` = ?, `online` = ?, `whereami` = ?, `login` = ?;",
-            array($userip,(time()+$useronline),stringParser::encode($where),(!$chkMe ? 0 : 1)));
+            $sql->insert("INSERT INTO `{prefix_counter_whoison}` SET `ip` = ?, `ssid` = ?, `online` = ?, `whereami` = ?, `login` = ?;",
+            array($userip, session_id(),(time()+$useronline),stringParser::encode($where),(!$chkMe ? 0 : 1)));
         }
         
         if($chkMe) {
@@ -1103,10 +1103,12 @@ function update_online($where='') {
 }
 
 //-> Prueft, wieviele Besucher gerade online sind
-function online_guests($where='') {
+function online_guests($where='',$like=false) {
     global $sql,$useronline,$isSpider;
     if(!$isSpider) {
-        $whereami = (empty($where) ? '' : " AND `whereami` = ".$sql->quote($where));
+        $whereami = (empty($where) ? '' : 
+            ($like ? " AND `whereami` LIKE '%".$where."%'" : 
+                " AND `whereami` = ".$sql->quote($where)));
         return cnt('{prefix_counter_whoison}'," WHERE (online+".$useronline.")>".time()."".$whereami." AND `login` = 0");
     }
     
@@ -1114,10 +1116,12 @@ function online_guests($where='') {
 }
 
 //-> Prueft, wieviele registrierte User gerade online sind
-function online_reg($where='') {
+function online_reg($where='',$like=false) {
     global $sql,$useronline,$isSpider;
     if(!$isSpider) {
-        $whereami = (empty($where) ? '' : " AND `whereami` = ".$sql->quote($where));
+        $whereami = (empty($where) ? '' : 
+            ($like ? " AND `whereami` LIKE '%".$where."%'" : 
+                " AND `whereami` = ".$sql->quote($where)));
         return cnt('{prefix_users}', " WHERE (time+".$useronline.")>".time()."".$whereami." AND `online` = 1");
     }
     

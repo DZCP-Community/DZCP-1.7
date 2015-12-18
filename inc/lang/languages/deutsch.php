@@ -79,6 +79,7 @@ define('_admin_news_readed', 'Gelesen');
 define('_admin_news_refresh', 'Aktualisieren');
 
 //Forum
+define("_forum_who_is_online", 'Wer ist online?');
 define("_forum_last_post", 'Neuesten Beitrag anzeigen');
 define("_forum_online_info0", 'Es [t_is] <b>[users]</b> Besucher online: <b>[regs]</b> [t_regs] und <b>[gast]</b> [t_gast] (Basierend auf den Besuchern der letzten [timer] Minuten)');
 define("_forum_online_info1", 'Registrierte User');
@@ -1079,7 +1080,7 @@ define('_forum_subkat_where', '<a href="../forum/">[mainkat]</a> <span class="fo
 define('_forum_head_skat_search', 'In dieser Kategorie suchen');
 define('_forum_head_threads', 'Themen');
 define('_forum_replys', 'Antworten');
-define("_forum_thread_lpost", '<p class="forumTopic">[date]</p><p class="forumTopic">[nick]<a href="[post_link]" title="[title]"><img src="[dir]/images/forum/[img]" border="0" height="9" width="9"></a>');
+define("_forum_thread_lpost", '<p class="forumTopic">[date]</p><p class="forumTopic">[nick]<a href="[post_link]" title="[lang_forum_last_post]"><img src="[dir]/images/forum/[img]" border="0"></a>');
 define('_forum_new_thread_head', 'Neues Thema erstellen');
 define('_empty_topic', 'Du musst ein Topic angeben!');
 define('_forum_newthread_successful', 'Das Thema wurde erfolgreich ins Forum eingetragen!');

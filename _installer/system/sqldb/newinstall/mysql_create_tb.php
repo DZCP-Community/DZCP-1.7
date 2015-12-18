@@ -286,6 +286,7 @@ function install_mysql_create() {
     $sql->create("CREATE TABLE IF NOT EXISTS `{prefix_counter_whoison}` ("
             . "`id` int(11) NOT NULL AUTO_INCREMENT,"
             . "`ip` varchar(15) NOT NULL DEFAULT '0.0.0.0',"
+            . "`ssid` varchar(50) NOT NULL DEFAULT '',"
             . "`online` int(20) NOT NULL DEFAULT '0',"
             . "`whereami` text,"
             . "`login` int(1) NOT NULL DEFAULT '0',"

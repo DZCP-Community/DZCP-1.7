@@ -39,7 +39,7 @@ function counter($js=false) {
                                              . "FROM `{prefix_counter}`;");
 
                 $info = '';
-                if(abs(online_reg()) != 0) {
+                if(($online_reg = online_reg()) != 0) {
                     $qryo = $sql->select("SELECT `id` FROM `{prefix_users}` WHERE (time+?) > ? AND `online` = 1 ORDER BY `nick`;",array($useronline,time()));
                     $kats = ''; $text = '';
                     if($sql->rowCount()) {
@@ -57,8 +57,8 @@ function counter($js=false) {
                                                       "v_all" => ($getstats['allvisitors']),
                                                       "v_perday" => round($getstats['avgvisitors'], 2),
                                                       "v_max" => $getstats['maxvisitors'],
-                                                      "g_online" => abs(online_guests($where)),
-                                                      "u_online" => abs(online_reg()),
+                                                      "g_online" => strval(online_guests($where)),
+                                                      "u_online" => strval($online_reg),
                                                       "info" => $info,
                                                       "v_online" => $getstats['maxonline']));
                 

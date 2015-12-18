@@ -149,7 +149,6 @@ define('_news_com', '#');
 ## Artikel ##
 define('_artikel_link', '<span class="fontBold">&raquo;</span> <a href="[url]" target="_blank">[link]</a> ');
 ## Forum ##
-define('_forum_thread_link', '[global] [sticky] <a href="?action=showthread&amp;kid=[kid]&amp;id=[id]">[topic]</a> [closed] <a href="?action=showthread&amp;id=[id]&amp;page=[page]#p[lpid]">&raquo;</a>');
 define('_forum_dowhat_add_thread', 'addthread&amp;kid=[kid]');
 define('_forum_add_lastpost', '?action=showthread&amp;id=[tid]&amp;page=[page]#p[id]');
 define('_forum_dowhat_add_post', 'addpost&amp;kid=[kid]&amp;id=[id]');
