@@ -107,9 +107,7 @@ if(defined('_Forum')) {
             }
         } //end while
 
-        if($get['intern'] == 1) $katname =  show(_forum_katname_intern, array("katname" => stringParser::decode($get['name'])));
-        else $katname = stringParser::decode($get['name']);
-
+        $katname = $get['intern'] ? show(_forum_katname_intern, array("katname" => stringParser::decode($get['name']))) : stringParser::decode($get['name']);
         if(!empty($showt)) {
             $show .= show($dir."/kats", array("katname" => $katname, "showt" => $showt));
         }
@@ -120,7 +118,7 @@ if(defined('_Forum')) {
                                              "total_topics" => strval(cnt("{prefix_forumthreads}")), 
                                              "total_members" => strval(cnt("{prefix_users}","WHERE `banned` = 0 AND `level` >= 1")), 
                                              "newest_member" => autor($sql->fetch("SELECT `id` FROM `{prefix_users}` WHERE `level` >= 1 AND "
-                                                     . "`banned` = 0 ORDER BY `regdatum` DESC;",array(),"id"))));
+                                                    . "`banned` = 0 ORDER BY `regdatum` DESC;",array(),"id"))));
     
     $threads = show(_forum_cnt_threads, array("threads" => cnt("{prefix_forumthreads}")));
     $posts = show(_forum_cnt_posts, array("posts" => cnt("{prefix_forumposts}")+cnt("{prefix_forumthreads}")));
@@ -136,10 +134,7 @@ if(defined('_Forum')) {
         }
     } //end while
     
-    $top_posts = show($dir."/top_posts", array("head" => _forum_top_posts,
-                                               "show" => $show_top,
-                                               "nick" => _nick,
-                                               "posts" => _forum_posts));
+    $top_posts = show($dir."/top_posts", array("show" => $show_top));
 
     /* Wer ist online */
     $qry = $sql->select('SELECT `position`,`color` FROM `{prefix_positions}`;'); $team_groups = '';
