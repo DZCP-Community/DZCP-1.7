@@ -79,6 +79,7 @@ define('_admin_news_readed', 'Gelesen');
 define('_admin_news_refresh', 'Aktualisieren');
 
 //Forum
+define("_forum_stats_top5", 'Statistik und Top 5');
 define("_forum_who_is_online", 'Wer ist online?');
 define("_forum_last_post", 'Neuesten Beitrag anzeigen');
 define("_forum_online_info0", 'Es [t_is] <b>[users]</b> Besucher online: <b>[regs]</b> [t_regs] und <b>[gast]</b> [t_gast] (Basierend auf den Besuchern der letzten [timer] Minuten)');
