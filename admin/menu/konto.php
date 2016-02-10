@@ -40,9 +40,7 @@ switch ($do) {
         $show = show($dir."/form_clankasse", array("newhead" => _clankasse_edit_head,
                                                    "do" => "editkat&amp;id=".$_GET['id']."",
                                                    "kat" => stringParser::decode($get['kat']),
-                                                   "top" => _config_c_clankasse,
-                                                   "what" => _button_value_edit,
-                                                   "dlkat" => _description));
+                                                   "what" => _button_value_edit));
     break;
     case 'editkat':
         if(empty($_POST['kat'])) {
@@ -99,13 +97,6 @@ switch ($do) {
                                                          "delete" => $delete));
         }
 
-        $show = show($dir."/clankasse", array("head" => _config_clankasse_head,
-                                              "edit" => _editicon_blank,
-                                              "bez" => _description,
-                                              "top" => _config_c_clankasse,
-                                              "add" => _clankasse_new_head,
-                                              "delete" => _deleteicon_blank,
-                                              "show" => $show,
-                                              "konto" => $konto));
+        $show = show($dir."/clankasse", array("show" => $show,"konto" => $konto));
     break;
 }

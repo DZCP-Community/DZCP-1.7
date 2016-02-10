@@ -28,9 +28,8 @@
 [show]
 <tr>
   <td class="contentBottom" colspan="4">
-    <form action="" method="get" onsubmit="return(DZCP.submitButton())">
-      <input type="hidden" name="admin" value="protocol" />
-      <input type="hidden" name="do" value="delete" />
+    <form action="?admin=protocol" method="post">
+      <input type="hidden" name="run" value="delete" />
       <input id="contentSubmit" type="submit" class="submit" value="[lang_button_title_del_protocol]" />
     </form>
   </td>

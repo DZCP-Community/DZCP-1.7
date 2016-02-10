@@ -8,14 +8,39 @@
         <tr>
             <th class="forumTH" colspan="2">&nbsp;[lang_forum_thread]&nbsp;</th>
             <th class="forumTH" width="120">&nbsp;[lang_autor]&nbsp;</th>
-            <th class="forumTH" width="40">&nbsp;Replies&nbsp;</th>
+            <th class="forumTH" width="40">&nbsp;[lang_replies]&nbsp;</th>
             <th class="forumTH" width="40">&nbsp;[lang_hits]&nbsp;</th>
             <th class="forumTH" width="175">&nbsp;[lang_forum_lpost]&nbsp;</th>
         </tr>          
         [threads]
         <tr align="center">
             <td class="forumTD" colspan="6">
-                <form method="post" action="./viewforum.php?show=style&amp;style=578&amp;f=3"><span class="gensmall">Display topics from previous:</span>&nbsp;<select name="st" id="st"><option value="0" selected="selected">All Topics</option><option value="1">1 day</option><option value="7">7 days</option><option value="14">2 weeks</option><option value="30">1 month</option><option value="90">3 months</option><option value="180">6 months</option><option value="365">1 year</option></select>&nbsp;<span class="gensmall">Sort by</span> <select name="sk" id="sk"><option value="a">Author</option><option value="t" selected="selected">Post time</option><option value="r">Replies</option><option value="s">Subject</option><option value="v">Views</option></select> <select name="sd" id="sd"><option value="a">Ascending</option><option value="d" selected="selected">Descending</option></select>&nbsp;<input class="btnlite" type="submit" name="sort" value="Go"></form>
+                <form method="post" action="?action=show&kid=[kid]&id=[id]">
+                    <span class="gensmall">Themen der letzten Zeit anzeigen:</span>&nbsp;
+                    <select name="time" id="st">
+                        <option value="0" selected="selected">Alle Themen</option>
+                        <option value="1">1 Tag</option>
+                        <option value="7">7 Tage</option>
+                        <option value="14">2 Wochen</option>
+                        <option value="30">1 Monat</option>
+                        <option value="90">3 Monate</option>
+                        <option value="180">6 Monate</option>
+                        <option value="365">1 Jahr</option>
+                    </select>&nbsp;
+                    <span class="gensmall">Sortiere nach</span> 
+                    <select name="sortby" id="sk">
+                        <option value="autor">[lang_autor]</option>
+                        <option value="time" selected="selected">Erstellungsdatum</option>
+                        <option value="posts">[lang_replies]</option>
+                        <option value="bcc">Betreff</option>
+                        <option value="hits">[lang_hits]</option>
+                    </select> 
+                    <select name="orderby" id="sd">
+                        <option value="a">Absteigend</option>
+                        <option value="d" selected="selected">Aufsteigend</option>
+                    </select>&nbsp;
+                    <input class="submit" id="contentSubmit" type="submit" name="sort" value="Go">
+                </form>
             </td>
         </tr>
     </tbody>

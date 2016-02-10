@@ -51,7 +51,7 @@ define('steam_avatar_refresh', (60*60)); // Wann soll das Avatarbild aktualisier
 define('steam_refresh', (8*60*60)); // Wann soll der Steam Status in der Userliste aktualisiert werden.
 define('steam_api_refresh', 30); // Wann sollen die Daten der Steam API aktualisiert werden * Online / Offline / In-Game Status
 define('steam_infos_cache', true); //Sollen die Profil Daten zwischengespeichert werden, * Cache Use
-define('steam_only_proxy', false); //Sollen soll nur der Steam Proxy Server verwendet werden.
+define('steam_only_proxy', false); //Sollen nur der Steam Proxy Server verwendet werden.
 
 define('server_show_empty_players', false); //Alle Spieler anzeigen deren Namen in der Spielerliste auf Grund von Sonderziechen nicht angezeigt werden können.
 
@@ -68,8 +68,7 @@ define('captcha_sox_binary_path', 'sox');
 
 define('count_clicks_expires', (48*60*60)); // Wie Lange die IPs fur den Click-Counter gespeichert bleiben.
 
-define('php_code_enabled', true); // Erlaubt es auf "Adminbereich: Seiten erstellen/verwalten", PHP Code zu verwenden. * Nur Aktivieren wenn es gebracht wird! *
-
+define('php_code_enabled', false); // Erlaubt es auf "Adminbereich: Seiten erstellen/verwalten", PHP Code zu verwenden. * Nur Aktivieren wenn es gebracht wird! *
 
 //
 //
@@ -90,7 +89,7 @@ define('sessions_memcache_host', '127.0.0.1'); //Server Adresse fur das Sessions
 define('sessions_memcache_port', 11311); //Server Port fur das Sessions Backend: memcache
 
 define('sessions_sql_sethost', false); //Verwende eine externe Datenbank fur die Sessions
-define('sessions_sql_driver', 'mysql'); //Welcher Datenbank Driver sokk verwendet werden
+define('sessions_sql_driver', 'mysql'); //Welcher Datenbank Treiber soll verwendet werden
 define('sessions_sql_host', 'localhost'); //SQL Host
 define('sessions_sql_user', 'user'); //SQL Username
 define('sessions_sql_pass', 'xxxx'); //SQL Passwort

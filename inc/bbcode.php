@@ -105,9 +105,9 @@ javascript::set('AnchorMove','');
 javascript::set('debug',(view_error_reporting && view_javascript_debug));
 
 //-> Global
-$action = isset($_GET['action']) ? trim($_GET['action']) : (isset($_POST['action']) ? trim($_POST['action']) : 'default');
+$action = isset($_GET['action']) ? secure_global_imput($_GET['action']) : (isset($_POST['action']) ? secure_global_imput($_POST['action']) : 'default');
 $page = isset($_GET['page']) ? intval(trim($_GET['page'])) : (isset($_POST['page']) ? intval(trim($_POST['page'])) : 1);
-$do = isset($_GET['do']) ? trim($_GET['do']) : (isset($_POST['do']) ? trim($_POST['do']) : '');
+$do = isset($_GET['do']) ? secure_global_imput($_GET['do']) : (isset($_POST['do']) ? secure_global_imput($_POST['do']) : '');
 $index = ''; $show = ''; $color = 0;
 
 //-> Neue Kernel Funktionen einbinden, sofern vorhanden
@@ -1166,6 +1166,9 @@ function isBanned($userid_set=0,$logout=true) {
 function permission($check,$uid=0) {
     global $sql,$userid,$chkMe;
     if (!$uid) { $uid = $userid; }
+    if(rootAdmin($uid)) 
+        return true;
+    
     if($chkMe == 4) {
         return true;
     } else {
@@ -2170,6 +2173,10 @@ function admin_perms($userid) {
         return false;
     }
 
+    if(rootAdmin($userid)) {
+        return true;
+    }
+    
     // no need for these admin areas & check user permission
     $e = array('gb', 'shoutbox', 'editusers', 'votes', 'contact', 'joinus', 'intnews', 'forum', 
     'gs_showpw','dlintern','intforum','galleryintern');
@@ -2350,9 +2357,10 @@ function getBoardPermissions($checkID = 0, $pos = 0) {
 }
 
 //-> schreibe in dei IPCheck Tabelle
-function setIpcheck($what = '') {
+function setIpcheck($what = '',$time = true) {
     global $sql;
-    $sql->insert("INSERT INTO `{prefix_ipcheck}` SET `ip` = ?, `user_id` = ?, `what` = ?, `time` = ?;",array(visitorIp(),intval(userid()),$what,time()));
+    $sql->insert("INSERT INTO `{prefix_ipcheck}` SET `ip` = ?, `user_id` = ?, `what` = ?, `time` = ?, `created` = ?;",
+            array(visitorIp(),intval(userid()),$what,($time ? time() : 0),time()));
 }
 
 //-> Preuft ob alle clicks nur einmal gezahlt werden *gast/user

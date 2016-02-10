@@ -14,6 +14,12 @@ if(defined('_Forum')) {
     if($checks['intern'] == 1 && (!permission("intforum") && !fintern($checks['id']))) {
         $index = error(_error_no_access, 1);
     } else {
+        //Filter
+        if(true) {
+            
+        }
+        
+        
         if(empty($_POST['suche'])) {
             $qry = $sql->select("SELECT * FROM `{prefix_forumthreads}` "
                     . "WHERE `kid` = ? OR `global` = 1 "
@@ -97,10 +103,9 @@ if(defined('_Forum')) {
         }
 
         $gets = $sql->fetch("SELECT `id`,`kattopic` FROM `{prefix_forumsubkats}` WHERE `id` = ?;",array($id));
-        $search = show($dir."/forum_skat_search", array("head_search" => _forum_head_skat_search,
-                                                        "id" => $id,
+        $search = show($dir."/forum_skat_search", array("id" => $id,
                                                         "kid" => $_GET['kid'],
-                                                        "suchwort" => isset($_POST['suche']) ? stringParser::decode($_POST['suche']) : ''));
+                                                        "suchwort" => isset($_POST['suche']) ? $_POST['suche'] : ''));
 
         $nav = nav($entrys,settings::get('m_fthreads'),"?action=show&amp;id=".$id."");
 

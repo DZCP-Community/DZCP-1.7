@@ -378,7 +378,7 @@ if(defined('_Forum')) {
         $sql->delete("DELETE FROM `{prefix_votes}` WHERE id = '".$gett['vote']."'");
         $sql->delete("DELETE FROM `{prefix_vote_results}` WHERE vid = '".$gett['vote']."'");
 
-        setIpcheck("vid_".$gett['vote']);
+        setIpcheck("vid_".$gett['vote'],false);
         $vid = "";
         }
 

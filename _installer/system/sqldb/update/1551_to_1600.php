@@ -57,7 +57,10 @@ function install_155x_1600_update()
     db("ALTER TABLE `".dba::get('users')."` ADD `psn` VARCHAR( 100 ) NOT NULL DEFAULT '' AFTER `xbox`;",false,false,true);
     db("ALTER TABLE `".dba::get('users')."` ADD `origin` VARCHAR( 100 ) NOT NULL DEFAULT '' AFTER `psn`;",false,false,true);
     db("ALTER TABLE `".dba::get('users')."` ADD `bnet` VARCHAR( 100 ) NOT NULL DEFAULT '' AFTER `origin`;",false,false,true);
-
+    db("ALTER TABLE `".dba::get('users')."` ADD `bnet` VARCHAR( 100 ) NOT NULL DEFAULT '' AFTER `origin`;",false,false,true);
+    
+    //ALTER TABLE `".dba::get('users')." ".$db['ipcheck']."` ADD `created` INT(11) NOT NULL DEFAULT '0' AFTER `time`;
+    
     // Setze fehlende Indexes * MySQL Optimierung
     db("ALTER TABLE `".dba::get('squaduser')."` ADD INDEX ( `user` ) ;",false,false,true);
 

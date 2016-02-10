@@ -8,7 +8,7 @@ if(defined('_Ck')) {
     if(!$chkMe || $chkMe < 2)
         $index = error(_error_wrong_permissions, 1);
     else {
-        $get_settings = settings::get(array('k_inhaber','k_nr','k_blz','k_bank','k_iban','k_bic','k_waehrung','k_vwz'));
+        $get_settings = settings::get_array(array('k_inhaber','k_nr','k_blz','k_bank','k_iban','k_bic','k_waehrung','k_vwz'));
         $entrys = cnt("{prefix_clankasse}");
         $qry = $sql->select("SELECT `id`,`pm`,`betrag`,`member`,`transaktion`,`datum` FROM `{prefix_clankasse}`
                   ".orderby_sql(array("betrag","transaktion","datum","member"), 'ORDER BY `datum` DESC').

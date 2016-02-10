@@ -9,7 +9,7 @@ $where = $where.': '._admin_pos;
 
 switch ($do) {
     case 'edit':
-        $qry = $sql->select("SELECT `pid`,`position` FROM `{prefix_positions}` ORDER BY pid DESC;"); $positions = '';
+        $qry = $sql->select("SELECT `pid`,`position` FROM `{prefix_positions}` ORDER BY `pid` DESC;"); $positions = '';
         foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => ($get['pid']+1),
                                                     "what" => _nach.' '.stringParser::decode($get['position']),
@@ -17,7 +17,7 @@ switch ($do) {
         }
 
         $id = intval($_GET['id']);
-        $get = $sql->fetch("SELECT `position`,`color` FROM `{prefix_positions}` WHERE `id` = ".$id.";");
+        $get = $sql->fetch("SELECT `position`,`color` FROM `{prefix_positions}` WHERE `id` = ?;",array($id));
         $show = show($dir."/form_pos", array("newhead" => _pos_edit_head,
                                              "do" => "editpos&amp;id=".$id."",
                                              "kat" => stringParser::decode($get['position']),
@@ -32,11 +32,12 @@ switch ($do) {
         if(empty($_POST['kat'])) {
             $show = error(_pos_empty_kat,1);
         } else {
-            $posid = intval($_POST['pos']); $id = intval($_GET['id']);
-            $pid = ($_POST['pos'] == "lazy" ? "" : ",`pid` = ".$posid);
-            $sign = ($_POST['pos'] == "1" || $_POST['pos'] == "2" ? ">= " : "> ");
-            $sql->update("UPDATE `{prefix_positions}` SET `pid` = (pid+1) WHERE `pid` ".$sign." ".$posid.";");
-            $sql->update("UPDATE `{prefix_positions}` SET `position` = '".stringParser::encode($_POST['kat'])."' ".$pid.", `color` = '".stringParser::encode($_POST['color'])."' WHERE `id` = ".$id.";");
+            $posid = intval($_POST['pos']);
+            $sql->update("UPDATE `{prefix_positions}` SET `pid` = (pid+1) WHERE `pid` ".($_POST['pos'] == "1" || $_POST['pos'] == "2" ? ">= " : "> ")
+                    ." ?;",array(intval($_POST['pos'])));
+            $sql->update("UPDATE `{prefix_positions}` SET `position` = ? ".
+                    ($_POST['pos'] == "lazy" ? "" : ",`pid` = ".intval($_POST['pos'])).", `color` = ? WHERE `id` = ?;",
+                    array(stringParser::encode($_POST['kat']),stringParser::encode($_POST['color']),intval($_GET['id'])));
 
             // Permissions Update
             if(empty($_POST['perm'])) {
@@ -52,12 +53,12 @@ switch ($do) {
             }
 
             // Check group Permissions is exists
-            if(!$sql->rows('SELECT `id` FROM `{prefix_permissions}` WHERE `pos` = '.$id.' LIMIT 1;')) {
-                $sql->insert("INSERT INTO `{prefix_permissions}` SET `pos` = ".$id.";");
+            if(!$sql->rows('SELECT `id` FROM `{prefix_permissions}` WHERE `pos` = ? LIMIT 1;',array($id))) {
+                $sql->insert("INSERT INTO `{prefix_permissions}` SET `pos` = ?;",array($id));
             }
 
             // Update Permissions
-            $sql->update('UPDATE `{prefix_permissions}` SET '.substr($sql_update, 0, -2).' WHERE `pos` = '.$id.' LIMIT 1;');
+            $sql->update('UPDATE `{prefix_permissions}` SET '.substr($sql_update, 0, -2).' WHERE `pos` = ? LIMIT 1;',array($id));
 
             // Internal Boardpermissions Update
             if(empty($_POST['board'])) {
@@ -65,18 +66,18 @@ switch ($do) {
             }
 
             // Cleanup Boardpermissions
-            $qry = $sql->select('SELECT `id`,`forum` FROM `{prefix_f_access}` WHERE `pos` = '.$id.';');
+            $qry = $sql->select('SELECT `id`,`forum` FROM `{prefix_f_access}` WHERE `pos` = ?;',array($id));
             foreach($qry as $get) {
                 if(!array_var_exists($get['forum'],$_POST['board'])) {
-                    $sql->delete('DELETE FROM `{prefix_f_access}` WHERE `id` = '.$get['id'].';'); 
+                    $sql->delete('DELETE FROM `{prefix_f_access}` WHERE `id` = ?;',array($get['id'])); 
                 }
             }
 
             //Add new Boardpermissions
             if(count($_POST['board']) >= 1) {
                 foreach($_POST['board'] AS $boardpem) { 
-                    if(!$sql->rows("SELECT `id` FROM `{prefix_f_access}` WHERE `pos` = ".$id." AND `forum` = '".$boardpem."';")) {
-                        $sql->insert("INSERT INTO `{prefix_f_access}` SET `pos` = ".$id.", `forum` = '".$boardpem."';"); 
+                    if(!$sql->rows("SELECT `id` FROM `{prefix_f_access}` WHERE `pos` = ? AND `forum` = ?;",array($id,$boardpem))) {
+                        $sql->insert("INSERT INTO `{prefix_f_access}` SET `pos` = ?, `forum` = ?;",array($id,$boardpem)); 
                     }
                 }
             }
@@ -85,12 +86,15 @@ switch ($do) {
         }
     break;
     case 'delete':
-        $sql->delete("DELETE FROM `{prefix_positions}` WHERE `id` = ".intval($_GET['id']).";");
-        $sql->delete("DELETE FROM `{prefix_permissions}` WHERE `pos` = ".intval($_GET['id']).";");
-        $show = info(_pos_admin_deleted, "?admin=positions");
+        $get = fetch("SELECT `id` FROM `{prefix_positions}` WHERE `id` = ?;",array(intval($_GET['id'])));
+        if($sql->rowCount()) {
+            $sql->delete("DELETE FROM `{prefix_positions}` WHERE `id` = ?;",array($get['id']));
+            $sql->delete("DELETE FROM `{prefix_permissions}` WHERE `pos` = ?;",array($get['id']));
+            $show = info(_pos_admin_deleted, "?admin=positions");
+        }
     break;
     case 'new':
-        $qry = $sql->select("SELECT `pid`,`position` FROM `{prefix_positions}` ORDER BY pid DESC;"); $positions = '';
+        $qry = $sql->select("SELECT `pid`,`position` FROM `{prefix_positions}` ORDER BY `pid` DESC;"); $positions = '';
         foreach($qry as $get) {
             $positions .= show(_select_field, array("value" => ($get['pid']+1),
                                                     "what" => _nach.' '.stringParser::decode($get['position']),
@@ -113,9 +117,11 @@ switch ($do) {
         if(empty($_POST['kat'])) {
             $show = error(_pos_empty_kat,1);
         } else {
-            $sign = ($_POST['pos'] == "1" || $_POST['pos'] == "2" ? ">= " : "> ");
-            $sql->update("UPDATE `{prefix_positions}` SET `pid` = (pid+1) WHERE pid ".$sign." '".intval($_POST['pos'])."';");
-            $sql->insert("INSERT INTO `{prefix_positions}` SET `pid` = '".intval($_POST['pos'])."', `position` = '".stringParser::encode($_POST['kat'])."', `color` = '".stringParser::encode($_POST['color'])."';");
+            $sql->update("UPDATE `{prefix_positions}` SET `pid` = (pid+1) WHERE `pid`;".
+                    ($_POST['pos'] == "1" || $_POST['pos'] == "2" ? ">= " : "> ")." ?;",
+                    array(intval($_POST['pos'])));
+            $sql->insert("INSERT INTO `{prefix_positions}` SET `pid` = ?, `position` = ?, `color` = ?;",
+                array(intval($_POST['pos']),stringParser::encode($_POST['kat']),stringParser::encode($_POST['color'])));
             
             $posID = $sql->lastInsertId();
             $qry = $sql->show("SHOW FIELDS FROM `{prefix_permissions}`;"); $sql_update = '';
@@ -127,7 +133,7 @@ switch ($do) {
             }
             
             // Add Permissions
-            $sql->insert('INSERT INTO `{prefix_permissions}` SET '.$sql_update.'`pos` = '.$posID.';');
+            $sql->insert('INSERT INTO `{prefix_permissions}` SET '.$sql_update.'`pos` = ?;',array($posID));
 
             // Internal Boardpermissions Update
             if(empty($_POST['board'])) {
@@ -137,17 +143,17 @@ switch ($do) {
             //Add new Boardpermissions
             if(count($_POST['board']) >= 1) {
                 foreach($_POST['board'] AS $boardpem) { 
-                    if(!$sql->rows("SELECT `id` FROM `{prefix_f_access}` WHERE `pos` = ".$posID." AND `forum` = '".$boardpem."';",true)) {
-                        $sql->insert("INSERT INTO `{prefix_f_access}` SET `pos` = ".$posID.", `forum` = '".$boardpem."';"); 
+                    if(!$sql->rows("SELECT `id` FROM `{prefix_f_access}` WHERE `pos` = ? AND `forum` = ?;",array($posID,$boardpem))) {
+                        $sql->insert("INSERT INTO `{prefix_f_access}` SET `pos` = ?, `forum` = ?;",array($posID,$boardpem)); 
                     }
                 }
             }
 
-          $show = info(_pos_admin_added, "?admin=positions");
+            $show = info(_pos_admin_added, "?admin=positions");
         }
     break;
     default:
-        $qry = $sql->select("SELECT `id`,`position` FROM `{prefix_positions}` ORDER BY pid DESC;"); $show_pos = '';
+        $qry = $sql->select("SELECT `id`,`position` FROM `{prefix_positions}` ORDER BY `pid` DESC;"); $show_pos = '';
         foreach($qry as $get) {
             $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                           "action" => "admin=positions&amp;do=edit",
@@ -160,18 +166,16 @@ switch ($do) {
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show_pos .= show($dir."/positions_show", array("edit" => $edit,
-                                                      "name" => stringParser::decode($get['position']),
-                                                      "class" => $class,
-                                                      "delete" => $delete));
+                                                            "name" => stringParser::decode($get['position']),
+                                                            "class" => $class,
+                                                            "delete" => $delete));
         }
 
         if(empty($show_pos)) {
             $show_pos = show(_no_entrys_yet, array("colspan" => "3"));
         }
 
-        $show = show($dir."/positions", array("show" => $show_pos,
-                                              "edit" => _editicon_blank,
-                                              "delete" => _deleteicon_blank));
+        $show = show($dir."/positions", array("show" => $show_pos));
         unset($show_pos,$qry,$get);
     break;
 }

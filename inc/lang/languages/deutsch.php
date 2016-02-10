@@ -69,6 +69,7 @@ define("_notification_warning", 'Achtung');
 define("_notification_custom", 'Benutzerdefiniert');
 define("_color", 'Farbe');
 define("_description", 'Bezeichnung');
+define("_replies", 'Antworten');
 define('_no_news_yet', '<tr>
   <td class="contentMainFirst" colspan="[colspan]" align="center">Keine neuen News vorhanden</td>
 </tr>');
@@ -77,9 +78,10 @@ define('_no_entrys_found', '<tr>
 </tr>');
 define('_admin_news_readed', 'Gelesen');
 define('_admin_news_refresh', 'Aktualisieren');
+define('_gallery_no_pictures', 'Keine Bilder hinzugef&uuml;gt');
 
 //Forum
-define("_forum_stats_top5", 'Statistik und Top 5');
+define("_forum_stats_top5", 'Statistik und Top 5 Posters');
 define("_forum_who_is_online", 'Wer ist online?');
 define("_forum_last_post", 'Neuesten Beitrag anzeigen');
 define("_forum_online_info0", 'Es [t_is] <b>[users]</b> Besucher online: <b>[regs]</b> [t_regs] und <b>[gast]</b> [t_gast] (Basierend auf den Besuchern der letzten [timer] Minuten)');
@@ -2276,7 +2278,7 @@ define('_link', 'Link');
 define('_linkname', 'Linkname');
 define('_url', 'URL');
 define('_admin', 'Admin');
-define('_hits', 'Hits');
+define('_hits', 'Zugriffe');
 define('_map', 'Map');
 define('_game', 'Game');
 define('_autor', 'Autor');

@@ -91,7 +91,8 @@ final class database {
     }
     
     public function rows($qry, array $params = array()) {
-        if (($type = $this->getQueryType($qry)) !== "select") {
+        if (($type = $this->getQueryType($qry)) !== "select" && 
+                ($type = $this->getQueryType($qry)) !== "show") {
             DebugConsole::sql_error_Exception("Incorrect Select Query",$qry,$params);
             DebugConsole::insert_error('database::rows','Incorrect Select Query!');
             DebugConsole::insert_sql_info('database::rows',$qry,$params);

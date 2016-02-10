@@ -69,6 +69,7 @@ define("_notification_warning", 'Warning');
 define("_notification_custom", 'Custom');
 define("_color", 'Color');
 define("_description", 'Description');
+define("_replies", 'Replies');
 define('_no_news_yet', '<tr>
   <td class="contentMainFirst" colspan="[colspan]" align="center">No new news available</td>
 </tr>');
@@ -77,9 +78,10 @@ define('_no_entrys_found', '<tr>
 </tr>');
 define('_admin_news_readed', 'Readed');
 define('_admin_news_refresh', 'Refresh');
+define('_gallery_no_pictures', 'No Pictures Added');
 
 //Forum
-define("_forum_stats_top5", 'Statistics and Top 5');
+define("_forum_stats_top5", 'Statistics and Top 5 Posters');
 define('_forum_who_is_online', 'Who is online?');
 define('_forum_last_post', 'View the latest post');
 define('_forum_online_info0', 'In total there are <b>[users]</b> users online: <b>[regs]</b> registered and <b>[gast]</b> guests (based on users active over the past [timer] minutes)');

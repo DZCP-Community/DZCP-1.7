@@ -22,7 +22,7 @@ if(defined('_Forum')) {
 
         $sql->delete("DELETE FROM `{prefix_vote_results}` WHERE vid = '".$getv['vote']."'");
 
-        setIpcheck("vid_".$getv['vote']);
+        setIpcheck("vid_".$getv['vote'],false);
         }
             $sql->delete("DELETE FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['id'])."'");
 

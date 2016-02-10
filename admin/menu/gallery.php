@@ -76,9 +76,6 @@ switch ($do) {
     case 'edit':
         $get = $sql->fetch("SELECT * FROM `{prefix_gallery}` WHERE `id` = ?;",array(intval($_GET['id'])));
         $show = show($dir."/form_gallery_edit", array("head" => _gallery_admin_edit,
-                                                      "gallery" => _gallery_gallery,
-                                                      "intern" => _internal,
-                                                      "beschr" => _beschreibung,
                                                       "value" => _button_value_edit,
                                                       "id" => $get['id'],
                                                       "e_gal" => stringParser::decode($get['kat']),
@@ -98,9 +95,7 @@ switch ($do) {
             $option .= "<option value=\"".$i."\">".$i."</option>";
         }
 
-        $show = show($dir."/form_gallery_new", array("head" => _gallery_admin_edit,
-                                                     "count" => _gallery_count_new,
-                                                     "gallery" => _subgallery_head,
+        $show = show($dir."/form_gallery_new", array("head" => _gallery_admin_head,
                                                      "value" => _error_fwd,
                                                      "gal" => stringParser::decode($get['kat']),
                                                      "id" => $get['id'],
@@ -152,13 +147,7 @@ switch ($do) {
             $option .= "<option value=\"".$i."\">".$i."</option>";
         }
 
-        $show = show($dir."/form_gallery", array("head" => _gallery_admin_head,
-                                                 "gallery" => _gallery_gallery,
-                                                 "intern" => _internal,
-                                                 "beschr" => _beschreibung,
-                                                 "value" => _error_fwd,
-                                                 "count" => _gallery_count,
-                                                 "option" => $option));
+        $show = show($dir."/form_gallery", array("option" => $option));
     break;
     default:
         $qry = $sql->select("SELECT * FROM `{prefix_gallery}` ORDER BY id DESC;");
@@ -196,8 +185,6 @@ switch ($do) {
         if(empty($show))
             $show = '<tr><td class="contentMainSecond">'._no_entrys.'</td></tr>';
 
-        $show = show($dir."/gallery",array("show" => $show,
-                                           "head" => _gallery_head,
-                                           "add" => _gallery_show_admin));
+        $show = show($dir."/gallery",array("show" => $show));
     break;
 }

@@ -25,11 +25,11 @@ bbcode::use_glossar(false);
 if (!isset($_SESSION['id']) || empty($_SESSION['id']) || !admin_perms($_SESSION['id'])) {
     $index = error(_error_wrong_permissions, 1);
 } else {
-    if (isset($_GET['admin']) && file_exists(basePath . '/admin/menu/' . strtolower($_GET['admin']) . '.php') &&
-            file_exists(basePath . '/admin/menu/' . strtolower($_GET['admin']) . '.xml')) {
+    if (isset($_GET['admin']) && file_exists(basePath . '/admin/menu/' . secure_global_imput($_GET['admin']).'.php') &&
+            file_exists(basePath . '/admin/menu/'.secure_global_imput($_GET['admin']).'.xml')) {
         $permission = false;
         define('_adminMenu', true);
-        $xml = simplexml_load_file(basePath . '/admin/menu/' . strtolower($_GET['admin']) . '.xml');
+        $xml = simplexml_load_file(basePath . '/admin/menu/'.secure_global_imput($_GET['admin']).'.xml');
         $rights = (string) $xml->Rights;
         $oa = (int) $xml->Only_Admin;
         $ora = (int) $xml->Only_Root;
@@ -41,7 +41,7 @@ if (!isset($_SESSION['id']) || empty($_SESSION['id']) || !admin_perms($_SESSION[
             $permission = true;
 
         if ($permission)
-            include(basePath . '/admin/menu/' . strtolower($_GET['admin']) . '.php');
+            include(basePath . '/admin/menu/'.secure_global_imput($_GET['admin']).'.php');
         else
             $show = error(_error_wrong_permissions, 1);
     }

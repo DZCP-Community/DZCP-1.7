@@ -31,6 +31,13 @@ function secure($string) {
     return str_replace(">","&#62;",$string);
 }
 
+function secure_global_imput($string) {
+    return str_ireplace(
+            array('=','?','\'','"','','<','>',
+                '(',')',';',',','.','+'), 
+            '', strtolower(trim($string)));
+}
+
 // set a backslash before a quote in $_POST, $_GET and $_COOKIE var, if magic_quotes_gpc is disabled in php.ini
 if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
     add_stripslashes($_REQUEST);

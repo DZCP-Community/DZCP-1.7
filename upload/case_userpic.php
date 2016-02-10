@@ -9,33 +9,45 @@ if(defined('_Upload')) {
         switch($do) {
             case 'upload':
                 $tmpname = $_FILES['file']['tmp_name'];
-                $name = $_FILES['file']['name'];
-                $type = $_FILES['file']['type'];
-                $size = $_FILES['file']['size'];
-
-                $endung = explode(".", $_FILES['file']['name']);
-                $endung = strtolower($endung[count($endung)-1]);
-
-                if(!$tmpname)
+                if(!$tmpname) {
                     $index = error(_upload_no_data, 1);
-                else if($size > settings::get('upicsize')."000")
-                    $index = error(_upload_wrong_size, 1);
-                else {
-                    foreach($picformat as $tmpendung) {
-                        if(file_exists(basePath."/inc/images/uploads/userpics/".$userid.".".$tmpendung))
-                            @unlink(basePath."/inc/images/uploads/userpics/".$userid.".".$tmpendung);
-                    }
-
-                    if(move_uploaded_file($tmpname, basePath."/inc/images/uploads/userpics/".$userid.".".strtolower($endung)))
-                        $index = info(_info_upload_success, "../user/?action=editprofile");
-                    else
+                } else {
+                    $file_info = getimagesize($tmpname);
+                    if(!$file_info) {
                         $index = error(_upload_error, 1);
+                    } else {
+                        $file_info['width']  = $file_info[0];
+                        $file_info['height'] = $file_info[1];
+                        $file_info['mime']   = $file_info[2];
+                        unset($file_info[3],$file_info['bits'],$file_info['channels'],
+                            $file_info[0],$file_info[1],$file_info[2]);
+
+                        if(!array_key_exists($file_info['mime'], $extensions)) {
+                           $error = show(_upload_usergallery_info, array('userpicsize' => config('upicsize')));
+                           $index = error($error, 1);
+                        } else {
+                            if($_FILES['file']['size'] > (config('upicsize')*1000)) {
+                                $index = error(_upload_wrong_size, 1);
+                            } else {
+                                foreach($picformat as $tmpendung) {
+                                    if(file_exists(basePath."/inc/images/uploads/userpics/".$userid.".".$tmpendung))
+                                        unlink(basePath."/inc/images/uploads/userpics/".$userid.".".$tmpendung);
+                                }
+                                
+                                if(!move_uploaded_file($tmpname, basePath."/inc/images/uploads/userpics/".$userid.".".$extensions[$file_info['mime']])) {
+                                    $index = error(_upload_error, 1);
+                                } else {
+                                    $index = info(_info_upload_success, "../user/?action=editprofile");
+                                }
+                            }
+                        }
+                    }
                 }
             break;
             case 'deletepic':
                 foreach($picformat as $tmpendung) {
                     if(file_exists(basePath."/inc/images/uploads/userpics/".$userid.".".$tmpendung))
-                        @unlink(basePath."/inc/images/uploads/userpics/".$userid.".".$tmpendung);
+                        unlink(basePath."/inc/images/uploads/userpics/".$userid.".".$tmpendung);
                 }
 
                 $index = info(_delete_pic_successful, "../user/?action=editprofile");
