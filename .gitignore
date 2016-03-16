@@ -11,3 +11,4 @@ nbproject/private/private.properties
 /nbproject/private/
 inc/cryptkey.php
 inc/_cache_/admin_dzcp_news.dat
+*.bin
