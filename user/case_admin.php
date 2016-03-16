@@ -154,11 +154,11 @@ if(defined('_UserMenu')) {
             $index = info(_admin_user_edited, "?action=user&amp;id=" . $userid . "");
         } elseif ($do == "delete") {
             $index = show(_user_delete_verify, array("user" => autor(intval($_GET['id'])), "id" => $_GET['id']));
+            $delUID = intval($_GET['id']);
             if ($_GET['verify'] == "yes") {
                 if (data("level", intval($_GET['id'])) == 4 || data("level", intval($_GET['id'])) == 3 || rootAdmin($delUID))
                     $index = error(_user_cant_delete_admin, 2);
                 else {
-                    $delUID = intval($_GET['id']);
                     if($delUID >= 1) {
                         setIpcheck("deluser(" . $userid . "_" . $delUID . ")");
                         $sql->update("UPDATE `{prefix_forumposts}` SET `reg` = 0 WHERE `reg` = ?;",array($delUID));
