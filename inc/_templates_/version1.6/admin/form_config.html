@@ -137,6 +137,17 @@
         </td>
       </tr>
       <tr>
+        <td class="contentMainTop"><span class="fontBold">[lang_akl]:</span></td>
+        <td class="contentMainFirst info" align="center">
+          <select name="akl" class="dropdown">
+            <option value="0">[lang_off]</option>
+            <option value="1" [sel_akl]>[lang_on]</option>
+            <option value="2" [sel_akl_ad]>[lang_akl_only_admin]</option>
+          </select>
+          <br />[lang_akl_info]
+        </td>
+      </tr>
+      <tr>
         <td class="contentMainTop"><span class="fontBold">[lang_config_double_post]:</span></td>
         <td class="contentMainFirst info" align="center">
           <select name="double_post" class="dropdown">
@@ -145,7 +156,7 @@
           </select>
         </td>
       </tr>
-            <tr>
+      <tr>
         <td class="contentMainTop"><span class="fontBold">[lang_config_fotum_vote]:</span></td>
         <td class="contentMainFirst info" align="center">
           <select name="forum_vote" class="dropdown">
@@ -419,6 +430,23 @@
       <tr>
         <td class="contentMainFirst info" align="center" colspan="2">
           <textarea id="eml_pwd" name="eml_pwd" cols="0" rows="0" class="editorStyleWord" style="width:98%">[c_eml_pwd]</textarea>
+        </td>
+      </tr>
+      <tr><td height="20">&nbsp;</td></tr>
+      <tr>
+        <td class="contentMainTop" style="width:180px"><span class="fontBold">[lang_admin_akl_regist_subj]:</span></td>
+        <td class="contentMainFirst info" align="center">
+          <input type="text" name="eml_akl_regist_subj" value="[c_eml_akl_regist_subj]" class="inputField_dis"
+          onfocus="this.className='inputField_en';"
+          onblur="this.className='inputField_dis';" />
+        </td>
+      </tr>
+      <tr>
+        <td class="contentMainTop" colspan="2" align="center"><span class="fontBold">[lang_admin_akl_regist]</span></td>
+      </tr>
+      <tr>
+        <td class="contentMainFirst info" align="center" colspan="2">
+          <textarea id="eml_akl_register" name="eml_akl_register" cols="0" rows="0" class="editorStyleWord" style="width:98%">[c_eml_akl_register]</textarea>
         </td>
       </tr>
       <tr><td height="20">&nbsp;</td></tr>

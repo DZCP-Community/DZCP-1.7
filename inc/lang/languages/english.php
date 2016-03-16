@@ -5,6 +5,38 @@
  */
 
 ## ADDED / REDEFINED FOR 1.7.0
+define('_config_activate_user', 'User aktivieren');
+define('_profil_admin_locked', 'Account ist nicht aktiviert');
+define('_profil_locked', 'Der Account ist noch nicht aktiviert, <a href="?index=user&amp;action=akl&do=send" target="_self">&lt; Aktivierungs-Mail senden &gt;</a>');
+define('_profil_closed', 'Der Account ist gesperrt');
+define('_admin_akl_regist_subj', 'Betreff: Registrierungs Aktivierungs-eMail');
+define('_admin_akl_regist', 'Registrierungs Aktivierungs-eMail Template');
+define('_reg_akl_invalid', 'Dieser Aktivierungslink ist nicht mehr g&uuml;ltig!');
+define('_reg_akl_valid', 'Dein Account wurde aktiviert!');
+define('_reg_akl_sended', 'Dein Aktivierungslink wurde an "[email]" versandt, schau bitte in dein E-Mail Postfach');
+define('_reg_akl_email_nf', 'Es existiert kein Account mit dieser E-Mail Addresse!');
+define('_reg_akl_locked', 'Der Account ist gesperrt und kann nicht mehr aktiviert werden!');
+define('_reg_akl_activated', 'Dein Account ist bereits aktiviert');
+define('_info_reg_valid_akl', 'Du hast dich erfolgreich registriert!<br /><br />Bitte aktiviere deinen Account &uuml;ber die Aktivierungs-eMail, die wir dir an deine E-Mail Adresse gesendet haben.<br /><br />Deine Zugangsdaten wurden dir an deine E-Mail Adresse "[email]" versandt.');
+define('_info_reg_valid_akl_ad', 'Du hast dich erfolgreich registriert!<br /><br />Deinen Account wird nach einer Pr&uuml;fung durch die Administratoren dieser Seite aktiviert.<br /><br />Deine Zugangsdaten wurden dir an deine E-Mail Adresse "[email]" versandt.');
+define('_button_value_activate', 'Aktivieren');
+define('_activate_code', 'Aktivierungscode');
+define('_activate_head', 'Account aktivieren');
+define('_perm_activateusers', 'Account Aktivierungen verwalten');
+define('_admin_akl_sended', 'gesendet');
+define('_admin_akl_activated', 'Aktivierungen');
+define('_actived', 'User Account wurde aktiviert!');
+define('_button_title_akl', 'Account aktivieren');
+define('_admin_akl_resend', 'Aktivierungslink wurde an "[email]" versandt.');
+define('_akl', 'Aktivierungsmails');
+define('_akl_info', 'Sollen Aktivierungsmails bei Neuregistrierungen verwendet werden');
+define('_akl_send', 'Aktivierungsmail senden');
+define('_akl_only_admin', 'Nur &uuml;ber Administrator');
+define('_button_activate_user', 'User aktivieren');
+define('_button_del_user', 'User l&ouml;schen');
+define('_users_deleted', 'User gel&ouml;scht');
+define('_actived_all', 'User Accounts wurden aktiviert!');
+define('_delete', 'L&ouml;schen');
 define('_config_c_cache' , 'Cache');
 define('_config_c_cache_provider' , 'Cache Provider');
 define('_config_c_cache_mem_host' , 'Memcache Host');
@@ -556,7 +588,7 @@ define('_clankasse_new' , '<form action="" method="get" onsubmit="return(DZCP.su
       <input id="contentSubmit" type="submit" class="submit" value="Insert new contribution" />
     </form>');
 define('_config_c_floods_what' , 'Here you can adjust the time in secontds which a user have to wait<br />to write something new in this area');;
-define('_confirm_del_shout' , 'You really want to delete this shoutbox entry');
+define('_confirm_del_shout' , 'You really want to delete this shoutbox entry?');
 ## ADDED FOR 1.4.5
 define('_admin_smiley_exists' , 'There is already a smiley with this name!');
 ## ADDED FOR 1.4.3
@@ -682,26 +714,26 @@ define('_server_admin_qport' , 'Optionally: queryport');
 define('_admin_server_nostatus' , 'No live status');
 define('_nletter_head' , 'Write newsletter');
 define('_squad', 'Team');
-define('_confirm_del_cw' , 'You really want to delete this clanwar');
-define('_confirm_del_vote' , 'You really want to delete this vote');
-define('_confirm_del_dl' , 'You really want to deletethis download');
-define('_confirm_del_galpic' , 'You really want to delete this picture');
-define('_confirm_del_gallery' , 'You really want to delete this gallery');
-define('_confirm_del_entry' , 'You really want to delete this entry');
-define('_confirm_del_navi' , 'You really want to delete this link');
+define('_confirm_del_cw' , 'You really want to delete this clanwar?');
+define('_confirm_del_vote' , 'You really want to delete this vote?');
+define('_confirm_del_dl' , 'You really want to deletethis download?');
+define('_confirm_del_galpic' , 'You really want to delete this picture?');
+define('_confirm_del_gallery' , 'You really want to delete this gallery?');
+define('_confirm_del_entry' , 'You really want to delete this entry?');
+define('_confirm_del_navi' , 'You really want to delete this link?');
 define('_confirm_del_profil' , 'You really want to delete this profile field?');
-define('_confirm_del_smiley' , 'You really want to delete this smiley');
-define('_confirm_del_kat' , 'You really want to delete this category');
-define('_confirm_del_artikel' , 'You really want to delete this article');
-define('_confirm_del_news' , 'You really want to delete this news');
-define('_confirm_del_site' , 'You really want to delete this site');
-define('_confirm_del_server' , 'You really want to delete this server');
-define('_confirm_del_team' , 'You really want to delete this team');
-define('_confirm_del_award' , 'You really want to delete this award');
-define('_confirm_del_ranking' , 'You really want to delete this ranking');
-define('_confirm_del_link' , 'You really want to delete this link');
-define('_confirm_del_sponsor' , 'You really want to delete this sponsor');
-define('_confirm_del_kalender' , 'You really want to delete this event');
+define('_confirm_del_smiley' , 'You really want to delete this smiley?');
+define('_confirm_del_kat' , 'You really want to delete this category?');
+define('_confirm_del_artikel' , 'You really want to delete this article?');
+define('_confirm_del_news' , 'You really want to delete this news?');
+define('_confirm_del_site' , 'You really want to delete this site?');
+define('_confirm_del_server' , 'You really want to delete this server?');
+define('_confirm_del_team' , 'You really want to delete this team?');
+define('_confirm_del_award' , 'You really want to delete this award?');
+define('_confirm_del_ranking' , 'You really want to delete this ranking?');
+define('_confirm_del_link' , 'You really want to delete this link?');
+define('_confirm_del_sponsor' , 'You really want to delete this sponsor?');
+define('_confirm_del_kalender' , 'You really want to delete this event?');
 define('_link_type' , 'Link type');
 define('_sponsor' , 'Sponsor');
 //-----------------------------------------------

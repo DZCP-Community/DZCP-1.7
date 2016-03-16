@@ -18,8 +18,7 @@ if(defined('_UserMenu')) {
                                               "r_nick" => "",
                                               "r_email" => "",
                                               "regcode" => $regcode));
-    }
-    else
+    } else
         $index = error(_error_user_already_in, 1);
 
     if ($do == "add" && !$chkMe && isIP(visitorIp())) {
@@ -34,7 +33,9 @@ if(defined('_UserMenu')) {
 
         $_POST['user'] = trim($_POST['user']); $_POST['nick'] = trim($_POST['nick']);
 
-        if(empty($_POST['user']) || empty($_POST['nick']) || empty($_POST['email']) || ($_POST['pwd'] != $_POST['pwd2']) || (settings::get("regcode") && !$securimage->check($_POST['secure'])) || $check_user || $check_nick || $check_email) {
+        if(empty($_POST['user']) || empty($_POST['nick']) || empty($_POST['email']) 
+                || ($_POST['pwd'] != $_POST['pwd2']) || (settings::get("regcode") && 
+                !$securimage->check($_POST['secure'])) || $check_user || $check_nick || $check_email) {
             if (settings::get("regcode") && !$securimage->check($_POST['secure'])) {
                 $error = show("errors/errortable", array("error" => _error_invalid_regcode));
             }
@@ -88,6 +89,7 @@ if(defined('_UserMenu')) {
                 $msg = _info_reg_valid_pwd;
             }
 
+            ## Neuen User in die Datenbank schreiben ##
             $sql->insert("INSERT INTO `{prefix_users}` "
                . "SET `user`     = ?, "
                    . "`nick`     = ?, "
@@ -95,21 +97,49 @@ if(defined('_UserMenu')) {
                    . "`ip`       = ?, "
                    . "`pwd`      = ?, "
                    . "`pwd_encoder` = ?, "
-                   . "`regdatum` = ".time().", "
-                   . "`level`    = 1, "
-                   . "`time`     = ".time().", "
-                   . "`status`   = 1;",
-            array(stringParser::encode(trim($_POST['user'])),stringParser::encode(trim($_POST['nick'])),stringParser::encode(trim($_POST['email'])),
-                visitorIp(),stringParser::encode($pwd),settings::get('default_pwd_encoder')));
+                   . "`actkey`   = ?, "
+                   . "`regdatum` = ".($time=time()).", "
+                   . "`level`    = ?, "
+                   . "`profile_access` = 1,"
+                   . "`time`     = ".$time.", "
+                   . "`status`   = ?;",
+            array(stringParser::encode(trim($_POST['user'])),
+                stringParser::encode(trim($_POST['nick'])),
+                stringParser::encode(trim($_POST['email'])),
+                visitorIp(),
+                stringParser::encode($pwd),
+                settings::get('default_pwd_encoder'),
+                (settings::get('use_akl') ? ($guid=GenGuid()) : ''),
+                (settings::get('use_akl') ? 0 : 1),
+                (settings::get('use_akl') >= 1 ? 0 : 1)));
 
+            ## Lese letzte ID aus ##
             $insert_id = $sql->lastInsertId();
+            
+             ## Lege User in der Permissions Tabelle an ##
             $sql->insert("INSERT INTO `{prefix_permissions}` SET `user` = ?;",array($insert_id));
-            $sql->insert("INSERT INTO `{prefix_userstats}` SET `user` = ?, `lastvisit` = ".time().";",array($insert_id));
+            
+            ## Lege User in der User-Statistik Tabelle an ##
+            $sql->insert("INSERT INTO `{prefix_userstats}` SET `user` = ?, `lastvisit` = ?;",array($insert_id,$time));
 
+            ## Ereignis in den Adminlog schreiben ##
             setIpcheck("reg(".$insert_id.")");
+            
+            ## E-Mail zusammenstellen und senden ##
+            if(settings::get('use_akl') == 1) {
+                $akl_link = 'http://'.$httphost.'/?action=akl&do=activate&key='.$guid;
+                $akl_link_page = 'http://'.$httphost.'/?action=akl&do=activate';
+
+                $message = show(bbcode_email(stringParser::decode(settings::get('eml_akl_register'))), 
+                        array("nick" => $_POST['user'], "link_page" => '<a href="'.$akl_link_page.'" target="_blank">'.$akl_link_page.'</a>', "guid" => $guid, "link" => '<a href="'.$akl_link.'" target="_blank">Link</a>'));
+                sendMail(trim($_POST['email']),stringParser::decode(settings::get('eml_akl_register_subj')),$message);
+            }
+
             $message = show(bbcode_email(stringParser::decode(settings::get('eml_reg'))), array("user" => trim($_POST['user']), "pwd" => $mkpwd));
             sendMail(trim($_POST['email']),stringParser::decode(settings::get('eml_reg_subj')),$message);
-            $index = info(show($msg, array("email" => $_POST['email'])), "../user/?action=login");
+
+            ## Nachricht anzeigen und zum  Userlogin weiterleiten ##
+            $index = info(show(settings::get('use_akl') ? (settings::get('use_akl') == 2 ? _info_reg_valid_akl_ad : _info_reg_valid_akl) : _info_reg_valid, array("email" => $_POST['email'])), "?action=login",5);
         }
     }
 }

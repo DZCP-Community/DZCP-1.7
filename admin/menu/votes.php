@@ -141,7 +141,7 @@ switch ($do) {
                 $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                                   "action" => "admin=votes&amp;do=delete",
                                                                   "title" => _button_title_del,
-                                                                  "del" => convSpace(_confirm_del_vote)));
+                                                                  "del" => _confirm_del_vote));
 
                 $icon = $get['menu'] ? "yes" : "no";
                 $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;

@@ -70,6 +70,8 @@ define('count_clicks_expires', (48*60*60)); // Wie Lange die IPs fur den Click-C
 
 define('php_code_enabled', false); // Erlaubt es auf "Adminbereich: Seiten erstellen/verwalten", PHP Code zu verwenden. * Nur Aktivieren wenn es gebracht wird! *
 
+define('phpmailer_enable', true); // Aktiviert phpmailer 
+
 //
 //
 // -> Zeichen fur den Passwort Generator
@@ -81,7 +83,7 @@ $extensions = array('image/jpeg','image/gif','image/png');
 #########################################
 //-> Sessions Settings Start * Expert *
 #########################################
-define('sessions_backend', 'memcache'); //Das zu verwendendes Backend: php,mysql,memcache,apc
+define('sessions_backend', 'apc'); //Das zu verwendendes Backend: php,mysql,memcache,apc
 define('sessions_encode_type', 'sha1'); //Verwende die sha1 codierung fuer session ids
 define('sessions_encode', true); //Inhalt der Sessions zusatzlich verschlusseln
 define('sessions_ttl_maxtime', (2*60*60)); //Live-Time der Sessions * 2h

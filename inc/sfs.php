@@ -13,7 +13,7 @@ class sfs {
     private static $autoblock = true;
     private static $blockuser = false;
     public static function check() {
-        global $userip;
+        global $userip,$sql;
         ## http://de.wikipedia.org/wiki/Private_IP-Adresse ##
         if(!validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && !validateIpV4Range($userip, '[127].[0].[0-255].[0-255]') && !validateIpV4Range($userip, '[10].[0-255].[0-255].[0-255]') && !validateIpV4Range($userip, '[172].[16-31].[0-255].[0-255]')) {
             $get = $sql->fetch("SELECT * FROM `{prefix_ipban}` WHERE `ip` = ? LIMIT 1;",array($userip));
@@ -51,7 +51,7 @@ class sfs {
                 //typ: 0 = Off, 1 = GSL, 2 = SysBan, 3 = Ipban
                 self::get(array('ip' => $userip)); //Array ( [success] => 1 [ip] => Array ( [lastseen] => 2013-04-26 19:57:51 [frequency] => 1327 [appears] => 1 [confidence] => 99.89 ) )
                 $stopforumspam = self::$json;
-                if($stopforumspam['success']) {
+                if(array_key_exists('success', $stopforumspam) && $stopforumspam['success']) {
                     $stopforumspam = $stopforumspam['ip']; // Array ( [lastseen] => 2013-04-26 19:57:51 [frequency] => 1327 [appears] => 1 [confidence] => 99.89 )
                     if($stopforumspam['appears'] == '1' && $stopforumspam['confidence'] >= self::$confidence && $stopforumspam['frequency'] >= self::$frequency && self::$autoblock) {
                         $stopforumspam['banned_msg'] = 'Autoblock by stopforumspam.com';

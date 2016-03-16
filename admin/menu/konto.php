@@ -89,7 +89,7 @@ switch ($do) {
             $delete = show("page/button_delete_single", array("id" => $getk['id'],
                                                               "action" => "admin=konto&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_entry)));
+                                                              "del" => _confirm_del_entry));
 
             $show .= show($dir."/clankasse_show", array("name" => stringParser::decode($getk['kat']),
                                                          "class" => $class,

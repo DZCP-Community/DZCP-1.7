@@ -254,7 +254,7 @@ switch($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=editor&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_site)));
+                                                              "del" => _confirm_del_site));
 
             $show .= show($dir."/editor_show", array("name" => "<a href='../sites/?show=".$get['id']."'>".stringParser::decode($get['titel'])."</a>",
                                                       "del" => $delete,

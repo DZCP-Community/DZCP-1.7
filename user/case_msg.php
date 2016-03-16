@@ -82,7 +82,7 @@ if(defined('_UserMenu')) {
                 } elseif ($uid == $userid) {
                     $index = error(_error_msg_self, 1);
                 } else {
-                    $titel = show(_msg_from_nick, array("nick" => data("nick")));
+                    $titel = show(_msg_from_nick, array("nick" => stringParser::decode(data("nick"))));
                     $index = show($dir . "/answer", array("von" => $userid,
                                                           "an" => $uid,
                                                           "titel" => $titel,

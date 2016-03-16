@@ -219,7 +219,7 @@ switch($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=artikel&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_artikel)));
+                                                              "del" => _confirm_del_artikel));
 
             $titel = show(_artikel_show_link, array("titel" => cut(stringParser::decode($get['titel']),settings::get('l_newsadmin')), "id" => $get['id']));
             $public = ($get['public'] ? '<a href="?admin=artikel&amp;do=public&amp;id='.$get['id'].'&amp;what=unset"><img src="../inc/images/public.gif" alt="" title="'._non_public.'" /></a>'

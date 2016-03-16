@@ -89,9 +89,8 @@ if(defined('_UserMenu')) {
                                                                "delete" => $delete));
                 }
 
-                $buddys = (empty($buddys) ? show(_no_entrys_found, array("colspan" => "5")) : $buddys);
+                $buddys = (empty($buddys) ? show(_no_entrys_found, array("colspan" => "5")) : $buddys); $users = "";
                 $qry = $sql->select("SELECT `id`,`nick` FROM `{prefix_users}` WHERE `level` != 0 ORDER BY `nick`;");
-                $users = "";
                 foreach($qry as $get) {
                     if(!array_key_exists($get['id'], $usersNL) && $get['id'] != $userid) {
                         $users .= show(_to_users, array("id" => $get['id'], "nick" =>stringParser::decode(data("nick",$get['id']))));

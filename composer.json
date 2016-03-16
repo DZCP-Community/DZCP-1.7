@@ -1,0 +1,11 @@
+{
+    "name": "vendor/d-z-c-p-1-7",
+    "description": "Description of project DZCP-1.7.",
+    "authors": [
+        {
+            "name": "Lucas",
+            "email": "support@hammermaps.de"
+        }
+    ],
+    "require": {}
+}

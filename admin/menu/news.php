@@ -83,7 +83,7 @@ switch($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=news&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_kat)));
+                                                              "del" => _confirm_del_kat));
 
             $img = show(_config_newskats_img, array("img" => stringParser::decode($get['katimg'])));
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;

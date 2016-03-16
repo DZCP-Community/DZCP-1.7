@@ -152,7 +152,7 @@ if(defined('_UserMenu')) {
                         $delete = show("page/button_delete_single", array("id" => $_GET['id'],
                                                                           "action" => "action=user&amp;show=gb&amp;do=delete&amp;gbid=" . $getgb['id'],
                                                                           "title" => _button_title_del,
-                                                                          "del" => convSpace(_confirm_del_entry)));
+                                                                          "del" => _confirm_del_entry));
                     }
 
                     if (!$getgb['reg']) {

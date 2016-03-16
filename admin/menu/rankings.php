@@ -106,7 +106,7 @@ switch ($do) {
           $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                             "action" => "admin=rankings&amp;do=delete",
                                                             "title" => _button_title_del,
-                                                            "del" => convSpace(_confirm_del_ranking)));
+                                                            "del" => _confirm_del_ranking));
 
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
           $show .= show($dir."/rankings_show", array("squad" => stringParser::decode($get['name']),

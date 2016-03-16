@@ -48,7 +48,7 @@ if(defined('_Artikel')) {
                                            "notification_page" => "",
                                            "showmore" => $showmore,
                                            "icq" => "",
-                                           "text" => bbcode::parse_html($_POST['artikel'],true),
+                                           "text" => bbcode::parse_html($_POST['artikel']),
                                            "datum" => date("j.m.y H:i")._uhr,
                                            "links" => $links,
                                            "autor" => autor($userid)));

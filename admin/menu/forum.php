@@ -211,7 +211,7 @@ switch ($do) {
                     $delete = show("page/button_delete_single", array("id" => $getk['id'],
                                                                       "action" => "admin=forum&amp;do=deletesubkat",
                                                                       "title" => _button_title_del,
-                                                                      "del" => convSpace(_confirm_del_entry)));
+                                                                      "del" => _confirm_del_entry));
 
                     $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
                     $subkats .= show($dir."/forum_show_subkats_show", array("subkat" => $subkat,
@@ -244,7 +244,7 @@ switch ($do) {
                 $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                                   "action" => "admin=".$_GET['admin']."&amp;do=delete",
                                                                   "title" => _button_title_del,
-                                                                  "del" => convSpace(_confirm_del_entry)));
+                                                                  "del" => _confirm_del_entry));
 
                 $status = ($get['intern'] ? _config_forum_intern : _config_forum_public);
 

@@ -62,7 +62,7 @@ if(defined('_Forum')) {
           $delete = show("page/button_delete_single", array("id" => $getp['id'],
                                                            "action" => "action=post&amp;do=delete",
                                                            "title" => _button_title_del,
-                                                           "del" => convSpace(_confirm_del_entry)));
+                                                           "del" => _confirm_del_entry));
         } else {
           $delete = "";
           $edit = "";

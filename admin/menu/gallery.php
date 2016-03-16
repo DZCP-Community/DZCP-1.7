@@ -165,7 +165,7 @@ switch ($do) {
             $del = show("page/button_delete_single", array("id" => $get['id'],
                                                            "action" => "admin=gallery&amp;do=delgal",
                                                            "title" => _button_title_del,
-                                                           "del" => convSpace(_confirm_del_gallery)));
+                                                           "del" => _confirm_del_gallery));
 
             $new = show(_gal_newicon, array("id" => $get['id'], "titel" => _button_value_newgal));
             $cntpics = $cnt == 1 ? _gallery_image : _gallery_images;

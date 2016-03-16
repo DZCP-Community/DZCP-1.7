@@ -256,7 +256,7 @@ switch ($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=cw&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_cw)));
+                                                              "del" => _confirm_del_cw));
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/clanwars_show", array("class" => $class,

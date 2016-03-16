@@ -106,7 +106,7 @@ switch ($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=dladmin&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_dl)));
+                                                              "del" => _confirm_del_dl));
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/downloads_show", array("id" => $get['id'],

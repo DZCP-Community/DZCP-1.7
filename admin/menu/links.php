@@ -78,7 +78,7 @@ switch ($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=links&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_link)));
+                                                              "del" => _confirm_del_link));
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
             $show .= show($dir."/links_show", array("link" => cut(stringParser::decode($get['url']),40),

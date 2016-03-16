@@ -370,7 +370,7 @@ if(defined('_UserMenu')) {
                                 $delete = show("page/button_delete_account", array("id" => $get['id'],
                                                                                    "action" => "action=editprofile&amp;do=delete",
                                                                                    "value" => _button_title_del_account,
-                                                                                   "del" => convSpace(_confirm_del_account)));
+                                                                                   "del" => _confirm_del_account));
 
                             $show = show($dir . "/edit_profil", array("country" => show_countrys($get['country']),
                                                                       "city" => stringParser::decode($get['city']),

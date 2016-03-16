@@ -741,7 +741,7 @@ if(defined('_Forum')) {
                 $thisFID = $sql->lastInsertId();
                 setIpcheck("fid(".$_GET['kid'].")");
 
-                $sql->update("UPDATE `{prefix_userstats}` SET `forumposts` = forumposts+1 WHERE `user` = '".$userid."'");
+                $sql->update("UPDATE `{prefix_userstats}` SET `forumthreads` = forumthreads+1 WHERE `user` = '".$userid."'");
 
                 $index = info(_forum_newthread_successful, "?action=showthread&amp;id=".$thisFID."#p1");
             }

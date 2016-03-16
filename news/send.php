@@ -116,7 +116,7 @@ switch ($action):
                     $nick = blank_autor($userid);
                     $von_nick = $userid;
                     $titel = show(_news_send_titel, array("nick" => blank_autor($userid)));
-                    $email = data('email');
+                    $email = stringParser::decode(data('email'));
                     $sendnews = 2;
                     $user = $userid;
                 }

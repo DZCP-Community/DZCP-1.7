@@ -44,8 +44,8 @@ class phpfastcache_apc extends BasePhpFastCache implements phpfastcache_driver {
 
     function driver_get($keyword, $option = array()) {
         if($this->cacheEnabled) {
-            $data = apc_fetch($keyword,$bo);
-            if($bo === false || empty($data)) {
+            $data = apc_fetch($keyword);
+            if($data === false || empty($data)) {
                 return null;
             }
 

@@ -28,7 +28,7 @@ if(defined('_Ck')) {
                 $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                                   "title" => _button_title_del,
                                                                   "action" => "action=admin&amp;do=delete",
-                                                                  "del" => convSpace(_confirm_del_entry)));
+                                                                  "del" => _confirm_del_entry));
             }
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;

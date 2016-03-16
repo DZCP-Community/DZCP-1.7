@@ -89,8 +89,8 @@ $isSpider = isSpider();
 $subfolder = basename(dirname(dirname(GetServerVars('PHP_SELF')).'../'));
 $httphost = GetServerVars('HTTP_HOST').(empty($subfolder) ? '' : '/'.$subfolder);
 $domain = str_replace('www.','',$httphost);
-$pagetitle =stringParser::decode(settings::get('pagetitel'));
-$sdir =stringParser::decode(settings::get('tmpdir'));
+$pagetitle = stringParser::decode(settings::get('pagetitel'));
+$sdir = stringParser::decode(settings::get('tmpdir'));
 $useronline = 1800;
 $reload = 3600 * 24;
 $picformat = array("jpg", "gif", "png");
@@ -114,8 +114,7 @@ $index = ''; $show = ''; $color = 0;
 if($functions_files = get_files(basePath.'/inc/additional-kernel/',false,true,array('php'))) {
     foreach($functions_files AS $func) { 
         include(basePath.'/inc/additional-kernel/'.$func); 
-    }
-    unset($functions_files,$func);
+    } unset($functions_files,$func);
 }
 
 /**
@@ -140,7 +139,6 @@ function validateIpV4Range ($ip, $range) {
             if ($targetsegment < $rseg[0] || $targetsegment > $rseg[1]) {
                 return false;
             }
-
             $counter++;
         }
     } else {
@@ -159,7 +157,6 @@ function validateIpV4Range ($ip, $range) {
                 if ($targetsegment < $rseg[0] || $targetsegment > $rseg[1]) {
                     return false;
                 }
-
                 $counter++;
             }
         }
@@ -224,6 +221,7 @@ function dzcp_session_destroy() {
     $_SESSION['pwd']       = '';
     $_SESSION['ip']        = '';
     $_SESSION['lastvisit'] = '';
+    $_SESSION['akl_id']    = 0;
     session_unset();
     session_destroy();
     session_regenerate_id();
@@ -282,6 +280,7 @@ if(cookie::get('id') != false && cookie::get('pkey') != false && empty($_SESSION
                 $_SESSION['ip']        = '';
                 $_SESSION['lastvisit'] = '';
                 $_SESSION['pkey']      = '';
+                $_SESSION['akl_id']    = 0;
             }
         } else {
             $sql->delete("DELETE FROM `{prefix_autologin}` WHERE `id` = ?;",array($get_almgr['id']));
@@ -617,11 +616,6 @@ function regexChars($txt) {
     return str_replace($search,$replace,strip_tags($txt));
 }
 
-//-> Leerzeichen mit + ersetzen (w3c)
-function convSpace($string) {
-    return str_replace(" ","+",$string);
-}
-
 function bbcode_html($txt,$tinymce=0) {
     $txt = str_replace("&lt;","<",$txt);
     $txt = str_replace("&gt;",">",$txt);
@@ -879,7 +873,7 @@ function fileExists($url,$post=false,$timeout=file_get_contents_timeout) {
         if($gzip) {
             $curl_info = curl_getinfo($curl,CURLINFO_HEADER_OUT);
             if(stristr($curl_info, 'accept-encoding') && stristr($curl_info, 'gzip')) {
-                $content = gzinflate( substr($content,10,-8) );
+                $content = @gzinflate( substr($content,10,-8) );
             }
         }
 
@@ -1809,6 +1803,16 @@ function sendMail($mailto,$subject,$content) {
         $mail->msgHTML($content);
         $mail->setLanguage(($language=='deutsch')?'de':'en', basePath.'/inc/lang/sendmail/');
         return $mail->Send();
+    } else {
+        $mail_logfile = basePath.'/inc/_logs/mail.log'; $maillog = "";
+        if(file_exists($mail_logfile)) {
+            $maillog = file_get_contents($mail_logfile);
+        }
+        $mailfrom = stringParser::decode(settings::get('mailfrom'));
+        $maillog .= "From: '".$mailfrom."'/n".
+                "To: '".preg_replace('/(\\n+|\\r+|%0A|%0D)/i', '',$mailto)."'"."'/n".
+                "'".$subject."'/n".$content;
+        file_put_contents($mail_logfile, $maillog);
     }
     
     return false;
@@ -2647,6 +2651,16 @@ function CryptMailto($email='',$template=_emailicon,$custom=array()) {
     return '<span id="'.$id.'">[javascript protected email address]</span>'.$script;
 }
 
+/**
+ * Generiert eine XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX unique id
+ *
+ * @return string
+ */
+function GenGuid() {
+    $s = strtoupper(md5(uniqid(rand(),true)));
+    return substr($s,0,8) .'-'.substr($s,8,4).'-'.substr($s,12,4).'-'.substr($s,16,4).'-'. substr($s,20);
+}
+
 //-> DZCP-API Klassen einbinden
 if($api_files = get_files(basePath.'/inc/api/',false,true,array('php'))) {
     foreach($api_files AS $api)
@@ -2708,7 +2722,7 @@ class javascript {
 //-> Ausgabe des Indextemplates
 function page($index='',$title='',$where='',$index_templ='index') {
     global $userid,$userip,$tmpdir,$chkMe,$dir,$view_error;
-    global $designpath,$language,$menu_index,$isSpider;
+    global $designpath,$language,$menu_index,$isSpider,$cache;
 
     javascript::set('lng',($language=='deutsch'?'de':'en'));
     javascript::set('maxW',settings::get('maxwidth'));
@@ -2717,6 +2731,8 @@ function page($index='',$title='',$where='',$index_templ='index') {
     javascript::set('autoRefresh',1);  // Enable Auto-Refresh for Ajax
     javascript::set('debug',view_javascript_debug);  // Enable JS Debug
     javascript::set('dir',$designpath);  // Designpath
+    javascript::set('dialog_button_00',_yes); 
+    javascript::set('dialog_button_01',_no); 
 
     // JS-Dateine einbinden * json *
     $java_vars = '<script language="javascript" type="text/javascript">var json=\''.javascript::encode().'\',dzcp_config=JSON&&JSON.parse(json)||$.parseJSON(json);</script>'."\n";
@@ -2727,6 +2743,7 @@ function page($index='',$title='',$where='',$index_templ='index') {
         echo show("errors/wmodus", array("tmpdir" => $tmpdir,
                                          "java_vars" => $java_vars,
                                          "dir" => $designpath,
+                                         "sid" => (float)rand()/(float)getrandmax(),
                                          "title" => strip_tags(stringParser::decode($title)),
                                          "login" => $login));
     } else {
@@ -2773,10 +2790,17 @@ function page($index='',$title='',$where='',$index_templ='index') {
 
         //template index autodetect
         $index_templ = ($index_templ == 'index' && file_exists($designpath.'/index_'.$dir.'.html') ? 'index_'.$dir : $index_templ);
-        
         //check if placeholders are given
-        $pholder = file_get_contents($designpath."/".$index_templ.".html");
-        
+        $pholder_hash = md5($designpath."/".$index_templ.".html");
+        if(!$cache->isExisting($pholder_hash) || !template_cache || !$cache->isMemModule()) {
+            $pholder = file_get_contents($designpath."/".$index_templ.".html");
+            if(template_cache && $cache->isMemModule()) {
+                $cache->set($pholder_hash, $pholder, template_cache_time);
+            }
+        } else {
+            $pholder = $cache->get($pholder_hash);
+        }
+
         //filter placeholders
         $dir = $designpath; //after template index autodetect!!!
         $blArr = array("[clanname]","[title]","[java_vars]","[template_switch]","[headtitle]","[login]",
@@ -2812,9 +2836,12 @@ function page($index='',$title='',$where='',$index_templ='index') {
             }
         }
         
+        
         $pholdervars = explode("^",$pholdervars);
-        for($i=0;$i<=count($pholdervars)-1;$i++)
-        { $arr[$pholdervars[$i]] = $$pholdervars[$i]; }
+        foreach ($pholdervars as $pholdervar) {
+            $arr[$pholdervar] = $$pholdervar;
+        }
+
         $arr['sid'] = (float)rand()/(float)getrandmax(); //Math.random() like
 
         //index output
@@ -2857,7 +2884,7 @@ class bbcode {
       '/\[mail\](.*?)\[\/mail\]/is',
       '/\[img\](.*?)\[\/img\]/is',
       '/\[img\=(\d*?)x(\d*?)\](.*?)\[\/img\]/is',
-      '/\[img (.*?)\](.*?)\[\/img\]/ise',
+      '/\[img (.*?)\](.*?)\[\/img\]/is',
 
       '/\[quote\](.*?)\[\/quote\]/is',
       '/\[quote\=(.*?)\](.*?)\[\/quote\]/is',
@@ -2906,7 +2933,7 @@ class bbcode {
       '&trade;');
 
     private static $lineBreaks_search = array(
-      '/\[list(.*?)\](.+?)\[\/list\]/sie',
+      '/\[list(.*?)\](.+?)\[\/list\]/si',
       '/\[\/list\]\s*\<br \/\>/i',
       '/\[\/code\]\s*\<br \/\>/i',
       '/\[\/quote\]\s*\<br \/\>/i',
@@ -3188,10 +3215,10 @@ class bbcode {
         }
 
         // Parse [list] tags
-        self::$string = preg_replace('/\[list\](.*?)\[\/list\]/sie', '"<ul>\n".self::process_list_items("$1")."\n</ul>"', self::$string);
+        self::$string = preg_replace('/\[list\](.*?)\[\/list\]/si', '"<ul>\n".self::process_list_items("$1")."\n</ul>"', self::$string);
         
         return preg_replace('/\[list\=(disc|circle|square|decimal|decimal-leading-zero|lower-roman|upper-roman|lower-greek|lower-alpha|'
-                . 'lower-latin|upper-alpha|upper-latin|hebrew|armenian|georgian|cjk-ideographic|hiragana|katakana|hiragana-iroha|katakana-iroha|none)\](.*?)\[\/list\]/sie',
+                . 'lower-latin|upper-alpha|upper-latin|hebrew|armenian|georgian|cjk-ideographic|hiragana|katakana|hiragana-iroha|katakana-iroha|none)\](.*?)\[\/list\]/si',
                 '"<ol style=\"list-style-type: $1;\">\n".self::process_list_items("$2")."\n</ol>"', self::$string);
     }
 

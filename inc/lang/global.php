@@ -103,6 +103,7 @@ define('_icqstatus', '<img src="http://web.icq.com/whitepages/online?icq=[uin]&a
 define('_hpicon', '<a href="[hp]" target="_blank"><img src="../inc/images/hp.gif" alt="" title="[hp]" class="icon" /></a>');
 define('_email_mailto', '<a href="mailto:[email]">[email]</a>');
 define('_emailicon', '<a href=\\"mailto:"+d+"\\"><img src=\\"../inc/images/email.gif\\" title="+d+" class=\\"icon\\" /></a>');
+define('_emailicon_non_mailto', '<a href="[email]"><img src="../inc/images/email.gif" alt="" class="icon" /></a>');
 define('_steamicon_blank', '<img src="../inc/images/steam.gif" alt="" class="icon" />');
 define('_emailicon_blank', '<img src="../inc/images/email.gif" alt="" class="icon" />');
 define('_hlswicon_blank', '<img src="../inc/images/xfire.gif" alt="" class="icon" />');

@@ -113,22 +113,22 @@ if(defined('_Clanwars')) {
                     $del1 = array_key_exists($sc1, $cw_screenshots) ? show("page/button_delete_single", array("id" => $_GET['id'],
                             "action" => "action=details&amp;do=delete_pic&amp;pic=".$cw_screenshots[$sc1],
                             "title" => _button_title_del,
-                            "del" => convSpace(_confirm_del_galpic))) : '';
+                            "del" => _confirm_del_galpic)) : '';
 
                     $del2 = array_key_exists($sc2, $cw_screenshots) ? show("page/button_delete_single", array("id" => $_GET['id'],
                             "action" => "action=details&amp;do=delete_pic&amp;pic=".$cw_screenshots[$sc2],
                             "title" => _button_title_del,
-                            "del" => convSpace(_confirm_del_galpic))) : '';
+                            "del" => _confirm_del_galpic)) : '';
 
                     $del3 = array_key_exists($sc3, $cw_screenshots) ? show("page/button_delete_single", array("id" => $_GET['id'],
                             "action" => "action=details&amp;do=delete_pic&amp;pic=".$cw_screenshots[$sc3],
                             "title" => _button_title_del,
-                            "del" => convSpace(_confirm_del_galpic))) : '';
+                            "del" => _confirm_del_galpic)) : '';
 
                     $del4 = array_key_exists($sc4, $cw_screenshots) ? show("page/button_delete_single", array("id" => $_GET['id'],
                             "action" => "action=details&amp;do=delete_pic&amp;pic=".$cw_screenshots[$sc4],
                             "title" => _button_title_del,
-                            "del" => convSpace(_confirm_del_galpic))) : '';
+                            "del" => _confirm_del_galpic)) : '';
                 }
 
                 $show_sc .= show($dir."/show_screenshots", array("screen1" => (array_key_exists($sc1, $cw_screenshots) ? img_cw($libPath,$cw_screenshots[$sc1]) : ''),
@@ -167,7 +167,7 @@ if(defined('_Clanwars')) {
                 $delete = show("page/button_delete_single", array("id" => $_GET['id'],
                                                                   "action" => "action=details&amp;do=delete&amp;cid=".$getc['id'],
                                                                   "title" => _button_title_del,
-                                                                  "del" => convSpace(_confirm_del_entry)));
+                                                                  "del" => _confirm_del_entry));
             }
 
             $hp = ""; $email = ""; $onoff = ""; $avatar = "";
@@ -358,7 +358,7 @@ if(defined('_Clanwars')) {
                             $sql->insert("INSERT INTO `{prefix_cw_comments}` SET `cw` = ?,`datum` = ?,`nick` = ?,`email` = ?,`hp` = ?,`reg` = ?,`comment` = ?,`ip` = ?;",
                                     array(intval($_GET['id']),time(),(isset($_POST['nick']) ? stringParser::encode($_POST['nick']) : stringParser::encode(data('nick'))),
                                         (isset($_POST['email']) ? stringParser::encode($_POST['email']) : stringParser::encode(data('email'))),
-                                        (isset($_POST['hp']) ? links($_POST['hp']) : links(data('hp'))),
+                                        (isset($_POST['hp']) ? links($_POST['hp']) : links(stringParser::decode(data('hp')))),
                                         $userid,stringParser::encode($_POST['comment']),stringParser::encode($userip)));
                             setIpcheck("cwid(".$_GET['id'].")");
                             $index = info(_comment_added, "?action=details&amp;id=".$_GET['id']."");
@@ -403,7 +403,7 @@ if(defined('_Clanwars')) {
                 $editedby = show(_edited_by, array("autor" => autor($userid), "time" => date("d.m.Y H:i", time())._uhr));
                 $sql->delete("UPDATE `{prefix_cw_comments}` SET `nick` = ?, `email` = ?, `hp` = ?, `comment` = ?, `editby` = ? WHERE `id` = ?",
                         array((isset($_POST['nick']) ? stringParser::encode($_POST['nick']) : stringParser::encode(data('nick'))),
-                        (isset($_POST['email']) ? stringParser::encode($_POST['email']) : stringParser::encode(data('email'))),(isset($_POST['hp']) ? links($_POST['hp']) : links(data('hp'))),
+                        (isset($_POST['email']) ? stringParser::encode($_POST['email']) : stringParser::encode(data('email'))),(isset($_POST['hp']) ? links($_POST['hp']) : links(stringParser::decode(data('hp')))),
                         stringParser::encode($_POST['comment']),stringParser::encode($editedby),intval($_GET['cid'])));
                 $index = info(_comment_edited, "?action=details&amp;id=".$_GET['id']."");
             } else

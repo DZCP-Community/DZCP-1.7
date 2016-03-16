@@ -166,7 +166,7 @@ final class session {
     ###################################################
     public final function apc_open($savePath, $sessionName) {
         $this->_prefix = 'BSession/'.$sessionName;
-        if (!apc_fetch($this->_prefix.'/TS', $result)) {
+        if (apc_fetch($this->_prefix.'/TS') === false) {
             apc_store($this->_prefix.'/TS', array(''));
             apc_store($this->_prefix.'/LOCK', array(''));
         }

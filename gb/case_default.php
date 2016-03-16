@@ -64,7 +64,7 @@ if(empty($index)) {
                 $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                                   "action" => "action=admin&amp;do=delete",
                                                                   "title" => _button_title_del,
-                                                                  "del" => convSpace(_confirm_del_entry)));
+                                                                  "del" => _confirm_del_entry));
 
                 $comment = show(_gb_commenticon, array("id" => $get['id'], "title" => _button_title_comment));
             }
@@ -114,7 +114,7 @@ if(empty($index)) {
                         $delete = show("page/button_delete_single", array("id" => $getc['id'],
                                                                           "action" => "action=admin&amp;do=cdelete",
                                                                           "title" => _button_title_del,
-                                                                          "del" => convSpace(_confirm_del_entry)));
+                                                                          "del" => _confirm_del_entry));
                     }
 
                     $nick = (!$getc['reg'] ? CryptMailto(stringParser::decode($getc['email']),_link_mailto,array('nick' => stringParser::decode($getc['nick']))) : autor($getc['reg']));

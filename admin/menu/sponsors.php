@@ -559,7 +559,7 @@ if(_adminMenu != 'true') exit;
           $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                             "action" => "admin=sponsors&amp;do=delete",
                                                             "title" => _button_title_del,
-                                                            "del" => convSpace(_confirm_del_link)));
+                                                            "del" => _confirm_del_link));
 
           $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;
 

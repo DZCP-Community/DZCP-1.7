@@ -28,7 +28,7 @@ if(!permission('galleryintern') && $get['intern']) {
             if(permission("gallery")) {
                 $del = show("page/button_delete_gallery", array("id" => "",
                                                                 "action" => "admin=gallery&amp;do=delete&amp;pic=".$file,
-                                                                "del" => convSpace(_confirm_del_galpic)));
+                                                                "del" => _confirm_del_galpic));
             }
 
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;

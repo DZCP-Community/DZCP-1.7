@@ -27,7 +27,7 @@ switch($do) {
                 $gbhp = (!empty($get['hp']) ? show(_hpicon, array("hp" => stringParser::decode($get['hp']))) : '');
                 $gbemail = (!empty($get['email']) ? CryptMailto(stringParser::decode($get['email'])) : '');
                 $gbtitel = show(_gb_titel, array("postid" => "?",
-                                                 "nick" => data($get['reg'], "nick"),
+                                                 "nick" => stringParser::decode(data($get['reg'], "nick")),
                                                  "edit" => "",
                                                  "public" => "",
                                                  "delete" => "",

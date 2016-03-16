@@ -219,7 +219,7 @@ switch ($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=slideshow&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_slider_admin_del)));
+                                                              "del" => _slider_admin_del));
 
             $entry .= show($dir."/slideshow_show", array("id" => $get['id'],
                                                          "class" => $class,

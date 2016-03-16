@@ -87,7 +87,7 @@ switch ($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=profile&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_profil)));
+                                                              "del" => _confirm_del_profil));
 
             $show_n = show($dir."/profil_show", array("class" => $class,
                                                       "name" => stringParser::decode($get['name']),

@@ -13,8 +13,8 @@ function shout($ajax = 0) {
     foreach($qry as $get) {
         $delete = "";
         if(permission("shoutbox"))
-            $delete = '<a href="../shout/?action=admin&amp;do=delete&amp;id='.$get['id'].'" onclick="return(DZCP.del(\''.
-                _confirm_del_shout.'\'))"><img src="../inc/images/delete_small.gif" title="'._button_title_del.'" alt="'._button_title_del.'" /></a>';
+            $delete = '<a href="../shout/?action=admin&amp;do=delete&amp;id='.$get['id'].'" rel="'._confirm_del_shout.'" class="confirm">'
+                . '<img src="../inc/images/delete_small.gif" title="'._button_title_del.'" alt="'._button_title_del.'" /></a>';
 
         if(preg_match("#\d#", stringParser::decode($get['email'])) && !check_email(stringParser::decode($get['email'])))
             $nick = autor(stringParser::decode($get['email']), "navShout",'','',settings::get('l_shoutnick'));

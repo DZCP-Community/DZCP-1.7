@@ -31,7 +31,7 @@ $where = $where.': '._partners_head;
         {
           $show = error(_empty_url, 1);
         } else {
-          $sql->insert("INSERT INTO `{prefix_partners}` SET `link` = ?, `banner`   = ?, `textlink` = ?;",
+          $sql->insert("INSERT INTO `{prefix_partners}` SET `link` = ?, `banner` = ?, `textlink` = ?;",
                   array(stringParser::encode(links($_POST['link'])),stringParser::encode(empty($_POST['textlink']) ? $_POST['banner'] : $_POST['textlink']),intval(empty($_POST['textlink']) ? 0 : 1)));
 
           $show = info(_partners_added, "?admin=partners");
@@ -81,7 +81,7 @@ $where = $where.': '._partners_head;
           $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                             "action" => "admin=partners&amp;do=delete",
                                                             "title" => _button_title_del,
-                                                            "del" => convSpace(_confirm_del_entry)));
+                                                            "del" => _confirm_del_entry));
 
           $rlink = links(stringParser::decode($get['link']));
           $button = '<img src="../banner/partners/'.stringParser::decode($get['banner']).'" alt="'.$rlink.'" title="'.$rlink.'" />';

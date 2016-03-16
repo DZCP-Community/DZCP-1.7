@@ -58,9 +58,9 @@ if(defined('_Artikel')) {
                                         "delete" => ''));
 
     $index = show("page/comments_show", array("titel" => $titel,
-                                              "comment" => bbcode::parse_html($_POST['comment'],true),
+                                              "comment" => bbcode::parse_html($_POST['comment']),
                                               "nick" => $nick,
-                                              "editby" => bbcode::parse_html($editedby,true),
+                                              "editby" => bbcode::parse_html($editedby),
                                               "email" => $email,
                                               "hp" => $hp,
                                               "avatar" => useravatar($get_userid),

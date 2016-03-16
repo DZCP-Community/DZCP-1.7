@@ -193,7 +193,7 @@ if(defined('_News') && isset($_GET['id']) && !empty($_GET['id'])) {
                     $delete = show("page/button_delete_single", array("id" => $get_news['id'],
                                                                       "action" => "action=show&amp;do=delete&amp;cid=" . $getc['id'],
                                                                       "title" => _button_title_del,
-                                                                      "del" => convSpace(_confirm_del_entry)));
+                                                                      "del" => _confirm_del_entry));
                 }
 
                 $email = ""; $hp = ""; $avatar = ""; $onoff = "";

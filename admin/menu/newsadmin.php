@@ -381,7 +381,7 @@ switch ($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=newsadmin&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_news)));
+                                                              "del" => _confirm_del_news));
 
             $titel = show(_news_show_link, array("titel" =>stringParser::decode(cut($get['titel'],settings::get('l_newsadmin'))), "id" => $get['id']));
             $intern = ($get['intern'] ? _votes_intern : '');

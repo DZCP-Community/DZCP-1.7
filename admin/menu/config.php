@@ -93,6 +93,7 @@ if($_POST) {
     if(settings::changed(($key='eml_fabo_npost_subj'),($var=stringParser::encode($_POST['eml_fabo_npost_subj'])))) settings::set($key,$var);
     if(settings::changed(($key='eml_fabo_tedit_subj'),($var=stringParser::encode($_POST['eml_fabo_tedit_subj'])))) settings::set($key,$var);
     if(settings::changed(($key='eml_fabo_pedit_subj'),($var=stringParser::encode($_POST['eml_fabo_pedit_subj'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_akl_regist_subj'),($var=stringParser::encode($_POST['eml_akl_regist_subj'])))) settings::set($key,$var);
     if(settings::changed(($key='eml_reg'),($var=stringParser::encode($_POST['eml_reg'])))) settings::set($key,$var);
     if(settings::changed(($key='eml_pwd'),($var=stringParser::encode($_POST['eml_pwd'])))) settings::set($key,$var);
     if(settings::changed(($key='eml_nletter'),($var=stringParser::encode($_POST['eml_nletter'])))) settings::set($key,$var);
@@ -100,6 +101,7 @@ if($_POST) {
     if(settings::changed(($key='eml_fabo_npost'),($var=stringParser::encode($_POST['eml_fabo_npost'])))) settings::set($key,$var);
     if(settings::changed(($key='eml_fabo_tedit'),($var=stringParser::encode($_POST['eml_fabo_tedit'])))) settings::set($key,$var);
     if(settings::changed(($key='eml_fabo_pedit'),($var=stringParser::encode($_POST['eml_fabo_pedit'])))) settings::set($key,$var);
+    if(settings::changed(($key='eml_akl_register'),($var=stringParser::encode($_POST['eml_akl_register'])))) settings::set($key,$var);
     if(settings::changed(($key='mailfrom'),($var=stringParser::encode($_POST['mailfrom'])))) settings::set($key,$var);
     if(settings::changed(($key='tmpdir'),($var=stringParser::encode($_POST['tmpdir'])))) settings::set($key,$var);
     if(settings::changed(($key='wmodus'),($var=intval($_POST['wmodus'])))) settings::set($key,$var);
@@ -114,6 +116,7 @@ if($_POST) {
     if(settings::changed(($key='memcache_port'),($var=intval($_POST['memcache_port'])))) settings::set($key,$var);
     if(settings::changed(($key='urls_linked'),($var=stringParser::encode($_POST['urls_linked'])))) settings::set($key,$var);
     if(settings::changed(($key='steam_api_key'),($var=stringParser::encode($_POST['steam_apikey'])))) settings::set($key,$var);
+    if(settings::changed(($key='use_akl'),($var=intval($_POST['akl'])))) settings::set($key,$var);
     settings::load(true);
     notification::add_success(_config_set);
 }
@@ -172,6 +175,7 @@ $show = show($dir."/form_config", array( "cache_select"          => $cache_optio
                                          "c_eml_fabo_npost_subj" => stringParser::decode(settings::get('eml_fabo_npost_subj')),
                                          "c_eml_fabo_tedit_subj" => stringParser::decode(settings::get('eml_fabo_tedit_subj')),
                                          "c_eml_fabo_pedit_subj" => stringParser::decode(settings::get('eml_fabo_pedit_subj')),
+                                         "c_eml_akl_regist_subj" => stringParser::decode(settings::get('eml_akl_register_subj')),
                                          "c_eml_reg"             => stringParser::decode(settings::get('eml_reg')),
                                          "c_eml_pwd"             => stringParser::decode(settings::get('eml_pwd')),
                                          "c_eml_nletter"         => stringParser::decode(settings::get('eml_nletter')),
@@ -179,6 +183,7 @@ $show = show($dir."/form_config", array( "cache_select"          => $cache_optio
                                          "c_eml_fabo_tedit"      => stringParser::decode(settings::get('eml_fabo_tedit')),
                                          "c_eml_fabo_pedit"      => stringParser::decode(settings::get('eml_fabo_pedit')),
                                          "c_eml_fabo_nposr"      => stringParser::decode(settings::get('eml_fabo_npost')),
+                                         "c_eml_akl_register"    => stringParser::decode(settings::get('eml_akl_register')),
                                          "memcache_host"         => stringParser::decode(settings::get('memcache_host')),
                                          "memcache_port"         => intval(settings::get('memcache_port')),
                                          "steam_apikey"          => stringParser::decode(settings::get('steam_api_key')),
@@ -252,6 +257,8 @@ $show = show($dir."/form_config", array( "cache_select"          => $cache_optio
                                          "smtp_tls_ssl"          => $smtp_secure_options,
                                          "lang"                  => $lang,
                                          "mail_ext_select"       => $mail_options,
+                                         "sel_akl"               => (settings::get('use_akl') == 1 ? 'selected="selected"' : ''),
+                                         "sel_akl_ad"            => (settings::get('use_akl') == 2 ? 'selected="selected"' : ''),
                                          "selyes"                => (settings::get('regcode') ? 'selected="selected"' : ''),
                                          "selno"                 => (!settings::get('regcode') ? 'selected="selected"' : ''),
                                          "selwm"                 => (settings::get('wmodus') ? 'selected="selected"' : ''),

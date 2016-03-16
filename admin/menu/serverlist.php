@@ -28,7 +28,7 @@ switch ($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=serverlist&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_server)));
+                                                              "del" => _confirm_del_server));
 
             if(empty($get['clanurl'])) {
                 $clanname = show(_slist_clanname_without_url, array("name" => stringParser::decode($get['clanname'])));

@@ -28,11 +28,15 @@ var DZCP = {
         isOpera = (navigator.userAgent.indexOf("Opera") !== -1) ? true : false;
         
         $('body').append('<div id="infoDiv"></div>');
+        $('body').append('<div id="dialog"></div>');
         layer = $('#infoDiv')[0];
         doc.body.onmousemove = this.trackMouse;
        
         // init lightbox
         DZCP.initLightbox();
+		
+        // init jquery-ui
+        DZCP.initJQueryUI();
         
         // init colorpicker
         $("#colorpicker").colorpicker();
@@ -62,10 +66,48 @@ var DZCP = {
         }
 		
 		DZCP.initCodeHighlighting();
-
-        // init template
-        $(".tabs").tabs("> .switchs");
+    },
+	
+    // init jquery-ui
+    initJQueryUI: function() {
         $(".tabs2").tabs(".switchs2 > div", { effect: 'fade', rotate: true });
+        $(".slidetabs").tabs(".images > div", { effect: 'fade', rotate: true }).slideshow({ autoplay: true, interval: 6000 });
+        $(".tabs").tabs("> .switchs", { effect: 'fade' });
+        $(".nav" ).button({ text: true });
+        $( "#rerun" ).button().click(function() { return false; }).next().button({ text: false, icons: { primary: "ui-icon-triangle-1-s" } }).click(function() {
+            var menu = $( this ).parent().next().show().position({ my: "left top", at: "left bottom", of: this });
+            $( document ).one( "click", function() { menu.hide(); });
+            return false;
+        }).parent().buttonset().next().hide().menu();
+
+        $("[title]").tooltip({ track: true, delay: 2, fade: 250 });
+        $("#dialog").dialog({ modal: true, bgiframe: true, width: 'auto', height: 'auto', autoOpen: false, title: 'Info' });
+
+        DZCP.UpdateJQueryUI();
+    },
+
+    // update jquery-ui
+    UpdateJQueryUI: function() {
+        $("input[type=submit]" ).button().click(function( ) { $(this).find("form").submit(); });
+        $("input[type=button]" ).button().click(function( ) { $(this).find("form").submit(); });
+        $("a.confirm").click(function(link) {
+            link.preventDefault();
+            var default_message_for_dialog = ''
+            var theHREF = $(this).attr("href");
+            var theREL = $(this).attr("rel");
+            var theMESSAGE = (theREL == undefined || theREL == '') ? default_message_for_dialog : theREL;
+            var theICON = '<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 0 0;"></span>';
+
+            var btns = {};
+            btns[decodeURIComponent(escape(dzcp_config.dialog_button_00))] = function() { window.location.href = theHREF; };
+            btns[decodeURIComponent(escape(dzcp_config.dialog_button_01))] = function() { $(this).dialog("close"); };
+
+            // set windows content
+            $('#dialog').html('<P>' + theICON + theMESSAGE + '</P>');
+            $("#dialog").dialog('option', 'buttons', btns);
+            $('#dialog').dialog('option', 'position', ['center', (document.body.clientHeight / 3)]);
+            $("#dialog").dialog("open");
+        });
     },
 	
     // init Auto-Refresh
@@ -104,8 +146,8 @@ var DZCP = {
                 easing: 'ease-in-out',
                 opener: function(openerElement) {
                     return openerElement.is('img') ? openerElement : openerElement.find('img');
-            }
-        }
+				}
+			}
         });
     },
 
@@ -173,7 +215,7 @@ var DZCP = {
         if(!DZCP.jQueryCheck(false)) return false;
         DZCP.DebugLogger('DynLoader -> Tag: \'' + tag + '\' / URL: \'' + "../inc/ajax.php?i=" + menu + options + '\'');
         var request = $.ajax({ url: "../inc/ajax.php?i=" + menu + options });
-        request.done(function(msg) { if(fade) { $('#' + tag).html( msg ).hide().fadeIn("normal"); } else { $('#' + tag).html( msg ); } });
+        request.done(function(msg) { if(fade) { $('#' + tag).html( msg ).hide().fadeIn("normal"); DZCP.UpdateJQueryUI(); } else { $('#' + tag).html( msg ); DZCP.UpdateJQueryUI(); } });
    },
     
     // init Ajax DynLoader Sides via Ajax
@@ -181,7 +223,7 @@ var DZCP = {
         if(!DZCP.jQueryCheck(false)) return false;
         DZCP.DebugLogger('PageDynLoader -> Tag: \'' + tag + '\' / URL: \'' + url + '\'');
         var request = $.ajax({ url: url });
-        request.done(function(msg) { $('#' + tag).html(msg).hide().fadeIn("normal"); DZCP.initLightbox(); });
+        request.done(function(msg) { $('#' + tag).html(msg).hide().fadeIn("normal"); DZCP.initLightbox(); DZCP.UpdateJQueryUI(); });
     },
     
     // init Ajax DynCaptcha
@@ -196,7 +238,7 @@ var DZCP = {
         if(sid > 0) { url_input = url_input + "&sid="+sid; } else { url_input = url_input + "&sid="+Math.random(); }
         DZCP.DebugLogger('DynCaptcha -> Tag: \'' + tag + '\' / URL: \'' + url_input + '\'');
         var request = $.ajax({ url: url_input });
-        request.done(function(msg) { $('#' + tag).attr("src",msg).hide().fadeIn("normal"); });
+        request.done(function(msg) { $('#' + tag).attr("src",msg).hide().fadeIn("normal"); DZCP.UpdateJQueryUI(); });
     },
 
     // Play Sound per JS-Audio
@@ -212,8 +254,9 @@ var DZCP = {
         if(!DZCP.jQueryCheck(false)) return false;
         $.post('../shout/index.php?ajax', $('#shoutForm').serialize(),function(req) {
         if(req) alert(req.replace(/  /g, ' '));
-        $('#navShout').load('../inc/ajax.php?i=shoutbox');
+        $('#navShout').load('../inc/ajax.php?i=shoutbox').hide().fadeIn("normal");
         if(!req) $('#shouteintrag').prop('value', '');
+		DZCP.UpdateJQueryUI();
       });
 
       return false;
@@ -493,14 +536,7 @@ var DZCP = {
       });
     },
 
-  // confirm delete
-    del: function(txt) {
-      txt = txt.replace(/\+/g, ' ');
-      txt = txt.replace(/oe/g, 'ö');
-      return confirm(txt + '?');
-    },
-
-  // forum search
+	// forum search
     hideForumFirst: function() {
         if(!DZCP.jQueryCheck(false)) return false;
       $('#allkat').prop('checked', false);
@@ -596,6 +632,19 @@ var DZCP = {
         DZCP.DebugLogger('Change all Checkboxes with ID:'+tag+'_*');
         $('input:checkbox[id^="'+tag+'_"]').not(obj).prop('checked', obj.checked);
     },
+	
+	check_all: function(name, obj) {
+        if(!obj || !obj.form) return false;
+        var box = obj.form.elements[name];
+        if(!box) return false;
+        if(!box.length) box.checked = obj.checked; else
+        for(var i = 0; i < box.length; i++)  box[i].checked = obj.checked;
+    },
+	
+    sendFrom: function(do_obj,do_a,formId) {
+        $('input[name='+ do_obj +']').val(do_a);
+        $("#" + formId).submit();
+    },
     
     BooleanToString: function(boolean) {
        return (boolean ? 'true' : 'false');
@@ -605,3 +654,4 @@ var DZCP = {
 // load global events
 $(document).ready(function() { if(DZCP.jQueryCheck(true)) { DZCP.init(); }});
 $(window).load(function() { if(DZCP.jQueryCheck(false)) { DZCP.resizeImages(); DZCP.GoToAnchor(); }});
+$(window).resize(function() { DZCP.resizeImages(); DZCP.UpdateJQueryUI(); });

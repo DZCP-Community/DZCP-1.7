@@ -37,7 +37,7 @@ if(defined('_Away')) {
             $chkMe == 4 ? $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                                             "action" => "action=del",
                                                                             "title" => _button_title_del,
-                                                                            "del" => convSpace(_confirm_del_entry))) : $delete = "&nbsp;";
+                                                                            "del" => _confirm_del_entry)) : $delete = "&nbsp;";
 
             $info = show($dir."/button_info", array("id" => $get['id'],
                                                     "action" => "action=info",

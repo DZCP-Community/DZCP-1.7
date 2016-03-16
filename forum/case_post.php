@@ -173,73 +173,83 @@ if(defined('_Forum')) {
         } elseif($checks['intern'] == 1 && !permission("intforum") && !fintern($checks['id'])) {
           $index = error(_error_no_access, 1);
         } else {
-          if($userid >= 1)
-          {
-              $postnick = data("nick");
-              $postemail = data("email");
+          if($userid >= 1) {
+              $postnick = stringParser::decode(data("nick"));
+              $postemail = stringParser::decode(data("email"));
           } else {
               $postnick = "";
               $postemail = "";
           }
           if(isset($_GET['zitat']))
           {
-            $getzitat = $sql->fetch("SELECT nick,reg,text FROM `{prefix_forumposts}` WHERE id = '".intval($_GET['zitat'])."'");
+            $getzitat = $sql->fetch("SELECT `nick`,`reg`,`text` FROM `{prefix_forumposts}` WHERE `id` = ?;",
+                    array(intval($_GET['zitat'])));
 
-            if($getzitat['reg'] == "0") $nick = $getzitat['nick'];
-            else                        $nick = autor($getzitat['reg']);
+            if($getzitat['reg'] == "0") 
+                $nick = $getzitat['nick'];
+            else                        
+                $nick = autor($getzitat['reg']);
 
             $zitat = bbcode::zitat($nick, $getzitat['text']);
           } elseif(isset($_GET['zitatt'])) {
-            $getzitat = $sql->fetch("SELECT t_nick,t_reg,t_text FROM `{prefix_forumthreads}` WHERE id = '".intval($_GET['zitatt'])."'");
+            $getzitat = $sql->fetch("SELECT `t_nick`,`t_reg`,`t_text` FROM `{prefix_forumthreads}` WHERE `id` = ?;",
+                    array(intval($_GET['zitatt'])));
 
-            if($getzitat['t_reg'] == "0") $nick = $getzitat['t_nick'];
-            else                          $nick = data("nick",$getzitat['t_reg']);
+            if($getzitat['t_reg'] == "0") 
+                $nick = $getzitat['t_nick'];
+            else                          
+                $nick = stringParser::decode(data("nick",$getzitat['t_reg']));
 
             $zitat = bbcode::zitat($nick, $getzitat['t_text']);
           } else {
             $zitat = "";
           }
 
-          $dowhat = show(_forum_dowhat_add_post, array("id" => $_GET['id'],
-                                                       "kid" => $_GET['kid']));
-
-          $getl = $sql->fetch("SELECT * FROM `{prefix_forumposts}`
-                      WHERE kid = '".intval($_GET['kid'])."'
-                      AND sid = '".intval($_GET['id'])."'
-                      ORDER BY date DESC");
+          $dowhat = show(_forum_dowhat_add_post, array("id" => $_GET['id'], "kid" => $_GET['kid']));
+          $getl = $sql->fetch("SELECT * FROM `{prefix_forumposts}` "
+                  . "WHERE `kid` = ? AND `sid` = ? "
+                  . "ORDER BY `date` DESC;",
+                  array(intval($_GET['kid']),intval($_GET['id'])));
           if($sql->rowCount())
           {
             if(data("signatur",$getl['reg'])) $sig = _sig.bbcode::parse_html(data("signatur",$getl['reg']));
             else                               $sig = "";
 
-            if($getl['reg'] != "0") $userposts = show(_forum_user_posts, array("posts" => userstats("forumposts",$getl['reg'])));
-            else                    $userposts = "";
+            if($getl['reg'] != "0") 
+                $userposts = show(_forum_user_posts, array("posts" => userstats("forumposts",$getl['reg'])));
+            else                    
+                $userposts = "";
 
-            if($getl['reg'] == "0") $onoff = "";
-            else                    $onoff = onlinecheck($getl['reg']);
+            if($getl['reg'] == "0") 
+                $onoff = "";
+            else                    
+                $onoff = onlinecheck($getl['reg']);
 
             $text = bbcode::parse_html($getl['text']);
 
-            if($chkMe == 4 || permission('ipban')) $posted_ip = $getl['ip'];
-            else              $posted_ip = _logged;
+            if($chkMe == 4 || permission('ipban')) 
+                $posted_ip = $getl['ip'];
+            else              
+                $posted_ip = _logged;
 
             $titel = show(_eintrag_titel_forum, array("postid" => (cnt("{prefix_forumposts}", " WHERE sid =".intval($_GET['id']))+1),
-                                                                                        "datum" => date("d.m.Y", $getl['date']),
-                                                                                        "zeit" => date("H:i", $getl['date'])._uhr,
-                                                "url" => '#',
-                                                "edit" => "",
-                                                "delete" => ""));
+                                                      "datum" => date("d.m.Y", $getl['date']),
+                                                      "zeit" => date("H:i", $getl['date'])._uhr,
+                                                      "url" => '#',
+                                                      "edit" => "",
+                                                      "delete" => ""));
             if($getl['reg'] != 0)
             {
               $getu = $sql->fetch("SELECT nick,icq,hp,email FROM `{prefix_users}` WHERE id = '".$getl['reg']."'");
 
               $email = CryptMailto(stringParser::decode($getu['email']),_emailicon_forum);
               $pn = _forum_pn_preview;
-              if(empty($getu['icq']) || $getu['icq'] == 0) $icq = "";
-                  else {
+              if(empty($getu['icq']) || $getu['icq'] == 0) 
+                  $icq = "";
+              else {
                 $uin = show(_icqstatus_forum, array("uin" => $getu['icq']));
                 $icq = '<a href="http://www.icq.com/whitepages/about_me.php?uin='.$getu['icq'].'" target="_blank">'.$uin.'</a>';
-                  }
+              }
 
               if(empty($getu['hp'])) $hp = "";
               else $hp = show(_hpicon_forum, array("hp" => $getu['hp']));

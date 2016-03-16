@@ -422,7 +422,7 @@ switch ($do) {
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                     "action" => "admin=squads&amp;do=delete",
                     "title" => _button_title_del,
-                    "del" => convSpace(_confirm_del_team)));
+                    "del" => _confirm_del_team));
 
             $icon = show(_gameicon, array("icon" => $get['icon']));
             $class = ($color % 2) ? "contentMainSecond" : "contentMainFirst"; $color++;

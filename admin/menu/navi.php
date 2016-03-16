@@ -9,8 +9,8 @@ if(_adminMenu != 'true') exit;
     $where = $where.': '._navi_head;
       if($do == "add")
       {
-        $qry = $sql->select("SELECT s2.*, s1.name AS katname, s1.placeholder FROM `{prefix_navi_kats}` AS s1 LEFT JOIN `{prefix_navi}` AS s2 ON s1.`placeholder` = s2.`kat`
-                   ORDER BY s1.name, s2.pos");
+        $qry = $sql->select("SELECT s2.*, s1.name AS katname, s1.placeholder FROM `{prefix_navi_kats}` AS s1 LEFT JOIN `{prefix_navi}` AS s2 ON s1.`placeholder` = s2.`kat` ORDER BY s1.name, s2.pos;");
+        $thiskat = ""; $position = "";
         foreach($qry as $get) {
           if($thiskat != $get['kat']) {
             $position .= '
@@ -247,7 +247,7 @@ if(_adminMenu != 'true') exit;
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=navi&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_navi)));
+                                                              "del" => _confirm_del_navi));
             $edit = "&nbsp;";
             $type = _navi_space;
           } else {
@@ -258,7 +258,7 @@ if(_adminMenu != 'true') exit;
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=navi&amp;do=delete",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_navi)));
+                                                              "del" => _confirm_del_navi));
           }
 
           if($get['shown'] == "1")
@@ -302,7 +302,7 @@ if(_adminMenu != 'true') exit;
             $delete = show("page/button_delete_single", array("id" => $get['id'],
                                                               "action" => "admin=navi&amp;do=deletekat",
                                                               "title" => _button_title_del,
-                                                              "del" => convSpace(_confirm_del_menu)));
+                                                              "del" => _confirm_del_menu));
           }
           $show_kats .= show($dir."/navi_kats", array("name" => stringParser::decode($get['name']),
                                                       "intern" => (empty($get['intern']) ? _noicon : _yesicon),

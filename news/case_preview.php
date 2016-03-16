@@ -64,13 +64,14 @@ if(defined('_News')) {
                                            "intern" => $intern,
                                            "sticky" => $sticky,
                                            "klapp" => $klapp,
-                                           "more" => bbcode::parse_html($_POST['morenews'],true),
+                                           "more" => bbcode::parse_html($_POST['morenews']),
                                            "viewed" => $viewed,
-                                           "text" => bbcode::parse_html($_POST['newstext'],true),
+                                           "text" => bbcode::parse_html($_POST['newstext']),
                                            "datum" => date("d.m.y H:i", time())._uhr,
                                            "links" => $links,
                                            "autor" => autor($_SESSION['id'])));
 
     update_user_status_preview();
+    header('Content-Type: text/html; charset=utf-8');
     exit(utf8_encode('<table class="mainContent" cellspacing="1">'.$index.'</table>'));
 }
