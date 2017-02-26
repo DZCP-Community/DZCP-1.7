@@ -57,117 +57,122 @@ if(defined('_UserMenu')) {
                     } elseif ($check_email) {
                         $index = error(_error_email_exists, 1);
                     } else {
-                        $index = info(_info_edit_profile_done, "?action=user&amp;id=" . $userid . "");
                         $newpwd = "";
                         if (isset($_POST['pwd']) && !empty($_POST['pwd'])) {
                             if(pwd_encoder($_POST['pwd']) == pwd_encoder($_POST['cpwd'])) {
                                 $_SESSION['pwd'] = pwd_encoder($_POST['pwd']);
                                 $newpwd = "`pwd` = '".stringParser::encode($_SESSION['pwd'])."',";
                                 $newpwd .= "`pwd_encoder` = ".settings::get('default_pwd_encoder').",";
-                                $index = info(_info_edit_profile_done, "?action=user&amp;id=" . $userid . "");
                             } else {
                                 $index = error(_error_passwords_dont_match, 1);
                             }
                         }
-
+                        
                         $bday = ($_POST['t'] && $_POST['m'] && $_POST['j'] ? cal($_POST['t']) . "." . cal($_POST['m']) . "." . $_POST['j'] : 0);
                         $qrycustom = $sql->select("SELECT `feldname`,`type` FROM `{prefix_profile}`"); $customfields = '';
                         foreach($qrycustom as $getcustom) {
                             $customfields .= " `".$getcustom['feldname']."` = '".($getcustom['type'] == 2 ? links($_POST[$getcustom['feldname']]) : stringParser::encode($_POST[$getcustom['feldname']]))."', ";
                         }
-
-                        $sql->update("UPDATE `{prefix_users}` SET " . $newpwd . " " . $customfields . " `country` = ?,`user` = ?, `nick` = ?, `rlname` = ?, `sex` = ?,`status` = ?, "
-                        ."`bday` = ?, `email` = ?, `nletter` = ?, `pnmail` = ?, `city` = ?, `gmaps_koord` = ?, `hp` = ?, `icq` = ?, `hlswid` = ?, `xboxid` = ?, `psnid` = ?,"
-                        ."`originid` = ?, `battlenetid` = ?,`steamid` = ?,`skypename` = ?,`signatur` = ?,`beschreibung` = ?, `perm_gb` = ?, `perm_gallery` = ?, `startpage` = ?, `profile_access` = ?"
-                        ." WHERE id = ?;", array(stringParser::encode($_POST['land']),stringParser::encode($_POST['user']),stringParser::encode($_POST['nick']),stringParser::encode($_POST['rlname']),intval( $_POST['sex']),intval( $_POST['status']),
-                                (!$bday ? 0 : strtotime($bday)),stringParser::encode($_POST['email']),intval( $_POST['nletter']),intval( $_POST['pnmail']),stringParser::encode($_POST['city']),
-                                stringParser::encode($_POST['gmaps_koord']),stringParser::encode(links($_POST['hp'])),
-                            intval($_POST['icq']),stringParser::encode(trim($_POST['hlswid'])),stringParser::encode(trim($_POST['xboxid'])),
-                                stringParser::encode(trim($_POST['psnid'])),stringParser::encode(trim($_POST['originid'])),stringParser::encode(trim($_POST['battlenetid'])),
-                            stringParser::encode(trim($_POST['steamid'])),stringParser::encode(trim($_POST['skypename'])),
-                                stringParser::encode($_POST['sig']),stringParser::encode($_POST['ich']),stringParser::encode($_POST['visibility_gb']),
-                            stringParser::encode($_POST['visibility_gallery']),intval($_POST['startpage']),intval($_POST['visibility_profile']),$userid));
                         
-                        $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($userid)));
-                        dbc_index::setIndex('user_' . $get['id'], $get); //Update Cache
+                        if(empty($index) && (!dzcp_demo || (dzcp_demo && !rootAdmin($userid)))) {
+                            $index = info(_info_edit_profile_done, "?action=user&amp;id=" . $userid . "");
+                            $sql->update("UPDATE `{prefix_users}` SET " . $newpwd . " " . $customfields . " `country` = ?,`user` = ?, `nick` = ?, `rlname` = ?, `sex` = ?,`status` = ?, "
+                            ."`bday` = ?, `email` = ?, `nletter` = ?, `pnmail` = ?, `city` = ?, `gmaps_koord` = ?, `hp` = ?, `icq` = ?, `hlswid` = ?, `xboxid` = ?, `psnid` = ?,"
+                            ."`originid` = ?, `battlenetid` = ?,`steamid` = ?,`skypename` = ?,`signatur` = ?,`beschreibung` = ?, `perm_gb` = ?, `perm_gallery` = ?, `startpage` = ?, `profile_access` = ?"
+                            ." WHERE id = ?;", array(stringParser::encode($_POST['land']),stringParser::encode($_POST['user']),stringParser::encode($_POST['nick']),stringParser::encode($_POST['rlname']),intval( $_POST['sex']),intval( $_POST['status']),
+                                    (!$bday ? 0 : strtotime($bday)),stringParser::encode($_POST['email']),intval( $_POST['nletter']),intval( $_POST['pnmail']),stringParser::encode($_POST['city']),
+                                    stringParser::encode($_POST['gmaps_koord']),stringParser::encode(links($_POST['hp'])),
+                                intval($_POST['icq']),stringParser::encode(trim($_POST['hlswid'])),stringParser::encode(trim($_POST['xboxid'])),
+                                    stringParser::encode(trim($_POST['psnid'])),stringParser::encode(trim($_POST['originid'])),stringParser::encode(trim($_POST['battlenetid'])),
+                                stringParser::encode(trim($_POST['steamid'])),stringParser::encode(trim($_POST['skypename'])),
+                                    stringParser::encode($_POST['sig']),stringParser::encode($_POST['ich']),stringParser::encode($_POST['visibility_gb']),
+                                stringParser::encode($_POST['visibility_gallery']),intval($_POST['startpage']),intval($_POST['visibility_profile']),$userid));
+
+                            $get = $sql->fetch("SELECT * FROM `{prefix_users}` WHERE `id` = ?;",array(intval($userid)));
+                            dbc_index::setIndex('user_' . $get['id'], $get); //Update Cache
+                        } else {
+                            $index = error(_error_user_dont_change_in_demo, 1);
+                        }
                     }
                 break;
                 case 'delete':
                     if(!rootAdmin($userid)) {
                         $getdel = $sql->fetch("SELECT `id`,`nick`,`email`,`hp` FROM `{prefix_users}` WHERE `id` = ?;",array($userid));
-                        $sql->update("UPDATE `{prefix_forumthreads}` SET `t_nick` = ?, `t_email` = ?, `t_hp` = ?, `t_reg` = 0, WHERE t_reg = ?;",
-                        array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
-                        $sql->update("UPDATE `{prefix_forumposts}` SET `nick` = ?, `email` = ?, `hp` = ?, WHERE `reg` = ?;",
-                        array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
-                        $sql->update("UPDATE `{prefix_newscomments}` SET `nick` = ?,`email` = ?, `hp` = ?, `reg` = 0, WHERE `reg` = ?;",
-                        array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
-                        $sql->update("UPDATE `{prefix_acomments}` SET `nick` = ?, `email` = ?, `hp` = ?, `reg` = 0, WHERE `reg` = ?;",
-                        array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
-                        $sql->delete("DELETE FROM `{prefix_messages}` WHERE `von` = ? OR   `an`  = ?;",array($getdel['id'],$getdel['id']));
-                        $sql->update("UPDATE `{prefix_usergb}` SET `reg` = 0 WHERE `reg` = ?;",array($getdel['id']));
-                        $sql->delete("DELETE FROM `{prefix_news}` WHERE `autor` = ?;",array($getdel['id']));
-                        $sql->delete("DELETE FROM `{prefix_permissions}` WHERE `user` = ?;",array($getdel['id']));
-                        $sql->delete("DELETE FROM `{prefix_squaduser}` WHERE `user` = ?;",array($getdel['id']));
-                        $sql->delete("DELETE FROM `{prefix_userbuddys}` WHERE `user` = ? OR `buddy` = ?;",array($getdel['id'],$getdel['id']));
-                        $sql->delete("DELETE FROM `{prefix_userstats}` WHERE `user` = ?;",array($getdel['id']));
-                        $sql->delete("DELETE FROM `{prefix_users}` WHERE `id` = ?;",array($getdel['id']));
-                        $sql->delete("DELETE FROM `{prefix_userstats}` WHERE `user` = ?;",array($getdel['id']));
-                        $sql->delete("DELETE FROM `{prefix_clicks_ips}` WHERE `uid` = ?;",array($getdel['id']));
-
-                        $qrygl = $sql->select("SELECT * FROM `{prefix_usergallery}` WHERE `user` = ?;",array($getdel['id']));
                         if($sql->rowCount()) {
-                            foreach($qrygl as $getgl) {
-                                $files = get_files(basePath."/inc/images/uploads/usergallery/",false,true,$picformat);
-                                foreach ($files as $file) {
-                                    $pic = explode('.', $getgl['pic']); $pic = $pic[0];
-                                    if(preg_match("#".$getdel['id']."_".$pic."_(.*?).(gif|jpg|jpeg|png)#",strtolower($file))!= FALSE) {
-                                        $res = preg_match("#".$getdel['id']."_".$pic."_(.*)#",$file,$match);
-                                        if (file_exists(basePath."/inc/images/uploads/usergallery/".$getdel['id']."_".$pic."_".$match[1])) {
-                                            unlink(basePath."/inc/images/uploads/usergallery/".$getdel['id']."_".$pic."_".$match[1]);
+                            $sql->update("UPDATE `{prefix_forumthreads}` SET `t_nick` = ?, `t_email` = ?, `t_hp` = ?, `t_reg` = 0, WHERE t_reg = ?;",
+                            array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
+                            $sql->update("UPDATE `{prefix_forumposts}` SET `nick` = ?, `email` = ?, `hp` = ?, WHERE `reg` = ?;",
+                            array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
+                            $sql->update("UPDATE `{prefix_newscomments}` SET `nick` = ?,`email` = ?, `hp` = ?, `reg` = 0, WHERE `reg` = ?;",
+                            array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
+                            $sql->update("UPDATE `{prefix_acomments}` SET `nick` = ?, `email` = ?, `hp` = ?, `reg` = 0, WHERE `reg` = ?;",
+                            array($getdel['nick'],$getdel['email'],stringParser::encode(links($getdel['hp'])),$getdel['id']));
+                            $sql->delete("DELETE FROM `{prefix_messages}` WHERE `von` = ? OR   `an`  = ?;",array($getdel['id'],$getdel['id']));
+                            $sql->update("UPDATE `{prefix_usergb}` SET `reg` = 0 WHERE `reg` = ?;",array($getdel['id']));
+                            $sql->delete("DELETE FROM `{prefix_news}` WHERE `autor` = ?;",array($getdel['id']));
+                            $sql->delete("DELETE FROM `{prefix_permissions}` WHERE `user` = ?;",array($getdel['id']));
+                            $sql->delete("DELETE FROM `{prefix_squaduser}` WHERE `user` = ?;",array($getdel['id']));
+                            $sql->delete("DELETE FROM `{prefix_userbuddys}` WHERE `user` = ? OR `buddy` = ?;",array($getdel['id'],$getdel['id']));
+                            $sql->delete("DELETE FROM `{prefix_userstats}` WHERE `user` = ?;",array($getdel['id']));
+                            $sql->delete("DELETE FROM `{prefix_users}` WHERE `id` = ?;",array($getdel['id']));
+                            $sql->delete("DELETE FROM `{prefix_userstats}` WHERE `user` = ?;",array($getdel['id']));
+                            $sql->delete("DELETE FROM `{prefix_clicks_ips}` WHERE `uid` = ?;",array($getdel['id']));
+
+                            $qrygl = $sql->select("SELECT * FROM `{prefix_usergallery}` WHERE `user` = ?;",array($getdel['id']));
+                            if($sql->rowCount()) {
+                                foreach($qrygl as $getgl) {
+                                    $files = get_files(basePath."/inc/images/uploads/usergallery/",false,true,$picformat);
+                                    foreach ($files as $file) {
+                                        $pic = explode('.', $getgl['pic']); $pic = $pic[0];
+                                        if(preg_match("#".$getdel['id']."_".$pic."_(.*?).(gif|jpg|jpeg|png)#",strtolower($file))!= FALSE) {
+                                            $res = preg_match("#".$getdel['id']."_".$pic."_(.*)#",$file,$match);
+                                            if (file_exists(basePath."/inc/images/uploads/usergallery/".$getdel['id']."_".$pic."_".$match[1])) {
+                                                unlink(basePath."/inc/images/uploads/usergallery/".$getdel['id']."_".$pic."_".$match[1]);
+                                            }
                                         }
                                     }
-                                }
 
-                                if (file_exists(basePath . '/inc/images/uploads/usergallery/'.$getdel['id'].'_'.$getgl['pic'])) {
-                                    unlink(basePath . '/inc/images/uploads/usergallery/'.$getdel['id'].'_'.$getgl['pic']);
+                                    if (file_exists(basePath . '/inc/images/uploads/usergallery/'.$getdel['id'].'_'.$getgl['pic'])) {
+                                        unlink(basePath . '/inc/images/uploads/usergallery/'.$getdel['id'].'_'.$getgl['pic']);
+                                    }
+
+                                    $sql->delete("DELETE FROM `{prefix_usergallery}` WHERE `id` = ?;",array($getgl['id']));
                                 }
-                                
-                                $sql->delete("DELETE FROM `{prefix_usergallery}` WHERE `id` = ?;",array($getgl['id']));
-                            }
-                        }
-                        
-                        $files = get_files(basePath."/inc/images/uploads/userpics/",false,true,$picformat);
-                        foreach ($files as $file) {
-                            if(preg_match("#".$getdel['id']."_(.*?).(gif|jpg|jpeg|png)#",strtolower($file))!= FALSE) {
-                                $res = preg_match("#".$getdel['id']."_(.*)#",$file,$match);
-                                if (file_exists(basePath."/inc/images/uploads/userpics/".$getdel['id']."_".$match[1])) {
-                                    unlink(basePath."/inc/images/uploads/userpics/".$getdel['id']."_".$match[1]);
-                                }
-                            }
-                        }
-                        
-                        $files = get_files(basePath."/inc/images/uploads/useravatare/",false,true,$picformat);
-                        foreach ($files as $file) {
-                            if(preg_match("#".$getdel['id']."_(.*?).(gif|jpg|jpeg|png)#",strtolower($file))!= FALSE) {
-                                $res = preg_match("#".$getdel['id']."_(.*)#",$file,$match);
-                                if (file_exists(basePath."/inc/images/uploads/useravatare/".$getdel['id']."_".$match[1])) {
-                                    unlink(basePath."/inc/images/uploads/useravatare/".$getdel['id']."_".$match[1]);
-                                }
-                            }
-                        }
-                        
-                        foreach ($picformat as $tmpendung) {
-                            if (file_exists(basePath . "/inc/images/uploads/userpics/" . intval($getdel['id']) . "." . $tmpendung)) {
-                                @unlink(basePath . "/inc/images/uploads/userpics/" . intval($getdel['id']) . "." . $tmpendung);
                             }
 
-                            if (file_exists(basePath . "/inc/images/uploads/useravatare/" . intval($getdel['id']) . "." . $tmpendung)) {
-                                @unlink(basePath . "/inc/images/uploads/useravatare/" . intval($getdel['id']) . "." . $tmpendung);
+                            $files = get_files(basePath."/inc/images/uploads/userpics/",false,true,$picformat);
+                            foreach ($files as $file) {
+                                if(preg_match("#".$getdel['id']."_(.*?).(gif|jpg|jpeg|png)#",strtolower($file))!= FALSE) {
+                                    $res = preg_match("#".$getdel['id']."_(.*)#",$file,$match);
+                                    if (file_exists(basePath."/inc/images/uploads/userpics/".$getdel['id']."_".$match[1])) {
+                                        unlink(basePath."/inc/images/uploads/userpics/".$getdel['id']."_".$match[1]);
+                                    }
+                                }
                             }
-                        }
 
-                        dzcp_session_destroy();
-                        $index = info(_info_account_deletet, '../news/');
+                            $files = get_files(basePath."/inc/images/uploads/useravatare/",false,true,$picformat);
+                            foreach ($files as $file) {
+                                if(preg_match("#".$getdel['id']."_(.*?).(gif|jpg|jpeg|png)#",strtolower($file))!= FALSE) {
+                                    $res = preg_match("#".$getdel['id']."_(.*)#",$file,$match);
+                                    if (file_exists(basePath."/inc/images/uploads/useravatare/".$getdel['id']."_".$match[1])) {
+                                        unlink(basePath."/inc/images/uploads/useravatare/".$getdel['id']."_".$match[1]);
+                                    }
+                                }
+                            }
+
+                            foreach ($picformat as $tmpendung) {
+                                if (file_exists(basePath . "/inc/images/uploads/userpics/" . intval($getdel['id']) . "." . $tmpendung)) {
+                                    @unlink(basePath . "/inc/images/uploads/userpics/" . intval($getdel['id']) . "." . $tmpendung);
+                                }
+
+                                if (file_exists(basePath . "/inc/images/uploads/useravatare/" . intval($getdel['id']) . "." . $tmpendung)) {
+                                    @unlink(basePath . "/inc/images/uploads/useravatare/" . intval($getdel['id']) . "." . $tmpendung);
+                                }
+                            }
+
+                            dzcp_session_destroy();
+                            $index = info(_info_account_deletet, '../news/');
+                        }
                     }
                 break;
                 default:

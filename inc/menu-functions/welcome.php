@@ -4,7 +4,6 @@
  * http://www.dzcp.de
  * Menu: Begrüßung nach Tageszeit
  */
-
 function welcome() {
     global $chkMe,$userid;
 
@@ -20,8 +19,9 @@ function welcome() {
                //-->
              </script>";
 
+    $demo = (dzcp_demo ? ' - <font color="#FF0004"><b>Demo Version: '._version.' | Build: '._build.' | Date: '._release.'</b></font>' : '');
     if(!$chkMe)
-        return $return.' '._welcome_guest;
+        return $return.' '._welcome_guest.$demo;
 
-    return $return.' '.autor($userid, "welcome");
+    return $return.' '.autor($userid, "welcome").$demo;
 }

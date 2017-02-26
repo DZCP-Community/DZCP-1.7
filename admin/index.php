@@ -117,7 +117,7 @@ if (!isset($_SESSION['id']) || empty($_SESSION['id']) || !admin_perms($_SESSION[
         if (allow_url_fopen_support()) {
             if (admin_view_dzcp_news) {
                 if (!$config_cache['use_cache'] || !$cache->isExisting("admin_news")) {
-                    $dzcp_news_stream = fileExists("http://www.dzcp.de/dzcp_news_1.7_test.php");
+                    $dzcp_news_stream = get_external_contents("http://www.dzcp.de/dzcp_news_1.7_test.php");
                     if ($dzcp_news_stream != false && !empty($dzcp_news_stream)) {
                         if ($config_cache['use_cache']) {
                             $cache->set("admin_news", base64_encode($dzcp_news_stream), 1200);
@@ -138,7 +138,7 @@ if (!isset($_SESSION['id']) || empty($_SESSION['id']) || !admin_perms($_SESSION[
                                 $dzcp_news_db[intval($_POST['newsID'])] = true;
                                 break;
                             case 'update':
-                                $dzcp_news_stream = fileExists("http://www.dzcp.de/dzcp_news_1.7_test.php");
+                                $dzcp_news_stream = get_external_contents("http://www.dzcp.de/dzcp_news_1.7_test.php");
                                 if ($dzcp_news_stream != false && !empty($dzcp_news_stream)) {
                                     if ($config_cache['use_cache']) {
                                         $cache->set("admin_news", base64_encode($dzcp_news_stream), 1200);

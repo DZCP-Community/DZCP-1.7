@@ -87,7 +87,7 @@ class sfs {
             fclose($fp);
         }
 
-        if(!(self::$json = fileExists(self::$url))) return false;
+        if(!(self::$json = get_external_contents(self::$url))) return false;
         if(empty(self::$json)) return false;
 
         self::$json = json_decode(self::$json,true);

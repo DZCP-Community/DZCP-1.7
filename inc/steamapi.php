@@ -115,7 +115,7 @@ class SteamAPI {
             self::$send_data_api['format'] = 'xml';
             self::$send_data_api['key'] = self::$api_key;
             self::$send_data_api['steamids'] = self::$user_data['steamID'];
-            if(steam_only_proxy || !($xml_stream = fileExists(self::$api_host.'/'.$interface.'/'.$method.'/'.$version.'/?'.http_build_query(self::$send_data_api)))) {
+            if(steam_only_proxy || !($xml_stream = get_external_contents(self::$api_host.'/'.$interface.'/'.$method.'/'.$version.'/?'.http_build_query(self::$send_data_api)))) {
                 //-> Use SteamAPI Proxy
                 if(function_exists('SteamAPI_Proxy')) {
                     $proxy = SteamAPI_Proxy(self::$profile_url,'api',array('interface' => $interface,'method' => $method, 'version' => $version));
@@ -165,7 +165,7 @@ class SteamAPI {
         global $cache;
         $zone_url = !empty($zone) ? '/'.$zone.'/' : ''; $zone_tag = !empty($zone) ? $zone.'_' : 'profile';
         if(!$config_cache['use_cache'] || !$cache->isExisting('steam_'.self::$profile_url) || !steam_infos_cache) {
-            $xml_stream = steam_only_proxy ? false : fileExists(self::$api_com.'/id/'.self::$profile_url.$zone_url.'/?xml=1');
+            $xml_stream = steam_only_proxy ? false : get_external_contents(self::$api_com.'/id/'.self::$profile_url.$zone_url.'/?xml=1');
             if(empty($xml_stream) || !$xml_stream) {
                 //-> Use SteamAPI Proxy
                 if(function_exists('SteamAPI_Proxy')) {

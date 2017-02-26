@@ -29,8 +29,8 @@ class phpfastcache_files extends BasePhpFastCache implements phpfastcache_driver
         }
         
         if(!is_dir(basePath.'/inc/_cache_') || 
-                !file_exists(basePath.'/_cache_')) {
-            @mkdir(basePath.'/_cache_', $config['default_chmod'], true);
+                !file_exists(basePath.'/inc/_cache_')) {
+            @mkdir(basePath.'/inc/_cache_', $config['default_chmod'], true);
         }
     }
 

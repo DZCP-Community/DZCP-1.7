@@ -289,6 +289,19 @@ if(cookie::get('id') != false && cookie::get('pkey') != false && empty($_SESSION
     }
 }
 
+//Demo Mode
+if(dzcp_demo) {
+    if(!empty($_SESSION['id'])) {
+        $_SESSION['pwd'] = pwd_encoder(dzcp_demo_password,3);
+    }
+    
+    if(data('pwd', 1) != pwd_encoder(dzcp_demo_password,3)) {
+        $newpwd = "`pwd` = '".stringParser::encode(pwd_encoder(dzcp_demo_password,3))."',`pwd_encoder` = 3";
+        $sql->update("UPDATE `{prefix_users}` SET " . $newpwd . " WHERE id = ?;", array(1));
+    }
+    $_SESSION['pwd_demo'] = dzcp_demo_password;
+}
+
 //-> Passwort in md5 oder sha1 bis 512 codieren
 function pwd_encoder($password,$encoder=-1) {
     $encoder = ($encoder != -1 ? $encoder : 
@@ -812,7 +825,7 @@ function array_var_exists($var,$search)
  * Funktion um eine Datei im Web auf Existenz zu prufen und abzurufen
  * @return String
  **/
-function fileExists($url,$post=false,$timeout=file_get_contents_timeout) {
+function get_external_contents($url,$post=false,$nogzip=false,$timeout=file_get_contents_timeout) {
     if((!allow_url_fopen_support() && !use_curl || (use_curl && !extension_loaded('curl'))))
         return false;
     
@@ -821,7 +834,7 @@ function fileExists($url,$post=false,$timeout=file_get_contents_timeout) {
     $port = isset($url_p['port']) ? $url_p['port'] : 80;
     
     if(!ping_port($host,$port,$timeout)) return false;
-    unset($host,$port);
+    unset($host);
    
     if(class_exists('Snoopy')) { //Use Snoopy HTTP Client
         $snoopy = new Snoopy;
@@ -844,6 +857,10 @@ function fileExists($url,$post=false,$timeout=file_get_contents_timeout) {
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_HEADER, false);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_AUTOREFERER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
+        curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/5.0");
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT , $timeout);
         curl_setopt($curl, CURLOPT_TIMEOUT, $timeout * 2); // x 2
         
@@ -855,25 +872,26 @@ function fileExists($url,$post=false,$timeout=file_get_contents_timeout) {
         }
         
         $gzip = false;
-        if(function_exists('gzinflate')) {
+        if(function_exists('gzinflate') && !$nogzip) {
             $gzip = true;
             curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept-Encoding: gzip,deflate'));
             curl_setopt($curl, CURLINFO_HEADER_OUT, true);
         }
         
         if($url_p['scheme'] == 'https') { //SSL
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($curl, CURLOPT_PORT , $port); 
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         }
-        
-        if (!$content = curl_exec($curl)) {
+
+        if (!is_object($curl) || !$content = curl_exec($curl)) {
             return false;
         }
 
         if($gzip) {
             $curl_info = curl_getinfo($curl,CURLINFO_HEADER_OUT);
             if(stristr($curl_info, 'accept-encoding') && stristr($curl_info, 'gzip')) {
-                $content = @gzinflate( substr($content,10,-8) );
+                $content = gzinflate( substr($content,10,-8) );
             }
         }
 
@@ -888,7 +906,7 @@ function fileExists($url,$post=false,$timeout=file_get_contents_timeout) {
         $opts['http']['timeout'] = $timeout * 2;
                 
         $gzip = false;
-        if(function_exists('gzinflate')) {
+        if(function_exists('gzinflate') && !$nogzip) {
             $gzip = true;
             $opts['http']['header'] = 'Accept-Encoding:gzip,deflate'."\r\n";
         }
@@ -2738,7 +2756,9 @@ function page($index='',$title='',$where='',$index_templ='index') {
     $java_vars = '<script language="javascript" type="text/javascript">var json=\''.javascript::encode().'\',dzcp_config=JSON&&JSON.parse(json)||$.parseJSON(json);</script>'."\n";
 
     if(settings::get("wmodus") && $chkMe != 4) {
-        $login = show("errors/wmodus_login", array("secure" => settings::get('securelogin') ? show("user/secure") : ''));
+        $demo = (dzcp_demo ? '<tr><td class="contentMainTop" colspan="2" align="center"><span class="fontBold">Login-Name: '.stringParser::decode(data('user',1)).'</span></td></tr>'
+                . '<tr><td class="contentMainTop" colspan="2" align="center"><span class="fontBold">Passwort: '.$_SESSION['pwd_demo'].'</span></td></tr>' : '');
+        $login = show("errors/wmodus_login", array("secure" => settings::get('securelogin') ? show("user/secure") : '', "demo" => $demo));
         cookie::save(); //Save Cookie
         echo show("errors/wmodus", array("tmpdir" => $tmpdir,
                                          "java_vars" => $java_vars,

@@ -29,8 +29,7 @@ ob_implicit_flush(false);
 
         //Steam Avatar
         if(!$config_cache['use_cache'] || !$cache->isExisting('steam_avatar_'.$steamID)) {
-            $ctx = stream_context_create(array('http'=>array('timeout' => file_get_contents_timeout)));
-            if($img_stream = file_get_contents($steam['user']['avatarIcon_url'], false, $ctx)) {
+            if($img_stream = get_external_contents($steam['user']['avatarIcon_url'], false, true)) {
                 $steam['user']['avatarIcon_url'] = 'data:image/png;base64,'.base64_encode($img_stream);
                 if(steam_avatar_cache && $config_cache['use_cache'])
                     $cache->set('steam_avatar_'.$steamID, bin2hex($img_stream), steam_avatar_refresh);

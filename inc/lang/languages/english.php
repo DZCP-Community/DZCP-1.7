@@ -5,6 +5,9 @@
  */
 
 ## ADDED / REDEFINED FOR 1.7.0
+define('_error_user_dont_change_in_demo', '<font color="#FF0004">Im Demo Betrieb ist ein &auml;ndern des Root-Administrators nicht m&ouml;glich!</font>');
+define('_error_dont_change_in_demo', '<font color="#FF0004">Im Demo Betrieb ist diese Aktion leider nicht m&ouml;glich!</font>');
+define('_aktion', 'Aktion');
 define('_config_activate_user', 'User aktivieren');
 define('_profil_admin_locked', 'Account ist nicht aktiviert');
 define('_profil_locked', 'Der Account ist noch nicht aktiviert, <a href="?index=user&amp;action=akl&do=send" target="_self">&lt; Aktivierungs-Mail senden &gt;</a>');

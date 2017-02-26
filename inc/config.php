@@ -68,12 +68,14 @@ define('captcha_sox_binary_path', 'sox');
 
 define('count_clicks_expires', (48*60*60)); // Wie Lange die IPs fur den Click-Counter gespeichert bleiben.
 
-define('php_code_enabled', false); // Erlaubt es auf "Adminbereich: Seiten erstellen/verwalten", PHP Code zu verwenden. * Nur Aktivieren wenn es gebracht wird! *
+define('php_code_enabled', false); // Erlaubt es auf "Adminbereich: Seiten erstellen/verwalten", PHP Code zu verwenden. * Nur Aktivieren wenn es gebaucht wird! *
 
-define('phpmailer_enable', true); // Aktiviert phpmailer 
+define('phpmailer_enable', true); // Aktiviert phpmailer
 
-//
-//
+define('dzcp_demo', false); // Aktiviert den DZCP Demo Modus
+define('dzcp_demo_password', 'admin'); // Setzt das Password für den DZCP Demo Modus 
+
+
 // -> Zeichen fur den Passwort Generator
 // ->                       Alphabet:                       Alphabet klein:               Zahlen:        Sonderzeichen:
 $passwordComponents = array("ABCDEFGHIJKLMNOPQRSTUVWXYZ" , "abcdefghijklmnopqrstuvwxyz" , "0123456789" , "#$@!");
@@ -83,7 +85,7 @@ $extensions = array('image/jpeg','image/gif','image/png');
 #########################################
 //-> Sessions Settings Start * Expert *
 #########################################
-define('sessions_backend', 'apc'); //Das zu verwendendes Backend: php,mysql,memcache,apc
+define('sessions_backend', 'php'); //Das zu verwendendes Backend: php,mysql,memcache,apc
 define('sessions_encode_type', 'sha1'); //Verwende die sha1 codierung fuer session ids
 define('sessions_encode', true); //Inhalt der Sessions zusatzlich verschlusseln
 define('sessions_ttl_maxtime', (2*60*60)); //Live-Time der Sessions * 2h
