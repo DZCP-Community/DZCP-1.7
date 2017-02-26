@@ -1,7 +1,4 @@
 <?php
-if (!defined('IN_DZCP'))
-    exit();
-
 if($_COOKIE['agb'] =! true)
     $index = show("/msg/agb_error");
 else
