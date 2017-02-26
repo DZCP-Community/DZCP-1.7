@@ -155,7 +155,7 @@ if (!isset($_SESSION['id']) || empty($_SESSION['id']) || !admin_perms($_SESSION[
                     file_put_contents(basePath . '/admin/admin_news.json', json_encode(array()));
                 }
 
-                if (count($dzcp_news_stream) >= 1) {
+                if(is_array($dzcp_news_stream) && count($dzcp_news_stream) >= 1) {
                     foreach ($dzcp_news_stream as $news) {
                         if (!array_key_exists($news['newsid'], $dzcp_news_db)) {
                             if (!$cache->isExisting('dzcp_news_image')) {
