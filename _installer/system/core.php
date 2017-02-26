@@ -21,7 +21,7 @@ define('INSTALLER', true);
 
 //-> Generiert die installations Schritte
 function steps() {
-    $lizenz = ''; $type = ''; $prepare = ''; $mysql = '';
+    $prepare = ''; $mysql = '';
     $db = ''; $update = ''; $adminacc = ''; $done = ''; $ftp = '';
 
     switch($_SESSION['setup_step']):
@@ -231,10 +231,10 @@ function write_sql_config() {
     $var = array("{prefix}", "{host}", "{user}" ,"{pass}" ,"{db}","{salt}","{engine}");
     $data = array($_SESSION['mysql_prefix'], $_SESSION['mysql_host'], $_SESSION['mysql_user'], $_SESSION['mysql_password'], $_SESSION['mysql_database'], $salt=mkpwd(), $_SESSION['mysql_engine']);
     $_SESSION['mysql_salt'] = str_replace($var, $data, $stream_salt);
-    file_put_contents(basePath.'/inc/mysql1.php', str_replace($var, $data, $stream_sql));
-    file_put_contents(basePath.'/inc/mysql_salt1.php', str_replace($var, $data, $stream_salt));
+    file_put_contents(basePath.'/inc/mysql.php', str_replace($var, $data, $stream_sql));
+    file_put_contents(basePath.'/inc/mysql_salt.php', str_replace($var, $data, $stream_salt));
     unset($stream_sql,$stream_salt);
-    return (file_exists(basePath.'/inc/mysql1.php') && file_exists(basePath.'/inc/mysql_salt1.php'));
+    return (file_exists(basePath.'/inc/mysql.php') && file_exists(basePath.'/inc/mysql_salt.php'));
 }
 
 //-> Prüft ob Datei existiert und ob auf ihr geschrieben werden kann
@@ -359,4 +359,8 @@ function mkpwd($passwordLength=12,$specialcars=true) {
 
     unset($random,$componentLength,$componentIndex);
     return $password;
+}
+
+function check_email($email) {
+    return (!preg_match("#^([a-zA-Z0-9\.\_\-]+)@([a-zA-Z0-9\.\-]+\.[A-Za-z][A-Za-z]+)$#", $email) ? false : true);
 }
