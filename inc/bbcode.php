@@ -322,7 +322,7 @@ if(isset($_GET['set_language']) && !empty($_GET['set_language'])) {
         cookie::save();
     }
 
-    header("Location: ".GetServerVars('HTTP_REFERER'));
+    header("Location: ".stringParser::decode(GetServerVars('HTTP_REFERER')));
 }
 
 lang($language); //Lade Sprache
