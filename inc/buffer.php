@@ -9,6 +9,7 @@ ob_implicit_flush(false);
 define('basePath', dirname(dirname(__FILE__).'../'));
 
 function can_gzip() {
+    if(!buffer_gzip_compress) return false;
     if(headers_sent() || connection_aborted()) return false; 
     if(!function_exists('gzcompress')) return false;
     if(strpos(GetServerVars('HTTP_ACCEPT_ENCODING'), 'x-gzip') !== false) return "x-gzip";

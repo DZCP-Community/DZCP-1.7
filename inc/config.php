@@ -42,6 +42,7 @@ define('auto_db_optimize_interval', (7*24*60*60)); // Wann soll der OPTIMIZE TAB
 define('dzcp_version_checker', true); // Version auf DZCP.de abgleichen und benachrichtigen ob eine neue Version zur Verfuegung steht.
 define('dzcp_version_checker_refresh', (120*60)); // Wie lange soll gewartet werden um einen Versionsabgleich auszufuehren.
 
+define('buffer_gzip_compress', false); // GZIP Kompression.
 define('buffer_gzip_compress_level', 4); // Level der GZIP Kompression 1 - 9
 define('buffer_show_licence_bar', true); // Schaltet die "Powered by DZCP - deV!L`z Clanportal V1.7" am Ende der Seite an oder aus.
 
