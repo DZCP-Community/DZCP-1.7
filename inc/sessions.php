@@ -47,7 +47,7 @@ final class session {
     }
 
     public final function init($destroy=false) {
-        if(!headers_sent() && !$this->is_session_started()) {
+        if(!headers_sent() && !self::is_session_started()) {
             if(show_sessions_debug)
                 DebugConsole::insert_info("session::init()", "Call session_start()");
 
@@ -67,7 +67,7 @@ final class session {
             $this->_prefix = self::$securityKey_mcrypt.'_';
             $this->_skcrypt = (!$cryptkey ? self::$securityKey_mcrypt : $cryptkey);
 
-            if(session_start())
+            if(!self::is_session_started() && session_start())
                 if(show_sessions_debug)
                     DebugConsole::insert_successful("session::init()", "Sessions started, ready to use");
         }
@@ -417,7 +417,7 @@ final class session {
     ##################### Private #####################
     ###################################################
 
-    protected final function is_session_started() {
+    public static final function is_session_started() {
         if ( php_sapi_name() !== 'cli' ) {
             if (version_compare(phpversion(), '5.4.0', '>=')) {
                 return session_status() === PHP_SESSION_ACTIVE ? true : false;

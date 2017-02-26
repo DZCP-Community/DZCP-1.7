@@ -12,7 +12,7 @@ if(!headers_sent()) {
         if(!$session->init())
             die('PHP-Sessions not started!');
     } else {
-        if(!session_start())
+        if(!session::is_session_started() && !session_start())
             die('PHP-Sessions not started!');
     }
 }
