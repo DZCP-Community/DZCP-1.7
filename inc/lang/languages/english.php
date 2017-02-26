@@ -131,6 +131,7 @@ define("_forum_total_posts", 'Total posts');
 define("_forum_total_topics", 'Total topics');
 define("_forum_total_members", 'Total members');
 define("_forum_newest_member", 'Our newest member');
+define("_forum_new_thread", 'New Thread');
 
 // Security Center
 define('_config_security', 'Security Center');
@@ -178,7 +179,7 @@ define('_admin_startpage_deleted', 'Startseite wurde erfogreich gel&ouml;scht');
 define('_admin_startpage_editd', 'Startseite wurde erfogreich editiert');
 define('_admin_startpage_no_name', 'Du hast keinen Namen eingegeben');
 define('_admin_startpage_no_url', 'Du hast keine URL eingegeben');
-define('_admin_startpage_add', 'Neue Startseite hinzufügen');
+define('_admin_startpage_add', 'Neue Startseite hinzufï¿½gen');
 
 //IP Blocker
 define('_ipban_admin_head', 'IP Blocker');
@@ -810,7 +811,6 @@ define('_pos_empty_kat' , 'You have to indicate a position!');
 define('_forum_lastpost' , '<a href="?action=showthread&amp;id=[tid]&amp;page=[page]#p[id]"><img src="../inc/images/forum_lpost.gif" alt="" title="Go to the last entry" class="icon" /></a>');
 define('_forum_addpost' , '<a href="?action=post&amp;do=add&amp;kid=[kid]&amp;id=[id]"><img src="../inc/images/forum_reply.gif" alt="" title="New entry" class="icon" /></a>');
 define('_pn_write' , '<a href="../user/?action=msg&amp;do=pn&amp;id=[id]"><img src="../inc/images/pn.gif" alt="" title="Write [nick] a new message" class="icon" /></a>');
-define('_forum_new_thread' , '<a href="?action=thread&amp;do=add&amp;kid=[id]"><img src="../inc/images/forum_new.gif" alt="" title="Insert thread" class="icon" /></a>');
 //--------------------------------------------\\
 define('_error_invalid_regcode' , 'The entered safety code does not agree with the character sequence indicated in the diagram!');
 define('_error_invalid_regcode_mathematic', 'Your calculation result from security code is not correct!');

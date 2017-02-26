@@ -1371,13 +1371,17 @@ td.middle,div.middle {
 /*---------------------------------------------
   WYSIWYG-Editor
 ---------------------------------------------*/
+table.mceLayout {
+    width: 740px;
+    height: 250px;
+}
 textarea.editorStyle,
 textarea.editorStyleWord,
 textarea.editorStyleMini,
 textarea.editorStyleNewsletter {
   overflow: auto;
-  width: 650px;
-  height: 200px;
+  width: 740px;
+  height: 250px;
 }
 textarea.editorStyleWord {
   height: 270px;

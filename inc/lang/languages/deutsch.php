@@ -132,6 +132,7 @@ define("_forum_total_posts", 'Beitr&auml;ge');
 define("_forum_total_topics", 'Themen');
 define("_forum_total_members", 'Mitglieder');
 define("_forum_newest_member", 'neuestes Mitglied');
+define("_forum_new_thread", 'Neues Thema');
 
 // Security Center
 define('_config_security', 'Security Center');
@@ -810,7 +811,6 @@ define('_pos_empty_kat', 'Du musst eine Rangbezeichnung angeben!');
 define('_forum_lastpost', '<a href="?action=showthread&amp;id=[tid]&amp;page=[page]#p[id]"><img src="../inc/images/forum_lpost.gif" alt="" title="Zum letzten Eintrag" class="icon" /></a>');
 define('_forum_addpost', '<a href="?action=post&amp;do=add&amp;kid=[kid]&amp;id=[id]"><img src="../inc/images/forum_reply.gif" alt="" title="Neuer Eintrag" class="icon" /></a>');
 define('_pn_write', '<a href="../user/?action=msg&amp;do=pn&amp;id=[id]"><img src="../inc/images/pn.gif" alt="" title="[nick] eine Nachricht schreiben" class="icon" /></a>');
-define('_forum_new_thread', '<a href="?action=thread&amp;do=add&amp;kid=[id]"><img src="../inc/images/forum_new.gif" alt="" title="Neues Thema erstellen" class="icon" /></a>');
 //--------------------------------------------\\
 define('_error_invalid_regcode', 'Der eingegebene Sicherheitsscode stimmt nicht mit der in der Grafik angezeigten Zeichenfolge &uuml;berein!');
 define('_error_invalid_regcode_mathematic', 'Das Rechenergebnis vom Sicherheitscode ist nicht richtig!');
