@@ -112,7 +112,7 @@ if(defined('_Forum')) {
         if(!empty($_POST['suche'])) {
             $show = show($dir."/search", array("threads" => $threads, "nav" => $nav));
         } else {
-            $show = show($dir."/forum_show_thread", array("nav" => $nav, "threads" => $threads, "newid" => $id));
+            $show = show($dir."/forum_show_thread", array("nav" => $nav, "threads" => $threads, "kid" => $id));
         }
 
         $kat = $sql->fetch("SELECT s1.`kattopic`,s2.`name` "

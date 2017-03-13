@@ -21,10 +21,10 @@ class sfs {
                 if((time()-$get['time']) > (2*86400) && $get['enable']) {
                     self::get(array('ip' => $userip)); //Array ( [success] => 1 [ip] => Array ( [lastseen] => 2013-04-26 19:57:51 [frequency] => 1327 [appears] => 1 [confidence] => 99.89 ) )
                     $stopforumspam = self::$json;
-                    if($stopforumspam['success']) {
+                    if(is_array($stopforumspam) && array_key_exists('success', $stopforumspam) && $stopforumspam['success']) {
                         $stopforumspam = $stopforumspam['ip']; // Array ( [lastseen] => 2013-04-26 19:57:51 [frequency] => 1327 [appears] => 1 [confidence] => 99.89 )
                         $stopforumspam_data_db = unserialize($get['data']);
-                        if($stopforumspam['appears'] == '1' && ($stopforumspam['confidence'] >= self::$confidence || $stopforumspam['frequency'] >= self::$frequency) && self::$autoblock) {
+                        if($stopforumspam['appears'] == '1' && ($stopforumspam['confidence'] >= self::$confidence && $stopforumspam['frequency'] >= self::$frequency) && self::$autoblock) {
                             $stopforumspam_data_db['confidence'] = $stopforumspam['confidence'];
                             $stopforumspam_data_db['frequency'] = $stopforumspam['frequency'];
                             $stopforumspam_data_db['lastseen'] = $stopforumspam['lastseen'];
@@ -51,7 +51,7 @@ class sfs {
                 //typ: 0 = Off, 1 = GSL, 2 = SysBan, 3 = Ipban
                 self::get(array('ip' => $userip)); //Array ( [success] => 1 [ip] => Array ( [lastseen] => 2013-04-26 19:57:51 [frequency] => 1327 [appears] => 1 [confidence] => 99.89 ) )
                 $stopforumspam = self::$json;
-                if(array_key_exists('success', $stopforumspam) && $stopforumspam['success']) {
+                if(is_array($stopforumspam) && array_key_exists('success', $stopforumspam) && $stopforumspam['success']) {
                     $stopforumspam = $stopforumspam['ip']; // Array ( [lastseen] => 2013-04-26 19:57:51 [frequency] => 1327 [appears] => 1 [confidence] => 99.89 )
                     if($stopforumspam['appears'] == '1' && $stopforumspam['confidence'] >= self::$confidence && $stopforumspam['frequency'] >= self::$frequency && self::$autoblock) {
                         $stopforumspam['banned_msg'] = 'Autoblock by stopforumspam.com';

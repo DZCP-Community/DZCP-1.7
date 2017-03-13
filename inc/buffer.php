@@ -12,19 +12,14 @@ function can_gzip() {
     if(!buffer_gzip_compress) return false;
     if(headers_sent() || connection_aborted()) return false; 
     if(!function_exists('gzcompress')) return false;
-    if(strpos(GetServerVars('HTTP_ACCEPT_ENCODING'), 'x-gzip') !== false) return "x-gzip";
-    if(strpos(GetServerVars('HTTP_ACCEPT_ENCODING'), 'sdch')   !== false) return "gzip"; 
-    if(strpos(GetServerVars('HTTP_ACCEPT_ENCODING'), 'gzip')   !== false) return "gzip"; 
+    if(strpos(GetServerVars('HTTP_ACCEPT_ENCODING'), 'x-gzip') !== false) return true;
+    if(strpos(GetServerVars('HTTP_ACCEPT_ENCODING'), 'sdch')   !== false) return true;
+    if(strpos(GetServerVars('HTTP_ACCEPT_ENCODING'), 'gzip')   !== false) return true;
     return false;
 }
 
 function gz_output($output='') {
     global $time_start;
-    $gzip_compress_level = (!defined('buffer_gzip_compress_level') ? 4 : buffer_gzip_compress_level);
-    if(function_exists('ini_set')) {
-        ini_set('zlib.output_compression_level', $gzip_compress_level);
-    }
-
     $time = round(getmicrotime() - $time_start,4);
     if(buffer_show_licence_bar) {
         switch (_edition) {
@@ -39,22 +34,28 @@ function gz_output($output='') {
         }
     }
 
-    $output .= "\r\n<!--This CMS is powered by deV!L`z Clanportal V"._version." - www.dzcp.de-->";
-    
     if($encoding=can_gzip()) {
-        $output .= "\r\n"."<!-- [GZIP => Level ".$gzip_compress_level."] ".sprintf("%01.2f",((strlen(gzcompress($output,$gzip_compress_level)))/1024))." kBytes | uncompressed: ".sprintf("%01.2f",((strlen($output))/1024 ))." kBytes -->";
-        ob_end_clean();
-        ob_start('ob_gzhandler');
-        header("Content-Encoding: ".$encoding);
-        echo "\x1f\x8b\x08\x00\x00\x00\x00\x00";
-        $hmtl = gzcompress($output,$gzip_compress_level);
-        echo substr($hmtl, 0, strlen($hmtl) - 4);
-        echo pack('V',crc32($output)); 
-        echo pack('V',strlen($output)); 
-        exit();
-        ob_end_flush();
+		if(function_exists('ini_set')) {
+			ini_set('zlib.output_compression','Off');
+		}
+		$gzip_compress_level = (!defined('buffer_gzip_compress_level') ? 4 : buffer_gzip_compress_level);
+        $output .= "\r\n"."<!-- [GZIP => Level ".$gzip_compress_level."] ".
+		sprintf("%01.2f",((strlen(gzencode(trim(preg_replace( '/\s+/', ' ', $output ) ), $gzip_compress_level)))/1024))." kBytes | uncompressed: ".
+		sprintf("%01.2f",((strlen($output))/1024 ))." kBytes -->";
+        $output = preg_replace('#\<!--.*?\-->#', '', $output); //Remove <!-- --> Tags
+		$output .= "\r\n<!--This CMS is powered by deV!L`z Clanportal "._version." - www.dzcp.de-->";
+		$hmtl = gzencode(trim(preg_replace( '/\s+/', ' ', $output ) ), $gzip_compress_level);
+        unset($output);
+        header('Content-Encoding: gzip');
+        header('content-type: text/html; charset: UTF-8');
+        header('cache-control: must-revalidate');
+        header('expires: '.gmdate("D, d M Y H:i:s", time() + 60 * 60) . " GMT" );
+        header('Content-Length: '.strlen($hmtl));
+        header('Vary: Accept-Encoding');
+        exit($hmtl);
     } else {
+		$output .= "\r\n<!--This CMS is powered by deV!L`z Clanportal "._version." - www.dzcp.de-->";
+        echo($output);
         ob_end_flush();
-        exit($output); 
     }
 }

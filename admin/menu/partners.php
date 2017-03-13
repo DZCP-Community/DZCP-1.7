@@ -74,7 +74,7 @@ $where = $where.': '._partners_head;
         $show = info(_partners_deleted,"?admin=partners");
       } else {
         $qry = $sql->select("SELECT * FROM `{prefix_partners}` ORDER BY id;");
-        while($get = _fetch($qry)) {
+        foreach ($qry as $get) {
           $edit = show("page/button_edit_single", array("id" => $get['id'],
                                                         "action" => "admin=partners&amp;do=edit",
                                                         "title" => _button_title_edit));

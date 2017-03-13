@@ -133,6 +133,12 @@ define("_forum_total_topics", 'Themen');
 define("_forum_total_members", 'Mitglieder');
 define("_forum_newest_member", 'neuestes Mitglied');
 define("_forum_new_thread", 'Neues Thema');
+define("_forum_sort_bcc", 'Betreff');
+define("_forum_sort_time", 'Erstellungsdatum');
+define("_forum_sort_by", 'Sortiere nach');
+define("_forum_sort_descending", 'Absteigend');
+define("_forum_sort_ascending", 'Aufsteigend');
+define("_forum_go", 'Los');
 
 // Security Center
 define('_config_security', 'Security Center');

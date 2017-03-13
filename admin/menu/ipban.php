@@ -88,8 +88,7 @@ switch ($do) {
         if($count_spam >= 1) {
             $site = (isset($_GET['sfs_side']) ? $_GET['sfs_side'] : 1);
             if($site < 1) $site = 1; $end = $site*20; $start = $end-20;
-
-            $count_spam_nav = $sql->rows("SELECT id FROM `{prefix_ipban}` WHERE `typ` = 1 ORDER BY `id` DESC LIMIT ?, 20;",array($start)); //Type Userban ROW
+            $count_spam_nav = $sql->rows("SELECT id FROM `{prefix_ipban}` WHERE `typ` = 1 ORDER BY `id` DESC LIMIT ".$start.", 20;"); //Type Userban ROW
             if($start != 0)
                 $pager_sfs = '<a href="?admin=ipban&sfs_side='.($site-1).'&ub_side='.(isset($_GET['ub_side']) ? $_GET['ub_side'] : 1).'"><img align="absmiddle" src="../inc/images/previous.png" alt="left" /></a>';
             else
@@ -102,7 +101,7 @@ switch ($do) {
             else
                 $pager_sfs .= '<img src="../inc/images/next.png" alt="right" align="absmiddle" class="disabled" />';
 
-            $qry = $sql->select("SELECT * FROM `{prefix_ipban}` WHERE `typ` = 1 ORDER BY `id` DESC LIMIT ?,20;",array($start)); $color = 1;
+            $qry = $sql->select("SELECT * FROM `{prefix_ipban}` WHERE `typ` = 1 ORDER BY `id` DESC LIMIT ".$start.", 20;"); $color = 1;
             foreach($qry as $get) {
                 $data_array = unserialize($get['data']);
                 $delete = show("page/button_delete_single", array("id" => $get['id'], "action" => "admin=ipban&amp;do=delete", "title" => _button_title_del, "del" => _confirm_del_ipban));
@@ -125,7 +124,7 @@ switch ($do) {
             $end = $site*20;
             $start = $end-20;
 
-            $count_user_nav = $sql->rows("SELECT id FROM `{prefix_ipban}` WHERE typ = 3 ORDER BY id DESC LIMIT ?, 20;",array($start)); //Type System Ban ROW
+            $count_user_nav = $sql->rows("SELECT id FROM `{prefix_ipban}` WHERE typ = 3 ORDER BY id DESC LIMIT ".$start.", 20;"); //Type System Ban ROW
 
             if($start != 0)
                 $pager_user = '<a href="?admin=ipban&ub_side='.($site-1).'&sfs_side='.(isset($_GET['sfs_side']) ? $_GET['sfs_side'] : 1).'"><img align="absmiddle" src="../inc/images/previous.png" alt="left" /></a>';
@@ -139,7 +138,7 @@ switch ($do) {
             else
                 $pager_user .= '<img src="../inc/images/next.png" alt="right" align="absmiddle" class="disabled" />';
 
-            $qry = $sql->select("SELECT * FROM `{prefix_ipban}` WHERE typ = 3 ORDER BY id DESC LIMIT ?, 20;",array($start)); $color = 1;
+            $qry = $sql->select("SELECT * FROM `{prefix_ipban}` WHERE typ = 3 ORDER BY id DESC LIMIT ".$start.", 20;"); $color = 1;
             foreach($qry as $get) {
                 $data_array = unserialize($get['data']);
                 $edit = show("page/button_edit_single", array("id" => $get['id'], "action" => "admin=ipban&amp;do=edit", "title" => _button_title_edit));

@@ -23,10 +23,10 @@ if(defined('_Upload')) {
                             $file_info[0],$file_info[1],$file_info[2]);
 
                         if(!array_key_exists($file_info['mime'], $extensions)) {
-                           $error = show(_upload_usergallery_info, array('userpicsize' => config('upicsize')));
+                           $error = show(_upload_usergallery_info, array('userpicsize' => settings::get('upicsize')));
                            $index = error($error, 1);
                         } else {
-                            if($_FILES['file']['size'] > (config('upicsize')*1000)) {
+                            if($_FILES['file']['size'] > (settings::get('upicsize')*1000)) {
                                 $index = error(_upload_wrong_size, 1);
                             } else {
                                 foreach($picformat as $tmpendung) {

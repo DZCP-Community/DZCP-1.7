@@ -24,7 +24,7 @@ define('thumbgen_cache', true); // Sollen die verkleinerten Bilder der Thumbgen 
 define('thumbgen_cache_time', 60*60); // Wie lange sollen die verkleinerten Bilder der Thumbgen im Cache verbleiben.
 
 define('template_cache', false); // Sollen das HTML-Template in den Memory Cache geladen werden * nur memcache,wincache,xcache oder apc *
-define('template_cache_time', 120); // Wie lange soll das HTML-Template im Memory Cache verbleiben in Sekunden.
+define('template_cache_time', 30); // Wie lange soll das HTML-Template im Memory Cache verbleiben in Sekunden.
 
 define('feed_update_time', 10*60); // Wann soll der Newsfeed aktualisiert werden.
 define('feed_enable_on_debug', false); // Soll der Newsfeed im Debugmodus generiert werden.
@@ -42,8 +42,8 @@ define('auto_db_optimize_interval', (7*24*60*60)); // Wann soll der OPTIMIZE TAB
 define('dzcp_version_checker', true); // Version auf DZCP.de abgleichen und benachrichtigen ob eine neue Version zur Verfuegung steht.
 define('dzcp_version_checker_refresh', (120*60)); // Wie lange soll gewartet werden um einen Versionsabgleich auszufuehren.
 
-define('buffer_gzip_compress', false); // GZIP Kompression.
-define('buffer_gzip_compress_level', 4); // Level der GZIP Kompression 1 - 9
+define('buffer_gzip_compress', true); // GZIP Kompression.
+define('buffer_gzip_compress_level', 6); // Level der GZIP Kompression 1 - 9
 define('buffer_show_licence_bar', true); // Schaltet die "Powered by DZCP - deV!L`z Clanportal V1.7" am Ende der Seite an oder aus.
 
 define('steam_enable', true); // Steam Status anzeigen * DZCP Steam API *

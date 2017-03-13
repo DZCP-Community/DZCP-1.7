@@ -16,20 +16,20 @@
         <tr align="center">
             <td class="forumTD" colspan="6">
                 <form method="post" action="?action=show&kid=[kid]&id=[id]">
-                    <span class="gensmall">Sortiere nach</span> 
+                    <span class="gensmall">[lang_forum_sort_by]</span>
                     <select name="sortby" id="sk">
                         <option value="autor">[lang_autor]</option>
-                        <option value="time" selected="selected">Erstellungsdatum</option>
+                        <option value="time">[lang_forum_sort_bcc]</option>
                         <option value="posts">[lang_replies]</option>
-                        <option value="bcc">Betreff</option>
+                        <option value="bcc">[lang_forum_sort_bcc]</option>
                         <option value="hits">[lang_hits]</option>
                     </select> 
                     <select name="orderby" id="sd">
-                        <option value="a">Absteigend</option>
-                        <option value="d" selected="selected">Aufsteigend</option>
+                        <option value="desc">[lang_forum_sort_descending]</option>
+                        <option value="asc">[lang_forum_sort_ascending]</option>
                     </select>&nbsp;
-                    <input class="submit" id="contentSubmit" type="submit" name="sort" value="Go">
-                    <input class="submit" id="newPostSubmit" type="button" value="[lang_forum_new_thread]" onclick="DZCP.goTo('../forum/?action=thread&do=add&kid=[newid]')">
+                    <input class="submit" id="contentSubmit" type="submit" name="sort" value="[lang_forum_go]">
+                    <input class="submit" id="newPostSubmit" type="button" value="[lang_forum_new_thread]" onclick="DZCP.goTo('../forum/?action=thread&do=add&kid=[kid]')">
                 </form>
             </td>
         </tr>

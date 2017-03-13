@@ -373,25 +373,27 @@ if(session_id()) {
     /*
      * Pruft ob mehrere Session IDs von der gleichen DNS kommen, sollte der Useragent keinen Bot Tag enthalten, wird ein Spambot angenommen.
      */
-    $get_sb = $sql->select("SELECT `id`,`ip`,`bot`,`agent` FROM `{prefix_iptodns}` WHERE `dns` LIKE ?;",array(stringParser::encode($userdns)));
+    $get_sb_array = $sql->select("SELECT `id`,`ip`,`bot`,`agent` FROM `{prefix_iptodns}` WHERE `dns` LIKE ?;",array(stringParser::encode($userdns)));
     if($sql->rowCount() >= 3 && !validateIpV4Range($userip, '[192].[168].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[127].[0].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[10].[0-255].[0-255].[0-255]') && 
         !validateIpV4Range($userip, '[172].[16-31].[0-255].[0-255]')) {
-        if(!$get_sb['bot'] && !isSpider(stringParser::decode($get_sb['agent']))) {
-            if(!$sql->rows("SELECT `id` FROM `{prefix_ipban}` WHERE `ip` = ? LIMIT 1;",array($userip))) {
-                $data_array = array();
-                $data_array['confidence'] = ''; $data_array['frequency'] = ''; $data_array['lastseen'] = '';
-                $data_array['banned_msg'] = stringParser::encode('SpamBot detected by System * No BotAgent *');
-                $data_array['agent'] = $get_sb['agent'];
-                $sql->insert("INSERT INTO `{prefix_ipban}` SET `time` = ?, `ip` = ?, `data` = ?, `typ` = 3;",array(time(),$get_sb['ip'],serialize($data_array)));
-                check_ip(); // IP Prufung * No IPV6 Support *
-                unset($data_array);
-            }
-        }
+		foreach ($get_sb_array as $get_sb) {
+			if(!$get_sb['bot'] && !isSpider(stringParser::decode($get_sb['agent']))) {
+				if(!$sql->rows("SELECT `id` FROM `{prefix_ipban}` WHERE `ip` = ? LIMIT 1;",array($userip))) {
+					$data_array = array();
+					$data_array['confidence'] = ''; $data_array['frequency'] = ''; $data_array['lastseen'] = '';
+					$data_array['banned_msg'] = stringParser::encode('SpamBot detected by System * No BotAgent *');
+					$data_array['agent'] = $get_sb['agent'];
+					$sql->insert("INSERT INTO `{prefix_ipban}` SET `time` = ?, `ip` = ?, `data` = ?, `typ` = 3;",array(time(),$get_sb['ip'],serialize($data_array)));
+					check_ip(); // IP Prufung * No IPV6 Support *
+					unset($data_array);
+				}
+			}
+		}
     }
 
-    unset($get_sb);
+    unset($get_sb,$get_sb_array);
 }
 
 /**
@@ -832,16 +834,17 @@ function get_external_contents($url,$post=false,$nogzip=false,$timeout=file_get_
     $url_p = @parse_url($url);
     $host = $url_p['host'];
     $port = isset($url_p['port']) ? $url_p['port'] : 80;
-    
+    $port = (($url_p['scheme'] == 'https' && $port == 80) ? 443 : $port);
     if(!ping_port($host,$port,$timeout)) return false;
     unset($host);
-   
-    if(class_exists('Snoopy')) { //Use Snoopy HTTP Client
-        $snoopy = new Snoopy;
+
+    if(class_exists('\\Snoopy\\Snoopy') && $url_p['scheme'] != 'https') { //Use Snoopy HTTP Client
+        $snoopy = new Snoopy\Snoopy;
         if(count($post) >= 1 && $post != false) {
             $snoopy->rawheaders["Pragma"] = "no-cache";
             $snoopy->submit($url, $post);
         } else {
+            $snoopy->rawheaders["Pragma"] = "no-cache";
             if (!$snoopy->fetch($url)) {
                 return false;
             }
@@ -853,14 +856,14 @@ function get_external_contents($url,$post=false,$nogzip=false,$timeout=file_get_
     if(use_curl && extension_loaded('curl')) {
         if(!$curl = curl_init())
             return false;
-        
+
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_HEADER, false);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_AUTOREFERER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/5.0");
+        curl_setopt($curl, CURLOPT_USERAGENT, "DZCP-HTTP-CLIENT");
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT , $timeout);
         curl_setopt($curl, CURLOPT_TIMEOUT, $timeout * 2); // x 2
         
@@ -877,14 +880,15 @@ function get_external_contents($url,$post=false,$nogzip=false,$timeout=file_get_
             curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept-Encoding: gzip,deflate'));
             curl_setopt($curl, CURLINFO_HEADER_OUT, true);
         }
-        
+
         if($url_p['scheme'] == 'https') { //SSL
-            curl_setopt($curl, CURLOPT_PORT , $port); 
+            curl_setopt($curl, CURLOPT_PORT , $port);
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         }
 
-        if (!is_object($curl) || !$content = curl_exec($curl)) {
+        $content = curl_exec($curl);
+        if (empty($content) || (is_bool($content) && !$content)) {
             return false;
         }
 
@@ -892,7 +896,7 @@ function get_external_contents($url,$post=false,$nogzip=false,$timeout=file_get_
             $curl_info = curl_getinfo($curl,CURLINFO_HEADER_OUT);
             if(stristr($curl_info, 'accept-encoding') && stristr($curl_info, 'gzip')) {
                 $content = gzinflate( substr($content,10,-8) );
-            }
+           }
         }
 
         @curl_close($curl);
@@ -950,6 +954,11 @@ function GetServerVars($var) {
         return stringParser::encode($_SERVER[$var]);
     } else if (array_key_exists($var, $_ENV) && !empty($_ENV[$var])) {
         return stringParser::encode($_ENV[$var]);
+    }
+
+    if($var=='HTTP_REFERER') { //Fix for empty HTTP_REFERER
+        return GetServerVars('REQUEST_SCHEME').'://'.GetServerVars('HTTP_HOST').
+        GetServerVars('DOCUMENT_URI');
     }
 
     return false;

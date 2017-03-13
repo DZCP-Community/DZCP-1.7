@@ -32,9 +32,12 @@ switch ($do) {
         if(empty($_POST['kat'])) {
             $show = error(_pos_empty_kat,1);
         } else {
-            $posid = intval($_POST['pos']);
-            $sql->update("UPDATE `{prefix_positions}` SET `pid` = (pid+1) WHERE `pid` ".($_POST['pos'] == "1" || $_POST['pos'] == "2" ? ">= " : "> ")
-                    ." ?;",array(intval($_POST['pos'])));
+            if($_POST['pos'] != 'lazy') {
+                $posid = intval($_POST['pos']);
+                $sql->update("UPDATE `{prefix_positions}` SET `pid` = (pid+1) WHERE `pid` " . ($_POST['pos'] == "1" || $_POST['pos'] == "2" ? ">= " : "> ")
+                    . " ?;", array(intval($_POST['pos'])));
+            }
+
             $sql->update("UPDATE `{prefix_positions}` SET `position` = ? ".
                     ($_POST['pos'] == "lazy" ? "" : ",`pid` = ".intval($_POST['pos'])).", `color` = ? WHERE `id` = ?;",
                     array(stringParser::encode($_POST['kat']),stringParser::encode($_POST['color']),intval($_GET['id'])));
@@ -53,7 +56,7 @@ switch ($do) {
             }
 
             // Check group Permissions is exists
-            if(!$sql->rows('SELECT `id` FROM `{prefix_permissions}` WHERE `pos` = ? LIMIT 1;',array($id))) {
+            if($_POST['pos'] != 'lazy' && !$sql->rows('SELECT `id` FROM `{prefix_permissions}` WHERE `pos` = ? LIMIT 1;',array($id))) {
                 $sql->insert("INSERT INTO `{prefix_permissions}` SET `pos` = ?;",array($id));
             }
 

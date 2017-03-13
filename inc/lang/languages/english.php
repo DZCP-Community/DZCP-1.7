@@ -39,7 +39,6 @@ define('_button_activate_user', 'User aktivieren');
 define('_button_del_user', 'User l&ouml;schen');
 define('_users_deleted', 'User gel&ouml;scht');
 define('_actived_all', 'User Accounts wurden aktiviert!');
-define('_delete', 'L&ouml;schen');
 define('_config_c_cache' , 'Cache');
 define('_config_c_cache_provider' , 'Cache Provider');
 define('_config_c_cache_mem_host' , 'Memcache Host');
@@ -132,6 +131,12 @@ define("_forum_total_topics", 'Total topics');
 define("_forum_total_members", 'Total members');
 define("_forum_newest_member", 'Our newest member');
 define("_forum_new_thread", 'New Thread');
+define("_forum_sort_bcc", 'Subject');
+define("_forum_sort_time", 'Creation Date');
+define("_forum_sort_by", 'Sort by');
+define("_forum_sort_descending", 'Descending');
+define("_forum_sort_ascending", 'Ascending');
+define("_forum_go", 'Go');
 
 // Security Center
 define('_config_security', 'Security Center');

@@ -265,6 +265,7 @@ switch ($do) {
 
     case 'delete':
         $sql->delete("DELETE FROM `{prefix_squads}` WHERE id = ?;",array(intval($_GET['id'])));
+		$sql->delete("DELETE FROM `{prefix_squaduser}` WHERE `squad` = ?;",array(intval($_GET['id'])));
         $sql->delete("DELETE FROM `{prefix_navi}` WHERE url = '../squads/?action=shows&amp;id=".intval($_GET['id'])."'");
 
         //Remove Pic
