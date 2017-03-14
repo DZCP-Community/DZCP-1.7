@@ -306,10 +306,10 @@ if(defined('_UserMenu')) {
                             foreach ($levels as &$level) {
                                 $selected = ($level == $get['perm_gallery'] ? ' selected="selected"' : '');
                                 switch ($level) {
-                                    case 0: $perm_gallery .= '<option value="'.$level.'">'._pedit_perm_public.'</option>'; break;
-                                    case 1: $perm_gallery .= '<option value="'.$level.'">'._pedit_perm_user.'</option>'; break;
-                                    case 2: $perm_gallery .= '<option value="'.$level.'">'._pedit_perm_member.'</option>'; break;
-                                    case 3: $perm_gallery .= '<option value="'.$level.'">'._pedit_perm_admin.'</option>'; break;
+                                    case 0: $perm_gallery .= '<option'.$selected.' value="'.$level.'">'._pedit_perm_public.'</option>'; break;
+                                    case 1: $perm_gallery .= '<option'.$selected.' value="'.$level.'">'._pedit_perm_user.'</option>'; break;
+                                    case 2: $perm_gallery .= '<option'.$selected.' value="'.$level.'">'._pedit_perm_member.'</option>'; break;
+                                    case 3: $perm_gallery .= '<option'.$selected.' value="'.$level.'">'._pedit_perm_admin.'</option>'; break;
                                 }
                             }
                             
@@ -317,10 +317,10 @@ if(defined('_UserMenu')) {
                             foreach ($levels as &$level) {
                                 $selected = ($level == $get['profile_access'] ? ' selected="selected"' : '');
                                 switch ($level) {
-                                    case 0: $perm_profile .= '<option value="'.$level.'">'._pedit_perm_public.'</option>'; break;
-                                    case 1: $perm_profile .= '<option value="'.$level.'">'._pedit_perm_user.'</option>'; break;
-                                    case 2: $perm_profile .= '<option value="'.$level.'">'._pedit_perm_member.'</option>'; break;
-                                    case 3: $perm_profile .= '<option value="'.$level.'">'._pedit_perm_admin.'</option>'; break;
+                                    case 0: $perm_profile .= '<option'.$selected.' value="'.$level.'">'._pedit_perm_public.'</option>'; break;
+                                    case 1: $perm_profile .= '<option'.$selected.' value="'.$level.'">'._pedit_perm_user.'</option>'; break;
+                                    case 2: $perm_profile .= '<option'.$selected.' value="'.$level.'">'._pedit_perm_member.'</option>'; break;
+                                    case 3: $perm_profile .= '<option'.$selected.' value="'.$level.'">'._pedit_perm_admin.'</option>'; break;
                                 }
                             }
                             
