@@ -10,19 +10,19 @@ if(defined('_Artikel')) {
     if($_POST['url1']) {
         $rel = _related_links;
         $links1 = show(_artikel_link, array("link" => stringParser::decode($_POST['link1']),
-                                            "url" => links($_POST['url1'])));
+                                            "url" => links(stringParser::decode($_POST['url1']))));
     }
     
     if($_POST['url2']) {
         $rel = _related_links;
         $links2 = show(_artikel_link, array("link" => stringParser::decode($_POST['link2']),
-                                            "url" => links($_POST['url2'])));
+                                            "url" => links(stringParser::decode($_POST['url2']))));
     }
     
     if($_POST['url3']) {
         $rel = _related_links;
         $links3 = show(_artikel_link, array("link" => stringParser::decode($_POST['link3']),
-                                            "url" => links($_POST['url3'])));
+                                            "url" => links(stringParser::decode($_POST['url3']))));
     }
 
     if(!empty($links1) || !empty($links2) || !empty($links3)) {

@@ -1228,7 +1228,7 @@ function update_user_status_preview() {
         ## Schreibe Werte in die Server Sessions ##
         $_SESSION['lastvisit']  = $get['time'];
 
-        if(stringParser::decode(data($get['id'], "ip")) != $_SESSION['ip'])
+        if(stringParser::decode(data("ip",$get['id'])) != $_SESSION['ip'])
             $_SESSION['lastvisit'] = data($get['id'], "time");
 
         if(empty($_SESSION['lastvisit']))
