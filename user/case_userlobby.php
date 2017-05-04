@@ -290,11 +290,11 @@ if(defined('_UserMenu')) {
         if (!empty($getkal) && check_new($getkal['datum'])) {
             if (date("d.m.Y", $getkal['datum']) == date("d.m.Y", time())) {
                 $nextkal = show(_userlobby_kal_today, array("time" => mktime(0, 0, 0, date("m", $getkal['datum']), date("d", $getkal['datum']), date("Y", $getkal['datum'])),
-                                                            "event" => $getkal['title']));
+                                                            "event" => stringParser::decode($getkal['title'])));
             } else {
                 $nextkal = show(_userlobby_kal_not_today, array("time" => mktime(0, 0, 0, date("m", $getkal['datum']), date("d", $getkal['datum']), date("Y", $getkal['datum'])),
                                                                 "date" => date("d.m.Y", $getkal['datum']),
-                                                                "event" => $getkal['title']));
+                                                                "event" => stringParser::decode($getkal['title'])));
             }
         }
 
@@ -422,7 +422,7 @@ if(defined('_UserMenu')) {
                                                          "user" => autor($getawayn['userid']),
                                                          "ab" => date("d.m.y", $getawayn['start']),
                                                          "wieder" => date("d.m.y", $getawayn['end']),
-                                                         "what" => $getawayn['titel']));
+                                                         "what" => stringParser::decode($getawayn['titel'])));
                 }
             }
 
@@ -453,7 +453,7 @@ if(defined('_UserMenu')) {
                     $awaya .= show(_user_away_now, array("id" => $getawaya['id'],
                                                          "user" => autor($getawaya['userid']),
                                                          "wieder" => $wieder,
-                                                         "what" => $getawaya['titel']));
+                                                         "what" => stringParser::decode($getawaya['titel'])));
                 }
             }
 
