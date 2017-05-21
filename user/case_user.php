@@ -20,7 +20,7 @@ if(defined('_UserMenu')) {
             $sex = $get['sex'] == 1 ? _male : ($get['sex'] == 2 ? _female : '-');
             $hp = empty($get['hp']) ? "-" : "<a href=\"" . $get['hp'] . "\" target=\"_blank\">" . $get['hp'] . "</a>";
             $email = empty($get['email']) ? "-" : CryptMailto(stringParser::decode($get['email']), _user_mailto_texttop);
-            $pn = show(_pn_write, array("id" => $_GET['id'], "nick" => $get['nick']));
+            $pn = show(_pn_write, array("id" => $_GET['id'], "nick" => stringParser::decode($get['nick'])));
             $hlsw = empty($get['hlswid']) ? "-" : show(_hlswicon, array("id" => stringParser::decode($get['hlswid']), "img" => "1", "css" => ""));
             $xboxu = empty($get['xboxid']) ? "-" : show(_xboxicon, array("id" => str_replace(" ", "%20", trim(stringParser::decode($get['xboxid']))), "img" => "1", "css" => ""));
             $xboxuser = empty($get['xboxid']) ? _noxboxavatar : show(_xboxpic, array("id" => str_replace(" ", "%20", trim(stringParser::decode($get['xboxid']))), "img" => "1", "css" => ""));
@@ -246,14 +246,14 @@ if(defined('_UserMenu')) {
                 $show = show($dir."/profil_show", array("hardware_head" => $hardware_head,
                                                         "country" => flag($get['country']),
                                                         "city" => (empty($city) ? '-' : $city),
-                                                        "logins" => userstats("logins", $_GET['id']),
-                                                        "hits" => userstats("hits", $_GET['id']),
-                                                        "msgs" => userstats("writtenmsg", $_GET['id']),
-                                                        "forenposts" => userstats("forumposts", $_GET['id']),
-                                                        "votes" => userstats("votes", $_GET['id']),
-                                                        "cws" => userstats("cws", $_GET['id']),
+                                                        "logins" => userstats("logins", $get['id']),
+                                                        "hits" => userstats("hits", $get['id']),
+                                                        "msgs" => userstats("writtenmsg", $get['id']),
+                                                        "forenposts" => userstats("forumposts", $get['id']),
+                                                        "votes" => userstats("votes", $get['id']),
+                                                        "cws" => userstats("cws", $get['id']),
                                                         "regdatum" => date("d.m.Y H:i", $get['regdatum']) . _uhr,
-                                                        "lastvisit" => date("d.m.Y H:i", userstats("lastvisit", $_GET['id'])) . _uhr,
+                                                        "lastvisit" => date("d.m.Y H:i", userstats("lastvisit", $get['id'])) . _uhr,
                                                         "hp" => $hp,
                                                         "xfire" => stringParser::decode($get['hlswid']),
                                                         "xboxx" => stringParser::decode($get['xboxid']),
@@ -293,13 +293,13 @@ if(defined('_UserMenu')) {
                                                         "custom_hardware" => $custom_hardware['content']));
             }
 
-            $navi_profil = show(_profil_navi_profil, array("id" => $_GET['id']));
-            $navi_gb = show(_profil_navi_gb, array("id" => $_GET['id']));
-            $navi_gallery = show(_profil_navi_gallery, array("id" => $_GET['id']));
-            $profil_head = show(_profil_head, array("profilhits" => userstats("profilhits", $_GET['id'])));
+            $navi_profil = show(_profil_navi_profil, array("id" => $get['id']));
+            $navi_gb = show(_profil_navi_gb, array("id" => $get['id']));
+            $navi_gallery = show(_profil_navi_gallery, array("id" => $get['id']));
+            $profil_head = show(_profil_head, array("profilhits" => userstats("profilhits", $get['id'])));
             $index = show($dir . "/profil", array("profilhead" => $profil_head,
                                                   "show" => $show,
-                                                  "nick" => autor($_GET['id']),
+                                                  "nick" => autor($get['id']),
                                                   "profil" => $navi_profil,
                                                   "gb" => $navi_gb,
                                                   "gallery" => $navi_gallery));

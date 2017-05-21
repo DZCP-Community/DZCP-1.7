@@ -107,6 +107,22 @@ if(defined('_UserMenu')) {
                                . "`see`        = 1;",
                     array($userid,intval($_POST['an']),stringParser::encode($_POST['titel']),stringParser::encode($_POST['eintrag'])));
                     $sql->update("UPDATE `{prefix_userstats}` SET `writtenmsg` = (writtenmsg+1) WHERE `user` = ?;",array($userid));
+
+                    //benachrichtigungs email senden
+                    if(data('pnmail',intval($_POST['an']))) {
+                        //E-Mail an empfänger senden
+                        $message = show(bbcode_email(stringParser::decode(settings::get('eml_pn'))),
+                            array('nick' => stringParser::decode(data('nick',intval($_POST['an']))),
+                                'titel' => stringParser::encode($_POST['titel']),
+                                'clan' => $pagetitle));
+                        //subj
+                        $subj = show(stringParser::decode(settings::get('eml_pn_subj')),
+                            array('domain' => $httphost));
+
+                        //send e-mail
+                        sendMail(stringParser::decode(data('email',intval($_POST['an']))), $subj, $message);
+                    }
+
                     $index = info(_msg_answer_done, "?action=msg");
                 }
             break;
@@ -241,6 +257,21 @@ if(defined('_UserMenu')) {
                                . "`titel` = ?, "
                                . "`nachricht` = ?,"
                                . "`see` = 1;",array($userid,$to,stringParser::encode($_POST['titel']),stringParser::encode($_POST['eintrag'])));
+
+                    //benachrichtigungs email senden
+                    if(data('pnmail',(int)$to)) {
+                        //E-Mail an empfänger senden
+                        $message = show(bbcode_email(stringParser::decode(settings::get('eml_pn'))),
+                            array('nick' => stringParser::decode(data('nick',(int)$to)),
+                                'titel' => stringParser::encode($_POST['titel']),
+                                'clan' => $pagetitle));
+                        //subj
+                        $subj = show(stringParser::decode(settings::get('eml_pn_subj')),
+                            array('domain' => $httphost));
+
+                        //send e-mail
+                        sendMail(stringParser::decode(data('email',(int)$to)), $subj, $message);
+                    }
 
                     $sql->update("UPDATE `{prefix_userstats}` SET `writtenmsg` = (writtenmsg+1) WHERE `user` = ?;",array($userid));
                     $index = info(_msg_answer_done, "?action=msg");
