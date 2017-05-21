@@ -116,7 +116,7 @@ if(defined('_UserMenu')) {
                     $level = data("level",$edituser);
                 }
                 
-                $newpwd = !empty($_POST['passwd']) ? "`pwd` = '" . md5($_POST['passwd']) . "'," : "";
+                $newpwd = !empty($_POST['passwd']) ? "`pwd` = '" . pwd_encoder($_POST['passwd']) . "'," : "";
                 $update_level = $_POST['level'] == 'banned' ? 0 : $level;
                 $update_banned = $_POST['level'] == 'banned' ? 1 : 0;
                 $sql->update("UPDATE {prefix_users} SET ".$newpwd." "
