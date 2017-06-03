@@ -109,7 +109,7 @@ if(defined('_Forum')) {
                    SET `nick`   = '".stringParser::encode($_POST['nick'])."',
                        `email`  = '".stringParser::encode($_POST['email'])."',
                        `text`   = '".stringParser::encode($_POST['eintrag'])."',
-                       `hp`     = '".links($_POST['hp'])."',
+                       `hp`     = '".stringParser::encode(links($_POST['hp']))."',
                        `edited` = '".stringParser::encode($editedby)."'
                    WHERE id = '".intval($_GET['id'])."'");
 
@@ -686,7 +686,7 @@ if(defined('_Forum')) {
                                                  `date`  = '".time()."',
                                                  `nick`  = '".stringParser::encode($_POST['nick'])."',
                                                  `email` = '".stringParser::encode($_POST['email'])."',
-                                                 `hp`    = '".links($_POST['hp'])."',
+                                                 `hp`    = '".stringParser::encode(links($_POST['hp']))."',
                                                  `reg`   = '".stringParser::encode($userid)."',
                                                  `text`  = '".stringParser::encode($_POST['eintrag'])."',
                                                  `ip`    = '".$userip."'");

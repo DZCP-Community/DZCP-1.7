@@ -153,7 +153,7 @@ if(_adminMenu != 'true') exit;
 
           $sql->insert("INSERT INTO `{prefix_sponsoren}`
                      SET `name`         = '".stringParser::encode($_POST['name'])."',
-                                     `link`         = '".links($_POST['link'])."',
+                                     `link`         = '".stringParser::encode(links($_POST['link']))."',
                                      `beschreibung` = '".stringParser::encode($_POST['beschreibung'])."',
                                      `site`         = '".intval($_POST['site'])."',
                                      `slink`        = '".$_POST['slink']."',
@@ -461,7 +461,7 @@ if(_adminMenu != 'true') exit;
 
             $sql->update("UPDATE `{prefix_sponsoren}`
                        SET      `name`         = '".stringParser::encode($_POST['name'])."',
-                             `link`         = '".links($_POST['link'])."',
+                             `link`         = '".stringParser::encode(links($_POST['link']))."',
                              `beschreibung` = '".stringParser::encode($_POST['beschreibung'])."',
                              `site`         = '".intval($_POST['site'])."',
                              `slink`        = '".$_POST['slink']."',

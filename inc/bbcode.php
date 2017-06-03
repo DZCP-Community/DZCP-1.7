@@ -1376,7 +1376,22 @@ function squad($code) {
 
 //-> Funktion um bei DB-Eintraegen URLs einem http:// zuzuweisen
 function links($hp) {
-    return !empty($hp) ? 'http://'.str_replace("http://","",$hp) : $hp;
+    if(!empty($hp)) {
+        //SSL
+        $count = 0;
+        $hp = str_replace("https://", "", $hp, $count);
+        if ($count >= 1) {
+            return 'https://' . $hp;
+        }
+
+        $count = 0;
+        $hp = str_replace("http://", "", $hp, $count);
+        if ($count >= 1) {
+            return 'http://' . $hp;
+        }
+    }
+
+    return $hp;
 }
 
 //-> Funktion um Passwoerter generieren zu lassen

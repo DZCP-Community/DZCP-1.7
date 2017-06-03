@@ -29,7 +29,7 @@ switch ($do) {
                 $show = error(_links_empty_text, 1);
         } else {
             $sql->insert("INSERT INTO `{prefix_links}` SET `url` = ?, `text` = ?, `banner` = ?, `beschreibung` = ?;",
-                  array(links($_POST['link']),stringParser::encode($_POST['text']),stringParser::encode($_POST['banner']),stringParser::encode($_POST['beschreibung'])));
+                  array(stringParser::encode(links($_POST['link'])),stringParser::encode($_POST['text']),stringParser::encode($_POST['banner']),stringParser::encode($_POST['beschreibung'])));
             $show = info(_link_added, "?admin=links");
         }
     break;
